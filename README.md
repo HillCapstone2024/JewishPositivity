@@ -26,11 +26,12 @@ git clone https://github.com/HillCapstone2024/JewishPositivity.git
 ```
 
 Download Python: https://www.python.org/downloads/
-Download NodeJs: https://nodejs.org/en/download/current
+Download NodeJs: https://nodejs.org/en/download/
 
-Make sure your pip installer is up to date
+Make sure your pip and npm installers are up to date
 ```bash
-python.exe -m pip install --upgrade pip
+python -m pip install --upgrade pip
+npm install npm@latest -g
 ```
 
 install Django and other pip packages
@@ -40,6 +41,7 @@ pip install -r requirements.txt
 
 install NodeJs packages
 ```bash
+cd React_Native
 npm install
 ```
 download the Expo Go app on your phone
@@ -52,6 +54,7 @@ python manage.py runserver
 ```
 ### Frontend
 ```bash
+cd React_Native
 expo start
 ```
 
