@@ -28,5 +28,5 @@ jobs:
     - name: Run Tests
       run: |
         cd Django
-        python manage.py 
-        python pythoncicdtest.py 
+        python manage.py test
+        python pythoncicdtest.py test
