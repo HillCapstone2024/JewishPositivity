@@ -55,7 +55,7 @@ python manage.py runserver
 ### Frontend
 ```bash
 cd React_Native
-expo start
+npx expo start
 ```
 
 A QR code will appear in the terminal, scan the QR code to run the app on your phone in Expo Go
