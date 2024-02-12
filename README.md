@@ -35,6 +35,7 @@ Add the following extensions:
 - [Pylance](https://marketplace.visualstudio.com/items?itemName=ms-python.vscode-pylance)
 - [GitLens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens)
 - [Git Graph](https://marketplace.visualstudio.com/items?itemName=mhutchie.git-graph)
+- [Github Actions](https://marketplace.visualstudio.com/items?itemName=GitHub.vscode-github-actions)
 
 Download [Python 3.12.2](https://www.python.org/downloads/)
 
