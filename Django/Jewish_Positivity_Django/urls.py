@@ -1,9 +1,12 @@
 # in urls.py
 
-from django.urls import path
 from .views import login_view, logout_view
+from django.urls import include, path
+from django.contrib import admin
 
 urlpatterns = [
-    path('login/', login_view, name='login'),
-    path('logout/', logout_view, name='logout'),
+    #path('login/', login_view, name='login'),
+    #path('logout/', logout_view, name='logout'),
+    path('admin/', admin.site.urls),
+    #path('timer/', include('timer.urls')),
 ]
