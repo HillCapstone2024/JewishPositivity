@@ -76,7 +76,7 @@ npm install
 
 download the Expo Go app on your phone ([iOS](https://apps.apple.com/app/expo-go/id982107779), [Android](https://play.google.com/store/apps/details?id=host.exp.exponent))
 
-For working with the database, install [MySQL Workbench](https://www.mysql.com/products/workbench/z).
+For working with the database, install [MySQL Workbench](https://www.mysql.com/products/workbench/).
 
 ## Running the Project
 
