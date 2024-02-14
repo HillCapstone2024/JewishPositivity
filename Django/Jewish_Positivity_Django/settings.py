@@ -75,23 +75,31 @@ WSGI_APPLICATION = "Jewish_Positivity_Django.wsgi.application"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 import os
 
-if (
-    os.getenv("DB_HOST")
-    and os.getenv("DB_PORT")
-    and os.getenv("DB_USERNAME")
-    and os.getenv("DB_PASSWORD")
-):
-    user = os.getenv("DB_USERNAME")
-    password = os.getenv("DB_PASSWORD")
-    host = os.getenv("DB_HOST")
-    port = os.getenv("DB_PORT")
-else:
-    with open(f"{BASE_DIR}\\db_key") as f:
+if os.path.exists(os.path.join(BASE_DIR, "db_key")):
+    with open(os.path.join(BASE_DIR, "db_key")) as f:
         lines = f.readlines()
         user = lines[0].strip()
         password = lines[1].strip()
         host = lines[2].strip()
         port = lines[3].strip()
+elif os.getenv("DB_USERNAME"):
+    user = os.getenv("DB_USERNAME")
+    password = os.getenv("DB_PASSWORD")
+    host = os.getenv("DB_HOST")
+    port = os.getenv("DB_PORT")
+elif os.environ.get("DB_USERNAME"):
+    user = os.environ.get("DB_USERNAME")
+    password = os.environ.get("DB_PASSWORD")
+    host = os.environ.get("DB_HOST")
+    port = os.environ.get("DB_PORT")
+elif os.environ["DB_USERNAME"]:
+    user = os.environ["DB_USERNAME"]
+    password = os.environ["DB_PASSWORD"]
+    host = os.environ["DB_HOST"]
+    port = os.environ["DB_PORT"]
+else:
+    print("No database credentials found")
+    
 
 DATABASES = {
     "default": {
