@@ -100,8 +100,13 @@ After starting the Django server, if you encounter this error: `You have 18 unap
 
 MAC Installing `mysqlclient`:
 Follow [this guide](https://gist.github.com/ShirishRam/99fc3def9d35e75e96a562f0524b0d46)
-If it still doesn't work, follow these steps as well:
+With the lib= step, 
+- make sure you add the line with the line: `vi` path from `which mysql_config` 
+- To find the line, type `/libs` to find the place in the document
+- Press I to enter insert mode, copy and paste the what the guide tells you to, comment out the line it says to replace. (try sudo if necessary)
+- Exit with escape, then `:wq!`
 
+If it still doesn't work, follow these steps as well:
 - Get the path for the config file with: `mysql_config --cflags`
 - Type this command: `export MYSQLCLIENT_CFLAGS=`output from above line
 - Same thing for library: `mysql_config --libs`
