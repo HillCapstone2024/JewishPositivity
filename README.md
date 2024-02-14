@@ -88,10 +88,13 @@ python manage.py runserver
 ```
 ### Adding Unit tests to the Pipeline
 
-For any python unit tests, be sure to add them to the Django folder so they can be properly accessed by the pipeline files. Then to add
-the tests to the suite, open the folder under the JewishPositivity repo called .github\workflows (\GitHub\JewishPositivity\.github\workflows). In this folder you will find a django.yml file. Within this file, scroll to the bottom of the page where you can find a section with the name: Run Tests. Underneath there is a run section with a default python test called manage.py. Copy the same syntax as that for your own tests, BE SURE TO COMMIT AND PUSH YOUR TESTS TO THE REPOSITORY BEFORE ADDING THEM TO THE PIPELINE, and add it with the same indentation as the previous tests. For example, "python mytest.py test" would run perfectly fine on the pipeline. After the test is added, save the file and do a push in the JewishPositivity folder to save those changes and your test will run on the pipeline whenever code is pushed to the repository.
+For any Python unit tests, be sure to add them to the `Django` folder so they can be properly accessed by the pipeline files. Then to add the tests to the suite, open the `django.yml` file found in `/.github/workflows`. Within this file, scroll to the bottom of the page where you can find a section with named `Run Tests`.
 
-If you have any pipeline questions send the tools a message on Slack and they can try and fix any issues you may be having
+Underneath there is a run section with a default Python test called `manage.py`. Copy the same syntax as that for your own tests and **be sure to commit and push your tests to the repository before adding them** with the same indentation as the previous tests. For example, `python mytest.py test` would run perfectly fine on the pipeline.
+
+After the test is added, saving the file, committing, and pushing will ensure the test will run on the pipeline whenever code is pushed to the repository.
+
+If you have any pipeline questions, send the tools team a message on Slack and they can try and fix any issues you may be having.
 
 ### Frontend
 
