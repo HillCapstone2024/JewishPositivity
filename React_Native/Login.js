@@ -11,13 +11,16 @@ const Login = ({ navigation }) => {
   const handleLogin = async () => {
     console.log('reached function');
       try {
+        console.log('made it to try');
+       
         const response = await axios.post(
           "/login",
           {
-            username,
-            password,
+            username: username,
+            password: password,
           }
-        );
+        )
+        console.log('make request');
         console.log("Login response:", response.data);
         //In the event of a successful login, here we would navigate to another page.
       } catch (error) {
