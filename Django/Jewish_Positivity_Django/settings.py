@@ -74,14 +74,21 @@ WSGI_APPLICATION = 'Jewish_Positivity_Django.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+with open(f'{BASE_DIR}\\db_key') as f:
+    lines = f.readlines()
+    user = lines[0].strip()
+    password = lines[1].strip()
+    host = lines[2].strip()
+    port = lines[3].strip()
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'production',
-        'USER': 'admin',
-        'PASSWORD': 'Capstone2024admin',
-        'HOST': '134.122.5.28',
-        'PORT': '3306',
+        'USER': user,
+        'PASSWORD': password,
+        'HOST': host,
+        'PORT': port,
     }
 }
 
