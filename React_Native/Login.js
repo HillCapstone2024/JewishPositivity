@@ -49,7 +49,7 @@ const Login = ({ navigation }) => {
       <TouchableOpacity style={styles.button} onPress={navigate}>
         <Text style={styles.buttonText}>Create an Account</Text>
       </TouchableOpacity>
-    </View>
+  </View>
   );
 };
 
@@ -58,23 +58,25 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#D4AA7D',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    color: 'white'
   },
   input: {
     width: '80%',
     height: 40,
-    borderColor: 'gray',
+    borderColor: 'white',
     borderWidth: 1,
     borderRadius: 5,
     marginBottom: 10,
     paddingHorizontal: 10,
   },
   button: {
-    backgroundColor: 'blue',
+    backgroundColor: '#6c94b4',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
