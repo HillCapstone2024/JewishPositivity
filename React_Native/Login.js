@@ -6,9 +6,23 @@ const Login = () => {
   const [password, setPassword] = useState('');
 
   const handleLogin = () => {
-    // Implement your login logic here
-    console.log('Username:', username);
-    console.log('Password:', password);
+    const handleLogin = async () => {
+      try {
+        const response = await axios.post(
+          "insert backend url here",
+          {
+            username,
+            password,
+          }
+        );
+        console.log("Login response:", response.data);
+        //In the event of a successful login, here we would navigate to another page.
+      } catch (error) {
+        console.error("Login error:", error);
+        //Here we would determine what the error is and then act accordingly.
+        //Most likely display wrong credentials message to the user.
+      }
+    };
   };
 
   return (
