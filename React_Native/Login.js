@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-
-const Login = () => {
+import axios from 'axios'
+const Login = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-
-  const handleLogin = () => {
-    const handleLogin = async () => {
+  
+  const navigate = () => {
+    navigation.navigate('Signup');
+  }
+  const handleLogin = async () => {
+    console.log('reached function');
       try {
         const response = await axios.post(
-          "insert backend url here",
+          "/login",
           {
             username,
             password,
@@ -23,7 +26,6 @@ const Login = () => {
         //Most likely display wrong credentials message to the user.
       }
     };
-  };
 
   return (
     <View style={styles.container}>
@@ -31,18 +33,21 @@ const Login = () => {
       <TextInput
         style={styles.input}
         placeholder="Username"
-        onChangeText={text => setUsername(text)}
+        onChangeText={(text) => setUsername(text)}
         value={username}
       />
       <TextInput
         style={styles.input}
         placeholder="Password"
-        onChangeText={text => setPassword(text)}
+        onChangeText={(text) => setPassword(text)}
         value={password}
         secureTextEntry
       />
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Login</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.button} onPress={navigate}>
+        <Text style={styles.buttonText}>Create an Account</Text>
       </TouchableOpacity>
     </View>
   );
