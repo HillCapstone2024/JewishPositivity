@@ -26,6 +26,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Run Tests
+      env:
+        DB_USERNAME:${{secrets.DB_USERNAME}}
+        DB_PASSWORD:${{secrets.DB_PASSWORD}}
+        DB_HOST:${{secrets.DB_HOST}}
+        DB_PORT:${{secrets.DB_PORT}}
       run: |
         cd Django
         python manage.py test
