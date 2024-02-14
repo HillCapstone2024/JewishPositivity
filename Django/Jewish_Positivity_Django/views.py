@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 
 def login_view(request):
+    print('in login_view')
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
@@ -17,6 +18,8 @@ def login_view(request):
         else:
             # Return an error message or handle unsuccessful login
             return HttpResponse('Login failed!')
+    if request.method == 'GET':
+        print('Reached GET in login_view')
     return HttpResponse('Not a POST request!')
 
 def create_user_view(request):
