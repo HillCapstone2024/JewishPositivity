@@ -98,3 +98,15 @@ A QR code will appear in the terminal, scan the QR code to run the app on your p
 
 After starting the Django server, if you encounter this error: `You have 18 unapplied migration(s). Your project may not work properly until you apply the migrations for app(s): admin, auth, contenttypes, sessions.`, you should run `python manage.py migrate` to apply them.
 
+MAC Installing mysqlclient:
+Follow this guide: https://gist.github.com/ShirishRam/99fc3def9d35e75e96a562f0524b0d46 
+If it still doesn't work, follow these steps as well:
+- Get the path for the config file with: mysql_config --cflags
+- Type this command: 
+    export MYSQLCLIENT_CFLAGS= output from above line
+- Same thing for library: mysql_config --libs
+    export MYSQLCLIENT_LDFLAGS= output from above line
+Try these commands as well
+- export CFLAGS="-D__x86_64__"
+- export ARCHFLAGS="-arch x86_64"
+Re-try pip install mysqlclient
