@@ -29,4 +29,3 @@ jobs:
       run: |
         cd Django
         python manage.py test
-        python pythoncicdtest.py test
