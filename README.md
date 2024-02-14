@@ -108,9 +108,9 @@ With the lib= step,
 
 If it still doesn't work, follow these steps as well:
 - Get the path for the config file with: `mysql_config --cflags`
-- Type this command: `export MYSQLCLIENT_CFLAGS=`output from above line
+- Type this command: `export MYSQLCLIENT_CFLAGS=` "path from above"
 - Same thing for library: `mysql_config --libs`
-    `export MYSQLCLIENT_LDFLAGS=` output from above line
+    `export MYSQLCLIENT_LDFLAGS=` "path from above"
 Try these commands as well
 - `export CFLAGS="-D__x86_64__"`
 - `export ARCHFLAGS="-arch x86_64"`
