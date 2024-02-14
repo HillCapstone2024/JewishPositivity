@@ -27,6 +27,7 @@ jobs:
         pip install -r requirements.txt
     - name: Run Tests
       run: |
+        python pip imstall msqlclient
         cd Django
         python manage.py test
         python pythoncicdtest.py test
