@@ -86,6 +86,15 @@ For working with the database, install [MySQL Workbench](https://www.mysql.com/p
 cd Django
 python manage.py runserver
 ```
+### Adding Unit tests to the Pipeline
+
+For any Python unit tests, be sure to add them to the `Django` folder so they can be properly accessed by the pipeline files. Then to add the tests to the suite, open the `django.yml` file found in `/.github/workflows`. Within this file, scroll to the bottom of the page where you can find a section with named `Run Tests`.
+
+Underneath there is a run section with a default Python test called `manage.py`. Copy the same syntax as that for your own tests and **be sure to commit and push your tests to the repository before adding them** with the same indentation as the previous tests. For example, `python mytest.py test` would run perfectly fine on the pipeline.
+
+After the test is added, saving the file, committing, and pushing will ensure the test will run on the pipeline whenever code is pushed to the repository.
+
+If you have any pipeline questions, send the tools team a message on Slack and they can try and fix any issues you may be having.
 
 ### Frontend
 
@@ -97,3 +106,21 @@ npx expo start
 A QR code will appear in the terminal, scan the QR code to run the app on your phone in Expo Go. If you're having issues with loading the app on Expo Go, try running `npx expo start --tunnel` instead. This should help on restricted networks like Hillspot. The first time you run the line, it may ask to install `@expo/ngrok@^4.1.0` - make sure to accept the global installation of this package.
 
 After starting the Django server, if you encounter this error: `You have 18 unapplied migration(s). Your project may not work properly until you apply the migrations for app(s): admin, auth, contenttypes, sessions.`, you should run `python manage.py migrate` to apply them.
+
+MAC Installing `mysqlclient`:
+Follow [this guide](https://gist.github.com/ShirishRam/99fc3def9d35e75e96a562f0524b0d46)
+With the lib= step, 
+- make sure you add the line with the line: `vi` path from `which mysql_config` 
+- To find the line, type `/libs` to find the place in the document
+- Press I to enter insert mode, copy and paste the what the guide tells you to, comment out the line it says to replace. (try sudo if necessary)
+- Exit with escape, then `:wq!`
+
+If it still doesn't work, follow these steps as well:
+- Get the path for the config file with: `mysql_config --cflags`
+- Type this command: `export MYSQLCLIENT_CFLAGS=` "path from above"
+- Same thing for library: `mysql_config --libs`
+    `export MYSQLCLIENT_LDFLAGS=` "path from above"
+Try these commands as well
+- `export CFLAGS="-D__x86_64__"`
+- `export ARCHFLAGS="-arch x86_64"`
+Re-try `pip install mysqlclient`

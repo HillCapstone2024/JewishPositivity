@@ -1,20 +1,26 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-
-const Login = () => {
+import axios from 'axios'
+const Login = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-
-  const handleLogin = () => {
-    const handleLogin = async () => {
+  
+  const navigate = () => {
+    navigation.navigate('Signup');
+  }
+  const handleLogin = async () => {
+    console.log('reached function');
       try {
+        console.log('made it to try');
+       
         const response = await axios.post(
-          "insert backend url here",
+          "/login",
           {
-            username,
-            password,
+            username: username,
+            password: password,
           }
-        );
+        )
+        console.log('make request');
         console.log("Login response:", response.data);
         //In the event of a successful login, here we would navigate to another page.
       } catch (error) {
@@ -23,7 +29,6 @@ const Login = () => {
         //Most likely display wrong credentials message to the user.
       }
     };
-  };
 
   return (
     <View style={styles.container}>
@@ -31,20 +36,23 @@ const Login = () => {
       <TextInput
         style={styles.input}
         placeholder="Username"
-        onChangeText={text => setUsername(text)}
+        onChangeText={(text) => setUsername(text)}
         value={username}
       />
       <TextInput
         style={styles.input}
         placeholder="Password"
-        onChangeText={text => setPassword(text)}
+        onChangeText={(text) => setPassword(text)}
         value={password}
         secureTextEntry
       />
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
-    </View>
+      <TouchableOpacity style={styles.button} onPress={navigate}>
+        <Text style={styles.buttonText}>Create an Account</Text>
+      </TouchableOpacity>
+  </View>
   );
 };
 
@@ -53,23 +61,25 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#D4AA7D',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    color: 'white'
   },
   input: {
     width: '80%',
     height: 40,
-    borderColor: 'gray',
+    borderColor: 'white',
     borderWidth: 1,
     borderRadius: 5,
     marginBottom: 10,
     paddingHorizontal: 10,
   },
   button: {
-    backgroundColor: 'blue',
+    backgroundColor: '#6c94b4',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
