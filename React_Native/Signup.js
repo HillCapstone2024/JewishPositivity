@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
+import axios from "axios";
 
 const Signup = ({ navigation }) => {
   const [username, setUsername] = useState("");
