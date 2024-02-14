@@ -98,4 +98,3 @@ A QR code will appear in the terminal, scan the QR code to run the app on your p
 
 After starting the Django server, if you encounter this error: `You have 18 unapplied migration(s). Your project may not work properly until you apply the migrations for app(s): admin, auth, contenttypes, sessions.`, you should run `python manage.py migrate` to apply them.
 
-# testing the slack workflow
