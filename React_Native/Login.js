@@ -5,6 +5,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  Button,
   StyleSheet,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
@@ -27,7 +28,30 @@ const Login = ({ navigation }) => {
     navigation.navigate("Signup");
   };
   const handleLogin = async () => {
-    
+    if (username == "" && password == "") {
+      setErrorMessage(
+        <View style={styles.errorMessageBox}>
+          <Text style={styles.errorMessageText}>
+            Enter a Username and Password
+          </Text>
+        </View>
+      );
+      return;
+    } else if (username == "") {
+      setErrorMessage(
+        <View style={styles.errorMessageBox}>
+          <Text style={styles.errorMessageText}>Enter a Username</Text>
+        </View>
+      );
+      return;
+    } else if (password == "") {
+      setErrorMessage(
+        <View style={styles.errorMessageBox}>
+          <Text style={styles.errorMessageText}>Enter a Password</Text>
+        </View>
+      );
+      return;
+    }
     try {
       console.log("made it to try");
       const response = await axios.post("/login", {
@@ -36,16 +60,21 @@ const Login = ({ navigation }) => {
       });
       console.log("make request");
       console.log("Login response:", response.data);
-      setErrorMessage("Successful Login");
+      setErrorMessage(
+        <View style={styles.errorMessageBox}>
+          <Text style={styles.errorMessageText}>Login Successful!</Text>
+        </View>
+      );
       //In the event of a successful login, here we would navigate to another page.
     } catch (error) {
       console.error("Login error:", error);
-      setErrorMessage(<View style={styles.errorMessageBox}>
-        <Text style={styles.errorMessageText}>Invalid Username or Password</Text>
-      </View>);
-
-      //Here we would determine what the error is and then act accordingly.
-      //Most likely display wrong credentials message to the user.
+      setErrorMessage(
+        <View style={styles.errorMessageBox}>
+          <Text style={styles.errorMessageText}>
+            Invalid Username or Password
+          </Text>
+        </View>
+      );
     }
   };
 
@@ -72,28 +101,28 @@ const Login = ({ navigation }) => {
       />
       <View>
         <View style={{ flexDirection: "row" }}>
-          <LinearGradient
-            // Button Linear Gradient
-            colors={["#8282e7", "#80c0ff"]}
-            start={[0, 1]}
-            end={[1, 0]}
-            style={styles.button}
-          >
-            <Text style={styles.buttonText} onPress={handleLogin}>
-              Login
-            </Text>
-          </LinearGradient>
-          <LinearGradient
-            // Button Linear Gradient
-            colors={["#8282e7", "#80c0ff"]}
-            start={[0, 1]}
-            end={[1, 0]}
-            style={styles.button}
-          >
-            <Text style={styles.buttonText} onPress={navigate}>
-              Sign Up
-            </Text>
-          </LinearGradient>
+          <TouchableOpacity onPress={handleLogin}>
+            <LinearGradient
+              // Button Linear Gradient
+              colors={["#8282e7", "#80c0ff"]}
+              start={[0, 1]}
+              end={[1, 0]}
+              style={styles.button}
+            >
+              <Text style={styles.buttonText}>Login</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={navigate}>
+            <LinearGradient
+              // Button Linear Gradient
+              colors={["#8282e7", "#80c0ff"]}
+              start={[0, 1]}
+              end={[1, 0]}
+              style={styles.button}
+            >
+              <Text style={styles.buttonText}>Sign Up</Text>
+            </LinearGradient>
+          </TouchableOpacity>
         </View>
         <LinearGradient
           // Button Linear Gradient
@@ -169,6 +198,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   errorMessageBox: {
+    textAlign: "center",
     borderRadius: 6,
     backgroundColor: "#ffc3c3",
     paddingVertical: 10,
@@ -183,6 +213,7 @@ const styles = StyleSheet.create({
     width: "80%",
   },
   errorMessageText: {
+    textAlign: "center",
     color: "#ff0000",
   },
   errorMessageBoxInvisible: {
