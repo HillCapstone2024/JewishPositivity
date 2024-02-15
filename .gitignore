@@ -4,6 +4,6 @@ node_modules/
 .expo/
 # We also do not want cache files that are created by Django
 *.pyc
-__pycache__
+__pycache__/
 db_key
 # Please check that you are only pushing your code and not files like settings, caches, dependencies that are specific to your computer 
