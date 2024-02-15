@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import axios from "axios";
 
 const Signup = ({ navigation }) => {
@@ -74,12 +75,38 @@ const Signup = ({ navigation }) => {
         value={password}
         secureTextEntry
       />
-      <TouchableOpacity style={styles.button} onPress={handleSignup}>
+      {/* <TouchableOpacity style={styles.button} onPress={handleSignup}>
         <Text style={styles.buttonText}>Create Account</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.button} onPress={navigate}>
         <Text style={styles.buttonText}>Already Have an Account?</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
+    <View>
+      <View style={{ flexDirection: "column" }}>
+          <LinearGradient
+            // Button Linear Gradient
+            colors={["#69a5ff", "#10c3e3"]}
+            start={[0, 1]}
+            end={[1, 0]}
+            style={styles.button}
+          >
+            <Text style={styles.buttonText} onPress={handleSignup}>
+              Sign Up
+            </Text>
+          </LinearGradient>
+          <LinearGradient
+            // Button Linear Gradient
+            colors={["#69a5ff", "#10c3e3"]}
+            start={[0, 1]}
+            end={[1, 0]}
+            style={styles.button}
+          >
+            <Text style={styles.buttonText} onPress={navigate}>
+              Already a Member?
+            </Text>
+          </LinearGradient>
+        </View>
+      </View>
     </View>
   );
 };
@@ -89,28 +116,36 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: '#D4AA7D',
+    backgroundColor: "white",
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 20,
-    color: 'white',
+    color: 'black',
   },
   input: {
-    width: "80%",
+    width: '80%',
     height: 40,
-    borderColor: "white",
-    borderWidth: 1,
-    borderRadius: 5,
+    borderStyle: 'solid',
+    borderBottomColor: '#e8bd25',
+    borderBottomWidth: 2,
+    borderRadius: 10,
     marginBottom: 10,
     paddingHorizontal: 10,
   },
   button: {
-    backgroundColor: "#6c94b4",
+    //backgroundColor: '#6c94b4',
     paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 50,
+    marginTop: 10,
+    marginHorizontal: 5,
     borderRadius: 5,
+    shadowColor: 'black',
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    shadowOpacity: 0.16,
+    alignItems: "center",
   },
   buttonText: {
     color: "white",
