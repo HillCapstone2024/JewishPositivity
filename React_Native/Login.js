@@ -104,7 +104,7 @@ const Login = ({ navigation }) => {
           <TouchableOpacity onPress={handleLogin}>
             <LinearGradient
               // Button Linear Gradient
-              colors={["#8282e7", "#80c0ff"]}
+              colors={["#69a5ff", "#10c3e3"]}
               start={[0, 1]}
               end={[1, 0]}
               style={styles.button}
@@ -115,7 +115,7 @@ const Login = ({ navigation }) => {
           <TouchableOpacity onPress={navigate}>
             <LinearGradient
               // Button Linear Gradient
-              colors={["#8282e7", "#80c0ff"]}
+              colors={["#69a5ff", "#10c3e3"]}
               start={[0, 1]}
               end={[1, 0]}
               style={styles.button}
@@ -124,7 +124,7 @@ const Login = ({ navigation }) => {
             </LinearGradient>
           </TouchableOpacity>
         </View>
-        <LinearGradient
+        {/* <LinearGradient
           // Button Linear Gradient
           colors={["#0023ff", "#000fcf"]}
           start={[0, 1]}
@@ -141,7 +141,7 @@ const Login = ({ navigation }) => {
           style={styles.button}
         >
           <Text style={styles.buttonText}>Sign in with Google</Text>
-        </LinearGradient>
+        </LinearGradient> */}
       </View>
     </View>
   );
@@ -170,13 +170,12 @@ const styles = StyleSheet.create({
     color: "white",
   },
   input: {
-    width: "80%",
+    width: '80%',
     height: 40,
-    borderColor: "white",
-    borderStyle: "solid",
-    borderBottomColor: "#000",
+    borderStyle: 'solid',
+    borderBottomColor: '#e8bd25',
     borderBottomWidth: 2,
-    borderRadius: 5,
+    borderRadius: 10,
     marginBottom: 10,
     paddingHorizontal: 10,
   },
