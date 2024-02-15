@@ -1,33 +1,49 @@
-import React, { useState } from 'react';
-import { View, Image, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, TouchableWithoutFeedback, Platform, Keyboard } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import axios from 'axios'
-
+import React, { useState } from "react";
+import {
+  View,
+  Image,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Platform,
+  Keyboard,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import axios from "axios";
 
 const Login = ({ navigation }) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState(
+    <View style={styles.errorMessageBoxInvisible}>
+      <Text style={styles.errorMessageTextInvisible}>Null</Text>
+    </View>
+  );
 
   const navigate = () => {
-    navigation.navigate('Signup');
-  }
+    navigation.navigate("Signup");
+  };
   const handleLogin = async () => {
-    console.log('reached function');
+    
     try {
-      console.log('made it to try');
-
-      const response = await axios.post(
-        "/login",
-        {
-          username: username,
-          password: password,
-        }
-      )
-      console.log('make request');
+      console.log("made it to try");
+      const response = await axios.post("/login", {
+        username: username,
+        password: password,
+      });
+      console.log("make request");
       console.log("Login response:", response.data);
+      setErrorMessage("Successful Login");
       //In the event of a successful login, here we would navigate to another page.
     } catch (error) {
       console.error("Login error:", error);
+      setErrorMessage(<View style={styles.errorMessageBox}>
+        <Text style={styles.errorMessageText}>Invalid Username or Password</Text>
+      </View>);
+
       //Here we would determine what the error is and then act accordingly.
       //Most likely display wrong credentials message to the user.
     }
@@ -39,10 +55,8 @@ const Login = ({ navigation }) => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}> */}
-      <Image
-        source={require('./assets/logo.png')}
-        style={styles.logo}
-      />
+      <Image source={require("./assets/logo.png")} style={styles.logo} />
+      {errorMessage}
       <TextInput
         style={styles.input}
         placeholder="Username"
@@ -60,90 +74,132 @@ const Login = ({ navigation }) => {
         <View style={{ flexDirection: "row" }}>
           <LinearGradient
             // Button Linear Gradient
-            colors={['#8282e7', '#80c0ff']}
+            colors={["#8282e7", "#80c0ff"]}
             start={[0, 1]}
             end={[1, 0]}
-            style={styles.button}>
-            <Text style={styles.buttonText} onPress={handleLogin}>Login</Text>
+            style={styles.button}
+          >
+            <Text style={styles.buttonText} onPress={handleLogin}>
+              Login
+            </Text>
           </LinearGradient>
           <LinearGradient
             // Button Linear Gradient
-            colors={['#8282e7', '#80c0ff']}
-            start={[0, 1]} end={[1, 0]}
-            style={styles.button}>
-            <Text style={styles.buttonText} onPress={navigate}>Sign Up</Text>
+            colors={["#8282e7", "#80c0ff"]}
+            start={[0, 1]}
+            end={[1, 0]}
+            style={styles.button}
+          >
+            <Text style={styles.buttonText} onPress={navigate}>
+              Sign Up
+            </Text>
           </LinearGradient>
         </View>
         <LinearGradient
           // Button Linear Gradient
-          colors={['#0023ff', '#000fcf']}
+          colors={["#0023ff", "#000fcf"]}
           start={[0, 1]}
           end={[1, 0]}
-          style={styles.button}>
+          style={styles.button}
+        >
           <Text style={styles.buttonText}>Sign in with Facebook</Text>
         </LinearGradient>
         <LinearGradient
           // Button Linear Gradient
-          colors={['#ff9e00', '#e64141']}
+          colors={["#ff9e00", "#e64141"]}
           start={[0, 1]}
           end={[1, 0]}
-          style={styles.button}>
+          style={styles.button}
+        >
           <Text style={styles.buttonText}>Sign in with Google</Text>
         </LinearGradient>
       </View>
-    </View >
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'white',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "white",
   },
   logo: {
     width: 200,
     height: 200,
     marginBottom: 20,
-    shadowColor: 'black',
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 6,
     shadowOpacity: 0.16,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 20,
-    color: 'white'
+    color: "white",
   },
   input: {
-    width: '80%',
+    width: "80%",
     height: 40,
-    borderColor: 'white',
-    borderStyle: 'solid',
-    borderBottomColor: '#000',
+    borderColor: "white",
+    borderStyle: "solid",
+    borderBottomColor: "#000",
     borderBottomWidth: 2,
     borderRadius: 5,
     marginBottom: 10,
     paddingHorizontal: 10,
   },
   button: {
-    backgroundColor: '#6c94b4',
+    backgroundColor: "#6c94b4",
     paddingVertical: 10,
     paddingHorizontal: 50,
     marginTop: 10,
     marginHorizontal: 5,
     borderRadius: 5,
-    shadowColor: 'black',
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 6,
     shadowOpacity: 0.16,
   },
   buttonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
+  },
+  errorMessageBox: {
+    borderRadius: 6,
+    backgroundColor: "#ffc3c3",
+    paddingVertical: 10,
+    paddingHorizontal: 50,
+    marginTop: 5,
+    marginBottom: 10,
+    marginHorizontal: 5,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    shadowOpacity: 0.06,
+    width: "80%",
+  },
+  errorMessageText: {
+    color: "#ff0000",
+  },
+  errorMessageBoxInvisible: {
+    backgroundColor: "white",
+    paddingVertical: 10,
+    paddingHorizontal: 50,
+    marginTop: 5,
+    marginBottom: 10,
+    marginHorizontal: 5,
+    width: "80%",
+    shadowColor: "white",
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    shadowOpacity: 0.06,
+  },
+  errorMessageTextInvisible: {
+    color: "white",
   },
 });
 
