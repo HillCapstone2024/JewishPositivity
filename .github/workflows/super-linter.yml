@@ -9,6 +9,7 @@ name: Super Linter
 permissions: read-all
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: '30 7 * * 1,3,5'
     - cron: '0 9 * * 1,3,5'
