@@ -23,6 +23,8 @@ on:
     - cron: '0 16 * * 0,2,4,6'
     - cron: '0 21 * * 0,2,4,6'
 
+permissions: read-all
+
 jobs:
   analyze:
     name: Analyze
