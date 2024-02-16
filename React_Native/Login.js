@@ -15,6 +15,8 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import axios from "axios";
 
+const API_URL = 'http://0.0.0.0:8000/';
+
 const Login = ({ navigation }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -53,8 +55,7 @@ const Login = ({ navigation }) => {
       return;
     }
     try {
-      console.log("made it to try");
-      const response = await axios.post("/login", {
+      const response = await axios.post(API_URL + "/login", {
         username: username,
         password: password,
       });
@@ -175,7 +176,7 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
     borderBottomColor: '#e8bd25',
     borderBottomWidth: 2,
-    borderRadius: 10,
+    // borderRadius: 10,
     marginBottom: 10,
     paddingHorizontal: 10,
   },
