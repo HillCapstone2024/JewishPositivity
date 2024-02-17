@@ -1,17 +1,22 @@
 # in views.py
 
+import json
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
 from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.middleware.csrf import get_token
 from django.http import JsonResponse
+
+User = get_user_model()
 
 def login_view(request):
     print('in login_view')
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+        data = json.loads(request.body)
+        # print(data)
+        username = data['username']
+        password = data['password']
         user = authenticate(request, username=username, password=password)
         print('username:', username)
         print('password:', password)
@@ -55,10 +60,6 @@ def logout_view(request):
         
     except Exception as e:
         return HttpResponseServerError(f"Error: {e}", status=500)  # Redirect to login page after logout
-
-def get_csrf_token(request):
-    csrf_token = get_token(request)
-    return JsonResponse({'csrfToken': csrf_token})
 
 def csrf_token_view(request):
     csrf_token = get_token(request)

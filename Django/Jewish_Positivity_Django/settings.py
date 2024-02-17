@@ -25,10 +25,10 @@ SECRET_KEY = "django-insecure-7meonev(26)4sbt7v-(3+mjf%r3yh$+kmalikrjo=lr3#vt21_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', 'Input ur IP']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', 'Input your IP']
 
 CORS_ORIGIN_WHITELIST = [
-    'http://Input ur IP:8081',
+    'http://Input your IP:8081',
 ]
 
 # Application definition
@@ -115,6 +115,9 @@ DATABASES = {
         "PORT": port,
     }
 }
+
+# Changes the default user model to the custom user model
+AUTH_USER_MODEL = 'Jewish_Positivity_Django.JpdUser'
 
 
 # Password validation

@@ -15,7 +15,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import axios from "axios";
 
-const API_URL = 'http://Input ur IP:8000/';
+const API_URL = 'http://Input your IP:8000';
 
 const Login = ({ navigation }) => {
   const [username, setUsername] = useState("");
@@ -65,7 +65,6 @@ const Login = ({ navigation }) => {
     };
     try {
       const csrfToken = await getCsrfToken();
-
       const response = await axios.post(`${API_URL}/login/`, {
         username: username,
         password: password,
@@ -74,6 +73,7 @@ const Login = ({ navigation }) => {
         'X-CSRFToken': csrfToken,
         'Content-Type': 'application/json',
       },
+      withCredentials: true,
     });
       console.log("make request");
       console.log("Login response:", response.data);
@@ -94,15 +94,6 @@ const Login = ({ navigation }) => {
       );
     }
   };
-  axios.get('http://Input ur IP:8000/csrf-token/')
-  .then(response => {
-    const csrfToken = response.data.csrfToken;
-    // Use csrfToken in subsequent requests
-  })
-  .catch(error => {
-    console.error('Error retrieving CSRF token:', error);
-  });
-
 
   return (
     <View style={styles.container}>
