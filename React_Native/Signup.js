@@ -21,22 +21,22 @@ const Signup = ({ navigation }) => {
   };
 
   const handleSignup = async () => {
-      try {
-        const response = await axios.post("/signup", {
-          username,
-          password,
-          firstname,
-          lastname,
-          email
-        });
-        console.log("Signup response:", response.data);
-        //In the event of a successful signup, here we would navigate to another page.
-      } catch (error) {
-        console.error("Signup error:", error);
-        //Here we would determine what the error is and then act accordingly.
-        //Most likely display wrong credentials message to the user.
-      }
-    };
+    try {
+      const response = await axios.post("/signup", {
+        username,
+        password,
+        firstname,
+        lastname,
+        email
+      });
+      console.log("Signup response:", response.data);
+      //In the event of a successful signup, here we would navigate to another page.
+    } catch (error) {
+      console.error("Signup error:", error);
+      //Here we would determine what the error is and then act accordingly.
+      //Most likely display wrong credentials message to the user.
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -46,7 +46,6 @@ const Signup = ({ navigation }) => {
         placeholder="Email"
         onChangeText={(text) => setEmail(text)}
         value={email}
-        secureTextEntry
       />
       <TextInput
         style={styles.input}
@@ -59,14 +58,12 @@ const Signup = ({ navigation }) => {
         placeholder="First Name"
         onChangeText={(text) => setFirstname(text)}
         value={firstname}
-        secureTextEntry
       />
       <TextInput
         style={styles.input}
         placeholder="Last Name"
         onChangeText={(text) => setLastname(text)}
         value={lastname}
-        secureTextEntry
       />
       <TextInput
         style={styles.input}
@@ -81,30 +78,34 @@ const Signup = ({ navigation }) => {
       <TouchableOpacity style={styles.button} onPress={navigate}>
         <Text style={styles.buttonText}>Already Have an Account?</Text>
       </TouchableOpacity> */}
-    <View>
-      <View style={{ flexDirection: "column" }}>
-          <LinearGradient
-            // Button Linear Gradient
-            colors={["#69a5ff", "#10c3e3"]}
-            start={[0, 1]}
-            end={[1, 0]}
-            style={styles.button}
-          >
-            <Text style={styles.buttonText} onPress={handleSignup}>
-              Sign Up
-            </Text>
-          </LinearGradient>
-          <LinearGradient
-            // Button Linear Gradient
-            colors={["#69a5ff", "#10c3e3"]}
-            start={[0, 1]}
-            end={[1, 0]}
-            style={styles.button}
-          >
-            <Text style={styles.buttonText} onPress={navigate}>
-              Already a Member?
-            </Text>
-          </LinearGradient>
+      <View>
+        <View style={{ flexDirection: "column" }}>
+          <TouchableOpacity onPress={handleSignup}>
+            <LinearGradient
+              // Button Linear Gradient
+              colors={["#69a5ff", "#10c3e3"]}
+              start={[0, 1]}
+              end={[1, 0]}
+              style={styles.button}
+            >
+              <Text style={styles.buttonText} >
+                Sign Up
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={navigate}>
+            <LinearGradient
+              // Button Linear Gradient
+              colors={["#69a5ff", "#10c3e3"]}
+              start={[0, 1]}
+              end={[1, 0]}
+              style={styles.button}
+            >
+              <Text style={styles.buttonText}>
+                Already a Member?
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -130,7 +131,7 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
     borderBottomColor: '#e8bd25',
     borderBottomWidth: 2,
-    borderRadius: 10,
+    // borderRadius: 10,
     marginBottom: 10,
     paddingHorizontal: 10,
   },

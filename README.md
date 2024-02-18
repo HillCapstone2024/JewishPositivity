@@ -84,7 +84,7 @@ For working with the database, install [MySQL Workbench](https://www.mysql.com/p
 
 ```bash
 cd Django
-python manage.py runserver
+python manage.py runserver 0.0.0.0:8000
 ```
 ### Adding Unit tests to the Pipeline
 

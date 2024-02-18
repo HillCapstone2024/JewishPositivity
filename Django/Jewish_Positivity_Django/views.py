@@ -1,16 +1,25 @@
 # in views.py
 
+import json
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
 from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+from django.middleware.csrf import get_token
+from django.http import JsonResponse
+
+User = get_user_model()
 
 def login_view(request):
     print('in login_view')
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
+        data = json.loads(request.body)
+        # print(data)
+        username = data['username']
+        password = data['password']
         user = authenticate(request, username=username, password=password)
+        print('username:', username)
+        print('password:', password)
         if user is not None:
             login(request, user)
             # return redirect('home')  # Redirect to home page after successful login
@@ -40,5 +49,18 @@ def create_user_view(request):
     return HttpResponse('Not a POST request!')
 
 def logout_view(request):
-    logout(request)
-    return redirect('login')  # Redirect to login page after logout
+    try:
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        if not username or not password:
+            raise ValueError("Username or password is missing")
+        
+        # Continue with login logic...
+        
+    except Exception as e:
+        return HttpResponseServerError(f"Error: {e}", status=500)  # Redirect to login page after logout
+
+def csrf_token_view(request):
+    csrf_token = get_token(request)
+    return JsonResponse({'csrfToken': csrf_token})
