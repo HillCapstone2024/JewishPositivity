@@ -10,7 +10,7 @@ from Jewish_Positivity_Django.managers import CustomUserManager
 #     user = models.OneToOneField('auth.User', on_delete=models.CASCADE)
 #     # Add additional fields as needed
 
-class JpdUser(AbstractUser):
+class User(AbstractUser):
     last_login = models.DateTimeField(blank=True, null=True)
     first_name = models.CharField(db_column='first_Name', max_length=100)  # Field name made lowercase.
     last_name = models.CharField(db_column='last_Name', max_length=100)  # Field name made lowercase.
@@ -22,9 +22,10 @@ class JpdUser(AbstractUser):
 
     REQUIRED_FIELDS = ['email']
     USERNAME_FIELD = 'username'
+    # Table is 'production.Jewish_Positivity_Django_user'
 
-    class Meta:
-        db_table = 'jpd_User'
+    # class Meta:
+    #     # db_table = 'auth_user' 
 
     # Don't know if we need these two methods
     # def set_password(self, raw_password):
