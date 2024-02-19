@@ -33,6 +33,13 @@ def login_view(request):
 
 def create_user_view(request):
     if request.method == 'POST':
+        #make sure all keys are given in post
+        required_keys = ['username', 'password', 'firstname', 'lastname', 'email']
+        missing_keys = [key for key in required_keys if key not in request.POST]
+        if missing_keys:
+            error_message = f"Missing required keys: {', '.join(missing_keys)}" #tells which keys missing in error message
+            return HttpResponse('error', content_type='text/plain', status=400)
+
         # Create a new user
         username = request.POST['username']
         password = request.POST['password']
