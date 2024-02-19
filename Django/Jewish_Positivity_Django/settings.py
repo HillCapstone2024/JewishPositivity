@@ -108,7 +108,7 @@ else:
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "api",
+        "NAME": "production",
         "USER": user,
         "PASSWORD": password,
         "HOST": host,
@@ -117,7 +117,7 @@ DATABASES = {
 }
 
 # Changes the default user model to the custom user model
-AUTH_USER_MODEL = 'Jewish_Positivity_Django.JpdUser'
+AUTH_USER_MODEL = 'Jewish_Positivity_Django.User'
 
 
 # Password validation
