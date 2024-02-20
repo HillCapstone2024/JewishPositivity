@@ -1,6 +1,7 @@
 # in views.py
 
 import json
+import re
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
 from django.shortcuts import render, redirect
@@ -34,7 +35,7 @@ def login_view(request):
 def create_user_view(request):
     if request.method == 'POST':
         #make sure all keys are given in post
-        required_keys = ['username', 'password', 'firstname', 'lastname', 'email']
+        required_keys = ['username', 'password','reentered_password', 'firstname', 'lastname', 'email']
         missing_keys = [key for key in required_keys if key not in request.POST]
         if missing_keys:
             error_message = f"Missing required keys: {', '.join(missing_keys)}" #tells which keys missing in error message
@@ -43,16 +44,27 @@ def create_user_view(request):
         # Create a new user
         username = request.POST['username']
         password = request.POST['password']
+        password2 = request.POST['reentered_password'] #must match frontend
         first_name = request.POST['firstname']
         last_name = request.POST['lastname']
         email= request.POST['email']
+
+         # Check if passwords match
+        if password != password2:
+            return HttpResponse('Passwords do not match', status=300)
+
+        # Regular expression pattern for validating email format
+        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if re.match(pattern, email) ==False:
+            return HttpResponse('Not email format', status=100)
+
         try:
             user= User.objects.create_user(username=username, password=password, email= email, first_name= first_name, last_name= last_name)
             user.save() 
             # return redirect('home')  # Redirect to home page after successful user creation
             return HttpResponse('Create a new user successful!')
         except:
-             return HttpResponse('User failed to be created.')
+             return HttpResponse('User failed to be created.', status= 150) #user failed to be created due to duplicate info
     return HttpResponse('Not a POST request!')
 
 def logout_view(request):
