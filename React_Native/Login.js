@@ -4,7 +4,7 @@ import {
   Image,
   Text,
   TextInput,
-  TouchableOpacity,
+  Pressable,
   Button,
   StyleSheet,
   KeyboardAvoidingView,
@@ -14,9 +14,10 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import axios from "axios";
+import IP_ADDRESS from "./ip.js";
 
-const IP_ADDRESS = process.env.IP_ADDRESS || "";
 const API_URL = "https://" + IP_ADDRESS + ":8000";
+console.log(API_URL);
 
 const Login = ({ navigation }) => {
   const [username, setUsername] = useState("");
@@ -122,7 +123,7 @@ const Login = ({ navigation }) => {
       />
       <View>
         <View style={{ flexDirection: "row" }}>
-          <TouchableOpacity onPress={handleLogin}>
+          <Pressable onPress={handleLogin}>
             <LinearGradient
               // Button Linear Gradient
               colors={["#69a5ff", "#10c3e3"]}
@@ -132,8 +133,8 @@ const Login = ({ navigation }) => {
             >
               <Text style={styles.buttonText}>Login</Text>
             </LinearGradient>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={navigate}>
+          </Pressable>
+          <Pressable onPress={navigate}>
             <LinearGradient
               // Button Linear Gradient
               colors={["#69a5ff", "#10c3e3"]}
@@ -143,7 +144,7 @@ const Login = ({ navigation }) => {
             >
               <Text style={styles.buttonText}>Sign Up</Text>
             </LinearGradient>
-          </TouchableOpacity>
+          </Pressable>
         </View>
         {/* <LinearGradient
           // Button Linear Gradient
