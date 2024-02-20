@@ -27,10 +27,10 @@ SECRET_KEY = "django-insecure-7meonev(26)4sbt7v-(3+mjf%r3yh$+kmalikrjo=lr3#vt21_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', f'https://{os.getenv("IP_ADDRESS")}']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', f'{os.getenv("IP_ADDRESS")}']
 
 CORS_ORIGIN_WHITELIST = [
-    f'https://{os.getenv("IP_ADDRESS")}:8081',
+    f'http://{os.getenv("IP_ADDRESS")}:8081',
 ]
 
 # Application definition
