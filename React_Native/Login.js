@@ -16,7 +16,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import axios from "axios";
 import IP_ADDRESS from "./ip.js";
 
-const API_URL = "https://" + IP_ADDRESS + ":8000";
+const API_URL = "http://" + IP_ADDRESS + ":8000";
 console.log(API_URL);
 
 const Login = ({ navigation }) => {
