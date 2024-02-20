@@ -11,7 +11,9 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
-
+import os
+from dotenv import load_dotenv
+load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -25,10 +27,10 @@ SECRET_KEY = "django-insecure-7meonev(26)4sbt7v-(3+mjf%r3yh$+kmalikrjo=lr3#vt21_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', 'Input your IP']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', f'https://{os.getenv("IP_ADDRESS")}']
 
 CORS_ORIGIN_WHITELIST = [
-    'http://Input your IP:8081',
+    f'https://{os.getenv("IP_ADDRESS")}:8081',
 ]
 
 # Application definition
@@ -77,32 +79,12 @@ WSGI_APPLICATION = "Jewish_Positivity_Django.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
-import os
 
-if os.path.exists(os.path.join(BASE_DIR, "db_key")):
-    with open(os.path.join(BASE_DIR, "db_key")) as f:
-        lines = f.readlines()
-        user = lines[0].strip()
-        password = lines[1].strip()
-        host = lines[2].strip()
-        port = lines[3].strip()
-elif os.getenv("DB_USERNAME"):
-    user = os.getenv("DB_USERNAME")
-    password = os.getenv("DB_PASSWORD")
-    host = os.getenv("DB_HOST")
-    port = os.getenv("DB_PORT")
-elif os.environ.get("DB_USERNAME"):
-    user = os.environ.get("DB_USERNAME")
-    password = os.environ.get("DB_PASSWORD")
-    host = os.environ.get("DB_HOST")
-    port = os.environ.get("DB_PORT")
-elif os.environ["DB_USERNAME"]:
-    user = os.environ["DB_USERNAME"]
-    password = os.environ["DB_PASSWORD"]
-    host = os.environ["DB_HOST"]
-    port = os.environ["DB_PORT"]
-else:
-    print("No database credentials found")
+
+user = os.getenv("DB_USERNAME")
+password = os.getenv("DB_PASSWORD")
+host = os.getenv("DB_HOST")
+port = os.getenv("DB_PORT")
     
 
 DATABASES = {
