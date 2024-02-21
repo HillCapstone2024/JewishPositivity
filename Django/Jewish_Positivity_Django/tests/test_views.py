@@ -3,6 +3,7 @@ from django.urls import reverse #reverse allows you to generate URLs for Django 
 from Jewish_Positivity_Django.models import User
 from Jewish_Positivity_Django.views import create_user_view
 import datetime
+from Jewish_Positivity_Django.models import User #import model to access printing users in the test DB
 
 #a test for the create_user_view
 # use this command in terminal to run test: python manage.py test myapp.tests.test_views.CreateUserViewTestCase
@@ -168,9 +169,19 @@ class SetTimesViewTestCase(TestCase):
 
         # Make a POST request to the create_user_view
         response = client.post(reverse('create_user_view'), user_data)
-
-        # Ensure the response is 200 indicating success
+        
+        # Ensure the response is 200 indicating success creating a user
         self.assertEqual(response.status_code, 200)
+
+         # Query the database and print its contents
+        queryset = User.objects.all()
+        for obj in queryset: ###printing user before updating times
+            print(f'User: {obj.username}')
+            print(f'First Name: {obj.first_name}')
+            print(f'Last Name: {obj.last_name}')
+            print(f'Time1: {obj.time1}')
+            print(f'Time2: {obj.time2}')
+            print(f'Time3: {obj.time3}') 
 
         # Creating a POST for updating the times
         post_data = {
@@ -183,7 +194,17 @@ class SetTimesViewTestCase(TestCase):
         # Make a POST request to the update_times_view model to update the database times
         response = client.post(reverse('update_times_view'), post_data) 
         
-        # Ensure the response is 200 indicating success
+        queryset = User.objects.all() #printing user after updating times
+        for obj in queryset:
+            print(f'User: {obj.username}')
+            print(f'First Name: {obj.first_name}')
+            print(f'Last Name: {obj.last_name}')
+            print(f'Time1: {obj.time1}')
+            print(f'Time2: {obj.time2}')
+            print(f'Time3: {obj.time3}')
+
+
+        # Ensure the response is 200 indicating successful update of times
         self.assertEqual(response.status_code, 200) 
 
     def test_set_times_invalid_order_fail(self): #testing for time1 < time2 < time3

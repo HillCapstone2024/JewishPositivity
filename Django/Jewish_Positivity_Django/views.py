@@ -94,17 +94,18 @@ def logout_view(request):
 
 def update_times_view(request):
     if request.method == 'POST':
-        # Retrieving username to access correct tuple in database and retrieving times for updating to non-default
+        # Retrieving username to access correct user in database 
+        #retrieving times for updating to non-default 
         username = request.POST.get('username')
         time1_str = request.POST.get('time1')
         time2_str = request.POST.get('time2')
         time3_str = request.POST.get('time3')
 
         try:
-            # Convert string times to time objects
-            time1 = time.fromisoformat(time1_str)
+            # Convert strings of posted times to time objects
+            time1 = time.fromisoformat(time1_str) #fromisoformat() expects format ("HH:MM:SS") 
             time2 = time.fromisoformat(time2_str)
-            time3 = time.fromisoformat(time3_str)
+            time3 = time.fromisoformat(time3_str) 
 
             if time1 < time2 < time3:
                 user = User.objects.get(username=username)  # Retrieving user from the database
