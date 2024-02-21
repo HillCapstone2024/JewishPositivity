@@ -40,3 +40,4 @@ jobs:
       run: |
         cd Django
         python manage.py test
+        python manage.py test Jewish_Positivity_Django.tests.test_views.CreateUserViewTestCase
