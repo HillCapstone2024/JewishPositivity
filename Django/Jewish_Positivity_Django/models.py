@@ -1,6 +1,7 @@
 # in models.py
 
 from django.db import models
+import datetime
 from django.contrib.auth.models import AbstractBaseUser, AbstractUser
 from django.contrib.auth.models import UserManager
 from Jewish_Positivity_Django.managers import CustomUserManager
@@ -17,6 +18,11 @@ class User(AbstractUser):
     email = models.CharField(primary_key=True, max_length=254)
     password = models.CharField(max_length=100)
     username = models.CharField(unique=True, max_length=100)
+
+    #scheduling fields- with default times 
+    time1 = models.TimeField(auto_now=False, auto_now_add=False, default= datetime.time(8, 00))
+    time2 = models.TimeField(auto_now=False, auto_now_add=False, default= datetime.time(15, 00))
+    time3 = models.TimeField(auto_now=False, auto_now_add=False, default= datetime.time(21, 00))
 
     objects = CustomUserManager()
 
