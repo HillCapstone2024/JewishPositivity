@@ -2,6 +2,7 @@ from django.test import TestCase, Client  #Client class to simulate HTTP request
 from django.urls import reverse #reverse allows you to generate URLs for Django views by providing the view name
 from Jewish_Positivity_Django.models import User
 from Jewish_Positivity_Django.views import create_user_view
+import datetime
 
 #a test for the create_user_view
 # use this command in terminal to run test: python manage.py test myapp.tests.test_views.CreateUserViewTestCase
@@ -151,11 +152,72 @@ class CreateUserViewTestCase(TestCase):
             self.assertEqual(response2.status_code, 400) #duplicate user error- did not create second user
 
 class SetTimesViewTestCase(TestCase):
-    def test_set_times_success(TestCase): #Successfully changed times in database
-        pass
-    def test_set_times_invalid_order(TestCase): #testing for time1 < time2 < time3
-        pass
+    def test_set_times_success(self): #Successfully changed times in database
+        # Initialize the Django test client
+        client = Client()
+
+        # Initializing a test user to update times in the database
+        user_data = {
+            'username': 'testuser',
+            'password': 'testpassword',
+            'reentered_password': 'testpassword',
+            'firstname': 'Test',
+            'lastname': 'User',
+            'email': 'test@example.com',
+        }
+
+        # Make a POST request to the create_user_view
+        response = client.post(reverse('create_user_view'), user_data)
+
+        # Ensure the response is 200 indicating success
+        self.assertEqual(response.status_code, 200)
+
+        # Creating a POST for updating the times
+        post_data = {
+                'username' : 'testuser',
+                'time1': datetime.time(8, 15),
+                'time2': datetime.time(16, 35),
+                'time3': datetime.time(19, 00),
+            }
+        
+        # Make a POST request to the update_times_view model to update the database times
+        response = client.post(reverse('update_times_view'), post_data) 
+        
+        # Ensure the response is 200 indicating success
+        self.assertEqual(response.status_code, 200) 
+
+    def test_set_times_invalid_order_fail(self): #testing for time1 < time2 < time3
+        # Initialize the Django test client
+        client = Client()
+
+        # Initializing a test user to update times in the database
+        user_data = {
+            'username': 'testuser',
+            'password': 'testpassword',
+            'reentered_password': 'testpassword',
+            'firstname': 'Test',
+            'lastname': 'User',
+            'email': 'test@example.com',
+        }
+
+        # Make a POST request to the create_user_view
+        response = client.post(reverse('create_user_view'), user_data)
+
+        # Ensure the response is 200 indicating success
+        self.assertEqual(response.status_code, 200)
+
+        # Creating a POST for updating the times with INCORRECT ORDERING
+        post_data = {
+                'username': 'testuser',
+                'time1': datetime.time(17, 35),
+                'time2': datetime.time(7, 35),
+                'time3': datetime.time(19, 00),
+            }
+        
+        response = client.post(reverse('update_times_view'), post_data) #calling model to update database times 
+        self.assertEqual(response.status_code, 400)
+
 
 class GetTimesViewTestCase(TestCase):
-     def test_get_times_success(TestCase): #Successfully retrieved times in database
+     def test_get_times_success(self): #Successfully retrieved times in database
         pass
