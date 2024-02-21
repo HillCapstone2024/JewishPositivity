@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "React_Native",
+    "name": "Jewish_Positivity",
     "slug": "React_Native",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -24,5 +24,6 @@
     "web": {
       "favicon": "./assets/favicon.png"
     }
+
   }
 }
