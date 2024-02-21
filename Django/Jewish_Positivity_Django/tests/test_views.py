@@ -214,7 +214,10 @@ class SetTimesViewTestCase(TestCase):
                 'time3': datetime.time(19, 00),
             }
         
-        response = client.post(reverse('update_times_view'), post_data) #calling model to update database times 
+        # Calling  update_times_view model to update database times
+        response = client.post(reverse('update_times_view'), post_data) 
+
+        # Status code of 400 means it fails, which it is supposed to
         self.assertEqual(response.status_code, 400)
 
 
