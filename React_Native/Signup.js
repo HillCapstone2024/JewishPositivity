@@ -157,7 +157,7 @@ const Signup = ({ navigation }) => {
         style={styles.input}
         placeholder="Verify Password"
         onChangeText={(text) => setReentered_password(text)}
-        value={password}
+        value={reentered_password}
         secureTextEntry
       />
       {/* <TouchableOpacity style={styles.button} onPress={handleSignup}>
