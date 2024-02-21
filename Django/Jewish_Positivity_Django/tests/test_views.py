@@ -182,6 +182,7 @@ class SetTimesViewTestCase(TestCase):
             print(f'Time1: {obj.time1}')
             print(f'Time2: {obj.time2}')
             print(f'Time3: {obj.time3}') 
+            print('')
 
         # Creating a POST for updating the times
         post_data = {
@@ -194,7 +195,7 @@ class SetTimesViewTestCase(TestCase):
         # Make a POST request to the update_times_view model to update the database times
         response = client.post(reverse('update_times_view'), post_data) 
         
-        queryset = User.objects.all() #printing user after updating times
+        queryset = User.objects.all() #printing db after updating times
         for obj in queryset:
             print(f'User: {obj.username}')
             print(f'First Name: {obj.first_name}')
@@ -202,7 +203,7 @@ class SetTimesViewTestCase(TestCase):
             print(f'Time1: {obj.time1}')
             print(f'Time2: {obj.time2}')
             print(f'Time3: {obj.time3}')
-
+            print('')
 
         # Ensure the response is 200 indicating successful update of times
         self.assertEqual(response.status_code, 200) 
@@ -213,7 +214,7 @@ class SetTimesViewTestCase(TestCase):
 
         # Initializing a test user to update times in the database
         user_data = {
-            'username': 'testuser',
+            'username': 'testuserfail',
             'password': 'testpassword',
             'reentered_password': 'testpassword',
             'firstname': 'Test',
@@ -235,10 +236,20 @@ class SetTimesViewTestCase(TestCase):
                 'time3': datetime.time(19, 00),
             }
         
-        # Calling  update_times_view model to update database times
+        queryset = User.objects.all() #printing db after attempted updating times
+        for obj in queryset:
+            print(f'User: {obj.username}')
+            print(f'First Name: {obj.first_name}')
+            print(f'Last Name: {obj.last_name}')
+            print(f'Time1: {obj.time1}')
+            print(f'Time2: {obj.time2}')
+            print(f'Time3: {obj.time3}')
+            print('')
+
+        # Calling update_times_view model to update database times-- this should give error
         response = client.post(reverse('update_times_view'), post_data) 
 
-        # Status code of 400 means it fails, which it is supposed to
+        # Status code of 400 means updating times fails due to incorrect order 
         self.assertEqual(response.status_code, 400)
 
 
