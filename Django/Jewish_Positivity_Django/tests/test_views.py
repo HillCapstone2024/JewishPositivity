@@ -150,3 +150,12 @@ class CreateUserViewTestCase(TestCase):
             self.assertEqual(response.status_code, 200) #status code of 200 means first user successfully created.
             self.assertEqual(response2.status_code, 400) #duplicate user error- did not create second user
 
+class SetTimesViewTestCase(TestCase):
+    def test_set_times_success(TestCase): #Successfully changed times in database
+        pass
+    def test_set_times_invalid_order(TestCase): #testing for time1 < time2 < time3
+        pass
+
+class GetTimesViewTestCase(TestCase):
+     def test_get_times_success(TestCase): #Successfully retrieved times in database
+        pass
