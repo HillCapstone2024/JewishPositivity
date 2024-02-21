@@ -8,6 +8,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
 from django.middleware.csrf import get_token
 from django.http import JsonResponse
+from django.db import IntegrityError
 
 User = get_user_model()
 
@@ -51,20 +52,29 @@ def create_user_view(request):
 
          # Check if passwords match
         if password != password2:
-            return HttpResponse('Passwords do not match', status=300)
+            return HttpResponse('Passwords do not match', status=400)
 
         # Regular expression pattern for validating email format
         pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-        if re.match(pattern, email) ==False:
-            return HttpResponse('Not email format', status=100)
+        if not re.match(pattern, email):
+            return HttpResponse('Not email format', status=400)
+
+        # Check if a user with the same email already exists
+        if User.objects.filter(email=email).exists():
+            return HttpResponse('duplicate email', status=400)
+        
+        # Check if a user with the same username already exists
+        if User.objects.filter(username=username).exists():
+            return HttpResponse('duplicate username', status=400)
 
         try:
             user= User.objects.create_user(username=username, password=password, email= email, first_name= first_name, last_name= last_name)
             user.save() 
+
             # return redirect('home')  # Redirect to home page after successful user creation
             return HttpResponse('Create a new user successful!')
-        except:
-             return HttpResponse('User failed to be created.', status= 150) #user failed to be created due to duplicate info
+        except: #IntegrityError
+             return HttpResponse('User failed to be created.', status= 400) #user failed to be created due to duplicate info
     return HttpResponse('Not a POST request!')
 
 def logout_view(request):
