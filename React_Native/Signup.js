@@ -15,12 +15,80 @@ const Signup = ({ navigation }) => {
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
   const [email, setEmail] = useState("");
+  const [errorMessage, setErrorMessage] = useState(
+    <View style = {styles.errorMessageBoxInvisible}>
+      <Text style = {styles.errorMessageTextInvisible}>
+        Null
+      </Text>
+    </View>
+  );
 
   const navigate = () => {
     navigation.navigate("Login");
   };
 
   const handleSignup = async () => {
+    if(username == "" && password != "" && firstname != "" && lastname != "" && email != "") {
+      setErrorMessage(
+        <View style = {styles.errorMessageBox}>
+          <Text style = {styles.errorMessageText}>
+            Please enter a Username
+          </Text>
+        </View>
+      );
+      return;
+    }
+    else if(password == "" && username != "" && firstname != "" && lastname != "" && email != "") {
+      setErrorMessage(
+        <View style = {styles.errorMessageBox}>
+          <Text style = {styles.errorMessageText}>
+            Please enter a Password
+          </Text>
+        </View>
+      );
+      return;
+    }
+    else if(firstname == "" && username != "" && password != "" && lastname != "" && email != "") {
+      setErrorMessage(
+        <View style = {styles.errorMessageBox}>
+          <Text style = {styles.errorMessageText}>
+            Please enter a First Name
+          </Text>
+        </View>
+      );
+      return;
+    }
+    else if(lastname == "" && username != "" && password != "" && firstname != "" && email != "") {
+      setErrorMessage(
+        <View style = {styles.errorMessageBox}>
+          <Text style = {styles.errorMessageText}>
+            Please enter a Last Name
+          </Text>
+        </View>
+      );
+      return;
+    }
+    else if(email == "" && username != "" && password != "" && firstname != "" && lastname != "") {
+      setErrorMessage(
+        <View style = {styles.errorMessageBox}>
+          <Text style = {styles.errorMessageText}>
+            Please enter an Email
+          </Text>
+        </View>
+      );
+      return;
+    }
+    else if(username == "" || password == "" || firstname == "" || lastname == "" || email == "") {
+      setErrorMessage(
+        <View style = {styles.errorMessageBox}>
+          <Text style = {styles.errorMessageText}>
+            Please enter missing credentials
+          </Text>
+        </View>
+      );
+      return;
+    }
+
     try {
       const response = await axios.post("/signup", {
         username,
@@ -41,6 +109,7 @@ const Signup = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Signup</Text>
+      {errorMessage}
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -152,6 +221,41 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  errorMessageBox: {
+    textAlign: "center",
+    borderRadius: 6,
+    backgroundColor: "#ffc3c3",
+    paddingVertical: 10,
+    paddingHorizontal: 50,
+    marginTop: 5,
+    marginBottom: 10,
+    marginHorizontal: 5,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    shadowOpacity: 0.06,
+    width: "80%",
+  },
+  errorMessageText: {
+    textAlign: "center",
+    color: "#ff0000",
+  },
+  errorMessageBoxInvisible: {
+    backgroundColor: "white",
+    paddingVertical: 10,
+    paddingHorizontal: 50,
+    marginTop: 5,
+    marginBottom: 10,
+    marginHorizontal: 5,
+    width: "80%",
+    shadowColor: "white",
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    shadowOpacity: 0.06,
+  },
+  errorMessageTextInvisible: {
+    color: "white",
   },
 });
 
