@@ -15,6 +15,7 @@ const Signup = ({ navigation }) => {
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
   const [email, setEmail] = useState("");
+  const [reentered_password, setReentered_password] = useState("");
   const [errorMessage, setErrorMessage] = useState(
     <View style = {styles.errorMessageBoxInvisible}>
       <Text style = {styles.errorMessageTextInvisible}>
@@ -28,7 +29,7 @@ const Signup = ({ navigation }) => {
   };
 
   const handleSignup = async () => {
-    if(username == "" && password != "" && firstname != "" && lastname != "" && email != "") {
+    if(username == "" && password != "" && firstname != "" && lastname != "" && email != "" && reentered_password != "") {
       setErrorMessage(
         <View style = {styles.errorMessageBox}>
           <Text style = {styles.errorMessageText}>
@@ -38,7 +39,7 @@ const Signup = ({ navigation }) => {
       );
       return;
     }
-    else if(password == "" && username != "" && firstname != "" && lastname != "" && email != "") {
+    else if(password == "" && username != "" && firstname != "" && lastname != "" && email != "" && reentered_password != "") {
       setErrorMessage(
         <View style = {styles.errorMessageBox}>
           <Text style = {styles.errorMessageText}>
@@ -48,7 +49,7 @@ const Signup = ({ navigation }) => {
       );
       return;
     }
-    else if(firstname == "" && username != "" && password != "" && lastname != "" && email != "") {
+    else if(firstname == "" && username != "" && password != "" && lastname != "" && email != "" && reentered_password != "") {
       setErrorMessage(
         <View style = {styles.errorMessageBox}>
           <Text style = {styles.errorMessageText}>
@@ -58,7 +59,7 @@ const Signup = ({ navigation }) => {
       );
       return;
     }
-    else if(lastname == "" && username != "" && password != "" && firstname != "" && email != "") {
+    else if(lastname == "" && username != "" && password != "" && firstname != "" && email != "" && reentered_password != "") {
       setErrorMessage(
         <View style = {styles.errorMessageBox}>
           <Text style = {styles.errorMessageText}>
@@ -68,7 +69,7 @@ const Signup = ({ navigation }) => {
       );
       return;
     }
-    else if(email == "" && username != "" && password != "" && firstname != "" && lastname != "") {
+    else if(email == "" && username != "" && password != "" && firstname != "" && lastname != "" && reentered_password != "") {
       setErrorMessage(
         <View style = {styles.errorMessageBox}>
           <Text style = {styles.errorMessageText}>
@@ -78,7 +79,17 @@ const Signup = ({ navigation }) => {
       );
       return;
     }
-    else if(username == "" || password == "" || firstname == "" || lastname == "" || email == "") {
+    else if(reentered_password == "" && username != "" && password != "" && firstname != "" && lastname != "" && email != "") {
+      setErrorMessage(
+        <View style = {styles.errorMessageBox}>
+          <Text style = {styles.errorMessageText}>
+            Please enter Verify Password
+          </Text>
+        </View>
+      );
+      return;
+    }
+    else if(username == "" || password == "" || firstname == "" || lastname == "" || email == "" || reentered_password == "") {
       setErrorMessage(
         <View style = {styles.errorMessageBox}>
           <Text style = {styles.errorMessageText}>
@@ -95,7 +106,8 @@ const Signup = ({ navigation }) => {
         password,
         firstname,
         lastname,
-        email
+        email,
+        reentered_password
       });
       console.log("Signup response:", response.data);
       //In the event of a successful signup, here we would navigate to another page.
@@ -139,6 +151,13 @@ const Signup = ({ navigation }) => {
         placeholder="Password"
         onChangeText={(text) => setPassword(text)}
         value={password}
+        secureTextEntry
+      />
+            <TextInput
+        style={styles.input}
+        placeholder="Verify Password"
+        onChangeText={(text) => setReentered_password(text)}
+        value={reentered_password}
         secureTextEntry
       />
       {/* <TouchableOpacity style={styles.button} onPress={handleSignup}>
