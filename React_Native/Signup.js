@@ -15,6 +15,7 @@ const Signup = ({ navigation }) => {
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
   const [email, setEmail] = useState("");
+  const [reentered_password, setReentered_password] = useState("");
   const [errorMessage, setErrorMessage] = useState(
     <View style = {styles.errorMessageBoxInvisible}>
       <Text style = {styles.errorMessageTextInvisible}>
@@ -95,7 +96,8 @@ const Signup = ({ navigation }) => {
         password,
         firstname,
         lastname,
-        email
+        email,
+        reentered_password
       });
       console.log("Signup response:", response.data);
       //In the event of a successful signup, here we would navigate to another page.
@@ -138,6 +140,13 @@ const Signup = ({ navigation }) => {
         style={styles.input}
         placeholder="Password"
         onChangeText={(text) => setPassword(text)}
+        value={password}
+        secureTextEntry
+      />
+            <TextInput
+        style={styles.input}
+        placeholder="Verify Password"
+        onChangeText={(text) => setReentered_password(text)}
         value={password}
         secureTextEntry
       />
