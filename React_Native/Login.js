@@ -28,8 +28,11 @@ const Login = ({ navigation }) => {
     </View>
   );
 
-  const navigate = () => {
+  const navigateSignOn = () => {
     navigation.navigate("Signup");
+  };
+  const navigateTimes = () => {
+    navigation.navigate("Times");
   };
   const handleLogin = async () => {
     if (username == "" && password == "") {
@@ -134,7 +137,7 @@ const Login = ({ navigation }) => {
               <Text style={styles.buttonText}>Login</Text>
             </LinearGradient>
           </Pressable>
-          <Pressable onPress={navigate}>
+          <Pressable onPress={navigateSignOn}>
             <LinearGradient
               // Button Linear Gradient
               colors={["#69a5ff", "#10c3e3"]}
@@ -146,6 +149,20 @@ const Login = ({ navigation }) => {
             </LinearGradient>
           </Pressable>
         </View>
+        <View style={{ flexDirection: "row" }}>
+          <Pressable onPress={navigateTimes}>
+              <LinearGradient
+                // Button Linear Gradient
+                colors={["#69a5ff", "#10c3e3"]}
+                start={[0, 1]}
+                end={[1, 0]}
+                style={styles.button}
+              >
+                <Text style={styles.buttonText}>Temp to time</Text>
+              </LinearGradient>
+            </Pressable>
+          </View>
+          {/* This view is temporary until we get our homepage working it only links to the Time change page */}
         {/* <LinearGradient
           // Button Linear Gradient
           colors={["#0023ff", "#000fcf"]}

@@ -9,6 +9,8 @@ from django.contrib.auth import get_user_model
 from django.middleware.csrf import get_token
 from django.http import JsonResponse
 from django.db import IntegrityError
+import datetime
+from datetime import time
 
 User = get_user_model()
 
@@ -89,6 +91,40 @@ def logout_view(request):
         
     except Exception as e:
         return HttpResponseServerError(f"Error: {e}", status=500)  # Redirect to login page after logout
+
+def update_times_view(request):
+    if request.method == 'POST':
+        # Retrieving username to access correct user in database 
+        #retrieving times for updating to non-default 
+        username = request.POST.get('username')
+        time1_str = request.POST.get('time1')
+        time2_str = request.POST.get('time2')
+        time3_str = request.POST.get('time3')
+
+        try:
+            # Convert strings of posted times to time objects
+            time1 = time.fromisoformat(time1_str) #fromisoformat() expects format ("HH:MM:SS") 
+            time2 = time.fromisoformat(time2_str)
+            time3 = time.fromisoformat(time3_str) 
+
+            if time1 < time2 < time3:
+                user = User.objects.get(username=username)  # Retrieving user from the database
+                user.time1 = time1  # Updating times specific to that user
+                user.time2 = time2
+                user.time3 = time3
+                user.save()  # Saving
+                return HttpResponse('Success! Times have been updated')
+            else:
+                return HttpResponse('Invalid ordering', status=400)
+        except User.DoesNotExist:
+            return HttpResponse('User not found', status=400)
+        except ValueError:
+            return HttpResponse('Invalid time format', status=400)
+        except Exception as e:
+            return HttpResponse('Updating user times failed: ' + str(e), status=400)
+    return HttpResponse('Not a POST request!')
+
+
 
 def csrf_token_view(request):
     csrf_token = get_token(request)

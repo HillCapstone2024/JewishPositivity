@@ -2,6 +2,8 @@ from django.test import TestCase, Client  #Client class to simulate HTTP request
 from django.urls import reverse #reverse allows you to generate URLs for Django views by providing the view name
 from Jewish_Positivity_Django.models import User
 from Jewish_Positivity_Django.views import create_user_view
+import datetime
+from Jewish_Positivity_Django.models import User #import model to access printing users in the test DB
 
 #a test for the create_user_view
 # use this command in terminal to run test: python manage.py test myapp.tests.test_views.CreateUserViewTestCase
@@ -150,3 +152,94 @@ class CreateUserViewTestCase(TestCase):
             self.assertEqual(response.status_code, 200) #status code of 200 means first user successfully created.
             self.assertEqual(response2.status_code, 400) #duplicate user error- did not create second user
 
+class SetTimesViewTestCase(TestCase):
+    def setUp(self):
+        # Initialize the Django test client
+        client = Client()
+
+        # Initializing a test user to update times in the database
+        user_data = {
+            'username': 'testuser',
+            'password': 'testpassword',
+            'reentered_password': 'testpassword',
+            'firstname': 'Test',
+            'lastname': 'User',
+            'email': 'test@example.com',
+        }
+
+        # Make a POST request to the create_user_view to make a test user
+        response = client.post(reverse('create_user_view'), user_data)
+
+    def test_set_times_success(self): #Successfully changed times in database
+        # Initialize the Django test client
+        client = Client()
+        
+        # Query the database and print its contents BEFORE updating the times
+        queryset = User.objects.all()
+        for obj in queryset: 
+            print(f'User: {obj.username}')
+            print(f'First Name: {obj.first_name}')
+            print(f'Last Name: {obj.last_name}')
+            print(f'Time1: {obj.time1}')
+            print(f'Time2: {obj.time2}')
+            print(f'Time3: {obj.time3}') 
+            print('')
+
+        # Creating a POST for updating the times
+        post_data = {
+            'username' : 'testuser',
+            'time1': datetime.time(8, 15),
+            'time2': datetime.time(16, 35),
+            'time3': datetime.time(19, 00),
+        }
+        
+        # Make a POST request to the update_times_view model to update the database times
+        response = client.post(reverse('update_times_view'), post_data) 
+        
+        # Query the database and print its contents AFTER updating the times
+        queryset = User.objects.all() 
+        for obj in queryset:
+            print(f'User: {obj.username}')
+            print(f'First Name: {obj.first_name}')
+            print(f'Last Name: {obj.last_name}')
+            print(f'Time1: {obj.time1}')
+            print(f'Time2: {obj.time2}')
+            print(f'Time3: {obj.time3}')
+            print('')
+
+        # Ensure the response is 200 indicating successful update of times
+        self.assertEqual(response.status_code, 200) 
+
+    def test_set_times_invalid_order_fail(self): #testing for time1 < time2 < time3
+        # Initialize the Django test client
+        client = Client()
+
+        # Creating a POST for updating the times with INCORRECT ORDERING
+        post_data = {
+            'username': 'testuser',
+            'time1': datetime.time(17, 35),
+            'time2': datetime.time(7, 35),
+            'time3': datetime.time(19, 00),
+        }
+        
+        # Printing DB after attempted updating times
+        queryset = User.objects.all()
+        for obj in queryset:
+            print(f'User: {obj.username}')
+            print(f'First Name: {obj.first_name}')
+            print(f'Last Name: {obj.last_name}')
+            print(f'Time1: {obj.time1}')
+            print(f'Time2: {obj.time2}')
+            print(f'Time3: {obj.time3}')
+            print('')
+
+        # Calling update_times_view model to update database times --> should give error
+        response = client.post(reverse('update_times_view'), post_data) 
+
+        # Status code of 400 means updating times fails due to incorrect order 
+        self.assertEqual(response.status_code, 400)
+
+
+class GetTimesViewTestCase(TestCase):
+     def test_get_times_success(self): #Successfully retrieved times in database
+        pass
