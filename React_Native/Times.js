@@ -37,7 +37,7 @@ const TimeChange = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Signup</Text>
+      <Text style={styles.title}>Times</Text>
       <TextInput
         style={styles.input}
         placeholder="First Time"
