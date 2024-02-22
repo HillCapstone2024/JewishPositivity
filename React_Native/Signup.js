@@ -176,7 +176,7 @@ const Signup = ({ navigation }) => {
               end={[1, 0]}
               style={styles.button}
             >
-              <Text style={styles.buttonText} >
+              <Text testID="signupButton" style={styles.buttonText} >
                 Sign Up
               </Text>
             </LinearGradient>

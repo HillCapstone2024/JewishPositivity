@@ -24,7 +24,7 @@ const Login = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState(
     <View style={styles.errorMessageBoxInvisible}>
-      <Text style={styles.errorMessageTextInvisible}>Null</Text>
+      <Text testID="errorMessage" style={styles.errorMessageTextInvisible}>Null</Text>
     </View>
   );
 
@@ -38,7 +38,7 @@ const Login = ({ navigation }) => {
     if (username == "" && password == "") {
       setErrorMessage(
         <View style={styles.errorMessageBox}>
-          <Text style={styles.errorMessageText}>
+          <Text testID="errorMessage"  style={styles.errorMessageText}>
             Enter a Username and Password
           </Text>
         </View>
@@ -47,14 +47,18 @@ const Login = ({ navigation }) => {
     } else if (username == "") {
       setErrorMessage(
         <View style={styles.errorMessageBox}>
-          <Text style={styles.errorMessageText}>Enter a Username</Text>
+          <Text testID="errorMessage"  style={styles.errorMessageText}>
+            Enter a Username
+          </Text>
         </View>
       );
       return;
     } else if (password == "") {
       setErrorMessage(
         <View style={styles.errorMessageBox}>
-          <Text style={styles.errorMessageText}>Enter a Password</Text>
+          <Text testID="errorMessage"  style={styles.errorMessageText}>
+            Enter a Password
+          </Text>
         </View>
       );
       return;
@@ -116,17 +120,19 @@ const Login = ({ navigation }) => {
         placeholder="Username"
         onChangeText={(text) => setUsername(text)}
         value={username}
+        testID="usernameInput"
       />
       <TextInput
         style={styles.input}
         placeholder="Password"
         onChangeText={(text) => setPassword(text)}
         value={password}
+        testID="passwordInput"
         secureTextEntry
       />
       <View>
         <View style={{ flexDirection: "row" }}>
-          <Pressable onPress={handleLogin}>
+          <Pressable onPress={handleLogin} testID="loginButton">
             <LinearGradient
               // Button Linear Gradient
               colors={["#69a5ff", "#10c3e3"]}
