@@ -153,7 +153,7 @@ class CreateUserViewTestCase(TestCase):
             self.assertEqual(response2.status_code, 400) #duplicate user error- did not create second user
 
 class SetTimesViewTestCase(TestCase):
-    def test_set_times_success(self): #Successfully changed times in database
+    def setUp(self):
         # Initialize the Django test client
         client = Client()
 
@@ -167,15 +167,16 @@ class SetTimesViewTestCase(TestCase):
             'email': 'test@example.com',
         }
 
-        # Make a POST request to the create_user_view
+        # Make a POST request to the create_user_view to make a test user
         response = client.post(reverse('create_user_view'), user_data)
-        
-        # Ensure the response is 200 indicating success creating a user
-        self.assertEqual(response.status_code, 200)
 
-         # Query the database and print its contents
+    def test_set_times_success(self): #Successfully changed times in database
+        # Initialize the Django test client
+        client = Client()
+        
+        # Query the database and print its contents BEFORE updating the times
         queryset = User.objects.all()
-        for obj in queryset: ###printing user before updating times
+        for obj in queryset: 
             print(f'User: {obj.username}')
             print(f'First Name: {obj.first_name}')
             print(f'Last Name: {obj.last_name}')
@@ -186,16 +187,17 @@ class SetTimesViewTestCase(TestCase):
 
         # Creating a POST for updating the times
         post_data = {
-                'username' : 'testuser',
-                'time1': datetime.time(8, 15),
-                'time2': datetime.time(16, 35),
-                'time3': datetime.time(19, 00),
-            }
+            'username' : 'testuser',
+            'time1': datetime.time(8, 15),
+            'time2': datetime.time(16, 35),
+            'time3': datetime.time(19, 00),
+        }
         
         # Make a POST request to the update_times_view model to update the database times
         response = client.post(reverse('update_times_view'), post_data) 
         
-        queryset = User.objects.all() #printing db after updating times
+        # Query the database and print its contents AFTER updating the times
+        queryset = User.objects.all() 
         for obj in queryset:
             print(f'User: {obj.username}')
             print(f'First Name: {obj.first_name}')
@@ -212,31 +214,16 @@ class SetTimesViewTestCase(TestCase):
         # Initialize the Django test client
         client = Client()
 
-        # Initializing a test user to update times in the database
-        user_data = {
-            'username': 'testuserfail',
-            'password': 'testpassword',
-            'reentered_password': 'testpassword',
-            'firstname': 'Test',
-            'lastname': 'User',
-            'email': 'test@example.com',
-        }
-
-        # Make a POST request to the create_user_view
-        response = client.post(reverse('create_user_view'), user_data)
-
-        # Ensure the response is 200 indicating success
-        self.assertEqual(response.status_code, 200)
-
         # Creating a POST for updating the times with INCORRECT ORDERING
         post_data = {
-                'username': 'testuser',
-                'time1': datetime.time(17, 35),
-                'time2': datetime.time(7, 35),
-                'time3': datetime.time(19, 00),
-            }
+            'username': 'testuser',
+            'time1': datetime.time(17, 35),
+            'time2': datetime.time(7, 35),
+            'time3': datetime.time(19, 00),
+        }
         
-        queryset = User.objects.all() #printing db after attempted updating times
+        # Printing DB after attempted updating times
+        queryset = User.objects.all()
         for obj in queryset:
             print(f'User: {obj.username}')
             print(f'First Name: {obj.first_name}')
@@ -246,7 +233,7 @@ class SetTimesViewTestCase(TestCase):
             print(f'Time3: {obj.time3}')
             print('')
 
-        # Calling update_times_view model to update database times-- this should give error
+        # Calling update_times_view model to update database times --> should give error
         response = client.post(reverse('update_times_view'), post_data) 
 
         # Status code of 400 means updating times fails due to incorrect order 
