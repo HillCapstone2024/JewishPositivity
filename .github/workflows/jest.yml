@@ -17,5 +17,6 @@ jobs:
           cache-dependency-path: React_Native/package-lock.json
       - run: |
           cd React_Native
+          echo "export default '0.0.0.0';" > ip.js
           npm ci
           npm test
