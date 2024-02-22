@@ -39,18 +39,20 @@ def create_user_view(request):
     if request.method == 'POST':
         #make sure all keys are given in post
         required_keys = ['username', 'password','reentered_password', 'firstname', 'lastname', 'email']
-        missing_keys = [key for key in required_keys if key not in request.POST]
+        data = json.loads(request.body)
+        missing_keys = [key for key in required_keys if key not in data]
         if missing_keys:
             error_message = f"Missing required keys: {', '.join(missing_keys)}" #tells which keys missing in error message
             return HttpResponse('error', content_type='text/plain', status=400)
 
         # Create a new user
-        username = request.POST['username']
-        password = request.POST['password']
-        password2 = request.POST['reentered_password'] #must match frontend
-        first_name = request.POST['firstname']
-        last_name = request.POST['lastname']
-        email= request.POST['email']
+        data = json.loads(request.body)
+        username = data['username']
+        password = data['password']
+        password2 = data['reentered_password'] #must match frontend
+        first_name = data['firstname']
+        last_name = data['lastname']
+        email= data['email']
 
          # Check if passwords match
         if password != password2:
@@ -96,10 +98,11 @@ def update_times_view(request):
     if request.method == 'POST':
         # Retrieving username to access correct user in database 
         #retrieving times for updating to non-default 
-        username = request.POST.get('username')
-        time1_str = request.POST.get('time1')
-        time2_str = request.POST.get('time2')
-        time3_str = request.POST.get('time3')
+        data = json.loads(request.body)
+        username = data.get('username')
+        time1_str = data.get('time1')
+        time2_str = data.get('time2')
+        time3_str = data.get('time3')
 
         try:
             # Convert strings of posted times to time objects
@@ -109,11 +112,13 @@ def update_times_view(request):
 
             if time1 < time2 < time3:
                 user = User.objects.get(username=username)  # Retrieving user from the database
-                user.time1 = time1  # Updating times specific to that user
-                user.time2 = time2
-                user.time3 = time3
+                user.time1 = time1.strftime('%H:%M:%S')  # Convert time objects to strings
+                user.time2 = time2.strftime('%H:%M:%S') 
+                user.time3 = time3.strftime('%H:%M:%S') 
                 user.save()  # Saving
-                return HttpResponse('Success! Times have been updated')
+
+                response_data = {'message': 'Success! Times have been updated'}
+                return HttpResponse(json.dumps(response_data), content_type='application/json')
             else:
                 return HttpResponse('Invalid ordering', status=400)
         except User.DoesNotExist:
@@ -123,7 +128,6 @@ def update_times_view(request):
         except Exception as e:
             return HttpResponse('Updating user times failed: ' + str(e), status=400)
     return HttpResponse('Not a POST request!')
-
 
 
 def csrf_token_view(request):

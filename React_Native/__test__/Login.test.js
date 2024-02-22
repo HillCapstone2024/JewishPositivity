@@ -24,22 +24,22 @@ describe("Login Component", () => {
 
   it("successfully handles missing password", async () => {
     const { getByTestId } = render(<Login />);
-    const { getByText } = render(<Login />);
     const usernameInput = getByTestId("usernameInput");
+    const loginButton = getByTestId("loginButton");
     fireEvent.changeText(usernameInput, "testing");
-    fireEvent.press(getByText("Login"));
-    expect(usernameInput.props.value).toBe("testing");
-    expect(getByText("Enter a Password")).toBeTruthy();
+    fireEvent.press(loginButton);
+    const errorMessage = getByTestId("errorMessage");
+    expect(errorMessage.props.children).toBe("Enter a Password");
   });
 
   it("successfully handles missing username", async () => {
     const { getByTestId } = render(<Login />);
-    const { getByText } = render(<Login />);
     const passwordInput = getByTestId("passwordInput");
+    const loginButton = getByTestId("loginButton");
     fireEvent.changeText(passwordInput, "testing");
-    fireEvent.press(getByText("Login"));
-    expect(passwordInput.props.value).toBe("testing");
-    expect(getByText("Enter a Username")).not.toBeNull();
+    fireEvent.press(loginButton);
+    const errorMessage = getByTestId("errorMessage");
+    expect(errorMessage.props.children).toBe("Enter a Username");
   });
 
   it.skip("successfully calls the backend for successful login", async () => {

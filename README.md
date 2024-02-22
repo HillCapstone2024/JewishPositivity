@@ -35,7 +35,7 @@ Add the following extensions:
 - [Pylance](https://marketplace.visualstudio.com/items?itemName=ms-python.vscode-pylance)
 - [GitLens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens)
 - [Git Graph](https://marketplace.visualstudio.com/items?itemName=mhutchie.git-graph)
-- [Github Actions](https://marketplace.visualstudio.com/items?itemName=GitHub.vscode-github-actions)
+- [GitHub Actions](https://marketplace.visualstudio.com/items?itemName=GitHub.vscode-github-actions)
 
 Download [Python 3.12.2](https://www.python.org/downloads/)
 
@@ -124,3 +124,13 @@ npx expo start
 ```
 
 A QR code will appear in the terminal, scan the QR code to run the app on your phone in Expo Go. If you're having issues with loading the app on Expo Go, try running `npx expo start --tunnel` instead. This should help on restricted networks like Hillspot. The first time you run the line, it may ask to install `@expo/ngrok@^4.1.0` - make sure to accept the global installation of this package.
+
+
+## Running Frontend Jest Tests
+
+CD into the React_Native folder then run 'npm test'. All frontend tests should be located in the __test__ directory inside of React_Native
+
+```bash
+cd React_Native
+npm test
+```

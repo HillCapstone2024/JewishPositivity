@@ -3,6 +3,7 @@ from django.urls import reverse #reverse allows you to generate URLs for Django 
 from Jewish_Positivity_Django.models import User
 from Jewish_Positivity_Django.views import create_user_view
 import datetime
+import json
 from Jewish_Positivity_Django.models import User #import model to access printing users in the test DB
 
 #a test for the create_user_view
@@ -24,7 +25,7 @@ class CreateUserViewTestCase(TestCase):
         }
 
         # Make a POST request to the create_user_view
-        response = client.post(reverse('create_user_view'), post_data)
+        response = client.post(reverse('create_user_view'), data=json.dumps(post_data), content_type='application/json')
 
         # Check if the response status code is 200
         self.assertEqual(response.status_code, 200) #status code of 200 usually means that the view has executed successfully and returned a response without any errors.
@@ -42,7 +43,7 @@ class CreateUserViewTestCase(TestCase):
         }
 
         # Make a POST request with invalid data
-        response = client.post(reverse('create_user_view'), invalid_post_data)
+        response = client.post(reverse('create_user_view'), data=json.dumps(invalid_post_data), content_type='application/json')
 
         # Check if the response status code is 400 (specified in view as missing key status code)
         self.assertEqual(response.status_code, 400) #this means missing key error was excuted and displayed
@@ -63,7 +64,7 @@ class CreateUserViewTestCase(TestCase):
         }
 
         # Make a POST request to the create_user_view
-        response = client.post(reverse('create_user_view'), post_data)
+        response = client.post(reverse('create_user_view'), data=json.dumps(post_data), content_type='application/json')
 
         # Check if the response status code is 400
         self.assertEqual(response.status_code, 400) # means that the view executed error message with passwords dont match.
@@ -84,7 +85,7 @@ class CreateUserViewTestCase(TestCase):
         }
 
         # Make a POST request to the create_user_view
-        response = client.post(reverse('create_user_view'), post_data)
+        response = client.post(reverse('create_user_view'), data=json.dumps(post_data), content_type='application/json')
 
         # Check if the response status code is 400
         self.assertEqual(response.status_code, 400) #status code of 400- executed error message with wrong email format.
@@ -114,8 +115,8 @@ class CreateUserViewTestCase(TestCase):
             }
 
             # Make a POST request to the create_user_view
-            response = client.post(reverse('create_user_view'), post_data) #adding first user
-            response2 = client.post(reverse('create_user_view'), post_data2)#trying to add second with same email
+            response = client.post(reverse('create_user_view'), data=json.dumps(post_data), content_type='application/json') #adding first user
+            response2 = client.post(reverse('create_user_view'), data=json.dumps(post_data2), content_type='application/json')#trying to add second with same email
 
             # Check if the response status code is 200 for first user (should have succeeded)
             self.assertEqual(response.status_code, 200) #status code of 200 means first user successfully created.
@@ -145,8 +146,8 @@ class CreateUserViewTestCase(TestCase):
             }
 
             # Make a POST request to the create_user_view
-            response = client.post(reverse('create_user_view'), post_data) #adding first user
-            response2 = client.post(reverse('create_user_view'), post_data2)#trying to add second with same email
+            response = client.post(reverse('create_user_view'), data=json.dumps(post_data), content_type='application/json') #adding first user
+            response2 = client.post(reverse('create_user_view'), data=json.dumps(post_data2), content_type='application/json')#trying to add second with same email
 
             # Check if the response status code is 200 for first user (should have succeeded)
             self.assertEqual(response.status_code, 200) #status code of 200 means first user successfully created.
@@ -168,7 +169,7 @@ class SetTimesViewTestCase(TestCase):
         }
 
         # Make a POST request to the create_user_view to make a test user
-        response = client.post(reverse('create_user_view'), user_data)
+        response = client.post(reverse('create_user_view'), data=json.dumps(user_data), content_type='application/json')
 
     def test_set_times_success(self): #Successfully changed times in database
         # Initialize the Django test client
@@ -188,13 +189,13 @@ class SetTimesViewTestCase(TestCase):
         # Creating a POST for updating the times
         post_data = {
             'username' : 'testuser',
-            'time1': datetime.time(8, 15),
-            'time2': datetime.time(16, 35),
-            'time3': datetime.time(19, 00),
+            'time1': datetime.time(8, 15).strftime('%H:%M:%S'),
+            'time2': datetime.time(16, 35).strftime('%H:%M:%S'),
+            'time3': datetime.time(19, 00).strftime('%H:%M:%S'),
         }
         
         # Make a POST request to the update_times_view model to update the database times
-        response = client.post(reverse('update_times_view'), post_data) 
+        response = client.post(reverse('update_times_view'), data=json.dumps(post_data), content_type='application/json') 
         
         # Query the database and print its contents AFTER updating the times
         queryset = User.objects.all() 
@@ -217,9 +218,9 @@ class SetTimesViewTestCase(TestCase):
         # Creating a POST for updating the times with INCORRECT ORDERING
         post_data = {
             'username': 'testuser',
-            'time1': datetime.time(17, 35),
-            'time2': datetime.time(7, 35),
-            'time3': datetime.time(19, 00),
+            'time1': datetime.time(17, 35).strftime('%H:%M:%S'),
+            'time2': datetime.time(7, 35).strftime('%H:%M:%S'),
+            'time3': datetime.time(19, 00).strftime('%H:%M:%S'),
         }
         
         # Printing DB after attempted updating times
@@ -234,7 +235,7 @@ class SetTimesViewTestCase(TestCase):
             print('')
 
         # Calling update_times_view model to update database times --> should give error
-        response = client.post(reverse('update_times_view'), post_data) 
+        response = client.post(reverse('update_times_view'), data=json.dumps(post_data), content_type='application/json') 
 
         # Status code of 400 means updating times fails due to incorrect order 
         self.assertEqual(response.status_code, 400)
