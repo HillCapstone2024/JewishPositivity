@@ -1,0 +1,21 @@
+name: Jest CI
+
+on: push
+
+permissions: read-all
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node.js environment and run tests
+        uses: actions/setup-node@v4.0.2
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: React_Native/package-lock.json
+      - run: |
+          cd React_Native
+          npm ci
+          npm test
