@@ -7,12 +7,46 @@ import {
   StyleSheet,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from "axios";
 
 const Times = ({ navigation }) => {
-  const [timeOne, setTimeOne] = useState("");
-  const [timeTwo, setTimeTwo] = useState("");
-  const [timeThree, setTimeThree] = useState("");
+  const [timeOne, setTimeOne] = useState(new Date());
+  const [timeTwo, setTimeTwo] = useState(new Date());
+  const [timeThree, setTimeThree] = useState(new Date());
+  const [showOne, setShowOne] = useState(false);
+  const [showTwo, setShowTwo] = useState(false);
+  const [showThree, setShowThree] = useState(false);
+  const [mode, setMode] = useState("time");
+  const onChange1 = (e, selectedDate) => {
+    setTimeOne(selectedDate);
+    setShowOne(false);
+  };
+
+  const onChange2 = (e, selectedDate) => {
+    setTimeTwo(selectedDate);
+    setShowTwo(false);
+  };
+
+  const onChange3 = (e, selectedDate) => {
+    setTimeThree(selectedDate);
+    setShowThree(false);
+  };
+
+  const showModeOne = (modeToShow) => {
+    setShowOne(true);
+    setMode(modeToShow);
+  };
+
+  const showModeTwo = (modeToShow) => {
+    setShowTwo(true);
+    setMode(modeToShow);
+  };
+
+  const showModeThree = (modeToShow) => {
+    setShowThree(true);
+    setMode(modeToShow);
+  };
 
 
   const navigate = () => {
@@ -42,40 +76,7 @@ const Times = ({ navigation }) => {
         style={styles.input}
         placeholder="First Time"
         onChangeText={(text) => setTimeOne(text)}
-        value={timeOne}
       />
-
-      <View>
-        <View style={{ flexDirection: "row" }}>
-          <TouchableOpacity >
-            <LinearGradient
-              // Button Linear Gradient
-              colors={["#69a5ff", "#10c3e3"]}
-              start={[0, 1]}
-              end={[1, 0]}
-              style={styles.button}
-            >
-              <Text style={styles.buttonText} >
-                Edit
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={navigate}>
-            <LinearGradient
-              // Button Linear Gradient
-              colors={["#69a5ff", "#10c3e3"]}
-              start={[0, 1]}
-              end={[1, 0]}
-              style={styles.button}
-            >
-              <Text style={styles.buttonText}>
-                Return Log in
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-          {/* This Return to log in will eventually be changed to a submit button */}
-        </View>
-      </View>
     </View>
   );
 };
