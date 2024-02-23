@@ -53,10 +53,10 @@ For Mac, if you get an error involving permissions after this npm command or aft
 - In the bash terminal, run: `nano ~/.bash_profile`
 - Add the below lines to the file that opens:
 
-    ```bash
-    alias python='python3'
-    alias pip='pip3'
-    ```
+  ```bash
+  alias python='python3'
+  alias pip='pip3'
+  ```
 
 - Close the file with ctrl+X and then press Y to save the changes and press enter to return to the terminal
 - Run the command `source ~/.bash_profile` to update the terminal or just open a new one
@@ -86,6 +86,7 @@ For working with the database, install [MySQL Workbench](https://www.mysql.com/p
 cd Django
 python manage.py runserver 0.0.0.0:8000
 ```
+
 ### Adding Unit tests to the Pipeline
 
 For any Python unit tests, be sure to add them to the `Django` folder so they can be properly accessed by the pipeline files. Then to add the tests to the suite, open the `django.yml` file found in `/.github/workflows`. Within this file, scroll to the bottom of the page where you can find a section with named `Run Tests`.
@@ -100,21 +101,23 @@ After starting the Django server, if you encounter this error: `You have 18 unap
 
 MAC Installing `mysqlclient`:
 Follow [this guide](https://gist.github.com/ShirishRam/99fc3def9d35e75e96a562f0524b0d46)
-With the lib= step, 
+With the lib= step,
+
 - make sure you add the path given by `which mysql_config` to the line: `vi` path
 - To find the line, type `/libs` to find the place in the document
 - Press I to enter insert mode, copy and paste the what the guide tells you to, comment out the line it says to replace. (try sudo if necessary)
 - Exit with escape, then `:wq!`
 
 If it still doesn't work, follow these steps as well:
+
 - Get the path for the config file with: `mysql_config --cflags`
 - Type this command: `export MYSQLCLIENT_CFLAGS=` "path from above"
 - Same thing for library: `mysql_config --libs`
-    `export MYSQLCLIENT_LDFLAGS=` "path from above"
-Try these commands as well
+  `export MYSQLCLIENT_LDFLAGS=` "path from above"
+  Try these commands as well
 - `export CFLAGS="-D__x86_64__"`
 - `export ARCHFLAGS="-arch x86_64"`
-Re-try `pip install mysqlclient`
+  Re-try `pip install mysqlclient`
 
 ### Frontend
 
@@ -125,10 +128,11 @@ npx expo start
 
 A QR code will appear in the terminal, scan the QR code to run the app on your phone in Expo Go. If you're having issues with loading the app on Expo Go, try running `npx expo start --tunnel` instead. This should help on restricted networks like Hillspot. The first time you run the line, it may ask to install `@expo/ngrok@^4.1.0` - make sure to accept the global installation of this package.
 
+If tunneling prevents your app from working, you can try the following: 'npx expo start --reset-cache' or disable firewall and antivirus software.
 
 ## Running Frontend Jest Tests
 
-CD into the React_Native folder then run 'npm test'. All frontend tests should be located in the __test__ directory inside of React_Native
+CD into the React_Native folder then run 'npm test'. All frontend tests should be located in the **test** directory inside of React_Native
 
 ```bash
 cd React_Native
