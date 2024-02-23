@@ -4,7 +4,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Login from './Login'
 import Signup from './Signup'
-import TimeChange from './Times';
+import Times from './Times';
 import Landing from './Landing';
 
 const Stack = createNativeStackNavigator();
@@ -23,7 +23,7 @@ export default function App() {
         <Stack.Screen name="Landing" component={Landing} />
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Signup" component={Signup} />
-        <Stack.Screen name="Times" component={TimeChange} />
+        <Stack.Screen name="Times" component={Times} />
       </Stack.Navigator>
     </NavigationContainer>
   );
