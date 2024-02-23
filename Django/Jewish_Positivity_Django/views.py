@@ -36,6 +36,7 @@ def login_view(request):
     return HttpResponse('Not a POST request!')
 
 def create_user_view(request):
+    print('reached create_user view')
     if request.method == 'POST':
         #make sure all keys are given in post
         required_keys = ['username', 'password','reentered_password', 'firstname', 'lastname', 'email']
@@ -43,7 +44,7 @@ def create_user_view(request):
         missing_keys = [key for key in required_keys if key not in data]
         if missing_keys:
             error_message = f"Missing required keys: {', '.join(missing_keys)}" #tells which keys missing in error message
-            return HttpResponse('error', content_type='text/plain', status=400)
+            return HttpResponse(error_message, content_type='text/plain', status=400)
 
         # Create a new user
         data = json.loads(request.body)
@@ -52,7 +53,8 @@ def create_user_view(request):
         password2 = data['reentered_password'] #must match frontend
         first_name = data['firstname']
         last_name = data['lastname']
-        email= data['email']
+        email = data['email']
+
 
          # Check if passwords match
         if password != password2:
@@ -61,7 +63,7 @@ def create_user_view(request):
         # Regular expression pattern for validating email format
         pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         if not re.match(pattern, email):
-            return HttpResponse('Not email format', status=400)
+            return HttpResponse('Not email format', status=401)
 
         # Check if a user with the same email already exists
         if User.objects.filter(email=email).exists():

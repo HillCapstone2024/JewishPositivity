@@ -8,6 +8,9 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import axios from "axios";
+import IP_ADDRESS from "./ip.js";
+
+const API_URL = "http://" + IP_ADDRESS + ":8000";
 
 const Signup = ({ navigation }) => {
   const [username, setUsername] = useState("");
@@ -100,22 +103,66 @@ const Signup = ({ navigation }) => {
       return;
     }
 
+    const getCsrfToken = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/csrf-token/`);
+        return response.data.csrfToken;
+      } catch (error) {
+        console.error("Error retrieving CSRF token:", error);
+        throw new Error("CSRF token retrieval failed");
+      }
+    };
+
     try {
-      const response = await axios.post("/signup", {
-        username,
-        password,
-        firstname,
-        lastname,
-        email,
-        reentered_password
-      });
+      const csrfToken = await getCsrfToken();
+      const response = await axios.post(
+        `${API_URL}/create_user/`,
+        {
+          username: username,
+          password: password,
+          reentered_password: reentered_password,
+          firstname: firstname,
+          lastname: lastname,
+          email: email
+        },
+        {
+          headers: {
+            "X-CSRFToken": csrfToken,
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+      console.log("make request");
       console.log("Signup response:", response.data);
-      //In the event of a successful signup, here we would navigate to another page.
+
+      setErrorMessage(
+        <View style={styles.errorMessageBox}>
+          <Text style={styles.errorMessageText}>Login Successful!</Text>
+        </View>
+      );
+      //In the event of a successful login, here we would navigate to another page.
     } catch (error) {
-      console.error("Signup error:", error);
-      //Here we would determine what the error is and then act accordingly.
-      //Most likely display wrong credentials message to the user.
+      console.error("Login error:", error.message);
+
     }
+
+    // try {
+    //   const response = await axios.post("/signup", {
+    //     username,
+    //     password,
+    //     firstname,
+    //     lastname,
+    //     email,
+    //     reentered_password
+    //   });
+    //   console.log("Signup response:", response.data);
+    //   //In the event of a successful signup, here we would navigate to another page.
+    // } catch (error) {
+    //   console.error("Signup error:", error);
+    //   //Here we would determine what the error is and then act accordingly.
+    //   //Most likely display wrong credentials message to the user.
+    // }
   };
 
   return (
