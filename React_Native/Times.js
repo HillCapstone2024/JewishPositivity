@@ -9,7 +9,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import axios from "axios";
 
-const TimeChange = ({ navigation }) => {
+const Times = ({ navigation }) => {
   const [timeOne, setTimeOne] = useState("");
   const [timeTwo, setTimeTwo] = useState("");
   const [timeThree, setTimeThree] = useState("");
@@ -123,4 +123,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TimeChange;
+export default Times;
