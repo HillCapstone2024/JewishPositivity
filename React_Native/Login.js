@@ -38,7 +38,7 @@ const Login = ({ navigation }) => {
     if (username == "" && password == "") {
       setErrorMessage(
         <View style={styles.errorMessageBox}>
-          <Text testID="errorMessage"  style={styles.errorMessageText}>
+          <Text testID="errorMessage" style={styles.errorMessageText}>
             Enter a Username and Password
           </Text>
         </View>
@@ -47,7 +47,7 @@ const Login = ({ navigation }) => {
     } else if (username == "") {
       setErrorMessage(
         <View style={styles.errorMessageBox}>
-          <Text testID="errorMessage"  style={styles.errorMessageText}>
+          <Text testID="errorMessage" style={styles.errorMessageText}>
             Enter a Username
           </Text>
         </View>
@@ -56,13 +56,14 @@ const Login = ({ navigation }) => {
     } else if (password == "") {
       setErrorMessage(
         <View style={styles.errorMessageBox}>
-          <Text testID="errorMessage"  style={styles.errorMessageText}>
+          <Text testID="errorMessage" style={styles.errorMessageText}>
             Enter a Password
           </Text>
         </View>
       );
       return;
     }
+
     const getCsrfToken = async () => {
       try {
         const response = await axios.get(`${API_URL}/csrf-token/`);
@@ -72,6 +73,7 @@ const Login = ({ navigation }) => {
         throw new Error("CSRF token retrieval failed");
       }
     };
+
     try {
       const csrfToken = await getCsrfToken();
       const response = await axios.post(`${API_URL}/login/`,
@@ -87,8 +89,10 @@ const Login = ({ navigation }) => {
           withCredentials: true,
         }
       );
+
       console.log("make request");
       console.log("Login response:", response.data);
+
       setErrorMessage(
         <View style={styles.errorMessageBox}>
           <Text style={styles.errorMessageText}>Login Successful!</Text>
@@ -113,63 +117,65 @@ const Login = ({ navigation }) => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}> */}
-      <Image source={require("./assets/logo.png")} style={styles.logo} />
-      {errorMessage}
-      <TextInput
-        style={styles.input}
-        placeholder="Username"
-        onChangeText={(text) => setUsername(text)}
-        value={username}
-        testID="usernameInput"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        onChangeText={(text) => setPassword(text)}
-        value={password}
-        testID="passwordInput"
-        secureTextEntry
-      />
-      <View>
-        <View style={{ flexDirection: "row" }}>
-          <Pressable onPress={handleLogin} testID="loginButton">
-            <LinearGradient
-              // Button Linear Gradient
-              colors={["#69a5ff", "#10c3e3"]}
-              start={[0, 1]}
-              end={[1, 0]}
-              style={styles.button}
-            >
-              <Text style={styles.buttonText}>Login</Text>
-            </LinearGradient>
-          </Pressable>
-          <Pressable onPress={navigateSignOn}>
-            <LinearGradient
-              // Button Linear Gradient
-              colors={["#69a5ff", "#10c3e3"]}
-              start={[0, 1]}
-              end={[1, 0]}
-              style={styles.button}
-            >
-              <Text style={styles.buttonText}>Sign Up</Text>
-            </LinearGradient>
-          </Pressable>
-        </View>
-        <View style={{ flexDirection: "row" }}>
-          <Pressable onPress={navigateTimes}>
-              <LinearGradient
-                // Button Linear Gradient
-                colors={["#69a5ff", "#10c3e3"]}
-                start={[0, 1]}
-                end={[1, 0]}
-                style={styles.button}
-              >
-                <Text style={styles.buttonText}>Temp to time</Text>
-              </LinearGradient>
-            </Pressable>
+          <Image source={require("./assets/logo.png")} style={styles.logo} />
+          {errorMessage}
+          <TextInput
+            style={styles.input}
+            placeholder="Username"
+            onChangeText={(text) => setUsername(text)}
+            value={username}
+            testID="usernameInput"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            onChangeText={(text) => setPassword(text)}
+            value={password}
+            testID="passwordInput"
+            secureTextEntry
+          />
+          <View>
+            <View style={{ flexDirection: "row" }}>
+              <Pressable onPress={handleLogin} testID="loginButton">
+                <LinearGradient
+                  // Button Linear Gradient
+                  colors={["#69a5ff", "#10c3e3"]}
+                  start={[0, 1]}
+                  end={[1, 0]}
+                  style={styles.button}
+                >
+                  <Text style={styles.buttonText}>Login</Text>
+                </LinearGradient>
+              </Pressable>
+              <Pressable onPress={navigateSignOn}>
+                <LinearGradient
+                  // Button Linear Gradient
+                  colors={["#69a5ff", "#10c3e3"]}
+                  start={[0, 1]}
+                  end={[1, 0]}
+                  style={styles.button}
+                >
+                  <Text style={styles.buttonText}>Sign Up</Text>
+                </LinearGradient>
+              </Pressable>
+            </View>
+            <View style={{ flexDirection: "row" }}>
+              <Pressable onPress={navigateTimes}>
+                <LinearGradient
+                  // Button Linear Gradient
+                  colors={["#69a5ff", "#10c3e3"]}
+                  start={[0, 1]}
+                  end={[1, 0]}
+                  style={styles.button}
+                >
+                  <Text style={styles.buttonText}>Temp to time</Text>
+                </LinearGradient>
+              </Pressable>
+            </View>
           </View>
+
           {/* This view is temporary until we get our homepage working it only links to the Time change page */}
-        {/* <LinearGradient
+          {/* <LinearGradient
           // Button Linear Gradient
           colors={["#0023ff", "#000fcf"]}
           start={[0, 1]}
@@ -187,8 +193,10 @@ const Login = ({ navigation }) => {
         >
           <Text style={styles.buttonText}>Sign in with Google</Text>
         </LinearGradient> */}
-      </View>
-    </View>
+        {/* </TouchableWithoutFeedback>
+      </KeyboardAvoidingView > */}
+
+    </View >
   );
 };
 
