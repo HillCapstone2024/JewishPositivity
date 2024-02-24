@@ -89,25 +89,16 @@ const Login = ({ navigation }) => {
           withCredentials: true,
         }
       );
-
-      console.log("make request");
       console.log("Login response:", response.data);
-
-      setErrorMessage(
-        <View style={styles.errorMessageBox}>
-          <Text style={styles.errorMessageText}>Login Successful!</Text>
-        </View>
-      );
-      //In the event of a successful login, here we would navigate to another page.
+      navigateTimes();
     } catch (error) {
-      console.error("Login error:", error);
+      console.log(error);
       setErrorMessage(
         <View style={styles.errorMessageBox}>
-          <Text style={styles.errorMessageText}>
-            Invalid Username or Password
-          </Text>
+          <Text style={styles.errorMessageText}>{error.response.data}</Text>
         </View>
       );
+      console.error("Login error:", error.response.data);
     }
   };
 

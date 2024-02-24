@@ -8,11 +8,27 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
 from django.middleware.csrf import get_token
 from django.http import JsonResponse
-from django.db import IntegrityError
-import datetime
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 from datetime import time
+import logging
+
+#configure logging
+logging.basicConfig(level=logging.INFO,  # Set the logging level to INFO
+                    format='%(asctime)s - %(levelname)s - %(message)s',  # Define log message format
+                    filename='views.log',  # Specify the log file
+                    filemode='w')  # Choose file mode (overwrite in this case)
+
 
 User = get_user_model()
+
+def validate_email_format(email): #To validate email format
+    try:
+        validate_email(email)
+    except ValidationError:
+        return False
+    return True
+
 
 def login_view(request):
     print('in login_view')
@@ -22,20 +38,21 @@ def login_view(request):
         username = data['username']
         password = data['password']
         user = authenticate(request, username=username, password=password)
-        print('username:', username)
-        print('password:', password)
+        logging.info('username: %s', username) # %s is a placeholder for where var should be inserted
+        logging.info('password: %s', password)
         if user is not None:
             login(request, user)
             # return redirect('home')  # Redirect to home page after successful login
-            return HttpResponse('Login successful!')
+            return HttpResponse('Login successful!', status=200)
         else:
             # Return an error message or handle unsuccessful login
-            return HttpResponse('Login failed!')
+            return HttpResponse('Login failed!', status=400)
     if request.method == 'GET':
-        print('Reached GET in login_view')
+        logging.info('Reached GET in login_view')
     return HttpResponse('Not a POST request!')
 
 def create_user_view(request):
+    logging.info('reached create_user view')
     if request.method == 'POST':
         #make sure all keys are given in post
         required_keys = ['username', 'password','reentered_password', 'firstname', 'lastname', 'email']
@@ -43,7 +60,7 @@ def create_user_view(request):
         missing_keys = [key for key in required_keys if key not in data]
         if missing_keys:
             error_message = f"Missing required keys: {', '.join(missing_keys)}" #tells which keys missing in error message
-            return HttpResponse('error', content_type='text/plain', status=400)
+            return HttpResponse(error_message, status=400)
 
         # Create a new user
         data = json.loads(request.body)
@@ -52,24 +69,25 @@ def create_user_view(request):
         password2 = data['reentered_password'] #must match frontend
         first_name = data['firstname']
         last_name = data['lastname']
-        email= data['email']
+        email = data['email']
+
 
          # Check if passwords match
         if password != password2:
             return HttpResponse('Passwords do not match', status=400)
 
         # Regular expression pattern for validating email format
-        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-        if not re.match(pattern, email):
-            return HttpResponse('Not email format', status=400)
+        if not validate_email_format(email):#function above using django validator
+            return HttpResponse('Not a valid email address', status=400)
 
         # Check if a user with the same email already exists
         if User.objects.filter(email=email).exists():
-            return HttpResponse('duplicate email', status=400)
+            logging.info('Same email exists')
+            return HttpResponse('Account with this email already exists', status=400)
         
         # Check if a user with the same username already exists
         if User.objects.filter(username=username).exists():
-            return HttpResponse('duplicate username', status=400)
+            return HttpResponse('Account with this username already exists', status=400)
 
         try:
             user= User.objects.create_user(username=username, password=password, email= email, first_name= first_name, last_name= last_name)
@@ -78,7 +96,7 @@ def create_user_view(request):
             # return redirect('home')  # Redirect to home page after successful user creation
             return HttpResponse('Create a new user successful!')
         except: #IntegrityError
-             return HttpResponse('User failed to be created.', status= 400) #user failed to be created due to duplicate info
+            return HttpResponse('User failed to be created.', status= 400) #user failed to be created due to duplicate info
     return HttpResponse('Not a POST request!')
 
 def logout_view(request):

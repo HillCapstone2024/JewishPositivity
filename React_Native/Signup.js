@@ -8,6 +8,9 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import axios from "axios";
+import IP_ADDRESS from "./ip.js";
+
+const API_URL = "http://" + IP_ADDRESS + ":8000";
 
 const Signup = ({ navigation }) => {
   const [username, setUsername] = useState("");
@@ -17,104 +20,60 @@ const Signup = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [reentered_password, setReentered_password] = useState("");
   const [errorMessage, setErrorMessage] = useState(
-    <View style = {styles.errorMessageBoxInvisible}>
-      <Text style = {styles.errorMessageTextInvisible}>
-        Null
-      </Text>
+    <View style={styles.errorMessageBoxInvisible}>
+      <Text style={styles.errorMessageTextInvisible}>Null</Text>
     </View>
   );
 
-  const navigate = () => {
+  const navigateLogin = () => {
     navigation.navigate("Login");
   };
 
+  const navigateTimes = () => {
+    navigation.navigate("Times");
+  };
+
   const handleSignup = async () => {
-    if(username == "" && password != "" && firstname != "" && lastname != "" && email != "" && reentered_password != "") {
-      setErrorMessage(
-        <View style = {styles.errorMessageBox}>
-          <Text style = {styles.errorMessageText}>
-            Please enter a Username
-          </Text>
-        </View>
-      );
-      return;
-    }
-    else if(password == "" && username != "" && firstname != "" && lastname != "" && email != "" && reentered_password != "") {
-      setErrorMessage(
-        <View style = {styles.errorMessageBox}>
-          <Text style = {styles.errorMessageText}>
-            Please enter a Password
-          </Text>
-        </View>
-      );
-      return;
-    }
-    else if(firstname == "" && username != "" && password != "" && lastname != "" && email != "" && reentered_password != "") {
-      setErrorMessage(
-        <View style = {styles.errorMessageBox}>
-          <Text style = {styles.errorMessageText}>
-            Please enter a First Name
-          </Text>
-        </View>
-      );
-      return;
-    }
-    else if(lastname == "" && username != "" && password != "" && firstname != "" && email != "" && reentered_password != "") {
-      setErrorMessage(
-        <View style = {styles.errorMessageBox}>
-          <Text style = {styles.errorMessageText}>
-            Please enter a Last Name
-          </Text>
-        </View>
-      );
-      return;
-    }
-    else if(email == "" && username != "" && password != "" && firstname != "" && lastname != "" && reentered_password != "") {
-      setErrorMessage(
-        <View style = {styles.errorMessageBox}>
-          <Text style = {styles.errorMessageText}>
-            Please enter an Email
-          </Text>
-        </View>
-      );
-      return;
-    }
-    else if(reentered_password == "" && username != "" && password != "" && firstname != "" && lastname != "" && email != "") {
-      setErrorMessage(
-        <View style = {styles.errorMessageBox}>
-          <Text style = {styles.errorMessageText}>
-            Please enter Verify Password
-          </Text>
-        </View>
-      );
-      return;
-    }
-    else if(username == "" || password == "" || firstname == "" || lastname == "" || email == "" || reentered_password == "") {
-      setErrorMessage(
-        <View style = {styles.errorMessageBox}>
-          <Text style = {styles.errorMessageText}>
-            Please enter missing credentials
-          </Text>
-        </View>
-      );
-      return;
-    }
+    const getCsrfToken = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/csrf-token/`);
+        return response.data.csrfToken;
+      } catch (error) {
+        console.error("Error retrieving CSRF token:", error);
+        throw new Error("CSRF token retrieval failed");
+      }
+    };
 
     try {
-      const response = await axios.post("/signup", {
-        username,
-        password,
-        firstname,
-        lastname,
-        email,
-        reentered_password
-      });
+      const csrfToken = await getCsrfToken();
+      const response = await axios.post(
+        `${API_URL}/create_user/`,
+        {
+          username: username,
+          password: password,
+          reentered_password: reentered_password,
+          firstname: firstname,
+          lastname: lastname,
+          email: email,
+        },
+        {
+          headers: {
+            "X-CSRFToken": csrfToken,
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
       console.log("Signup response:", response.data);
-      //In the event of a successful signup, here we would navigate to another page.
+      navigateTimes();
     } catch (error) {
-      console.error("Signup error:", error);
-      //Here we would determine what the error is and then act accordingly.
-      //Most likely display wrong credentials message to the user.
+      console.log(error)
+      setErrorMessage(
+        <View style={styles.errorMessageBox}>
+          <Text style={styles.errorMessageText}>{error.response.data}</Text>
+        </View>
+      );
+      console.error("Signup error:", error.response.data);
     }
   };
 
@@ -153,7 +112,7 @@ const Signup = ({ navigation }) => {
         value={password}
         secureTextEntry
       />
-            <TextInput
+      <TextInput
         style={styles.input}
         placeholder="Verify Password"
         onChangeText={(text) => setReentered_password(text)}
@@ -176,12 +135,12 @@ const Signup = ({ navigation }) => {
               end={[1, 0]}
               style={styles.button}
             >
-              <Text testID="signupButton" style={styles.buttonText} >
+              <Text testID="signupButton" style={styles.buttonText}>
                 Sign Up
               </Text>
             </LinearGradient>
           </TouchableOpacity>
-          <TouchableOpacity onPress={navigate}>
+          <TouchableOpacity onPress={navigateLogin}>
             <LinearGradient
               // Button Linear Gradient
               colors={["#69a5ff", "#10c3e3"]}
@@ -189,9 +148,7 @@ const Signup = ({ navigation }) => {
               end={[1, 0]}
               style={styles.button}
             >
-              <Text style={styles.buttonText}>
-                Already a Member?
-              </Text>
+              <Text style={styles.buttonText}>Already a Member?</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
@@ -211,13 +168,13 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 20,
-    color: 'black',
+    color: "black",
   },
   input: {
-    width: '80%',
+    width: "80%",
     height: 40,
-    borderStyle: 'solid',
-    borderBottomColor: '#e8bd25',
+    borderStyle: "solid",
+    borderBottomColor: "#e8bd25",
     borderBottomWidth: 2,
     // borderRadius: 10,
     marginBottom: 10,
@@ -230,7 +187,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginHorizontal: 5,
     borderRadius: 5,
-    shadowColor: 'black',
+    shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 6,
     shadowOpacity: 0.16,

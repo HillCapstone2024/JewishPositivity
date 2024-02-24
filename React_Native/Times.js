@@ -9,6 +9,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from "axios";
+import TopBar from "./topBar";
 
 const Times = ({ navigation }) => {
   const [timeOne, setTimeOne] = useState(new Date());
@@ -70,13 +71,16 @@ const Times = ({ navigation }) => {
   // };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Times</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="First Time"
-        onChangeText={(text) => setTimeOne(text)}
-      />
+    <View>
+      <TopBar navigation={navigation} />
+      <View style={styles.container}>
+        <Text style={styles.title}>Times</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="First Time"
+          onChangeText={(text) => setTimeOne(text)}
+        />
+      </View>
     </View>
   );
 };
