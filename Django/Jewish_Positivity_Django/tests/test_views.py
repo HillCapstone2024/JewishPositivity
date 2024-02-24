@@ -7,17 +7,13 @@ import json
 from Jewish_Positivity_Django.models import User #import model to access printing users in the test DB
 import logging
 
-# Configure logging
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s',
-                    filename='test_views.log',
-                    filemode='w')
 
 
 #a test for the create_user_view
 # use this command in terminal to run test: python manage.py test myapp.tests.test_views.CreateUserViewTestCase
 
 class CreateUserViewTestCase(TestCase):
+
     def test_create_user_success(self): #test if user was successfully made
         # Initialize the Django test client
         client = Client()
@@ -128,7 +124,7 @@ class CreateUserViewTestCase(TestCase):
 
             # Check if the response status code is 200 for first user (should have succeeded)
             self.assertEqual(response.status_code, 200) #status code of 200 means first user successfully created.
-            self.assertEqual(response2.status_code, 402) #duplicate user error- did not create second user
+            self.assertEqual(response2.status_code, 401) #duplicate user error- did not create second user
 
     def test_create_user_duplicate_username(self): #test that error appears when trying to add duplicate usernames
             # Initialize the Django test client

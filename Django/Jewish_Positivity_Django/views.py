@@ -76,7 +76,7 @@ def create_user_view(request):
         # Check if a user with the same email already exists
         if User.objects.filter(email=email).exists():
             logging.info('Same email exists')
-            return HttpResponse('Account with this email already exists', status=402)
+            return HttpResponse('Account with this email already exists', status=401)
         
         # Check if a user with the same username already exists
         if User.objects.filter(username=username).exists():

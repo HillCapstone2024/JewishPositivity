@@ -9,3 +9,4 @@ db_key
 # Please check that you are only pushing your code and not files like settings, caches, dependencies that are specific to your computer 
 .env
 ip.js
+.log
