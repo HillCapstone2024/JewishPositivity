@@ -8,8 +8,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
 from django.middleware.csrf import get_token
 from django.http import JsonResponse
-from django.db import IntegrityError
-import datetime
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 from datetime import time
 import logging
 
@@ -21,6 +21,14 @@ logging.basicConfig(level=logging.INFO,  # Set the logging level to INFO
 
 
 User = get_user_model()
+
+def validate_email_format(email): #To validate email format
+    try:
+        validate_email(email)
+    except ValidationError:
+        return False
+    return True
+
 
 def login_view(request):
     print('in login_view')
@@ -69,8 +77,7 @@ def create_user_view(request):
             return HttpResponse('Passwords do not match', status=400)
 
         # Regular expression pattern for validating email format
-        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-        if not re.match(pattern, email):
+        if not validate_email_format(email):#function above using django validator
             return HttpResponse('Not a valid email address', status=401)
 
         # Check if a user with the same email already exists
