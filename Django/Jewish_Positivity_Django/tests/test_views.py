@@ -92,7 +92,7 @@ class CreateUserViewTestCase(TestCase):
         response = client.post(reverse('create_user_view'), data=json.dumps(post_data), content_type='application/json')
 
         # Check if the response status code is 400
-        self.assertEqual(response.status_code, 401) #status code of 400- executed error message with wrong email format.
+        self.assertEqual(response.status_code, 400) #status code of 400- executed error message with wrong email format.
 
 
     def test_create_user_duplicate_email(self): #test that error appears when trying to add duplicate emails
@@ -124,7 +124,7 @@ class CreateUserViewTestCase(TestCase):
 
             # Check if the response status code is 200 for first user (should have succeeded)
             self.assertEqual(response.status_code, 200) #status code of 200 means first user successfully created.
-            self.assertEqual(response2.status_code, 401) #duplicate user error- did not create second user
+            self.assertEqual(response2.status_code, 400) #duplicate user error- did not create second user
 
     def test_create_user_duplicate_username(self): #test that error appears when trying to add duplicate usernames
             # Initialize the Django test client
@@ -155,7 +155,7 @@ class CreateUserViewTestCase(TestCase):
 
             # Check if the response status code is 200 for first user (should have succeeded)
             self.assertEqual(response.status_code, 200) #status code of 200 means first user successfully created.
-            self.assertEqual(response2.status_code, 403) #duplicate user error- did not create second user
+            self.assertEqual(response2.status_code, 400) #duplicate user error- did not create second user
 
 class SetTimesViewTestCase(TestCase):
     def setUp(self):

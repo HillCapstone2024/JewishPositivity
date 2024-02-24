@@ -78,16 +78,16 @@ def create_user_view(request):
 
         # Regular expression pattern for validating email format
         if not validate_email_format(email):#function above using django validator
-            return HttpResponse('Not a valid email address', status=401)
+            return HttpResponse('Not a valid email address', status=400)
 
         # Check if a user with the same email already exists
         if User.objects.filter(email=email).exists():
             logging.info('Same email exists')
-            return HttpResponse('Account with this email already exists', status=401)
+            return HttpResponse('Account with this email already exists', status=400)
         
         # Check if a user with the same username already exists
         if User.objects.filter(username=username).exists():
-            return HttpResponse('Account with this username already exists', status=403)
+            return HttpResponse('Account with this username already exists', status=400)
 
         try:
             user= User.objects.create_user(username=username, password=password, email= email, first_name= first_name, last_name= last_name)
@@ -96,7 +96,7 @@ def create_user_view(request):
             # return redirect('home')  # Redirect to home page after successful user creation
             return HttpResponse('Create a new user successful!')
         except: #IntegrityError
-            return HttpResponse('User failed to be created.', status= 404) #user failed to be created due to duplicate info
+            return HttpResponse('User failed to be created.', status= 400) #user failed to be created due to duplicate info
     return HttpResponse('Not a POST request!')
 
 def logout_view(request):

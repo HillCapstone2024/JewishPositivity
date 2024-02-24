@@ -1,14 +1,24 @@
-2024-02-24 15:57:25,286 - INFO - reached create_user view
-2024-02-24 15:57:26,240 - INFO - reached create_user view
-2024-02-24 15:57:26,256 - INFO - Same email exists
-2024-02-24 15:57:26,256 - WARNING - Unauthorized: /create_user/
-2024-02-24 15:57:26,334 - INFO - reached create_user view
-2024-02-24 15:57:27,184 - INFO - reached create_user view
-2024-02-24 15:57:27,233 - WARNING - Forbidden: /create_user/
-2024-02-24 15:57:27,545 - INFO - reached create_user view
-2024-02-24 15:57:27,545 - WARNING - Unauthorized: /create_user/
-2024-02-24 15:57:27,621 - INFO - reached create_user view
-2024-02-24 15:57:27,623 - WARNING - Bad Request: /create_user/
-2024-02-24 15:57:27,697 - INFO - reached create_user view
-2024-02-24 15:57:27,697 - WARNING - Bad Request: /create_user/
-2024-02-24 15:57:27,766 - INFO - reached create_user view
+2024-02-24 16:04:26,326 - INFO - reached create_user view
+2024-02-24 16:04:27,099 - INFO - User: testuser
+2024-02-24 16:04:27,109 - INFO - First Name: Test
+2024-02-24 16:04:27,109 - INFO - Last Name: User
+2024-02-24 16:04:27,109 - INFO - Time1: 08:00:00
+2024-02-24 16:04:27,109 - INFO - Time2: 15:00:00
+2024-02-24 16:04:27,109 - INFO - Time3: 21:00:00
+2024-02-24 16:04:27,109 - INFO - 
+2024-02-24 16:04:27,109 - WARNING - Bad Request: /update-times/
+2024-02-24 16:04:27,192 - INFO - reached create_user view
+2024-02-24 16:04:27,992 - INFO - User: testuser
+2024-02-24 16:04:27,992 - INFO - First Name: Test
+2024-02-24 16:04:27,992 - INFO - Last Name: User
+2024-02-24 16:04:27,992 - INFO - Time1: 08:00:00
+2024-02-24 16:04:27,992 - INFO - Time2: 15:00:00
+2024-02-24 16:04:28,001 - INFO - Time3: 21:00:00
+2024-02-24 16:04:28,001 - INFO - 
+2024-02-24 16:04:28,075 - INFO - User: testuser
+2024-02-24 16:04:28,075 - INFO - First Name: Test
+2024-02-24 16:04:28,075 - INFO - Last Name: User
+2024-02-24 16:04:28,075 - INFO - Time1: 08:15:00
+2024-02-24 16:04:28,075 - INFO - Time2: 16:35:00
+2024-02-24 16:04:28,087 - INFO - Time3: 19:00:00
+2024-02-24 16:04:28,087 - INFO - 
