@@ -11,6 +11,14 @@ from django.http import JsonResponse
 from django.db import IntegrityError
 import datetime
 from datetime import time
+import logging
+
+#configure logging
+logging.basicConfig(level=logging.INFO,  # Set the logging level to INFO
+                    format='%(asctime)s - %(levelname)s - %(message)s',  # Define log message format
+                    filename='views.log',  # Specify the log file
+                    filemode='w')  # Choose file mode (overwrite in this case)
+
 
 User = get_user_model()
 
@@ -22,8 +30,8 @@ def login_view(request):
         username = data['username']
         password = data['password']
         user = authenticate(request, username=username, password=password)
-        print('username:', username)
-        print('password:', password)
+        logging.info('username: %s', username) # %s is a placeholder for where var should be inserted
+        logging.info('password: %s', password)
         if user is not None:
             login(request, user)
             # return redirect('home')  # Redirect to home page after successful login
@@ -32,11 +40,11 @@ def login_view(request):
             # Return an error message or handle unsuccessful login
             return HttpResponse('Login failed!', status=400)
     if request.method == 'GET':
-        print('Reached GET in login_view')
+        logging.info('Reached GET in login_view')
     return HttpResponse('Not a POST request!')
 
 def create_user_view(request):
-    print('reached create_user view')
+    logging.info('reached create_user view')
     if request.method == 'POST':
         #make sure all keys are given in post
         required_keys = ['username', 'password','reentered_password', 'firstname', 'lastname', 'email']
@@ -67,7 +75,7 @@ def create_user_view(request):
 
         # Check if a user with the same email already exists
         if User.objects.filter(email=email).exists():
-            print('Same email exists')
+            logging.info('Same email exists')
             return HttpResponse('Account with this email already exists', status=402)
         
         # Check if a user with the same username already exists

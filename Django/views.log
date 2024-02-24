@@ -1,0 +1,14 @@
+2024-02-24 15:04:36,453 - INFO - reached create_user view
+2024-02-24 15:04:37,255 - INFO - reached create_user view
+2024-02-24 15:04:37,286 - INFO - Same email exists
+2024-02-24 15:04:37,287 - WARNING - Payment Required: /create_user/
+2024-02-24 15:04:37,369 - INFO - reached create_user view
+2024-02-24 15:04:38,104 - INFO - reached create_user view
+2024-02-24 15:04:38,174 - WARNING - Forbidden: /create_user/
+2024-02-24 15:04:38,257 - INFO - reached create_user view
+2024-02-24 15:04:38,258 - WARNING - Unauthorized: /create_user/
+2024-02-24 15:04:38,337 - INFO - reached create_user view
+2024-02-24 15:04:38,338 - WARNING - Bad Request: /create_user/
+2024-02-24 15:04:38,418 - INFO - reached create_user view
+2024-02-24 15:04:38,418 - WARNING - Bad Request: /create_user/
+2024-02-24 15:04:38,502 - INFO - reached create_user view

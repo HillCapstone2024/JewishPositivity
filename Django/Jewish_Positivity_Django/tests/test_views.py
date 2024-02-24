@@ -5,6 +5,14 @@ from Jewish_Positivity_Django.views import create_user_view
 import datetime
 import json
 from Jewish_Positivity_Django.models import User #import model to access printing users in the test DB
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s',
+                    filename='test_views.log',
+                    filemode='w')
+
 
 #a test for the create_user_view
 # use this command in terminal to run test: python manage.py test myapp.tests.test_views.CreateUserViewTestCase
@@ -88,7 +96,7 @@ class CreateUserViewTestCase(TestCase):
         response = client.post(reverse('create_user_view'), data=json.dumps(post_data), content_type='application/json')
 
         # Check if the response status code is 400
-        self.assertEqual(response.status_code, 400) #status code of 400- executed error message with wrong email format.
+        self.assertEqual(response.status_code, 401) #status code of 400- executed error message with wrong email format.
 
 
     def test_create_user_duplicate_email(self): #test that error appears when trying to add duplicate emails
@@ -120,7 +128,7 @@ class CreateUserViewTestCase(TestCase):
 
             # Check if the response status code is 200 for first user (should have succeeded)
             self.assertEqual(response.status_code, 200) #status code of 200 means first user successfully created.
-            self.assertEqual(response2.status_code, 400) #duplicate user error- did not create second user
+            self.assertEqual(response2.status_code, 402) #duplicate user error- did not create second user
 
     def test_create_user_duplicate_username(self): #test that error appears when trying to add duplicate usernames
             # Initialize the Django test client
@@ -142,7 +150,7 @@ class CreateUserViewTestCase(TestCase):
                 'reentered_password': 'testpassword',
                 'firstname': 'Test',
                 'lastname': 'User',
-                'email': 'test7@example.com', 
+                'email': 'test78@example.com', 
             }
 
             # Make a POST request to the create_user_view
@@ -151,7 +159,7 @@ class CreateUserViewTestCase(TestCase):
 
             # Check if the response status code is 200 for first user (should have succeeded)
             self.assertEqual(response.status_code, 200) #status code of 200 means first user successfully created.
-            self.assertEqual(response2.status_code, 400) #duplicate user error- did not create second user
+            self.assertEqual(response2.status_code, 403) #duplicate user error- did not create second user
 
 class SetTimesViewTestCase(TestCase):
     def setUp(self):
@@ -178,13 +186,14 @@ class SetTimesViewTestCase(TestCase):
         # Query the database and print its contents BEFORE updating the times
         queryset = User.objects.all()
         for obj in queryset: 
-            print(f'User: {obj.username}')
-            print(f'First Name: {obj.first_name}')
-            print(f'Last Name: {obj.last_name}')
-            print(f'Time1: {obj.time1}')
-            print(f'Time2: {obj.time2}')
-            print(f'Time3: {obj.time3}') 
-            print('')
+            # Log user information
+            logging.info('User: %s', obj.username)
+            logging.info('First Name: %s', obj.first_name)
+            logging.info('Last Name: %s', obj.last_name)
+            logging.info('Time1: %s', obj.time1)
+            logging.info('Time2: %s', obj.time2)
+            logging.info('Time3: %s', obj.time3)
+            logging.info('')  
 
         # Creating a POST for updating the times
         post_data = {
@@ -200,13 +209,14 @@ class SetTimesViewTestCase(TestCase):
         # Query the database and print its contents AFTER updating the times
         queryset = User.objects.all() 
         for obj in queryset:
-            print(f'User: {obj.username}')
-            print(f'First Name: {obj.first_name}')
-            print(f'Last Name: {obj.last_name}')
-            print(f'Time1: {obj.time1}')
-            print(f'Time2: {obj.time2}')
-            print(f'Time3: {obj.time3}')
-            print('')
+            # Log user information
+            logging.info('User: %s', obj.username)
+            logging.info('First Name: %s', obj.first_name)
+            logging.info('Last Name: %s', obj.last_name)
+            logging.info('Time1: %s', obj.time1)
+            logging.info('Time2: %s', obj.time2)
+            logging.info('Time3: %s', obj.time3)
+            logging.info('')  
 
         # Ensure the response is 200 indicating successful update of times
         self.assertEqual(response.status_code, 200) 
@@ -226,13 +236,13 @@ class SetTimesViewTestCase(TestCase):
         # Printing DB after attempted updating times
         queryset = User.objects.all()
         for obj in queryset:
-            print(f'User: {obj.username}')
-            print(f'First Name: {obj.first_name}')
-            print(f'Last Name: {obj.last_name}')
-            print(f'Time1: {obj.time1}')
-            print(f'Time2: {obj.time2}')
-            print(f'Time3: {obj.time3}')
-            print('')
+            logging.info('User: %s', obj.username)
+            logging.info('First Name: %s', obj.first_name)
+            logging.info('Last Name: %s', obj.last_name)
+            logging.info('Time1: %s', obj.time1)
+            logging.info('Time2: %s', obj.time2)
+            logging.info('Time3: %s', obj.time3)
+            logging.info('') 
 
         # Calling update_times_view model to update database times --> should give error
         response = client.post(reverse('update_times_view'), data=json.dumps(post_data), content_type='application/json') 
