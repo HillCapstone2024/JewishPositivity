@@ -32,3 +32,4 @@ jobs:
           cd Django
           python manage.py test Jewish_Positivity_Django.tests.test_views.CreateUserViewTestCase
           python manage.py test Jewish_Positivity_Django.tests.test_views.SetTimesViewTestCase
+          python manage.py test Jewish_Positivity_Django.tests.test_views.GetTimesViewTestCase
