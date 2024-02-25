@@ -1,24 +1,22 @@
-2024-02-24 16:04:26,326 - INFO - reached create_user view
-2024-02-24 16:04:27,099 - INFO - User: testuser
-2024-02-24 16:04:27,109 - INFO - First Name: Test
-2024-02-24 16:04:27,109 - INFO - Last Name: User
-2024-02-24 16:04:27,109 - INFO - Time1: 08:00:00
-2024-02-24 16:04:27,109 - INFO - Time2: 15:00:00
-2024-02-24 16:04:27,109 - INFO - Time3: 21:00:00
-2024-02-24 16:04:27,109 - INFO - 
-2024-02-24 16:04:27,109 - WARNING - Bad Request: /update-times/
-2024-02-24 16:04:27,192 - INFO - reached create_user view
-2024-02-24 16:04:27,992 - INFO - User: testuser
-2024-02-24 16:04:27,992 - INFO - First Name: Test
-2024-02-24 16:04:27,992 - INFO - Last Name: User
-2024-02-24 16:04:27,992 - INFO - Time1: 08:00:00
-2024-02-24 16:04:27,992 - INFO - Time2: 15:00:00
-2024-02-24 16:04:28,001 - INFO - Time3: 21:00:00
-2024-02-24 16:04:28,001 - INFO - 
-2024-02-24 16:04:28,075 - INFO - User: testuser
-2024-02-24 16:04:28,075 - INFO - First Name: Test
-2024-02-24 16:04:28,075 - INFO - Last Name: User
-2024-02-24 16:04:28,075 - INFO - Time1: 08:15:00
-2024-02-24 16:04:28,075 - INFO - Time2: 16:35:00
-2024-02-24 16:04:28,087 - INFO - Time3: 19:00:00
-2024-02-24 16:04:28,087 - INFO - 
+2024-02-24 20:28:07,665 - INFO - reached create_user view
+2024-02-24 20:28:08,200 - WARNING - Bad Request: /get_times/
+2024-02-24 20:28:08,200 - INFO - Response: <HttpResponse status_code=400, "text/html; charset=utf-8">
+2024-02-24 20:28:08,200 - INFO - 
+2024-02-24 20:28:08,216 - INFO - User: testuser
+2024-02-24 20:28:08,219 - INFO - First Name: Test
+2024-02-24 20:28:08,219 - INFO - Last Name: User
+2024-02-24 20:28:08,219 - INFO - Time1: 08:00:00
+2024-02-24 20:28:08,219 - INFO - Time2: 15:00:00
+2024-02-24 20:28:08,219 - INFO - Time3: 21:00:00
+2024-02-24 20:28:08,220 - INFO - 
+2024-02-24 20:28:08,270 - INFO - reached create_user view
+2024-02-24 20:28:08,760 - INFO - {'time1': '08:00:00', 'time2': '15:00:00', 'time3': '21:00:00'}
+2024-02-24 20:28:08,760 - INFO - Response: <HttpResponse status_code=200, "text/html; charset=utf-8">
+2024-02-24 20:28:08,761 - INFO - 
+2024-02-24 20:28:08,775 - INFO - User: testuser
+2024-02-24 20:28:08,776 - INFO - First Name: Test
+2024-02-24 20:28:08,776 - INFO - Last Name: User
+2024-02-24 20:28:08,776 - INFO - Time1: 08:00:00
+2024-02-24 20:28:08,776 - INFO - Time2: 15:00:00
+2024-02-24 20:28:08,776 - INFO - Time3: 21:00:00
+2024-02-24 20:28:08,776 - INFO - 

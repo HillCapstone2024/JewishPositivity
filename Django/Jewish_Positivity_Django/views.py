@@ -147,6 +147,30 @@ def update_times_view(request):
             return HttpResponse('Updating user times failed: ' + str(e), status=400)
     return HttpResponse('Not a POST request!')
 
+def get_times_view(request):
+    if request.method == 'GET':
+        username = request.GET.get('username') #JSON is not typically used for GET requests here 
+
+        # Make sure the get data is not empty
+        if username is not None:
+            try:
+                # Retrieve the user from the database by username
+                user = User.objects.get(username=username)
+
+                #get the times
+                response_data = {
+                                'time1': user.time1.strftime('%H:%M:%S'), 
+                                'time2': user.time2.strftime('%H:%M:%S'), 
+                                'time3': user.time3.strftime('%H:%M:%S')
+                                }
+                
+                logging.info(response_data)
+                return HttpResponse(response_data) #returning a DICTIONARY -do not change
+            except:
+                return HttpResponse("User does not exist", status=400)
+        else: #username was empty
+            return HttpResponse("Username not provided", status=400)
+    return HttpResponse('Not a GET request!')
 
 def csrf_token_view(request):
     csrf_token = get_token(request)
