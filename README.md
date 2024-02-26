@@ -36,6 +36,7 @@ Add the following extensions:
 - [GitLens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens)
 - [Git Graph](https://marketplace.visualstudio.com/items?itemName=mhutchie.git-graph)
 - [GitHub Actions](https://marketplace.visualstudio.com/items?itemName=GitHub.vscode-github-actions)
+- [Sonar Lint](https://marketplace.visualstudio.com/items?itemName=SonarSource.sonarlint-vscode)
 
 Download [Python 3.12.2](https://www.python.org/downloads/)
 
