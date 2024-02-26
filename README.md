@@ -36,6 +36,7 @@ Add the following extensions:
 - [GitLens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens)
 - [Git Graph](https://marketplace.visualstudio.com/items?itemName=mhutchie.git-graph)
 - [GitHub Actions](https://marketplace.visualstudio.com/items?itemName=GitHub.vscode-github-actions)
+- [Sonar Lint](https://marketplace.visualstudio.com/items?itemName=SonarSource.sonarlint-vscode)
 
 Download [Python 3.12.2](https://www.python.org/downloads/)
 
@@ -73,6 +74,8 @@ install NodeJs packages
 cd React_Native
 npm install
 ```
+### IP.js for Frontend
+To get the frontend to work, you need to add a file called 'ip.js' that includes your IP Address. Contact the development team for how to properly configure this. 
 
 download the Expo Go app on your phone ([iOS](https://apps.apple.com/app/expo-go/id982107779), [Android](https://play.google.com/store/apps/details?id=host.exp.exponent))
 
@@ -86,6 +89,8 @@ For working with the database, install [MySQL Workbench](https://www.mysql.com/p
 cd Django
 python manage.py runserver 0.0.0.0:8000
 ```
+### Env File for Backend
+You need to add a .env file with the credentials and your IP Address to get the backend to work. Contact the development team for how to set this up. 
 
 ### Adding Unit tests to the Pipeline
 
@@ -138,3 +143,4 @@ CD into the React_Native folder then run 'npm test'. All frontend tests should b
 cd React_Native
 npm test
 ```
+
