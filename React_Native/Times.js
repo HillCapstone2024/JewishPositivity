@@ -5,6 +5,8 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  Pressable,
+  Button,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -76,18 +78,41 @@ const Times = ({ navigation }) => {
   // };
 
   return (
-    <View>
-      <TopBar navigation={navigation} />
+    // <View>
+    //   <TopBar navigation={navigation} />
       <View style={styles.container}>
-        <Text style={styles.title}>Times</Text>
         {errorMessage}
-        <TextInput
-          style={styles.input}
-          placeholder="First Time"
-          onChangeText={(text) => setTimeOne(text)}
-        />
+
+        <View style={{ flexDirection: "column" }}>
+          <View style = {styles.buttonEnabled}>
+          <Button title="Time 1" onPress={() => showModeOne("time")} />
+            {showOne && (
+              <DateTimePicker
+              value = {timeOne}
+              mode = {mode}
+              is24Hour = {false}
+              onChange={onChange1}
+              minuteInterval = {5}
+              display = "spinner"
+              /> 
+            )}
+            </View>
+              
+              <Pressable>
+                <LinearGradient
+                  // Button Linear Gradient
+                  colors={["#69a5ff", "#10c3e3"]}
+                  start={[0, 1]}
+                  end={[1, 0]}
+                  style={styles.button}
+                  
+                >
+                  <Text style={styles.buttonText}>Temp to time</Text>
+                </LinearGradient>
+              </Pressable>
+            </View>
       </View>
-    </View>
+    // </View>
   );
 };
 
@@ -115,7 +140,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   button: {
-    //backgroundColor: '#6c94b4',
+    backgroundColor: '#6c94b4',
     paddingVertical: 10,
     paddingHorizontal: 50,
     marginTop: 10,
