@@ -19,6 +19,11 @@ const Times = ({ navigation }) => {
   const [showTwo, setShowTwo] = useState(false);
   const [showThree, setShowThree] = useState(false);
   const [mode, setMode] = useState("time");
+  const [errorMessage, setErrorMessage] = useState(
+    <View style = {styles.errorMessageBoxInvisible}>
+      <Text style = {styles.errorMessageTextInvisible}>Null</Text>
+    </View>
+  );
   const onChange1 = (e, selectedDate) => {
     setTimeOne(selectedDate);
     setShowOne(false);
@@ -75,6 +80,7 @@ const Times = ({ navigation }) => {
       <TopBar navigation={navigation} />
       <View style={styles.container}>
         <Text style={styles.title}>Times</Text>
+        {errorMessage}
         <TextInput
           style={styles.input}
           placeholder="First Time"
@@ -125,6 +131,41 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  errorMessageBox: {
+    textAlign: "center",
+    borderRadius: 6,
+    backgroundColor: "#ffc3c3",
+    paddingVertical: 10,
+    paddingHorizontal: 50,
+    marginTop: 5,
+    marginBottom: 10,
+    marginHorizontal: 5,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    shadowOpacity: 0.06,
+    width: "80%",
+  },
+  errorMessageText: {
+    textAlign: "center",
+    color: "#ff0000",
+  },
+  errorMessageBoxInvisible: {
+    backgroundColor: "white",
+    paddingVertical: 10,
+    paddingHorizontal: 50,
+    marginTop: 5,
+    marginBottom: 10,
+    marginHorizontal: 5,
+    width: "80%",
+    shadowColor: "white",
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    shadowOpacity: 0.06,
+  },
+  errorMessageTextInvisible: {
+    color: "white",
   },
 });
 

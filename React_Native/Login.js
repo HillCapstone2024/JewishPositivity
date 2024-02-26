@@ -35,35 +35,6 @@ const Login = ({ navigation }) => {
     navigation.navigate("Times");
   };
   const handleLogin = async () => {
-    if (username == "" && password == "") {
-      setErrorMessage(
-        <View style={styles.errorMessageBox}>
-          <Text testID="errorMessage" style={styles.errorMessageText}>
-            Enter a Username and Password
-          </Text>
-        </View>
-      );
-      return;
-    } else if (username == "") {
-      setErrorMessage(
-        <View style={styles.errorMessageBox}>
-          <Text testID="errorMessage" style={styles.errorMessageText}>
-            Enter a Username
-          </Text>
-        </View>
-      );
-      return;
-    } else if (password == "") {
-      setErrorMessage(
-        <View style={styles.errorMessageBox}>
-          <Text testID="errorMessage" style={styles.errorMessageText}>
-            Enter a Password
-          </Text>
-        </View>
-      );
-      return;
-    }
-
     const getCsrfToken = async () => {
       try {
         const response = await axios.get(`${API_URL}/csrf-token/`);
