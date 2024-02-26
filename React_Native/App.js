@@ -14,6 +14,7 @@ import Signup from './Signup'
 import Times from './Times';
 import Landing from './Landing';
 import TopBar from "./topBar";
+import BottomTab from "./BottomTab";
 
 // OneSignal.Debug.setLogLevel(LogLevel.Verbose);
 // OneSignal.initialize(Constants.expoConfig.extra.OneSignalAppId);
@@ -59,9 +60,9 @@ export default function App() {
         <Stack.Screen name="Times" component={Times} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
+        <Stack.Screen name="BottomTab" component={BottomTab} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
-
-
