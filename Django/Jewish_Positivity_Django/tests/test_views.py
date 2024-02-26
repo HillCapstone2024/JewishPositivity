@@ -248,5 +248,71 @@ class SetTimesViewTestCase(TestCase):
 
 
 class GetTimesViewTestCase(TestCase):
-     def test_get_times_success(self): #Successfully retrieved times in database
-        pass
+    def setUp(self):
+        # Initialize the Django test client
+        client = Client()
+
+        # Initializing a test user to update times in the database
+        user_data = {
+            'username': 'testuser',
+            'password': 'testpassword',
+            'reentered_password': 'testpassword',
+            'firstname': 'Test',
+            'lastname': 'User',
+            'email': 'test@example.com',
+        }
+
+        # Make a POST request to the create_user_view to make a test user
+        response = client.post(reverse('create_user_view'), data=json.dumps(user_data), content_type='application/json')
+
+    def test_get_times_success(self): # Successfully retrieves a valid user's times from the database
+        # Initialize the Django test client
+        client = Client()
+
+        # Create test data
+        get_data = {'username': 'testuser'}
+
+        # Send GET request to get_times_view
+        response = client.get(reverse('get_times_view'), data=get_data)
+
+        # Check if response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+        # Printing DB after attempted getting of times
+        logging.info('Response: %s',response)
+        logging.info('')
+        queryset = User.objects.all()
+        for obj in queryset:
+            logging.info('User: %s', obj.username)
+            logging.info('First Name: %s', obj.first_name)
+            logging.info('Last Name: %s', obj.last_name)
+            logging.info('Time1: %s', obj.time1)
+            logging.info('Time2: %s', obj.time2)
+            logging.info('Time3: %s', obj.time3)
+            logging.info('') 
+
+    def test_get_times_fail(self): # Fails to get times in database due to user not existing
+        # Initialize the Django test client
+        client = Client()
+
+        # Create test data
+        get_data = {'username': 'doesnotexist'}
+
+        # Send GET request to get_times_view
+        response = client.get(reverse('get_times_view'), data=get_data)
+
+        # Check if response status code is 400 -- failure
+        self.assertEqual(response.status_code, 400)
+        
+        # Printing DB after attempted getting of times
+        logging.info('Response: %s',response)
+        logging.info('')
+        queryset = User.objects.all()
+        for obj in queryset:
+            logging.info('User: %s', obj.username)
+            logging.info('First Name: %s', obj.first_name)
+            logging.info('Last Name: %s', obj.last_name)
+            logging.info('Time1: %s', obj.time1)
+            logging.info('Time2: %s', obj.time2)
+            logging.info('Time3: %s', obj.time3)
+            logging.info('') 
