@@ -2,10 +2,10 @@
 
 from django.db import models
 import datetime
+from django.utils import timezone
 from django.contrib.auth.models import AbstractBaseUser, AbstractUser
 from django.contrib.auth.models import UserManager
 from Jewish_Positivity_Django.managers import CustomUserManager
-# from django.contrib.auth.hashers import make_password, check_password
 
 # class UserProfile(models.Model): # Uses default User model
 #     user = models.OneToOneField('auth.User', on_delete=models.CASCADE)
@@ -28,37 +28,21 @@ class User(AbstractUser):
 
     REQUIRED_FIELDS = ['email']
     USERNAME_FIELD = 'username'
-    # Table is 'production.Jewish_Positivity_Django_user'
 
-    # class Meta:
-    #     # db_table = 'auth_user' 
+# class Notification(models.Model):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     message = models.CharField(max_length=255)
+#     target_audience = models.CharField(max_length=100)
 
-    # Don't know if we need these two methods
-    # def set_password(self, raw_password):
-    #     self.password = make_password(raw_password)
+#     def get_notification_times(self):
+#         """Get the three notification times for today."""
+#         # Get the associated user instance from ForKey relationship
+#         user_instance = self.user
 
-    # def check_password(self, raw_password):
-    #     return check_password(raw_password, self.password)
-
-# class User(AbstractBaseUser):
-#     first_Name = models.CharField(max_length=100)
-#     last_Name = models.CharField(max_length=100)
-#     email = models.EmailField(primary_key=True)
-#     password = models.CharField(max_length=100)
-#     username = models.CharField(max_length=100, unique=True)
-
-#     # Required fields for User Model
-#     REQUIRED_FIELDS = ['email']
-#     # Specify Username field
-#     USERNAME_FIELD = 'username'
-    
-#     # Manager
-#     objects = CustomUserManager()
-
-#     def __str__(self):
-#         return self.email + ' ' + self.username + ' ' + self.first_name + ' ' + self.last_name
-
-#     class Meta: #For Additional Operations
-#         db_table = "jpd_User"
-
+#         # Extract the times from the user fields
+#         #Combine today's date with each notification time to create datetime objects
+#         time_1 = timezone.make_aware(timezone.datetime.combine(timezone.now().date(), user_instance.time1))
+#         time_2 = timezone.make_aware(timezone.datetime.combine(timezone.now().date(), user_instance.time2))
+#         time_3 = timezone.make_aware(timezone.datetime.combine(timezone.now().date(), user_instance.time3))
+#         return [time_1, time_2, time_3]
 
