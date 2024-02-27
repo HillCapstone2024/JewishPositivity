@@ -1,12 +1,13 @@
 from django.test import TestCase, Client  #Client class to simulate HTTP requests
 from django.urls import reverse #reverse allows you to generate URLs for Django views by providing the view name
-from Jewish_Positivity_Django.models import User
 from Jewish_Positivity_Django.views import create_user_view
 import datetime
 import json
 from Jewish_Positivity_Django.models import User #import model to access printing users in the test DB
 import logging
-
+from Jewish_Positivity_Django.tasks import send_notifications
+from django.utils import timezone
+#from Jewish_Positivity_Django.models import Notification #This is used to set up notification tests
 
 
 #a test for the create_user_view
@@ -316,20 +317,28 @@ class GetTimesViewTestCase(TestCase):
             logging.info('Time3: %s', obj.time3)
             logging.info('') 
 
-class NotificationSendingTestCase(TestCase):
-    def test_notification_sending_success(self): # test case for successful notification sending
-        client = Client()
-        response = client.post(reverse('send_notification'), {'message': 'Test notification'})
+class NotificationSendingTask(TestCase):
+    def setUp(self):
+        # Create notifications with past send times
+        pass
+        # past_send_time_1 = timezone.now() - timezone.timedelta(hours=1)
+        # past_send_time_2 = timezone.now() - timezone.timedelta(days=1)
 
-        # Assert that the response is successful
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content.decode('utf-8'), "Notification sent successfully")
+        # Notification.objects.create(  #from model for Notification
+        #     message='Notification 1',
+        #     target_audience='Audience 1',
+        #     send_time=past_send_time_1
+        # )
 
+        # Notification.objects.create(
+        #     message='Notification 2',
+        #     target_audience='Audience 2',
+        #     send_time=past_send_time_2
+        # )
 
-    def test_notification_sending_failure(self): # test case for failed notification sending
-        client = Client()
-        response = client.post(reverse('send_notification'), {'message': 'Test notification'})
-
-        # Assert that the response indicates failure
-        self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.content.decode('utf-8'), "Failed to send notification")
+    def test_send_notifications_task(self):
+        pass
+        # send_notifications() # Call the send_notifications task directly
+        # self.assertEqual(Notification.objects.count(), 0) #notifications are deleted after being sent, 0 left after execution
+        # Assert that notifications are sent as expected
+        # You can assert the state of the database, or check external services like OneSignal

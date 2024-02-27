@@ -12,6 +12,7 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from datetime import time
 import logging
+import requests
 
 #configure logging
 logging.basicConfig(level=logging.INFO,  # Set the logging level to INFO
@@ -170,9 +171,6 @@ def get_times_view(request):
         else: #username was empty
             return HttpResponse("Username not provided", status=400)
     return HttpResponse('Not a GET request!')
-
-def send_notification_view(request): #to handle notification requests
-    pass
 
 def csrf_token_view(request):
     csrf_token = get_token(request)
