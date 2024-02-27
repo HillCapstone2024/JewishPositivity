@@ -8,7 +8,6 @@ from Jewish_Positivity_Django.models import User #import model to access printin
 import logging
 
 
-
 #a test for the create_user_view
 # use this command in terminal to run test: python manage.py test myapp.tests.test_views.CreateUserViewTestCase
 

@@ -1,6 +1,6 @@
 # in Jewish_Positivity_Django/urls.py
 
-from .views import login_view, create_user_view, logout_view, update_times_view, get_times_view, send_notification_view 
+from .views import login_view, create_user_view, logout_view, update_times_view, get_times_view
 from django.urls import path
 from django.contrib import admin
 from .views import csrf_token_view

@@ -12,7 +12,6 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from datetime import time
 import logging
-import requests
 
 #configure logging
 logging.basicConfig(level=logging.INFO,  # Set the logging level to INFO
