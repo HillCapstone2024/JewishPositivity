@@ -79,65 +79,65 @@ const Login = ({ navigation }) => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}> */}
-          <Image source={require("./assets/logo.png")} style={styles.logo} />
-          {errorMessage}
-          <TextInput
-            style={styles.input}
-            placeholder="Username"
-            onChangeText={(text) => setUsername(text)}
-            value={username}
-            testID="usernameInput"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            onChangeText={(text) => setPassword(text)}
-            value={password}
-            testID="passwordInput"
-            secureTextEntry
-          />
-          <View>
-            <View style={{ flexDirection: "row" }}>
-              <Pressable onPress={handleLogin} testID="loginButton">
-                <LinearGradient
-                  // Button Linear Gradient
-                  colors={["#69a5ff", "#10c3e3"]}
-                  start={[0, 1]}
-                  end={[1, 0]}
-                  style={styles.button}
-                >
-                  <Text style={styles.buttonText}>Login</Text>
-                </LinearGradient>
-              </Pressable>
-              <Pressable onPress={navigateSignOn}>
-                <LinearGradient
-                  // Button Linear Gradient
-                  colors={["#69a5ff", "#10c3e3"]}
-                  start={[0, 1]}
-                  end={[1, 0]}
-                  style={styles.button}
-                >
-                  <Text style={styles.buttonText}>Sign Up</Text>
-                </LinearGradient>
-              </Pressable>
-            </View>
-            <View style={{ flexDirection: "row" }}>
-              <Pressable onPress={navigateTimes}>
-                <LinearGradient
-                  // Button Linear Gradient
-                  colors={["#69a5ff", "#10c3e3"]}
-                  start={[0, 1]}
-                  end={[1, 0]}
-                  style={styles.button}
-                >
-                  <Text style={styles.buttonText}>Temp to time</Text>
-                </LinearGradient>
-              </Pressable>
-            </View>
-          </View>
+      <Image source={require("./assets/logo.png")} style={styles.logo} />
+      {errorMessage}
+      <TextInput
+        style={styles.input}
+        placeholder="Username"
+        onChangeText={(text) => setUsername(text)}
+        value={username}
+        testID="usernameInput"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        onChangeText={(text) => setPassword(text)}
+        value={password}
+        testID="passwordInput"
+        secureTextEntry
+      />
+      <View>
+        <View style={{ flexDirection: "row" }}>
+          <Pressable onPress={handleLogin} testID="loginButton">
+            <LinearGradient
+              // Button Linear Gradient
+              colors={["#69a5ff", "#10c3e3"]}
+              start={[0, 1]}
+              end={[1, 0]}
+              style={styles.button}
+            >
+              <Text style={styles.buttonText}>Login</Text>
+            </LinearGradient>
+          </Pressable>
+          <Pressable onPress={navigateSignOn}>
+            <LinearGradient
+              // Button Linear Gradient
+              colors={["#69a5ff", "#10c3e3"]}
+              start={[0, 1]}
+              end={[1, 0]}
+              style={styles.button}
+            >
+              <Text style={styles.buttonText}>Sign Up</Text>
+            </LinearGradient>
+          </Pressable>
+        </View>
+        <View style={{ flexDirection: "row" }}>
+          <Pressable onPress={navigateTimes}>
+            <LinearGradient
+              // Button Linear Gradient
+              colors={["#69a5ff", "#10c3e3"]}
+              start={[0, 1]}
+              end={[1, 0]}
+              style={styles.button}
+            >
+              <Text style={styles.buttonText}>Temp to time</Text>
+            </LinearGradient>
+          </Pressable>
+        </View>
+      </View>
 
-          {/* This view is temporary until we get our homepage working it only links to the Time change page */}
-          {/* <LinearGradient
+      {/* This view is temporary until we get our homepage working it only links to the Time change page */}
+      {/* <LinearGradient
           // Button Linear Gradient
           colors={["#0023ff", "#000fcf"]}
           start={[0, 1]}
@@ -155,7 +155,7 @@ const Login = ({ navigation }) => {
         >
           <Text style={styles.buttonText}>Sign in with Google</Text>
         </LinearGradient> */}
-        {/* </TouchableWithoutFeedback>
+      {/* </TouchableWithoutFeedback>
       </KeyboardAvoidingView > */}
 
     </View >

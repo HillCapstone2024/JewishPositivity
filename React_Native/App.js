@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -15,6 +15,7 @@ import Times from './Times';
 import Landing from './Landing';
 import TopBar from "./topBar";
 import BottomTab from "./BottomTab";
+import LoadingScreen from "./Loading";
 
 // OneSignal.Debug.setLogLevel(LogLevel.Verbose);
 // OneSignal.initialize(Constants.expoConfig.extra.OneSignalAppId);
@@ -45,7 +46,17 @@ function SettingsScreen({ navigation }) {
 
 export default function App() {
   const [initialRouteName, setInitialRouteName] = useState("Login");
+  const [isLoading, setIsLoading] = useState(true);
 
+  useEffect(() => {
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 4000);
+  }, []);
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
   // const value = AsyncStorage.getItem('user');
   // if (value !== null) {
   //   setInitialRouteName("Home");
