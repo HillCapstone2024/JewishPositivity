@@ -19,7 +19,6 @@ logging.basicConfig(level=logging.INFO,  # Set the logging level to INFO
                     filename='views.log',  # Specify the log file
                     filemode='w')  # Choose file mode (overwrite in this case)
 
-
 User = get_user_model()
 
 def validate_email_format(email): #To validate email format
@@ -171,6 +170,9 @@ def get_times_view(request):
         else: #username was empty
             return HttpResponse("Username not provided", status=400)
     return HttpResponse('Not a GET request!')
+
+def send_notification_view(request): #to handle notification requests
+    pass
 
 def csrf_token_view(request):
     csrf_token = get_token(request)
