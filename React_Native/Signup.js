@@ -86,24 +86,28 @@ const Signup = ({ navigation }) => {
         placeholder="Email"
         onChangeText={(text) => setEmail(text)}
         value={email}
+        testID="emailInput"
       />
       <TextInput
         style={styles.input}
         placeholder="Username"
         onChangeText={(text) => setUsername(text)}
         value={username}
+        testID="usernameInput"
       />
       <TextInput
         style={styles.input}
         placeholder="First Name"
         onChangeText={(text) => setFirstname(text)}
         value={firstname}
+        testID="firstNameInput"
       />
       <TextInput
         style={styles.input}
         placeholder="Last Name"
         onChangeText={(text) => setLastname(text)}
         value={lastname}
+        testID="lastNameInput"
       />
       <TextInput
         style={styles.input}
@@ -111,6 +115,7 @@ const Signup = ({ navigation }) => {
         onChangeText={(text) => setPassword(text)}
         value={password}
         secureTextEntry
+        testID="passwordInput"
       />
       <TextInput
         style={styles.input}
@@ -118,6 +123,7 @@ const Signup = ({ navigation }) => {
         onChangeText={(text) => setReentered_password(text)}
         value={reentered_password}
         secureTextEntry
+        testID="passwordTwoInput"
       />
       {/* <TouchableOpacity style={styles.button} onPress={handleSignup}>
         <Text style={styles.buttonText}>Create Account</Text>
