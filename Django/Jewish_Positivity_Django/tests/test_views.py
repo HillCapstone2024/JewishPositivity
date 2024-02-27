@@ -246,7 +246,6 @@ class SetTimesViewTestCase(TestCase):
         # Status code of 400 means updating times fails due to incorrect order 
         self.assertEqual(response.status_code, 400)
 
-
 class GetTimesViewTestCase(TestCase):
     def setUp(self):
         # Initialize the Django test client
@@ -316,3 +315,21 @@ class GetTimesViewTestCase(TestCase):
             logging.info('Time2: %s', obj.time2)
             logging.info('Time3: %s', obj.time3)
             logging.info('') 
+
+class NotificationSendingTestCase(TestCase):
+    def test_notification_sending_success(self): # test case for successful notification sending
+        client = Client()
+        response = client.post(reverse('send_notification'), {'message': 'Test notification'})
+
+        # Assert that the response is successful
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content.decode('utf-8'), "Notification sent successfully")
+
+
+    def test_notification_sending_failure(self): # test case for failed notification sending
+        client = Client()
+        response = client.post(reverse('send_notification'), {'message': 'Test notification'})
+
+        # Assert that the response indicates failure
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.content.decode('utf-8'), "Failed to send notification")

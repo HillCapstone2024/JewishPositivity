@@ -1,0 +1,20 @@
+2024-02-27 10:11:14,368 - ERROR - Internal Server Error: /send-notification/
+Traceback (most recent call last):
+  File "C:\Users\tizia\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\tizia\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\handlers\base.py", line 204, in _get_response
+    self.check_response(response, callback)
+  File "C:\Users\tizia\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\handlers\base.py", line 332, in check_response
+    raise ValueError(
+ValueError: The view Jewish_Positivity_Django.views.send_notification_view didn't return an HttpResponse object. It returned None instead.
+2024-02-27 10:11:14,625 - ERROR - Internal Server Error: /send-notification/
+Traceback (most recent call last):
+  File "C:\Users\tizia\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\tizia\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\handlers\base.py", line 204, in _get_response
+    self.check_response(response, callback)
+  File "C:\Users\tizia\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\handlers\base.py", line 332, in check_response
+    raise ValueError(
+ValueError: The view Jewish_Positivity_Django.views.send_notification_view didn't return an HttpResponse object. It returned None instead.
