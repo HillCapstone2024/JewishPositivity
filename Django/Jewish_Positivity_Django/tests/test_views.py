@@ -8,188 +8,205 @@ from Jewish_Positivity_Django.models import User #import model to access printin
 import logging
 
 
-
 #a test for the create_user_view
 # use this command in terminal to run test: python manage.py test myapp.tests.test_views.CreateUserViewTestCase
 
-class CreateUserViewTestCase(TestCase):
+# Define constant content type
+CONTENT_TYPE_JSON = 'application/json'
 
-    def test_create_user_success(self): #test if user was successfully made
-        # Initialize the Django test client
+# Define format for user log message
+LOG_MSG_FORMAT = '%s: %s'
+
+# Define constant strings for logging
+LOG_USER = 'User'
+LOG_FIRST_NAME = 'First Name'
+LOG_LAST_NAME = 'Last Name'
+LOG_TIME1 = 'Time1'
+LOG_TIME2 = 'Time2'
+LOG_TIME3 = 'Time3'
+
+class CreateUserViewTestCase(TestCase):
+    
+    # Define constant post data
+    POST_DATA_SUCCESS = {
+        'username': 'testuser',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'success@example.com',
+    }
+
+    POST_DATA_FAILURE_MISSING_KEYS = {
+        # Missing required fields
+    }
+
+    POST_DATA_FAILURE_PASSWORDS_DONT_MATCH = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'nottestpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'failure@example.com',
+    }
+
+    POST_DATA_FAILURE_WRONG_EMAIL_FORMAT = {
+        'username': 'testuser3',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'wrongformat',
+    }
+
+    POST_DATA_FAILURE_DUPLICATE_EMAIL = {
+        'username': 'testuser4',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'dupefailure@example.com',
+    }
+    POST_DATA_FAILURE_DUPLICATE_EMAIL_2 = {
+        'username': 'testuser5',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'dupefailure@example.com',
+    }
+
+    POST_DATA_FAILURE_DUPLICATE_USERNAME = {
+        'username': 'testuser7',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test7@example.com',
+    }
+
+    POST_DATA_FAILURE_DUPLICATE_USERNAME_2 = {
+        'username': 'testuser7',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test8@example.com',
+    }
+
+
+    def test_create_user_success(self):
+        # Test if user was successfully made
         client = Client()
 
-        # Define the POST data to simulate form submission
-        post_data = {
-            'username': 'testuser',
-            'password': 'testpassword',
-            'reentered_password': 'testpassword',
-            'firstname': 'Test',
-            'lastname': 'User',
-            'email': 'test@example.com',
-        }
-
         # Make a POST request to the create_user_view
-        response = client.post(reverse('create_user_view'), data=json.dumps(post_data), content_type='application/json')
+        response = client.post(reverse('create_user_view'), data=json.dumps(self.POST_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
 
         # Check if the response status code is 200
-        self.assertEqual(response.status_code, 200) #status code of 200 usually means that the view has executed successfully and returned a response without any errors.
+        self.assertEqual(response.status_code, 200)
 
         # Check if a user with the specified username was created
         self.assertTrue(User.objects.filter(username='testuser').exists())
 
-    def test_create_user_failure(self): # test if view will correctly fail to create user with missing keys
-        # Initialize the Django test client
-        client = Client()
 
-        # Define invalid POST data
-        invalid_post_data = {
-            # Missing required fields
-        }
+    def test_create_user_failure_missing_keys(self):
+        # Test if view will correctly fail to create user with missing keys
+        client = Client()
 
         # Make a POST request with invalid data
-        response = client.post(reverse('create_user_view'), data=json.dumps(invalid_post_data), content_type='application/json')
+        response = client.post(reverse('create_user_view'), data=json.dumps(self.POST_DATA_FAILURE_MISSING_KEYS), content_type=CONTENT_TYPE_JSON)
 
         # Check if the response status code is 400 (specified in view as missing key status code)
-        self.assertEqual(response.status_code, 400) #this means missing key error was excuted and displayed
+        self.assertEqual(response.status_code, 400)
 
-    
-    def test_create_user_passwords(self): #test if password don't match that correct error will appear
-        # Initialize the Django test client
+
+    def test_create_user_passwords(self):
+        # Test if passwords don't match that correct error will appear
         client = Client()
 
-        # Define the POST data to simulate form submission
-        post_data = {
-            'username': 'testuser1',
-            'password': 'testpassword',
-            'reentered_password': 'nottestpassword',
-            'firstname': 'Test',
-            'lastname': 'User',
-            'email': 'test1@example.com',
-        }
-
         # Make a POST request to the create_user_view
-        response = client.post(reverse('create_user_view'), data=json.dumps(post_data), content_type='application/json')
+        response = client.post(reverse('create_user_view'), data=json.dumps(self.POST_DATA_FAILURE_PASSWORDS_DONT_MATCH), content_type=CONTENT_TYPE_JSON)
 
         # Check if the response status code is 400
-        self.assertEqual(response.status_code, 400) # means that the view executed error message with passwords dont match.
+        self.assertEqual(response.status_code, 400)
 
-    
-    def test_create_user_emailValidation(self): #test if emails not in correct format that correct error will appear
-        # Initialize the Django test client
+
+    def test_create_user_emailValidation(self):
+        # Test if emails not in correct format that correct error will appear
         client = Client()
 
-        # Define the POST data to simulate form submission
-        post_data = {
-            'username': 'testuser3',
-            'password': 'testpassword',
-            'reentered_password': 'testpassword',
-            'firstname': 'Test',
-            'lastname': 'User',
-            'email': 'wrongformat',
-        }
-
         # Make a POST request to the create_user_view
-        response = client.post(reverse('create_user_view'), data=json.dumps(post_data), content_type='application/json')
+        response = client.post(reverse('create_user_view'), data=json.dumps(self.POST_DATA_FAILURE_WRONG_EMAIL_FORMAT), content_type=CONTENT_TYPE_JSON)
 
         # Check if the response status code is 400
-        self.assertEqual(response.status_code, 400) #status code of 400- executed error message with wrong email format.
+        self.assertEqual(response.status_code, 400)
 
 
-    def test_create_user_duplicate_email(self): #test that error appears when trying to add duplicate emails
-            # Initialize the Django test client
-            client = Client()
+    def test_create_user_duplicate_email(self):
+        # Test that error appears when trying to add duplicate emails
+        client = Client()
 
-            # Define the POST data to simulate form submission
-            post_data = {
-                'username': 'testuser4',
-                'password': 'testpassword',
-                'reentered_password': 'testpassword',
-                'firstname': 'Test',
-                'lastname': 'User',
-                'email': 'test4@example.com',
-            }
+        # Make a POST request to the create_user_view
+        response = client.post(reverse('create_user_view'), data=json.dumps(self.POST_DATA_FAILURE_DUPLICATE_EMAIL), content_type=CONTENT_TYPE_JSON)
+        response2 = client.post(reverse('create_user_view'), data=json.dumps(self.POST_DATA_FAILURE_DUPLICATE_EMAIL_2), content_type=CONTENT_TYPE_JSON)
 
-            post_data2 = {
-                'username': 'testuser5',
-                'password': 'testpassword',
-                'reentered_password': 'testpassword',
-                'firstname': 'Test',
-                'lastname': 'User',
-                'email': 'test4@example.com', #same email as first user above
-            }
+        # Check if the response status code is 200 for first user (should have succeeded)
+        self.assertEqual(response.status_code, 200)
 
-            # Make a POST request to the create_user_view
-            response = client.post(reverse('create_user_view'), data=json.dumps(post_data), content_type='application/json') #adding first user
-            response2 = client.post(reverse('create_user_view'), data=json.dumps(post_data2), content_type='application/json')#trying to add second with same email
+        # Check if the response status code is 400 for second user (duplicate user error)
+        self.assertEqual(response2.status_code, 400)
 
-            # Check if the response status code is 200 for first user (should have succeeded)
-            self.assertEqual(response.status_code, 200) #status code of 200 means first user successfully created.
-            self.assertEqual(response2.status_code, 400) #duplicate user error- did not create second user
 
-    def test_create_user_duplicate_username(self): #test that error appears when trying to add duplicate usernames
-            # Initialize the Django test client
-            client = Client()
+    def test_create_user_duplicate_username(self):
+        # Test that error appears when trying to add duplicate usernames
+        client = Client()
 
-            # Define the POST data to simulate form submission
-            post_data = {
-                'username': 'testuser7',
-                'password': 'testpassword',
-                'reentered_password': 'testpassword',
-                'firstname': 'Test',
-                'lastname': 'User',
-                'email': 'test7@example.com',
-            }
+        # Make a POST request to the create_user_view
+        response = client.post(reverse('create_user_view'), data=json.dumps(self.POST_DATA_FAILURE_DUPLICATE_USERNAME), content_type=CONTENT_TYPE_JSON)
+        response2 = client.post(reverse('create_user_view'), data=json.dumps(self.POST_DATA_FAILURE_DUPLICATE_USERNAME_2), content_type=CONTENT_TYPE_JSON)
 
-            post_data2 = {
-                'username': 'testuser7',#same username as first user above
-                'password': 'testpassword',
-                'reentered_password': 'testpassword',
-                'firstname': 'Test',
-                'lastname': 'User',
-                'email': 'test78@example.com', 
-            }
+        # Check if the response status code is 200 for first user (should have succeeded)
+        self.assertEqual(response.status_code, 200)
 
-            # Make a POST request to the create_user_view
-            response = client.post(reverse('create_user_view'), data=json.dumps(post_data), content_type='application/json') #adding first user
-            response2 = client.post(reverse('create_user_view'), data=json.dumps(post_data2), content_type='application/json')#trying to add second with same email
+        # Check if the response status code is 400 for second user (duplicate user error)
+        self.assertEqual(response2.status_code, 400)
 
-            # Check if the response status code is 200 for first user (should have succeeded)
-            self.assertEqual(response.status_code, 200) #status code of 200 means first user successfully created.
-            self.assertEqual(response2.status_code, 400) #duplicate user error- did not create second user
 
 class SetTimesViewTestCase(TestCase):
+
+    # Define constant post data
+    POST_DATA_SUCCESS = {
+        'username': 'testuser',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'success2@example.com',
+    }
+
+    # Set up method to create a test user
     def setUp(self):
         # Initialize the Django test client
         client = Client()
 
-        # Initializing a test user to update times in the database
-        user_data = {
-            'username': 'testuser',
-            'password': 'testpassword',
-            'reentered_password': 'testpassword',
-            'firstname': 'Test',
-            'lastname': 'User',
-            'email': 'test@example.com',
-        }
+        # Make a POST request to create a test user
+        client.post(reverse('create_user_view'), data=json.dumps(self.POST_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
 
-        # Make a POST request to the create_user_view to make a test user
-        response = client.post(reverse('create_user_view'), data=json.dumps(user_data), content_type='application/json')
-
-    def test_set_times_success(self): #Successfully changed times in database
-        # Initialize the Django test client
+    def test_set_times_success(self):
+        # Test if user was successfully made
         client = Client()
         
         # Query the database and print its contents BEFORE updating the times
         queryset = User.objects.all()
         for obj in queryset: 
             # Log user information
-            logging.info('User: %s', obj.username)
-            logging.info('First Name: %s', obj.first_name)
-            logging.info('Last Name: %s', obj.last_name)
-            logging.info('Time1: %s', obj.time1)
-            logging.info('Time2: %s', obj.time2)
-            logging.info('Time3: %s', obj.time3)
-            logging.info('')  
+            logging.info(LOG_MSG_FORMAT, LOG_USER, obj.username)
+            logging.info(LOG_MSG_FORMAT, LOG_FIRST_NAME, obj.first_name)
+            logging.info(LOG_MSG_FORMAT, LOG_LAST_NAME, obj.last_name)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME1, obj.time1)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME2, obj.time2)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME3, obj.time3)
+            logging.info('')   
 
         # Creating a POST for updating the times
         post_data = {
@@ -199,26 +216,26 @@ class SetTimesViewTestCase(TestCase):
             'time3': datetime.time(19, 00).strftime('%H:%M:%S'),
         }
         
-        # Make a POST request to the update_times_view model to update the database times
-        response = client.post(reverse('update_times_view'), data=json.dumps(post_data), content_type='application/json') 
+        # Make a POST request to update the times
+        response = client.post(reverse('update_times_view'), data=json.dumps(post_data), content_type=CONTENT_TYPE_JSON) 
         
         # Query the database and print its contents AFTER updating the times
         queryset = User.objects.all() 
         for obj in queryset:
             # Log user information
-            logging.info('User: %s', obj.username)
-            logging.info('First Name: %s', obj.first_name)
-            logging.info('Last Name: %s', obj.last_name)
-            logging.info('Time1: %s', obj.time1)
-            logging.info('Time2: %s', obj.time2)
-            logging.info('Time3: %s', obj.time3)
-            logging.info('')  
+            logging.info(LOG_MSG_FORMAT, LOG_USER, obj.username)
+            logging.info(LOG_MSG_FORMAT, LOG_FIRST_NAME, obj.first_name)
+            logging.info(LOG_MSG_FORMAT, LOG_LAST_NAME, obj.last_name)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME1, obj.time1)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME2, obj.time2)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME3, obj.time3)
+            logging.info('')   
 
         # Ensure the response is 200 indicating successful update of times
         self.assertEqual(response.status_code, 200) 
 
-    def test_set_times_invalid_order_fail(self): #testing for time1 < time2 < time3
-        # Initialize the Django test client
+    def test_set_times_invalid_order_fail(self):
+        # Test for time1 < time2 < time3
         client = Client()
 
         # Creating a POST for updating the times with INCORRECT ORDERING
@@ -232,40 +249,41 @@ class SetTimesViewTestCase(TestCase):
         # Printing DB after attempted updating times
         queryset = User.objects.all()
         for obj in queryset:
-            logging.info('User: %s', obj.username)
-            logging.info('First Name: %s', obj.first_name)
-            logging.info('Last Name: %s', obj.last_name)
-            logging.info('Time1: %s', obj.time1)
-            logging.info('Time2: %s', obj.time2)
-            logging.info('Time3: %s', obj.time3)
-            logging.info('') 
+            logging.info(LOG_MSG_FORMAT, LOG_USER, obj.username)
+            logging.info(LOG_MSG_FORMAT, LOG_FIRST_NAME, obj.first_name)
+            logging.info(LOG_MSG_FORMAT, LOG_LAST_NAME, obj.last_name)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME1, obj.time1)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME2, obj.time2)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME3, obj.time3)
+            logging.info('')   
 
         # Calling update_times_view model to update database times --> should give error
-        response = client.post(reverse('update_times_view'), data=json.dumps(post_data), content_type='application/json') 
+        response = client.post(reverse('update_times_view'), data=json.dumps(post_data), content_type=CONTENT_TYPE_JSON) 
 
         # Status code of 400 means updating times fails due to incorrect order 
         self.assertEqual(response.status_code, 400)
 
 class GetTimesViewTestCase(TestCase):
+
+    # Define constant user data
+    USER_DATA = {
+        'username': 'testuser',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+    }
+
     def setUp(self):
         # Initialize the Django test client
         client = Client()
 
-        # Initializing a test user to update times in the database
-        user_data = {
-            'username': 'testuser',
-            'password': 'testpassword',
-            'reentered_password': 'testpassword',
-            'firstname': 'Test',
-            'lastname': 'User',
-            'email': 'test@example.com',
-        }
+        # Make a POST request to create a test user
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER_DATA), content_type=CONTENT_TYPE_JSON)
 
-        # Make a POST request to the create_user_view to make a test user
-        response = client.post(reverse('create_user_view'), data=json.dumps(user_data), content_type='application/json')
-
-    def test_get_times_success(self): # Successfully retrieves a valid user's times from the database
-        # Initialize the Django test client
+    def test_get_times_success(self):
+        # Successfully retrieves a valid user's times from the database
         client = Client()
 
         # Create test data
@@ -278,20 +296,20 @@ class GetTimesViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
         # Printing DB after attempted getting of times
-        logging.info('Response: %s',response)
+        logging.info('Response: %s', response)
         logging.info('')
         queryset = User.objects.all()
         for obj in queryset:
-            logging.info('User: %s', obj.username)
-            logging.info('First Name: %s', obj.first_name)
-            logging.info('Last Name: %s', obj.last_name)
-            logging.info('Time1: %s', obj.time1)
-            logging.info('Time2: %s', obj.time2)
-            logging.info('Time3: %s', obj.time3)
-            logging.info('') 
+            logging.info(LOG_MSG_FORMAT, LOG_USER, obj.username)
+            logging.info(LOG_MSG_FORMAT, LOG_FIRST_NAME, obj.first_name)
+            logging.info(LOG_MSG_FORMAT, LOG_LAST_NAME, obj.last_name)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME1, obj.time1)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME2, obj.time2)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME3, obj.time3)
+            logging.info('')   
 
-    def test_get_times_fail(self): # Fails to get times in database due to user not existing
-        # Initialize the Django test client
+    def test_get_times_fail(self):
+        # Fails to get times in database due to user not existing
         client = Client()
 
         # Create test data
@@ -302,34 +320,43 @@ class GetTimesViewTestCase(TestCase):
 
         # Check if response status code is 400 -- failure
         self.assertEqual(response.status_code, 400)
-        
+
         # Printing DB after attempted getting of times
-        logging.info('Response: %s',response)
+        logging.info('Response: %s', response)
         logging.info('')
         queryset = User.objects.all()
         for obj in queryset:
-            logging.info('User: %s', obj.username)
-            logging.info('First Name: %s', obj.first_name)
-            logging.info('Last Name: %s', obj.last_name)
-            logging.info('Time1: %s', obj.time1)
-            logging.info('Time2: %s', obj.time2)
-            logging.info('Time3: %s', obj.time3)
-            logging.info('') 
-
-class NotificationSendingTestCase(TestCase):
-    def test_notification_sending_success(self): # test case for successful notification sending
-        client = Client()
-        response = client.post(reverse('send_notification'), {'message': 'Test notification'})
-
-        # Assert that the response is successful
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content.decode('utf-8'), "Notification sent successfully")
+            logging.info(LOG_MSG_FORMAT, LOG_USER, obj.username)
+            logging.info(LOG_MSG_FORMAT, LOG_FIRST_NAME, obj.first_name)
+            logging.info(LOG_MSG_FORMAT, LOG_LAST_NAME, obj.last_name)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME1, obj.time1)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME2, obj.time2)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME3, obj.time3)
+            logging.info('')   
 
 
-    def test_notification_sending_failure(self): # test case for failed notification sending
-        client = Client()
-        response = client.post(reverse('send_notification'), {'message': 'Test notification'})
+class NotificationSendingTask(TestCase):
+    def setUp(self):
+        # Create notifications with past send times
+        pass
+        # past_send_time_1 = timezone.now() - timezone.timedelta(hours=1)
+        # past_send_time_2 = timezone.now() - timezone.timedelta(days=1)
 
-        # Assert that the response indicates failure
-        self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.content.decode('utf-8'), "Failed to send notification")
+        # Notification.objects.create(  #from model for Notification
+        #     message='Notification 1',
+        #     target_audience='Audience 1',
+        #     send_time=past_send_time_1
+        # )
+
+        # Notification.objects.create(
+        #     message='Notification 2',
+        #     target_audience='Audience 2',
+        #     send_time=past_send_time_2
+        # )
+
+    def test_send_notifications_task(self):
+        pass
+        # send_notifications() # Call the send_notifications task directly
+        # self.assertEqual(Notification.objects.count(), 0) #notifications are deleted after being sent, 0 left after execution
+        # Assert that notifications are sent as expected
+        # You can assert the state of the database, or check external services like OneSignal

@@ -171,9 +171,6 @@ def get_times_view(request):
             return HttpResponse("Username not provided", status=400)
     return HttpResponse('Not a GET request!')
 
-def send_notification_view(request): #to handle notification requests
-    pass
-
 def csrf_token_view(request):
     csrf_token = get_token(request)
     return JsonResponse({'csrfToken': csrf_token})
