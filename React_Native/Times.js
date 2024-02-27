@@ -85,13 +85,41 @@ const Times = ({ navigation }) => {
 
         <View style={{ flexDirection: "column" }}>
           <View style = {styles.buttonEnabled}>
-          <Button title="Time 1" onPress={() => showModeOne("time")} />
+          <Button title="Time One" onPress={() => showModeOne("time")} />
             {showOne && (
               <DateTimePicker
               value = {timeOne}
               mode = {mode}
               is24Hour = {false}
               onChange={onChange1}
+              minuteInterval = {5}
+              display = "spinner"
+              /> 
+            )}
+            </View>
+            
+          <View style = {styles.buttonEnabled}>
+          <Button title="Time Two" onPress={() => showModeTwo("time")} />
+            {showTwo && (
+              <DateTimePicker
+              value = {timeTwo}
+              mode = {mode}
+              is24Hour = {false}
+              onChange={onChange2}
+              minuteInterval = {5}
+              display = "spinner"
+              /> 
+            )}
+            </View>
+
+          <View style = {styles.buttonEnabled}>
+          <Button title="Time Three" onPress={() => showModeThree("time")} />
+            {showThree && (
+              <DateTimePicker
+              value = {timeThree}
+              mode = {mode}
+              is24Hour = {false}
+              onChange={onChange3}
               minuteInterval = {5}
               display = "spinner"
               /> 
@@ -105,12 +133,16 @@ const Times = ({ navigation }) => {
                   start={[0, 1]}
                   end={[1, 0]}
                   style={styles.button}
-                  
                 >
                   <Text style={styles.buttonText}>Temp to time</Text>
                 </LinearGradient>
               </Pressable>
             </View>
+              {/* Just tests to make sure time changes worked  */}
+            <Text>Time1={timeOne.getHours()}:{timeOne.getMinutes()}</Text>
+            <Text>Time2={timeTwo.getHours()}:{timeTwo.getMinutes()}</Text>
+            <Text>Time3={timeThree.getHours()}:{timeThree.getMinutes()}</Text>
+            {/* <Text>Testtt={timeOne.getTime()}</Text> */}
       </View>
     // </View>
   );
