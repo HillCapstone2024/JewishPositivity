@@ -61,7 +61,7 @@ const Login = ({ navigation }) => {
         }
       );
       console.log("Login response:", response.data);
-      navigateTimes();
+      navigateTemp();
     } catch (error) {
       console.log(error);
       setErrorMessage(
