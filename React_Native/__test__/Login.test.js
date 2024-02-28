@@ -41,7 +41,7 @@ describe("Login Component", () => {
     });
   });
 
-  it("Navigates to 'Times' on successful login", async () => {
+  it("Navigates to 'Main' on successful login", async () => {
     axios.get.mockResolvedValue({ data: { csrfToken: "test-csrf-token" } });
     const mockLoginResponse = {
         data: "Login successful!",
@@ -54,7 +54,7 @@ describe("Login Component", () => {
     fireEvent.press(getByText("Login"));
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith("Times");
+      expect(mockNavigate).toHaveBeenCalledWith("Main");
     });
   });
 
