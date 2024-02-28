@@ -56,30 +56,7 @@ const Times = ({ navigation }) => {
     setMode(modeToShow);
   };
 
-
-  const navigate = () => {
-    navigation.navigate("Login");
-  };
-
-  // const handleTimeChange = async () => {
-  //   try {
-  //     const response = await axios.post("/signup", {
-  //       timeOne,
-  //       timeTwo,
-  //       timeThree,
-  //     });
-  //     console.log("Signup response:", response.data);
-  //     //In the event of a successful signup, here we would navigate to another page.
-  //   } catch (error) {
-  //     console.error("Signup error:", error);
-  //     //Here we would determine what the error is and then act accordingly.
-  //     //Most likely display wrong credentials message to the user.
-  //   }
-  // };
-
   return (
-    // <View>
-    //   <TopBar navigation={navigation} />
       <View style={styles.container}>
         {errorMessage}
 
@@ -125,7 +102,22 @@ const Times = ({ navigation }) => {
               /> 
             )}
             </View>
-              
+            </View>
+
+            <View style={{ flexDirection: "row" }}>
+
+            <Pressable>
+                <LinearGradient
+                  // Button Linear Gradient
+                  colors={["#69a5ff", "#10c3e3"]}
+                  start={[0, 1]}
+                  end={[1, 0]}
+                  style={styles.button}
+                >
+                  <Text style={styles.buttonText}>Submit Changes</Text>
+                </LinearGradient>
+              </Pressable>
+
               <Pressable>
                 <LinearGradient
                   // Button Linear Gradient
@@ -134,7 +126,7 @@ const Times = ({ navigation }) => {
                   end={[1, 0]}
                   style={styles.button}
                 >
-                  <Text style={styles.buttonText}>Temp to time</Text>
+                  <Text style={styles.buttonText}>Cancel Changes</Text>
                 </LinearGradient>
               </Pressable>
             </View>
@@ -174,7 +166,7 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: '#6c94b4',
     paddingVertical: 10,
-    paddingHorizontal: 50,
+    paddingHorizontal: 20,
     marginTop: 10,
     marginHorizontal: 5,
     borderRadius: 5,
