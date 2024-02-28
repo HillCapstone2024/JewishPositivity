@@ -17,9 +17,9 @@ import IP_ADDRESS from "./ip.js";
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
 const Times = ({ navigation }) => {
-  const [timeOne, setTimeOne] = useState(new Date());
-  const [timeTwo, setTimeTwo] = useState(new Date());
-  const [timeThree, setTimeThree] = useState(new Date());
+  const [timeOne, setTimeOne] = useState(new Date(2024,2,28,8,0,0));
+  const [timeTwo, setTimeTwo] = useState(new Date(2024,2,28,15,0,0));
+  const [timeThree, setTimeThree] = useState(new Date(2024,2,28,21,0,0));
   const [showOne, setShowOne] = useState(false);
   const [showTwo, setShowTwo] = useState(false);
   const [showThree, setShowThree] = useState(false);
@@ -29,9 +29,11 @@ const Times = ({ navigation }) => {
       <Text style = {styles.errorMessageTextInvisible}>Null</Text>
     </View>
   );
+
+  //Handles changes to time on Time Picker
   const onChange1 = (e, selectedDate) => {
-    setTimeOne(selectedDate);
-    setShowOne(false);
+      setTimeOne(selectedDate);
+      setShowOne(false);
   };
 
   const onChange2 = (e, selectedDate) => {
@@ -200,11 +202,6 @@ const handleTimeChange = async () => {
                 </LinearGradient>
               </Pressable>
             </View>
-              {/* Just tests to make sure time changes worked  */}
-            <Text>Time1={timeOne.getHours()}:{timeOne.getMinutes()}</Text>
-            <Text>Time2={timeTwo.getHours()}:{timeTwo.getMinutes()}</Text>
-            <Text>Time3={timeThree.getHours()}:{timeThree.getMinutes()}</Text>
-            {/* <Text>Testtt={timeOne.getTime()}</Text> */}
       </View>
     // </View>
   );
