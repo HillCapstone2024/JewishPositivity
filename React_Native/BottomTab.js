@@ -9,8 +9,11 @@ import HomeScreen from './HomeScreen';
 const Tab = createBottomTabNavigator();
 
 const screenOptions = {
-    "tabBarActiveTintColor": "blue",
-    "tabBarInactiveTintColor": "grey",
+    "headerShown": false,
+    "tabBarActiveBackgroundColor": "#4A90E2",
+    "tabBarInactiveBackgroundColor": "#4A90E2",
+    "tabBarActiveTintColor": "#FFD700",
+    "tabBarInactiveTintColor": "black",
     "tabBarLabelStyle": {
     "paddingBottom": 5,
     "fontSize": 10
@@ -25,11 +28,11 @@ const BottomTab = () => {
     <Tab.Navigator initialRouteName="Home" screenOptions={screenOptions}>
 
         <Tab.Screen name="Home" component={HomeScreen} options={{tabBarIcon:({color, size})=>(
-            <Ionicons name="home-outline" size={size} color={color} />)
+            <Ionicons name="home" size={size} color={color} />)
           }}/>
 
         <Tab.Screen name="Times" component={TimeChange} options={{tabBarIcon:({color, size})=>(
-            <Ionicons name="time-outline" size={size} color={color} />)
+            <Ionicons name="time" size={size} color={color} />)
           }}/>
           
     </Tab.Navigator>

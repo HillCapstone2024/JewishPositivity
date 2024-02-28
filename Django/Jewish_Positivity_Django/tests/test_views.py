@@ -1,6 +1,5 @@
 from django.test import TestCase, Client  #Client class to simulate HTTP requests
 from django.urls import reverse #reverse allows you to generate URLs for Django views by providing the view name
-from Jewish_Positivity_Django.models import User
 from Jewish_Positivity_Django.views import create_user_view
 import datetime
 import json
@@ -333,30 +332,3 @@ class GetTimesViewTestCase(TestCase):
             logging.info(LOG_MSG_FORMAT, LOG_TIME2, obj.time2)
             logging.info(LOG_MSG_FORMAT, LOG_TIME3, obj.time3)
             logging.info('')   
-
-
-class NotificationSendingTask(TestCase):
-    def setUp(self):
-        # Create notifications with past send times
-        pass
-        # past_send_time_1 = timezone.now() - timezone.timedelta(hours=1)
-        # past_send_time_2 = timezone.now() - timezone.timedelta(days=1)
-
-        # Notification.objects.create(  #from model for Notification
-        #     message='Notification 1',
-        #     target_audience='Audience 1',
-        #     send_time=past_send_time_1
-        # )
-
-        # Notification.objects.create(
-        #     message='Notification 2',
-        #     target_audience='Audience 2',
-        #     send_time=past_send_time_2
-        # )
-
-    def test_send_notifications_task(self):
-        pass
-        # send_notifications() # Call the send_notifications task directly
-        # self.assertEqual(Notification.objects.count(), 0) #notifications are deleted after being sent, 0 left after execution
-        # Assert that notifications are sent as expected
-        # You can assert the state of the database, or check external services like OneSignal

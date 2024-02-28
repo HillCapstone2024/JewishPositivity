@@ -17,6 +17,8 @@ import TopBar from "./topBar";
 import BottomTab from "./BottomTab";
 import LoadingScreen from "./Loading";
 
+import Layout from "./Layout";
+
 // OneSignal.Debug.setLogLevel(LogLevel.Verbose);
 // OneSignal.initialize(Constants.expoConfig.extra.OneSignalAppId);
 
@@ -64,14 +66,17 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName={initialRouteName}>
+      <Stack.Navigator initialRouteName={initialRouteName}>  
         <Stack.Screen name="Landing" component={Landing} />
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Signup" component={Signup} />
-        <Stack.Screen name="Times" component={Times} />
+        <Stack.Screen name="Main" component={Layout} />
+        
+
+        {/* <Stack.Screen name="Times" component={Times} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
-        <Stack.Screen name="BottomTab" component={BottomTab} />
+        <Stack.Screen name="BottomTab" component={BottomTab} /> */}
 
       </Stack.Navigator>
     </NavigationContainer>
