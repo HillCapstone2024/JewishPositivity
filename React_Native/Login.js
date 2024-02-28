@@ -31,8 +31,8 @@ const Login = ({ navigation }) => {
   const navigateSignOn = () => {
     navigation.navigate("Signup");
   };
-  const navigateTimes = () => {
-    navigation.navigate("Times");
+  const navigateTemp = () => {
+    navigation.navigate("Main");
   };
   const handleLogin = async () => {
     const getCsrfToken = async () => {
@@ -122,7 +122,7 @@ const Login = ({ navigation }) => {
           </Pressable>
         </View>
         <View style={{ flexDirection: "row" }}>
-          <Pressable onPress={navigateTimes}>
+          <Pressable onPress={navigateTemp}>
             <LinearGradient
               // Button Linear Gradient
               colors={["#69a5ff", "#10c3e3"]}
@@ -130,7 +130,7 @@ const Login = ({ navigation }) => {
               end={[1, 0]}
               style={styles.button}
             >
-              <Text style={styles.buttonText}>Temp to time</Text>
+              <Text style={styles.buttonText}>Temp to Home</Text>
             </LinearGradient>
           </Pressable>
         </View>
