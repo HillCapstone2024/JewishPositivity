@@ -12,6 +12,9 @@ import { LinearGradient } from "expo-linear-gradient";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from "axios";
 import TopBar from "./topBar";
+import IP_ADDRESS from "./ip.js";
+
+const API_URL = "http://" + IP_ADDRESS + ":8000";
 
 const Times = ({ navigation }) => {
   const [timeOne, setTimeOne] = useState(new Date());
@@ -55,6 +58,50 @@ const Times = ({ navigation }) => {
     setShowThree(true);
     setMode(modeToShow);
   };
+
+  //POST
+const handleTimeChange = async () => {
+  const getCsrfToken = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/csrf-token/`);
+      return response.data.csrfToken;
+    } catch (error) {
+      console.error("Error retrieving CSRF token:", error);
+      throw new Error("CSRF token retrieval failed");
+    }
+  };
+  try {
+    const csrfToken = await getCsrfToken();
+    const response = await axios.post(
+      `${API_URL}/update_times/`,
+      {
+        username: username,
+        password: password,
+        time1: timeOne,
+        time2: timeTwo,
+        time3: timeThree,
+      },
+      {
+        headers: {
+          "X-CSRFToken": csrfToken,
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      }
+    );
+    console.log("Time change response:", response.data);
+    navigateHome();
+  } catch (error) {
+    console.log(error)
+    setErrorMessage(
+      <View style={styles.errorMessageBox}>
+        <Text style={styles.errorMessageText}>{error.response.data}</Text>
+      </View>
+    );
+    console.error("Time change error:", error.response.data);
+  }
+};
+
 
   return (
       <View style={styles.container}>
