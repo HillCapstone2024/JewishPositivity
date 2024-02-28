@@ -61,47 +61,70 @@ const Times = ({ navigation }) => {
         {errorMessage}
 
         <View style={{ flexDirection: "column" }}>
-          <View style = {styles.buttonEnabled}>
-          <Button title="Time One" onPress={() => showModeOne("time")} />
-            {showOne && (
-              <DateTimePicker
-              value = {timeOne}
-              mode = {mode}
-              is24Hour = {false}
-              onChange={onChange1}
-              minuteInterval = {5}
-              display = "spinner"
-              /> 
-            )}
-            </View>
-            
-          <View style = {styles.buttonEnabled}>
-          <Button title="Time Two" onPress={() => showModeTwo("time")} />
-            {showTwo && (
-              <DateTimePicker
-              value = {timeTwo}
-              mode = {mode}
-              is24Hour = {false}
-              onChange={onChange2}
-              minuteInterval = {5}
-              display = "spinner"
-              /> 
-            )}
-            </View>
+        <Pressable onPress={() => showModeOne("time")}>
+              <LinearGradient
+                  // Button Linear Gradient
+                  colors={["#69a5ff", "#10c3e3"]}
+                  start={[0, 1]}
+                  end={[1, 0]}
+                  style={styles.button}
+                >
+                <Text style={styles.buttonText}>Time 1</Text>
+                </LinearGradient>
+                {showOne && (
+                <DateTimePicker
+                value = {timeOne}
+                mode = {mode}
+                is24Hour = {false}
+                onChange={onChange1}
+                minuteInterval = {5}
+                display = "spinner"
+                /> 
+                )}
+            </Pressable>
+            <Pressable onPress={() => showModeTwo("time")}>
+              <LinearGradient
+                  // Button Linear Gradient
+                  colors={["#69a5ff", "#10c3e3"]}
+                  start={[0, 1]}
+                  end={[1, 0]}
+                  style={styles.button}
+                >
+                <Text style={styles.buttonText}>Time 2</Text>
+                </LinearGradient>
+                {showTwo && (
+                <DateTimePicker
+                value = {timeTwo}
+                mode = {mode}
+                is24Hour = {false}
+                onChange={onChange2}
+                minuteInterval = {5}
+                display = "spinner"
+                /> 
+                )}
+            </Pressable>
 
-          <View style = {styles.buttonEnabled}>
-          <Button title="Time Three" onPress={() => showModeThree("time")} />
-            {showThree && (
-              <DateTimePicker
-              value = {timeThree}
-              mode = {mode}
-              is24Hour = {false}
-              onChange={onChange3}
-              minuteInterval = {5}
-              display = "spinner"
-              /> 
-            )}
-            </View>
+            <Pressable onPress={() => showModeThree("time")}>
+              <LinearGradient
+                  // Button Linear Gradient
+                  colors={["#69a5ff", "#10c3e3"]}
+                  start={[0, 1]}
+                  end={[1, 0]}
+                  style={styles.button}
+                >
+                <Text style={styles.buttonText}>Time 3</Text>
+                </LinearGradient>
+                {showThree && (
+                <DateTimePicker
+                value = {timeThree}
+                mode = {mode}
+                is24Hour = {false}
+                onChange={onChange3}
+                minuteInterval = {5}
+                display = "spinner"
+                /> 
+                )}
+            </Pressable>
             </View>
 
             <View style={{ flexDirection: "row" }}>
