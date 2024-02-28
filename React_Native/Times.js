@@ -116,7 +116,7 @@ const handleTimeChange = async () => {
                   end={[1, 0]}
                   style={styles.button}
                 >
-                <Text style={styles.buttonText}>Time 1</Text>
+                <Text style={styles.buttonText}>{timeOne.toLocaleTimeString()}</Text>
                 </LinearGradient>
                 {showOne && (
                 <DateTimePicker
@@ -137,7 +137,7 @@ const handleTimeChange = async () => {
                   end={[1, 0]}
                   style={styles.button}
                 >
-                <Text style={styles.buttonText}>Time 2</Text>
+                <Text style={styles.buttonText}>{timeTwo.toLocaleTimeString()}</Text>
                 </LinearGradient>
                 {showTwo && (
                 <DateTimePicker
@@ -159,7 +159,7 @@ const handleTimeChange = async () => {
                   end={[1, 0]}
                   style={styles.button}
                 >
-                <Text style={styles.buttonText}>Time 3</Text>
+                <Text style={styles.buttonText}>{timeThree.toLocaleTimeString()}</Text>
                 </LinearGradient>
                 {showThree && (
                 <DateTimePicker
