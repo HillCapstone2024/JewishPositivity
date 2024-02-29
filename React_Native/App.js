@@ -54,6 +54,7 @@ export default function App() {
         <Stack.Screen name="Signup" component={Signup} />
         <Stack.Screen name="Main" component={Layout} />
         <Stack.Screen name="Drawer" component={MyDrawer}/>
+        <Stack.Screen name="Times" component={Times} />
 
         {/* <Stack.Screen name="Times" component={Times} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
