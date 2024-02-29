@@ -6,7 +6,7 @@ import TopBar from "./topBar";
 const Layout = () => {
   return (
     <View style={styles.container}>
-      <TopBar />
+      {/* <TopBar /> */}
       <View style={styles.content}>
         <BottomTab />
       </View>

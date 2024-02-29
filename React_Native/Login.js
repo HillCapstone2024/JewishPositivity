@@ -31,6 +31,9 @@ const Login = ({ navigation }) => {
   const navigateSignOn = () => {
     navigation.navigate("Signup");
   };
+   const navigateDrawer = () => {
+     navigation.navigate("Drawer");
+   };
   const navigateTemp = () => {
     navigation.navigate("Main");
   };
@@ -133,6 +136,17 @@ const Login = ({ navigation }) => {
               <Text style={styles.buttonText}>Temp to Home</Text>
             </LinearGradient>
           </Pressable>
+          <Pressable onPress={navigateDrawer}>
+            <LinearGradient
+              // Button Linear Gradient
+              colors={["#69a5ff", "#10c3e3"]}
+              start={[0, 1]}
+              end={[1, 0]}
+              style={styles.button}
+            >
+              <Text style={styles.buttonText}>Temp to Drawer</Text>
+            </LinearGradient>
+          </Pressable>
         </View>
       </View>
 
@@ -157,8 +171,7 @@ const Login = ({ navigation }) => {
         </LinearGradient> */}
       {/* </TouchableWithoutFeedback>
       </KeyboardAvoidingView > */}
-
-    </View >
+    </View>
   );
 };
 
