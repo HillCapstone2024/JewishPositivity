@@ -116,7 +116,7 @@ describe("Signup Component", () => {
     });
   });
 
-  it("Navigates to 'Times' on successful signup", async () => {
+  it("Navigates to 'Drawer' on successful signup", async () => {
     axios.get.mockResolvedValue({ data: { csrfToken: "test-csrf-token" } });
     const mockLoginResponse = {
       data: "Create a new user successful!",
@@ -135,7 +135,7 @@ describe("Signup Component", () => {
     fireEvent.press(getByTestId("signupButton"));
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith("Times");
+      expect(mockNavigate).toHaveBeenCalledWith("Drawer");
     });
   });
 });

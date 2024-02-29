@@ -6,16 +6,27 @@ import {
 } from "@react-navigation/drawer";
 import { Ionicons } from "@expo/vector-icons";
 import { View, Image, StyleSheet, Text, LinearGradient, Settings } from "react-native";
-
+import React, { useEffect, useState } from "react";
 import Layout from "./Layout";
 import Times from "./Times";
 import UserProfile from "./Profile";
 import SettingsPage from "./Settings";
+import * as Storage from "./AsyncStorage.js";
 
 const Drawer = createDrawerNavigator();
 
 
 const CustomDrawerContent = (props) => {
+    const [username, setUsername] = useState("");
+
+    useEffect(() => {
+    const loadUsername = async () => {
+        const storedUsername = await Storage.getItem("@username");
+        setUsername(storedUsername || "No username");
+    };
+
+    loadUsername();
+    }, []);
   return (
     <DrawerContentScrollView {...props}>
       {/* <DrawerItemList {...props} /> */}
@@ -24,7 +35,7 @@ const CustomDrawerContent = (props) => {
           source={require("./assets/logo.png")} //eventually have profile pic here. would need to do a post request
           style={styles.drawerImage}
         />
-        <Text>Username here</Text> 
+        <Text>{username}</Text> 
       </View>
       <DrawerItem
         label="layout"

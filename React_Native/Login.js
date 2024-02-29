@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Image,
@@ -15,6 +15,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import axios from "axios";
 import IP_ADDRESS from "./ip.js";
+import * as Storage from "./AsyncStorage.js";
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 console.log(API_URL);
@@ -27,6 +28,12 @@ const Login = ({ navigation }) => {
       <Text testID="errorMessage" style={styles.errorMessageTextInvisible}>Null</Text>
     </View>
   );
+
+  const saveUsername = async () => {
+    await Storage.setItem("@username", username);
+    console.log("successfully saved username")
+  };
+
 
   const navigateSignOn = () => {
     navigation.navigate("Signup");
@@ -44,6 +51,13 @@ const Login = ({ navigation }) => {
         return response.data.csrfToken;
       } catch (error) {
         console.error("Error retrieving CSRF token:", error);
+        setErrorMessage(
+          <View style={styles.errorMessageBox}>
+            <Text style={styles.errorMessageText}>
+              CSRF token retrieval failed
+            </Text>
+          </View>
+        );
         throw new Error("CSRF token retrieval failed");
       }
     };
@@ -64,6 +78,7 @@ const Login = ({ navigation }) => {
         }
       );
       console.log("Login response:", response.data);
+      saveUsername();
       navigateDrawer();
     } catch (error) {
       console.log(error);
