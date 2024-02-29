@@ -15,7 +15,7 @@ import Times from "./Times";
 import Landing from "./Landing";
 import BottomTab from "./BottomTab";
 import LoadingScreen from "./Loading";
-
+import TermsofUse from "./TermsofUse";
 import Layout from "./Layout";
 import MyDrawer from "./drawer";
 import HomeScreen from "./HomeScreen";
@@ -57,6 +57,7 @@ export default function App() {
         <Stack.Screen name="Drawer" component={MyDrawer}/>
         <Stack.Screen name="Times" component={Times} />
         <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="TermsofUse" component={TermsofUse} />
         
         {/* <Stack.Screen name="Times" component={Times} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
