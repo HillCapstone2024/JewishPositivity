@@ -122,6 +122,11 @@ const handleTimeChange = async () => {
     );
     console.log("Time change response:", response.data);
     console.log("username is: ", username);
+    setErrorMessage(
+      <View style={styles.successMessageBox}>
+        <Text style={styles.successMessageText}>{"Times Changed Successfully"}</Text>
+      </View>
+    );
     navigateHome();
   } catch (error) {
     console.log(error)
@@ -300,6 +305,25 @@ const styles = StyleSheet.create({
   errorMessageText: {
     textAlign: "center",
     color: "#ff0000",
+  },
+  successMessageBox: {
+    textAlign: "center",
+    borderRadius: 6,
+    backgroundColor: "#5cb85c",
+    paddingVertical: 10,
+    paddingHorizontal: 50,
+    marginTop: 5,
+    marginBottom: 10,
+    marginHorizontal: 5,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    shadowOpacity: 0.06,
+    width: "80%",
+  },
+  successMessageText: {
+    textAlign: "center",
+    color: "#FFFFFF",
   },
   errorMessageBoxInvisible: {
     backgroundColor: "white",
