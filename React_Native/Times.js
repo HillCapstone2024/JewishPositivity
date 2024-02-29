@@ -30,6 +30,10 @@ const Times = ({ navigation }) => {
     </View>
   );
 
+  const navigateHome = () => {
+    navigation.navigate("Home");
+  };
+
   //Handles changes to time on Time Picker
   const onChange1 = (e, selectedDate) => {
       setTimeOne(selectedDate);
@@ -63,6 +67,7 @@ const Times = ({ navigation }) => {
 
   //POST
 const handleTimeChange = async () => {
+  //console.log("time1: " + timeOne.toTimeString().split(' ')[0] + " time2: " + timeTwo.toTimeString().split(' ')[0] + " time3: " + timeThree.toTimeString().split(' ')[0])
   const getCsrfToken = async () => {
     try {
       const response = await axios.get(`${API_URL}/csrf-token/`);
@@ -75,13 +80,12 @@ const handleTimeChange = async () => {
   try {
     const csrfToken = await getCsrfToken();
     const response = await axios.post(
-      `${API_URL}/update_times/`,
+      `${API_URL}/update-times/`,
       {
-        username: username,
-        password: password,
-        time1: timeOne,
-        time2: timeTwo,
-        time3: timeThree,
+        username: 'capstone',
+        time1: timeOne.toTimeString().split(' ')[0],
+        time2: timeTwo.toTimeString().split(' ')[0],
+        time3: timeThree.toTimeString().split(' ')[0],
       },
       {
         headers: {
@@ -178,7 +182,7 @@ const handleTimeChange = async () => {
 
             <View style={{ flexDirection: "row" }}>
 
-            <Pressable>
+            <Pressable onPress={handleTimeChange}>
                 <LinearGradient
                   // Button Linear Gradient
                   colors={["#69a5ff", "#10c3e3"]}
@@ -190,7 +194,7 @@ const handleTimeChange = async () => {
                 </LinearGradient>
               </Pressable>
 
-              <Pressable>
+              <Pressable onPress={navigateHome}>
                 <LinearGradient
                   // Button Linear Gradient
                   colors={["#69a5ff", "#10c3e3"]}
