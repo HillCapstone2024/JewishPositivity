@@ -21,7 +21,7 @@ import MyDrawer from "./drawer";
 import HomeScreen from "./HomeScreen";
 
 // OneSignal.Debug.setLogLevel(LogLevel.Verbose);
-// OneSignal.initialize(Constants.expoConfig.extra.OneSignalAppId);
+// OneSignal.initialize(Constants.expoConfig.extra.oneSignalAppId);
 
 // OneSignal.Notifications.requestPermission(true);
 
