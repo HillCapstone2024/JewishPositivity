@@ -11,7 +11,7 @@
 - Roman Galeano
 - Alex Gallant
 - Diego Gonzalez-Tellez
-- Jahiem Law
+- Jaheim Law
 - Caitlin Nolan
 - Nick Samios
 - Tiziana Hernandez
