@@ -7,9 +7,10 @@ import {
   StyleSheet,
   Pressable,
   Button,
+  Appearance
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import axios from "axios";
 import TopBar from "./topBar";
 import IP_ADDRESS from "./ip.js";
@@ -17,52 +18,70 @@ import IP_ADDRESS from "./ip.js";
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
 const Times = ({ navigation }) => {
+  //Creates time variables with defaults built in
   const [timeOne, setTimeOne] = useState(new Date(2024,2,28,8,0,0));
   const [timeTwo, setTimeTwo] = useState(new Date(2024,2,28,15,0,0));
   const [timeThree, setTimeThree] = useState(new Date(2024,2,28,21,0,0));
-  const [showOne, setShowOne] = useState(false);
-  const [showTwo, setShowTwo] = useState(false);
-  const [showThree, setShowThree] = useState(false);
-  const [mode, setMode] = useState("time");
   const [errorMessage, setErrorMessage] = useState(
     <View style = {styles.errorMessageBoxInvisible}>
       <Text style = {styles.errorMessageTextInvisible}>Null</Text>
     </View>
   );
 
-  //Handles changes to time on Time Picker
-  const onChange1 = (e, selectedDate) => {
-      setTimeOne(selectedDate);
-      setShowOne(false);
+  const navigateHome = () => {
+    navigation.navigate("Home");
   };
 
-  const onChange2 = (e, selectedDate) => {
-    setTimeTwo(selectedDate);
-    setShowTwo(false);
+  const [isDatePickerVisible1, setDatePickerVisibility1] = useState(false);
+  const [isDatePickerVisible2, setDatePickerVisibility2] = useState(false);
+  const [isDatePickerVisible3, setDatePickerVisibility3] = useState(false);
+
+  //Changes theme of spinner depending on OS' theme (resolves iOS issue)
+  const colorScheme = Appearance.getColorScheme();
+  const handleTheme = () => {
+    let handleTheme=false;
+    if (colorScheme=='light'){
+      handleTheme=true;
+    } else {
+      handleTheme-false;
+    } };
+ 
+  //Used to show or hide picker for each button  
+  const showDatePicker1 = () => {
+    setDatePickerVisibility1(true);
+  };
+  const hideDatePicker1 = () => {
+    setDatePickerVisibility1(false);
   };
 
-  const onChange3 = (e, selectedDate) => {
-    setTimeThree(selectedDate);
-    setShowThree(false);
+  const showDatePicker2 = () => {
+    setDatePickerVisibility2(true);
+  };
+  const hideDatePicker2 = () => {
+    setDatePickerVisibility2(false);
   };
 
-  const showModeOne = (modeToShow) => {
-    setShowOne(true);
-    setMode(modeToShow);
+  const showDatePicker3 = () => {
+    setDatePickerVisibility3(true);
+  };
+  const hideDatePicker3 = () => {
+    setDatePickerVisibility3(false);
   };
 
-  const showModeTwo = (modeToShow) => {
-    setShowTwo(true);
-    setMode(modeToShow);
-  };
-
-  const showModeThree = (modeToShow) => {
-    setShowThree(true);
-    setMode(modeToShow);
-  };
+  //Updates time variable and hides time picker once time is confirmed
+  const handleConfirmOne = (date) => {
+    setTimeOne(date);
+    hideDatePicker1(); }
+  const handleConfirmTwo = (date) => {
+   setTimeTwo(date);
+   hideDatePicker2(); }
+  const handleConfirmThree = (date) => {
+    setTimeThree(date);
+    hideDatePicker3(); }
 
   //POST
 const handleTimeChange = async () => {
+  //console.log("time1: " + timeOne.toTimeString().split(' ')[0] + " time2: " + timeTwo.toTimeString().split(' ')[0] + " time3: " + timeThree.toTimeString().split(' ')[0])
   const getCsrfToken = async () => {
     try {
       const response = await axios.get(`${API_URL}/csrf-token/`);
@@ -75,13 +94,12 @@ const handleTimeChange = async () => {
   try {
     const csrfToken = await getCsrfToken();
     const response = await axios.post(
-      `${API_URL}/update_times/`,
+      `${API_URL}/update-times/`,
       {
-        username: username,
-        password: password,
-        time1: timeOne,
-        time2: timeTwo,
-        time3: timeThree,
+        username: 'capstone',
+        time1: timeOne.toTimeString().split(' ')[0],
+        time2: timeTwo.toTimeString().split(' ')[0],
+        time3: timeThree.toTimeString().split(' ')[0],
       },
       {
         headers: {
@@ -104,13 +122,12 @@ const handleTimeChange = async () => {
   }
 };
 
-
   return (
       <View style={styles.container}>
         {errorMessage}
 
         <View style={{ flexDirection: "column" }}>
-        <Pressable onPress={() => showModeOne("time")}>
+        <Pressable onPress={showDatePicker1}>
               <LinearGradient
                   // Button Linear Gradient
                   colors={["#69a5ff", "#10c3e3"]}
@@ -120,18 +137,21 @@ const handleTimeChange = async () => {
                 >
                 <Text style={styles.buttonText}>{timeOne.toLocaleTimeString()}</Text>
                 </LinearGradient>
-                {showOne && (
-                <DateTimePicker
+                
+                <DateTimePickerModal
+                isVisible={isDatePickerVisible1}
+                mode="time"
                 value = {timeOne}
-                mode = {mode}
-                is24Hour = {false}
-                onChange={onChange1}
-                minuteInterval = {5}
-                display = "spinner"
-                /> 
-                )}
+                onConfirm={handleConfirmOne}
+                onCancel={hideDatePicker1}
+                display="spinner"
+                isDarkModeEnabled={handleTheme}
+                minuteInterval={5}
+                is24Hour={false}
+              />
+                
             </Pressable>
-            <Pressable onPress={() => showModeTwo("time")}>
+            <Pressable onPress={showDatePicker2}>
               <LinearGradient
                   // Button Linear Gradient
                   colors={["#69a5ff", "#10c3e3"]}
@@ -141,19 +161,20 @@ const handleTimeChange = async () => {
                 >
                 <Text style={styles.buttonText}>{timeTwo.toLocaleTimeString()}</Text>
                 </LinearGradient>
-                {showTwo && (
-                <DateTimePicker
+                <DateTimePickerModal
+                isVisible={isDatePickerVisible2}
+                mode="time"
                 value = {timeTwo}
-                mode = {mode}
-                is24Hour = {false}
-                onChange={onChange2}
-                minuteInterval = {5}
-                display = "spinner"
-                /> 
-                )}
+                onConfirm={handleConfirmTwo}
+                onCancel={hideDatePicker2}
+                display="spinner"
+                isDarkModeEnabled={handleTheme}
+                minuteInterval={5}
+                is24Hour={false}
+              />
             </Pressable>
 
-            <Pressable onPress={() => showModeThree("time")}>
+            <Pressable onPress={showDatePicker3}>
               <LinearGradient
                   // Button Linear Gradient
                   colors={["#69a5ff", "#10c3e3"]}
@@ -163,22 +184,23 @@ const handleTimeChange = async () => {
                 >
                 <Text style={styles.buttonText}>{timeThree.toLocaleTimeString()}</Text>
                 </LinearGradient>
-                {showThree && (
-                <DateTimePicker
+                <DateTimePickerModal
+                isVisible={isDatePickerVisible3}
+                mode="time"
                 value = {timeThree}
-                mode = {mode}
-                is24Hour = {false}
-                onChange={onChange3}
-                minuteInterval = {5}
-                display = "spinner"
-                /> 
-                )}
+                onConfirm={handleConfirmThree}
+                onCancel={hideDatePicker3}
+                display="spinner"
+                isDarkModeEnabled={handleTheme}
+                minuteInterval={5}
+                is24Hour={false}
+              />
             </Pressable>
             </View>
 
             <View style={{ flexDirection: "row" }}>
 
-            <Pressable>
+            <Pressable onPress={handleTimeChange}>
                 <LinearGradient
                   // Button Linear Gradient
                   colors={["#69a5ff", "#10c3e3"]}
@@ -190,7 +212,7 @@ const handleTimeChange = async () => {
                 </LinearGradient>
               </Pressable>
 
-              <Pressable>
+              <Pressable onPress={navigateHome}>
                 <LinearGradient
                   // Button Linear Gradient
                   colors={["#69a5ff", "#10c3e3"]}
