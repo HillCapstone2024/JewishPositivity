@@ -18,6 +18,7 @@ import LoadingScreen from "./Loading";
 
 import Layout from "./Layout";
 import MyDrawer from "./drawer";
+import HomeScreen from "./HomeScreen";
 
 // OneSignal.Debug.setLogLevel(LogLevel.Verbose);
 // OneSignal.initialize(Constants.expoConfig.extra.OneSignalAppId);
@@ -55,7 +56,8 @@ export default function App() {
         <Stack.Screen name="Main" component={Layout} />
         <Stack.Screen name="Drawer" component={MyDrawer}/>
         <Stack.Screen name="Times" component={Times} />
-
+        <Stack.Screen name="Home" component={HomeScreen} />
+        
         {/* <Stack.Screen name="Times" component={Times} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
