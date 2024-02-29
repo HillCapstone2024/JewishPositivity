@@ -12,11 +12,14 @@ import { LinearGradient } from "expo-linear-gradient";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from "axios";
 import TopBar from "./topBar";
+import IP_ADDRESS from "./ip.js";
+
+const API_URL = "http://" + IP_ADDRESS + ":8000";
 
 const Times = ({ navigation }) => {
-  const [timeOne, setTimeOne] = useState(new Date());
-  const [timeTwo, setTimeTwo] = useState(new Date());
-  const [timeThree, setTimeThree] = useState(new Date());
+  const [timeOne, setTimeOne] = useState(new Date(2024,2,28,8,0,0));
+  const [timeTwo, setTimeTwo] = useState(new Date(2024,2,28,15,0,0));
+  const [timeThree, setTimeThree] = useState(new Date(2024,2,28,21,0,0));
   const [showOne, setShowOne] = useState(false);
   const [showTwo, setShowTwo] = useState(false);
   const [showThree, setShowThree] = useState(false);
@@ -26,9 +29,11 @@ const Times = ({ navigation }) => {
       <Text style = {styles.errorMessageTextInvisible}>Null</Text>
     </View>
   );
+
+  //Handles changes to time on Time Picker
   const onChange1 = (e, selectedDate) => {
-    setTimeOne(selectedDate);
-    setShowOne(false);
+      setTimeOne(selectedDate);
+      setShowOne(false);
   };
 
   const onChange2 = (e, selectedDate) => {
@@ -56,6 +61,50 @@ const Times = ({ navigation }) => {
     setMode(modeToShow);
   };
 
+  //POST
+const handleTimeChange = async () => {
+  const getCsrfToken = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/csrf-token/`);
+      return response.data.csrfToken;
+    } catch (error) {
+      console.error("Error retrieving CSRF token:", error);
+      throw new Error("CSRF token retrieval failed");
+    }
+  };
+  try {
+    const csrfToken = await getCsrfToken();
+    const response = await axios.post(
+      `${API_URL}/update_times/`,
+      {
+        username: username,
+        password: password,
+        time1: timeOne,
+        time2: timeTwo,
+        time3: timeThree,
+      },
+      {
+        headers: {
+          "X-CSRFToken": csrfToken,
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      }
+    );
+    console.log("Time change response:", response.data);
+    navigateHome();
+  } catch (error) {
+    console.log(error)
+    setErrorMessage(
+      <View style={styles.errorMessageBox}>
+        <Text style={styles.errorMessageText}>{error.response.data}</Text>
+      </View>
+    );
+    console.error("Time change error:", error.response.data);
+  }
+};
+
+
   return (
       <View style={styles.container}>
         {errorMessage}
@@ -69,7 +118,7 @@ const Times = ({ navigation }) => {
                   end={[1, 0]}
                   style={styles.button}
                 >
-                <Text style={styles.buttonText}>Time 1</Text>
+                <Text style={styles.buttonText}>{timeOne.toLocaleTimeString()}</Text>
                 </LinearGradient>
                 {showOne && (
                 <DateTimePicker
@@ -90,7 +139,7 @@ const Times = ({ navigation }) => {
                   end={[1, 0]}
                   style={styles.button}
                 >
-                <Text style={styles.buttonText}>Time 2</Text>
+                <Text style={styles.buttonText}>{timeTwo.toLocaleTimeString()}</Text>
                 </LinearGradient>
                 {showTwo && (
                 <DateTimePicker
@@ -112,7 +161,7 @@ const Times = ({ navigation }) => {
                   end={[1, 0]}
                   style={styles.button}
                 >
-                <Text style={styles.buttonText}>Time 3</Text>
+                <Text style={styles.buttonText}>{timeThree.toLocaleTimeString()}</Text>
                 </LinearGradient>
                 {showThree && (
                 <DateTimePicker
@@ -153,11 +202,6 @@ const Times = ({ navigation }) => {
                 </LinearGradient>
               </Pressable>
             </View>
-              {/* Just tests to make sure time changes worked  */}
-            <Text>Time1={timeOne.getHours()}:{timeOne.getMinutes()}</Text>
-            <Text>Time2={timeTwo.getHours()}:{timeTwo.getMinutes()}</Text>
-            <Text>Time3={timeThree.getHours()}:{timeThree.getMinutes()}</Text>
-            {/* <Text>Testtt={timeOne.getTime()}</Text> */}
       </View>
     // </View>
   );
