@@ -29,7 +29,7 @@ const Times = ({ navigation }) => {
   );
 
   const navigateHome = () => {
-    navigation.navigate("Drawer");
+    navigation.navigate("Home");
   };
 
   const [isDatePickerVisible1, setDatePickerVisibility1] = useState(false);
