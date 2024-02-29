@@ -30,7 +30,7 @@ const Signup = ({ navigation }) => {
   };
 
   const navigateTimes = () => {
-    navigation.navigate("Times");
+    navigation.navigate("Drawer");
   };
 
   const handleSignup = async () => {
