@@ -5,6 +5,11 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  Image,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import axios from "axios";
@@ -85,88 +90,88 @@ const Signup = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Signup</Text>
-      {errorMessage}
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        onChangeText={(text) => setEmail(text)}
-        value={email}
-        testID="emailInput"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Username"
-        onChangeText={(text) => setUsername(text)}
-        value={username}
-        testID="usernameInput"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="First Name"
-        onChangeText={(text) => setFirstname(text)}
-        value={firstname}
-        testID="firstNameInput"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Last Name"
-        onChangeText={(text) => setLastname(text)}
-        value={lastname}
-        testID="lastNameInput"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        onChangeText={(text) => setPassword(text)}
-        value={password}
-        secureTextEntry
-        testID="passwordInput"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Verify Password"
-        onChangeText={(text) => setReentered_password(text)}
-        value={reentered_password}
-        secureTextEntry
-        testID="passwordTwoInput"
-      />
-      {/* <TouchableOpacity style={styles.button} onPress={handleSignup}>
-        <Text style={styles.buttonText}>Create Account</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={navigate}>
-        <Text style={styles.buttonText}>Already Have an Account?</Text>
-      </TouchableOpacity> */}
-      <View>
-        <View style={{ flexDirection: "column" }}>
-          <TouchableOpacity onPress={handleSignup}>
-            <LinearGradient
-              // Button Linear Gradient
-              colors={["#69a5ff", "#10c3e3"]}
-              start={[0, 1]}
-              end={[1, 0]}
-              style={styles.button}
-            >
-              <Text testID="signupButton" style={styles.buttonText}>
-                Sign Up
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={navigateLogin}>
-            <LinearGradient
-              // Button Linear Gradient
-              colors={["#69a5ff", "#10c3e3"]}
-              start={[0, 1]}
-              end={[1, 0]}
-              style={styles.button}
-            >
-              <Text style={styles.buttonText}>Already a Member?</Text>
-            </LinearGradient>
-          </TouchableOpacity>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}
+      >
+        <Image source={require("./assets/logo.png")} style={styles.logo} />
+        {errorMessage}
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          onChangeText={(text) => setEmail(text)}
+          value={email}
+          testID="emailInput"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Username"
+          onChangeText={(text) => setUsername(text)}
+          value={username}
+          testID="usernameInput"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="First Name"
+          onChangeText={(text) => setFirstname(text)}
+          value={firstname}
+          testID="firstNameInput"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Last Name"
+          onChangeText={(text) => setLastname(text)}
+          value={lastname}
+          testID="lastNameInput"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          onChangeText={(text) => setPassword(text)}
+          value={password}
+          secureTextEntry
+          testID="passwordInput"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Verify Password"
+          onChangeText={(text) => setReentered_password(text)}
+          value={reentered_password}
+          secureTextEntry
+          testID="passwordTwoInput"
+        />
+        <View>
+          <View style={{ flexDirection: "column" }}>
+            <TouchableOpacity onPress={handleSignup}>
+              <LinearGradient
+                // Button Linear Gradient
+                colors={["#69a5ff", "#10c3e3"]}
+                start={[0, 1]}
+                end={[1, 0]}
+                style={styles.button}
+              >
+                <Text testID="signupButton" style={styles.buttonText}>
+                  Sign Up
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={navigateLogin}>
+              <LinearGradient
+                // Button Linear Gradient
+                colors={["#69a5ff", "#10c3e3"]}
+                start={[0, 1]}
+                end={[1, 0]}
+                style={styles.button}
+              >
+                <Text style={styles.buttonText}>Already a Member?</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-    </View>
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -177,10 +182,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "white",
   },
+  logo: {
+    width: 150,
+    height: 150,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    shadowOpacity: 0.16,
+  },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 20,
     color: "black",
   },
   input: {

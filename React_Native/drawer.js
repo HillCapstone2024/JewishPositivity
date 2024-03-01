@@ -12,21 +12,30 @@ import Times from "./Times";
 import UserProfile from "./Profile";
 import SettingsPage from "./Settings";
 import * as Storage from "./AsyncStorage.js";
+import { createAvatar } from '@dicebear/core';
+import { micah } from '@dicebear/collection';
+import { SvgXml } from 'react-native-svg';
 
 const Drawer = createDrawerNavigator();
 
 
 const CustomDrawerContent = (props) => {
   const [username, setUsername] = useState("");
+  const avatar = createAvatar(micah, {
+    seed: Storage.getItem("@username") || "No username",
+    radius: 50,
+    mouth: ["smile","smirk","laughing"]
+  }).toString();
+
 
   const handleLogout = () => {
     const logout = async () => {
       await Storage.removeItem("@username");
       props.navigation.reset({
         index: 0,
-        routes: [{ name: "Login" }]
+        routes: [{ name: "Landing" }]
       });
-      props.navigation.navigate('Login')
+      props.navigation.navigate('Landing')
     }
     Alert.alert(
       "Logout?",
@@ -48,13 +57,12 @@ const CustomDrawerContent = (props) => {
   }, []);
   return (
     <DrawerContentScrollView {...props}>
-      {/* <DrawerItemList {...props} /> */}
       <View style={styles.drawerHeader}>
-        <Image
-          source={require("./assets/logo.png")} //eventually have profile pic here. would need to do a post request
+        <SvgXml
+          xml={avatar} 
           style={styles.drawerImage}
         />
-        <Text>{username}</Text>
+        <Text style={styles.drawerUsername}>{username}</Text>
       </View>
       <DrawerItem
         label="Home"
@@ -129,6 +137,12 @@ const styles = StyleSheet.create({
   drawerHeader: {
     alignItems: "center",
     paddingVertical: 20,
+  },
+  drawerUsername: {
+    color: "white",
+    fontSize: 20,
+    fontWeight: "bold",
+    paddingTop: 20,
   },
   drawerImage: {
     width: 150,
