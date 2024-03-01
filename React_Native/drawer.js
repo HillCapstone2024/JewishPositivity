@@ -49,6 +49,15 @@ const CustomDrawerContent = (props) => {
         <Text>{username}</Text>
       </View>
       <DrawerItem
+        label="Home"
+        icon={({ color, size }) => (
+          <Ionicons name="home" color={color} size={size} />
+        )}
+        inactiveBackgroundColor="white"
+        component={Layout}
+        onPress={() => props.navigation.navigate("Layout")}
+      />
+      <DrawerItem
         label="Profile"
         icon={({ color, size }) => (
           <Ionicons name="person" color={color} size={size} />
