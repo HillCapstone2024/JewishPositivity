@@ -9,6 +9,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import axios from "axios";
 import IP_ADDRESS from "./ip.js";
+import * as Storage from "./AsyncStorage.js";
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
@@ -24,6 +25,11 @@ const Signup = ({ navigation }) => {
       <Text style={styles.errorMessageTextInvisible}>Null</Text>
     </View>
   );
+
+  const saveUsername = async () => {
+    await Storage.setItem("@username", username);
+    console.log("successfully saved username: ", username);
+  };
 
   const navigateLogin = () => {
     navigation.navigate("Login");
@@ -65,6 +71,7 @@ const Signup = ({ navigation }) => {
         }
       );
       console.log("Signup response:", response.data);
+      saveUsername();
       navigateTimes();
     } catch (error) {
       console.log(error)

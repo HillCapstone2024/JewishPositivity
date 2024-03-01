@@ -10,6 +10,13 @@ const navigationMock = {
   navigate: mockNavigate,
 };
 
+jest.mock("@react-native-async-storage/async-storage", () => ({
+  setItem: jest.fn(),
+  getItem: jest.fn(() => Promise.resolve(null)), // Adjust this as needed for your tests
+  removeItem: jest.fn(),
+  clear: jest.fn(),
+}));
+
 describe("Signup Component", () => {
   it("Successfully renders Signup page", () => {
     const { getByText, getByTestId } = render(<Signup />);
