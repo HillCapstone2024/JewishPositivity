@@ -40,7 +40,7 @@ const Times = ({ navigation }) => {
   }, []);
 
   const navigateHome = () => {
-    navigation.navigate("Drawer");
+    navigation.navigate("Home");
   };
 
   const [isDatePickerVisible1, setDatePickerVisibility1] = useState(false);
@@ -127,7 +127,7 @@ const handleTimeChange = async () => {
         <Text style={styles.successMessageText}>{"Times Changed Successfully"}</Text>
       </View>
     );
-    navigateHome();
+    //navigateHome();
   } catch (error) {
     console.log(error)
     setErrorMessage(
