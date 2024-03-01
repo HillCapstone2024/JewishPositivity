@@ -1,0 +1,30 @@
+2024-03-01 09:38:28,090 - INFO - reached create_user view
+2024-03-01 09:38:28,090 - INFO - Parsed JSON data: {'username': 'testuser4', 'password': 'testpassword', 'reentered_password': 'testpassword', 'firstname': 'Test', 'lastname': 'User', 'email': 'dupefailure@example.com'}
+2024-03-01 09:38:28,090 - INFO - Missing keys: []
+2024-03-01 09:38:29,053 - INFO - reached create_user view
+2024-03-01 09:38:29,053 - INFO - Parsed JSON data: {'username': 'testuser5', 'password': 'testpassword', 'reentered_password': 'testpassword', 'firstname': 'Test', 'lastname': 'User', 'email': 'dupefailure@example.com'}
+2024-03-01 09:38:29,053 - INFO - Missing keys: []
+2024-03-01 09:38:29,070 - INFO - Same email exists
+2024-03-01 09:38:29,070 - WARNING - Bad Request: /create_user/
+2024-03-01 09:38:29,126 - INFO - reached create_user view
+2024-03-01 09:38:29,126 - INFO - Parsed JSON data: {'username': 'testuser7', 'password': 'testpassword', 'reentered_password': 'testpassword', 'firstname': 'Test', 'lastname': 'User', 'email': 'test7@example.com'}
+2024-03-01 09:38:29,126 - INFO - Missing keys: []
+2024-03-01 09:38:30,024 - INFO - reached create_user view
+2024-03-01 09:38:30,024 - INFO - Parsed JSON data: {'username': 'testuser7', 'password': 'testpassword', 'reentered_password': 'testpassword', 'firstname': 'Test', 'lastname': 'User', 'email': 'test8@example.com'}
+2024-03-01 09:38:30,024 - INFO - Missing keys: []
+2024-03-01 09:38:30,051 - WARNING - Bad Request: /create_user/
+2024-03-01 09:38:30,104 - INFO - reached create_user view
+2024-03-01 09:38:30,104 - INFO - Parsed JSON data: {'username': 'testuser3', 'password': 'testpassword', 'reentered_password': 'testpassword', 'firstname': 'Test', 'lastname': 'User', 'email': 'wrongformat'}
+2024-03-01 09:38:30,106 - INFO - Missing keys: []
+2024-03-01 09:38:30,106 - WARNING - Bad Request: /create_user/
+2024-03-01 09:38:30,152 - INFO - reached create_user view
+2024-03-01 09:38:30,152 - INFO - Parsed JSON data: {'email': 'example@example.com'}
+2024-03-01 09:38:30,154 - INFO - Missing keys: ['username', 'password', 'reentered_password', 'firstname', 'lastname']
+2024-03-01 09:38:30,154 - WARNING - Bad Request: /create_user/
+2024-03-01 09:38:30,206 - INFO - reached create_user view
+2024-03-01 09:38:30,206 - INFO - Parsed JSON data: {'username': 'testuser1', 'password': 'testpassword', 'reentered_password': 'nottestpassword', 'firstname': 'Test', 'lastname': 'User', 'email': 'failure@example.com'}
+2024-03-01 09:38:30,206 - INFO - Missing keys: []
+2024-03-01 09:38:30,208 - WARNING - Bad Request: /create_user/
+2024-03-01 09:38:30,260 - INFO - reached create_user view
+2024-03-01 09:38:30,260 - INFO - Parsed JSON data: {'username': 'testuser', 'password': 'testpassword', 'reentered_password': 'testpassword', 'firstname': 'Test', 'lastname': 'User', 'email': 'success@example.com'}
+2024-03-01 09:38:30,262 - INFO - Missing keys: []

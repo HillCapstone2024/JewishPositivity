@@ -38,6 +38,7 @@ class CreateUserViewTestCase(TestCase):
 
     POST_DATA_FAILURE_MISSING_KEYS = {
         # Missing required fields
+        'email': 'example@example.com',
     }
 
     POST_DATA_FAILURE_PASSWORDS_DONT_MATCH = {
