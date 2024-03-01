@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, Switch, StyleSheet, Button, Alert } from 'react-native';
 import axios from "axios";
 import IP_ADDRESS from "./ip.js";
+import * as WebBrowser from 'expo-web-browser';
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
@@ -45,19 +46,19 @@ const SettingsScreen = ({ navigation }) => {
       console.error("Login error:", error.response.data);
     }
   };
-  Alert
+  const url = "https://drive.google.com/file/d/15TGCUb7dvpNorO9IcGfiyDL60WatPa07/edit";
   const toggleTheme = () => setIsDarkTheme(previousState => !previousState);
   const toggleHapticFeedback = () => setIsHapticFeedbackEnabled(previousState => !previousState);
-  const handleReport = () => Alert.alert('Report', 'Report something broken?', [{ text: 'Cancel', style: 'cancel' }, { text: 'Report' }]);
+  const handleReport = () => Alert.prompt('Report', 'Report something broken?', [{ text: 'Cancel', style: 'cancel' }, { text: 'Report' }]);
   const handleTermsofUse = () => Alert.alert('Terms of Use', 'Read the terms of use?', [{ text: 'Cancel', style: 'cancel' }, { text: 'Read', onPress: () => navigation.navigate('TermsofUse') }]);
-  const handlePrivacyPolicy = () => Alert.alert('Privacy Policy', 'Read the privacy policy?', [{ text: 'Cancel', style: 'cancel' }, { text: 'Read', onPress: () => navigation.navigate('PrivacyPolicy') }]);
+  const handlePrivacyPolicy = () => Alert.alert('Privacy Policy', 'Read the privacy policy?', [{ text: 'Cancel', style: 'cancel' }, { text: 'Read', onPress: () => WebBrowser.openBrowserAsync(url) }]);
   const handleDeleteAccount = () => Alert.alert('Delete Account', 'Are you sure you want to delete your account?', [{ text: 'Cancel', style: 'cancel' }, { text: 'Delete', style: 'destructive', onPress: () => sendAccountDeletionRequest() }]);
 
   return (
     <View style={styles.container}>
 
       <View style={styles.setting}>
-        <Text style={styles.settingText}>Theme (Dark Mode)</Text>
+        <Text style={styles.settingText}>Theme</Text>
         <Switch
           onValueChange={toggleTheme}
           value={isDarkTheme}

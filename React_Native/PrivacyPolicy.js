@@ -1,27 +1,10 @@
 import React from 'react';
-import Pdf from 'react-native-pdf';
+import * as WebBrowser from 'expo-web-browser';
 
-const PrivacyPolicy = () => {
 
-    return (
-        <Pdf
-            source={require("./assets/PRIVACY POLICY.pdf")}
-            onLoadComplete={(numberOfPages, filePath) => {
-                console.log(`Number of pages: ${numberOfPages}`);
-            }}
-            onError={(error) => {
-                console.log(error);
-            }}
-            style={{ flex: 1 }}
-        />
-    );
+const PrivacyPolicy = async () => {
+    const url = "https://drive.google.com/file/d/15TGCUb7dvpNorO9IcGfiyDL60WatPa07/edit";
+    await WebBrowser.openBrowserAsync(url);
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 20,
-    },
-});
 
 export default PrivacyPolicy;
