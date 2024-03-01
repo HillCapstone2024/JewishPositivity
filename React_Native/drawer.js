@@ -20,12 +20,20 @@ const CustomDrawerContent = (props) => {
   const [username, setUsername] = useState("");
 
   const handleLogout = () => {
+    const logout = async () => {
+      await Storage.removeItem("@username");
+      props.navigation.reset({
+        index: 0,
+        routes: [{ name: "Login" }]
+      });
+      props.navigation.navigate('Login')
+    }
     Alert.alert(
       "Logout?",
       "Are you sure you want to log out?",
       [
         { text: "Cancel", style: "cancel" },
-        { text: "Logout", onPress: () => props.navigation.navigate('Login') }
+        { text: "Logout", onPress: () => logout() }
       ]
     );
   };

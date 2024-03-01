@@ -6,6 +6,7 @@ const Landing = ({ navigation }) => {
     const [videoName, setVideoName] = useState(null);
     const colorScheme = useColorScheme();
     const isDarkMode = colorScheme === 'dark';
+    
     useEffect(() => {
         if (colorScheme === 'dark') {
 
@@ -93,7 +94,7 @@ const Landing = ({ navigation }) => {
             </View>
 
             <TouchableOpacity onPress={handleLogin} style={[styles.continueButton, { top: screenHeight * 0.3 }]}>
-                <Text style={[styles.buttonText, { color: isDarkMode ? 'white' : 'black' }]}>Continue</Text>
+                <Text style={[styles.buttonText]}>Continue</Text>
             </TouchableOpacity>
         </View>
     );
@@ -124,29 +125,22 @@ const styles = StyleSheet.create({
         alignItems: 'left',
     },
     wordOne: {
-        fontSize: 50,
+        fontSize: Dimensions.get('window').width/7,
         fontWeight: 'bold',
         marginHorizontal: 10,
     },
     wordTwo: {
-        fontSize: 80,
+        fontSize: Dimensions.get('window').width/5,
         color: 'white',
         fontWeight: 'bold',
         marginHorizontal: 10,
     },
     continueButton: {
         backgroundColor: '#96d7ff',
-        paddingVertical: 15,
-        paddingHorizontal: 30,
-        borderRadius: 30,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 15,
         elevation: 5, // Add elevation for the glow effect
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 4,
-        },
-        shadowOpacity: 0.3,
-        shadowRadius: 4.65,
         marginVertical: 20,
         bottom: 0,
     },
@@ -160,6 +154,10 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         top: -130,
         marginBottom: 100,
+        shadowColor: '#fff',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 1,
+        shadowRadius: 3,
     },
 });
 

@@ -1,10 +1,9 @@
 import "react-native-gesture-handler";
 import React, { useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Storage from "./AsyncStorage.js";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { AppRegistry, Platform } from "react-native";
-import { View, Text } from "react-native";
 
 // import { LogLevel, OneSignal } from "react-native-onesignal";
 // import Constants from "expo-constants";
@@ -13,12 +12,12 @@ import Login from "./Login";
 import Signup from "./Signup";
 import Times from "./Times";
 import Landing from "./Landing";
-import BottomTab from "./BottomTab";
 import LoadingScreen from "./Loading";
 import TermsofUse from "./TermsofUse";
 import Layout from "./Layout";
 import MyDrawer from "./drawer";
 import HomeScreen from "./HomeScreen";
+import PrivacyPolicy from "./PrivacyPolicy";
 
 // OneSignal.Debug.setLogLevel(LogLevel.Verbose);
 // OneSignal.initialize(Constants.expoConfig.extra.oneSignalAppId);
@@ -30,10 +29,19 @@ AppRegistry.registerComponent("X", () => App);
 
 
 export default function App() {
-  const [initialRouteName, setInitialRouteName] = useState("Login");
+  const [initialRouteName, setInitialRouteName] = useState("Landing");
   const [isLoading, setIsLoading] = useState(true);
 
+  const setRouteName = async () => {
+    await Storage.getItem("@username").then((username) => {
+      if (username) {
+        setInitialRouteName("Drawer");
+      }
+    });
+  };
+
   useEffect(() => {
+    setRouteName();
     setTimeout(() => {
       setIsLoading(false);
     }, 4000);
@@ -42,11 +50,6 @@ export default function App() {
   if (isLoading) {
     return <LoadingScreen />;
   }
-  // const value = AsyncStorage.getItem('user');
-  // if (value !== null) {
-  //   setInitialRouteName("Home");
-  // }
-
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName={initialRouteName}>
@@ -54,11 +57,11 @@ export default function App() {
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Signup" component={Signup} />
         <Stack.Screen name="Main" component={Layout} />
-        <Stack.Screen name="Drawer" component={MyDrawer}/>
+        <Stack.Screen name="Drawer" component={MyDrawer} />
         <Stack.Screen name="Times" component={Times} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="TermsofUse" component={TermsofUse} />
-        
+        <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
         {/* <Stack.Screen name="Times" component={Times} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />

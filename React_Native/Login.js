@@ -38,9 +38,13 @@ const Login = ({ navigation }) => {
   const navigateSignOn = () => {
     navigation.navigate("Signup");
   };
-   const navigateDrawer = () => {
-     navigation.navigate("Drawer");
-   };
+  const navigateDrawer = () => {
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "Drawer" }]
+    });
+    navigation.navigate("Drawer");
+  };
   const navigateTemp = () => {
     navigation.navigate("Main");
   };
