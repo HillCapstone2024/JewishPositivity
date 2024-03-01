@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import axios from "axios";
 import TopBar from "./topBar";
 import IP_ADDRESS from "./ip.js";
+import * as Storage from "./AsyncStorage.js";
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
@@ -22,14 +23,24 @@ const Times = ({ navigation }) => {
   const [timeOne, setTimeOne] = useState(new Date(2024,2,28,8,0,0));
   const [timeTwo, setTimeTwo] = useState(new Date(2024,2,28,15,0,0));
   const [timeThree, setTimeThree] = useState(new Date(2024,2,28,21,0,0));
+  const [username, setUsername] = useState("");
   const [errorMessage, setErrorMessage] = useState(
     <View style = {styles.errorMessageBoxInvisible}>
       <Text style = {styles.errorMessageTextInvisible}>Null</Text>
     </View>
   );
 
+  useEffect(() => {
+    const loadUsername = async () => {
+      const storedUsername = await Storage.getItem("@username");
+      setUsername(storedUsername || "");
+    };
+
+    loadUsername();
+  }, []);
+
   const navigateHome = () => {
-    navigation.navigate("Drawer");
+    navigation.navigate("Home");
   };
 
   const [isDatePickerVisible1, setDatePickerVisibility1] = useState(false);
@@ -96,7 +107,7 @@ const handleTimeChange = async () => {
     const response = await axios.post(
       `${API_URL}/update-times/`,
       {
-        username: 'capstone',
+        username: username,
         time1: timeOne.toTimeString().split(' ')[0],
         time2: timeTwo.toTimeString().split(' ')[0],
         time3: timeThree.toTimeString().split(' ')[0],
@@ -110,7 +121,13 @@ const handleTimeChange = async () => {
       }
     );
     console.log("Time change response:", response.data);
-    navigateHome();
+    console.log("username is: ", username);
+    setErrorMessage(
+      <View style={styles.successMessageBox}>
+        <Text style={styles.successMessageText}>{"Times Changed Successfully"}</Text>
+      </View>
+    );
+    //navigateHome();
   } catch (error) {
     console.log(error)
     setErrorMessage(
@@ -288,6 +305,25 @@ const styles = StyleSheet.create({
   errorMessageText: {
     textAlign: "center",
     color: "#ff0000",
+  },
+  successMessageBox: {
+    textAlign: "center",
+    borderRadius: 6,
+    backgroundColor: "#5cb85c",
+    paddingVertical: 10,
+    paddingHorizontal: 50,
+    marginTop: 5,
+    marginBottom: 10,
+    marginHorizontal: 5,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    shadowOpacity: 0.06,
+    width: "80%",
+  },
+  successMessageText: {
+    textAlign: "center",
+    color: "#FFFFFF",
   },
   errorMessageBoxInvisible: {
     backgroundColor: "white",

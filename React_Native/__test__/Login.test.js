@@ -10,6 +10,13 @@ const navigationMock = {
   navigate: mockNavigate,
 };
 
+jest.mock("@react-native-async-storage/async-storage", () => ({
+  setItem: jest.fn(),
+  getItem: jest.fn(() => Promise.resolve(null)), // Adjust this as needed for your tests
+  removeItem: jest.fn(),
+  clear: jest.fn(),
+}));
+
 describe("Login Component", () => {
   it("can do simple jest test", () => {
     expect(1 + 2).toBe(3);
@@ -54,7 +61,7 @@ describe("Login Component", () => {
     fireEvent.press(getByText("Login"));
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith("Main");
+      expect(mockNavigate).toHaveBeenCalledWith("Drawer");
     });
   });
 

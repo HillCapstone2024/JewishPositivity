@@ -56,7 +56,9 @@ def create_user_view(request):
         #make sure all keys are given in post
         required_keys = ['username', 'password','reentered_password', 'firstname', 'lastname', 'email']
         data = json.loads(request.body)
+        logging.info("Parsed JSON data: %s", data)
         missing_keys = [key for key in required_keys if key not in data]
+        logging.info("Missing keys: %s", missing_keys)
         if missing_keys:
             error_message = f"Missing required keys: {', '.join(missing_keys)}" #tells which keys missing in error message
             return HttpResponse(error_message, status=400)

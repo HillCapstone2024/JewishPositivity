@@ -1,12 +1,14 @@
-# This file tells git what to ignore when commiting. For example, we do not want our npm libraries(dependencies) being pushed so we will ignore the npm folder
+# React Native
 node_modules/
 .DS_Store
 .expo/
-# We also do not want cache files that are created by Django
-*.pyc
+ip.js
+andriod/
+ios/
+notificationsTest.json
+# Django
 __pycache__/
 db_key
-# Please check that you are only pushing your code and not files like settings, caches, dependencies that are specific to your computer 
 .env
-ip.js
 .log
+views.log

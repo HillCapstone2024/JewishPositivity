@@ -5,31 +5,69 @@ import {
   DrawerItem,
 } from "@react-navigation/drawer";
 import { Ionicons } from "@expo/vector-icons";
-import { View, Image, StyleSheet, Text, LinearGradient, Settings } from "react-native";
-
+import { View, Image, StyleSheet, Text, LinearGradient, Settings, Alert } from "react-native";
+import React, { useEffect, useState } from "react";
 import Layout from "./Layout";
 import Times from "./Times";
 import UserProfile from "./Profile";
 import SettingsPage from "./Settings";
+import * as Storage from "./AsyncStorage.js";
+import { createAvatar } from '@dicebear/core';
+import { micah } from '@dicebear/collection';
+import { SvgXml } from 'react-native-svg';
 
 const Drawer = createDrawerNavigator();
 
 
 const CustomDrawerContent = (props) => {
+  const [username, setUsername] = useState("");
+  const avatar = createAvatar(micah, {
+    seed: Storage.getItem("@username") || "No username",
+    radius: 50,
+    mouth: ["smile","smirk","laughing"]
+  }).toString();
+
+
+  const handleLogout = () => {
+    const logout = async () => {
+      await Storage.removeItem("@username");
+      props.navigation.reset({
+        index: 0,
+        routes: [{ name: "Landing" }]
+      });
+      props.navigation.navigate('Landing')
+    }
+    Alert.alert(
+      "Logout?",
+      "Are you sure you want to log out?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Logout", onPress: () => logout() }
+      ]
+    );
+  };
+
+  useEffect(() => {
+    const loadUsername = async () => {
+      const storedUsername = await Storage.getItem("@username");
+      setUsername(storedUsername || "No username");
+    };
+
+    loadUsername();
+  }, []);
   return (
     <DrawerContentScrollView {...props}>
-      {/* <DrawerItemList {...props} /> */}
       <View style={styles.drawerHeader}>
-        <Image
-          source={require("./assets/logo.png")} //eventually have profile pic here. would need to do a post request
+        <SvgXml
+          xml={avatar} 
           style={styles.drawerImage}
         />
-        <Text>Username here</Text> 
+        <Text style={styles.drawerUsername}>{username}</Text>
       </View>
       <DrawerItem
-        label="layout"
+        label="Home"
         icon={({ color, size }) => (
-          <Ionicons name="person" color={color} size={size} />
+          <Ionicons name="home" color={color} size={size} />
         )}
         inactiveBackgroundColor="white"
         component={Layout}
@@ -53,7 +91,7 @@ const CustomDrawerContent = (props) => {
         onPress={() => props.navigation.navigate("SettingsPage")}
       />
       <DrawerItem
-        label="My Community"
+        label="My Communities"
         icon={({ color, size }) => (
           <Ionicons name="people" color={color} size={size} />
         )}
@@ -65,6 +103,7 @@ const CustomDrawerContent = (props) => {
           <Ionicons name="exit" color={color} size={size} />
         )}
         inactiveBackgroundColor="white"
+        onPress={handleLogout}
       />
     </DrawerContentScrollView>
   );
@@ -74,7 +113,7 @@ const CustomDrawerContent = (props) => {
 const MyDrawer = () => {
   return (
     <Drawer.Navigator
-        initialRouteName="Layout"
+      initialRouteName="Layout"
       screenOptions={{
         drawerStyle: {
           backgroundColor: "#4A90E2",
@@ -98,6 +137,12 @@ const styles = StyleSheet.create({
   drawerHeader: {
     alignItems: "center",
     paddingVertical: 20,
+  },
+  drawerUsername: {
+    color: "white",
+    fontSize: 20,
+    fontWeight: "bold",
+    paddingTop: 20,
   },
   drawerImage: {
     width: 150,

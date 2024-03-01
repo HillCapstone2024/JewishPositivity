@@ -36,9 +36,6 @@ const UserProfile = () => {
           Journal Entries: {userInfo.journalEntries}
         </Text>
       </View>
-      <View style={styles.content}>
-        <BottomTab />
-      </View>
     </View>
   );
 };

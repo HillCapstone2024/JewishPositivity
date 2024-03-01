@@ -10,6 +10,13 @@ const navigationMock = {
   navigate: mockNavigate,
 };
 
+jest.mock("@react-native-async-storage/async-storage", () => ({
+  setItem: jest.fn(),
+  getItem: jest.fn(() => Promise.resolve(null)), // Adjust this as needed for your tests
+  removeItem: jest.fn(),
+  clear: jest.fn(),
+}));
+
 describe("Signup Component", () => {
   it("Successfully renders Signup page", () => {
     const { getByText, getByTestId } = render(<Signup />);
@@ -116,7 +123,7 @@ describe("Signup Component", () => {
     });
   });
 
-  it("Navigates to 'Times' on successful signup", async () => {
+  it("Navigates to 'Drawer' on successful signup", async () => {
     axios.get.mockResolvedValue({ data: { csrfToken: "test-csrf-token" } });
     const mockLoginResponse = {
       data: "Create a new user successful!",
@@ -135,7 +142,7 @@ describe("Signup Component", () => {
     fireEvent.press(getByTestId("signupButton"));
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith("Times");
+      expect(mockNavigate).toHaveBeenCalledWith("Drawer");
     });
   });
 });

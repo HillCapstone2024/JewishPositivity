@@ -15,7 +15,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.jewishpositivity.jewishpositivity"
     },
     "android": {
       "adaptiveIcon": {
@@ -26,6 +27,18 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+
+  "plugins": [
+    [
+    "onesignal-expo-plugin",
+    {
+      "mode": "development"
     }
+  ]
+],
+"extra": {
+  "oneSignalAppId": "ec16a462-d3d0-4fa3-85cd-d4bdaa8e98a8"
+}
   }
 }
