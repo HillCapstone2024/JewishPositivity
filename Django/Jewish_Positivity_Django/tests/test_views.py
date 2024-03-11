@@ -117,6 +117,15 @@ class CreateUserViewTestCase(TestCase):
         'email': 'test8@example.com',
     }
 
+    POST_DATA_FAILURE_MISSING_PASSWORD = {
+        'username': 'testuser7',
+        'password': '',
+        'reentered_password': '',
+        'firstname': 'firstname',
+        'lastname': 'HI',
+        'email': 'test8@example.com',
+    }
+
     POST_DATA_FAILURE_WHITESPACE = {
         'username': ' ',
         'password': '   ',
@@ -125,6 +134,7 @@ class CreateUserViewTestCase(TestCase):
         'lastname': 'HEY',
         'email': 'test8@example.com',
     }
+    
 
 
     def test_create_user_success(self):
@@ -174,12 +184,24 @@ class CreateUserViewTestCase(TestCase):
         # logging the test we are in
         logging.info("TESTING CREATE_USER_MISSING_LAST_NAME....")
 
-
         # Test if view will correctly fail to create user with missing keys
         client = Client()
 
         # Make a POST request with invalid data
         response = client.post(reverse('create_user_view'), data=json.dumps(self.POST_DATA_FAILURE_MISSING_LAST_NAME), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400 (specified in view as missing key status code)
+        self.assertEqual(response.status_code, 400)
+    
+    def test_create_user_failure_missing_password(self):
+        # logging the test we are in
+        logging.info("TESTING CREATE_USER_MISSING_PASSWORD....")
+
+        # Test if view will correctly fail to create user with missing keys
+        client = Client()
+
+        # Make a POST request with invalid data
+        response = client.post(reverse('create_user_view'), data=json.dumps(self.POST_DATA_FAILURE_MISSING_PASSWORD), content_type=CONTENT_TYPE_JSON)
 
         # Check if the response status code is 400 (specified in view as missing key status code)
         self.assertEqual(response.status_code, 400)
