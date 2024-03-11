@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import TimeChange from './Times';
 import HomeScreen from './HomeScreen';
+import JournalEntry from "./journalEntry";
 
 const Tab = createBottomTabNavigator();
 
@@ -37,11 +38,11 @@ const BottomTab = () => {
       />
 
       <Tab.Screen
-        name="Times"
-        component={TimeChange}
+        name="Journal"
+        component={JournalEntry}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="time" size={size} color={color} />
+            <Ionicons name="journal" size={size} color={color} />
           ),
         }}
       />

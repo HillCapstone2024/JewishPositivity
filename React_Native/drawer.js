@@ -5,8 +5,9 @@ import {
   DrawerItem,
 } from "@react-navigation/drawer";
 import { Ionicons } from "@expo/vector-icons";
-import { View, Image, StyleSheet, Text, LinearGradient, Settings, Alert } from "react-native";
+import { View, Image, StyleSheet, Text, LinearGradient, Settings, Alert, Keyboard } from "react-native";
 import React, { useEffect, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import Layout from "./Layout";
 import Times from "./Times";
 import UserProfile from "./Profile";
@@ -110,7 +111,18 @@ const CustomDrawerContent = (props) => {
 };
 
 
-const MyDrawer = () => {
+const MyDrawer = ({ navigation }) => {
+  //work in progress
+    useFocusEffect(
+      React.useCallback(() => {
+        const unsubscribe = navigation.addListener("drawerOpen", () => {
+          // Dismiss the keyboard when the drawer is opened
+          Keyboard.dismiss();
+        });
+
+        return unsubscribe;
+      }, [navigation])
+    );
   return (
     <Drawer.Navigator
       initialRouteName="Layout"
