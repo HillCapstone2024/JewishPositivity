@@ -38,7 +38,12 @@ class CreateUserViewTestCase(TestCase):
 
     POST_DATA_FAILURE_MISSING_KEYS = {
         # Missing required fields
-        'email': 'example@example.com',
+        'username': '',
+        'password': '',
+        'reentered_password': '',
+        'firstname': '',
+        'lastname': '',
+        'email': '',
     }
 
     POST_DATA_FAILURE_PASSWORDS_DONT_MATCH = {
@@ -94,8 +99,38 @@ class CreateUserViewTestCase(TestCase):
         'email': 'test8@example.com',
     }
 
+    POST_DATA_FAILURE_MISSING_FIRST_NAME = {
+        'username': 'testuser7',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': '',
+        'lastname': 'User',
+        'email': 'test8@example.com',
+    }
+
+    POST_DATA_FAILURE_MISSING_LAST_NAME = {
+        'username': 'testuser7',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'firstname',
+        'lastname': '',
+        'email': 'test8@example.com',
+    }
+
+    POST_DATA_FAILURE_WHITESPACE = {
+        'username': ' ',
+        'password': '   ',
+        'reentered_password': 'testpassword',
+        'firstname': 'firstname',
+        'lastname': 'HEY',
+        'email': 'test8@example.com',
+    }
+
 
     def test_create_user_success(self):
+        # logging the test we are in
+        logging.info("TESTING CREATE_USER_SUCCESS....")
+       
         # Test if user was successfully made
         client = Client()
 
@@ -110,6 +145,9 @@ class CreateUserViewTestCase(TestCase):
 
 
     def test_create_user_failure_missing_keys(self):
+        # logging the test we are in
+        logging.info("TESTING CREATE_USER_MISSING_KEYS....")
+
         # Test if view will correctly fail to create user with missing keys
         client = Client()
 
@@ -119,8 +157,51 @@ class CreateUserViewTestCase(TestCase):
         # Check if the response status code is 400 (specified in view as missing key status code)
         self.assertEqual(response.status_code, 400)
 
+    def test_create_user_failure_missing_first_name(self):
+        # logging the test we are in
+        logging.info("TESTING CREATE_USER_MISSING_FIRST_NAME....")
+
+        # Test if view will correctly fail to create user with missing keys
+        client = Client()
+
+        # Make a POST request with invalid data
+        response = client.post(reverse('create_user_view'), data=json.dumps(self.POST_DATA_FAILURE_MISSING_FIRST_NAME), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400 (specified in view as missing key status code)
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_user_failure_missing_last_name(self):
+        # logging the test we are in
+        logging.info("TESTING CREATE_USER_MISSING_LAST_NAME....")
+
+
+        # Test if view will correctly fail to create user with missing keys
+        client = Client()
+
+        # Make a POST request with invalid data
+        response = client.post(reverse('create_user_view'), data=json.dumps(self.POST_DATA_FAILURE_MISSING_LAST_NAME), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400 (specified in view as missing key status code)
+        self.assertEqual(response.status_code, 400)
+    
+    def test_create_user_failure_entering_whitespace(self):
+        # logging the test we are in
+        logging.info("TESTING CREATE_USER_MISSING_ENTERING_WHITESPACE...")
+
+
+        # Test if view will correctly fail to create user with missing keys
+        client = Client()
+
+        # Make a POST request with invalid data
+        response = client.post(reverse('create_user_view'), data=json.dumps(self.POST_DATA_FAILURE_WHITESPACE), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400 (specified in view as missing key status code)
+        self.assertEqual(response.status_code, 400)
 
     def test_create_user_passwords(self):
+        # logging the test we are in
+        logging.info("TESTING CREATE_USER_PASSWORD....")
+
         # Test if passwords don't match that correct error will appear
         client = Client()
 
@@ -132,6 +213,9 @@ class CreateUserViewTestCase(TestCase):
 
 
     def test_create_user_emailValidation(self):
+        # logging the test we are in
+        logging.info("TESTING CREATE_USER_EMAILVALIDATION....")
+
         # Test if emails not in correct format that correct error will appear
         client = Client()
 
@@ -143,6 +227,9 @@ class CreateUserViewTestCase(TestCase):
 
 
     def test_create_user_duplicate_email(self):
+        # logging the test we are in
+        logging.info("TESTING CREATE_USER_DUPLICATE_EMAIL....")
+
         # Test that error appears when trying to add duplicate emails
         client = Client()
 
@@ -158,6 +245,9 @@ class CreateUserViewTestCase(TestCase):
 
 
     def test_create_user_duplicate_username(self):
+        # logging the test we are in
+        logging.info("TESTING CREATE_USER_DUPLICATE_USERNAME....")
+
         # Test that error appears when trying to add duplicate usernames
         client = Client()
 

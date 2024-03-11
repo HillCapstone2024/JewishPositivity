@@ -30,10 +30,19 @@ def validate_email_format(email): #To validate email format
 
 
 def login_view(request):
-    print('in login_view')
     if request.method == 'POST':
+        # Load POST data
         data = json.loads(request.body)
-        # print(data)
+        logging.info("Parsed JSON data: %s", data)
+        missing_keys = [key for key,value in data.items() if value is None or value.strip() == '']
+        logging.info("Missing keys: %s", missing_keys)
+
+        # Make sure no fields are empty in the POST data, else return the empty fields
+        if missing_keys:
+            error_message = f"Missing required keys: {', '.join(missing_keys)}" #tells which keys missing in error message
+            return HttpResponse(error_message, status=400)
+        
+        # Define variables for Django Database
         username = data['username']
         password = data['password']
         user = authenticate(request, username=username, password=password)
@@ -46,19 +55,18 @@ def login_view(request):
         else:
             # Return an error message or handle unsuccessful login
             return HttpResponse('Login failed!', status=400)
-    if request.method == 'GET':
-        logging.info('Reached GET in login_view')
     return HttpResponse('Not a POST request!')
 
 def create_user_view(request):
-    logging.info('reached create_user view')
     if request.method == 'POST':
-        #make sure all keys are given in post
-        required_keys = ['username', 'password','reentered_password', 'firstname', 'lastname', 'email']
+
+        # Load POST data
         data = json.loads(request.body)
         logging.info("Parsed JSON data: %s", data)
-        missing_keys = [key for key in required_keys if key not in data]
+        missing_keys = [key for key,value in data.items() if value is None or value.strip() == '']
         logging.info("Missing keys: %s", missing_keys)
+
+        # Make sure no fields are empty in the POST data, else return the empty fields
         if missing_keys:
             error_message = f"Missing required keys: {', '.join(missing_keys)}" #tells which keys missing in error message
             return HttpResponse(error_message, status=400)
