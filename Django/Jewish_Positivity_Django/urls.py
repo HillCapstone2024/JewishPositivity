@@ -13,4 +13,5 @@ urlpatterns = [
     path('csrf-token/', csrf_token_view, name='csrf_token'),
     path('update-times/', update_times_view, name='update_times_view'),
     path('get_times/', get_times_view, name='get_times_view'),
+    path('check-in/', get_times_view, name='checkin_view'),
 ]
