@@ -134,8 +134,6 @@ class CreateUserViewTestCase(TestCase):
         'lastname': 'HEY',
         'email': 'test8@example.com',
     }
-    
-
 
     def test_create_user_success(self):
         # logging the test we are in
@@ -152,7 +150,6 @@ class CreateUserViewTestCase(TestCase):
 
         # Check if a user with the specified username was created
         self.assertTrue(User.objects.filter(username='testuser').exists())
-
 
     def test_create_user_failure_missing_keys(self):
         # logging the test we are in
@@ -233,7 +230,6 @@ class CreateUserViewTestCase(TestCase):
         # Check if the response status code is 400
         self.assertEqual(response.status_code, 400)
 
-
     def test_create_user_emailValidation(self):
         # logging the test we are in
         logging.info("TESTING CREATE_USER_EMAILVALIDATION....")
@@ -246,7 +242,6 @@ class CreateUserViewTestCase(TestCase):
 
         # Check if the response status code is 400
         self.assertEqual(response.status_code, 400)
-
 
     def test_create_user_duplicate_email(self):
         # logging the test we are in
@@ -265,7 +260,6 @@ class CreateUserViewTestCase(TestCase):
         # Check if the response status code is 400 for second user (duplicate user error)
         self.assertEqual(response2.status_code, 400)
 
-
     def test_create_user_duplicate_username(self):
         # logging the test we are in
         logging.info("TESTING CREATE_USER_DUPLICATE_USERNAME....")
@@ -282,7 +276,6 @@ class CreateUserViewTestCase(TestCase):
 
         # Check if the response status code is 400 for second user (duplicate user error)
         self.assertEqual(response2.status_code, 400)
-
 
 class SetTimesViewTestCase(TestCase):
 
@@ -445,3 +438,82 @@ class GetTimesViewTestCase(TestCase):
             logging.info(LOG_MSG_FORMAT, LOG_TIME2, obj.time2)
             logging.info(LOG_MSG_FORMAT, LOG_TIME3, obj.time3)
             logging.info('')   
+
+class CheckinViewTestCase(TestCase): #to test handling of checkin post for text, photo, video and audio
+    
+    # Define post data
+    TEXT_DATA_SUCCESS = {
+        'username': 'admin',
+        'moment_number': 1,
+        'content_type': 'text',
+        'content': '', #fill in with example entry
+    }
+
+    PHOTO_DATA_SUCCESS = {
+        'username': 'admin',
+        'moment_number': 2,
+        'content_type': 'photo',
+        'content': '', #How to pass in photo?
+    }
+
+    AUDIO_DATA_SUCCESS = {
+        'username': 'admin',
+        'moment_number': 3,
+        'content_type': 'audio',
+        'content': '', #How to pass in audio?
+    }
+
+    VIDEO_DATA_SUCCESS = {
+        'username': 'admin2',
+        'moment_number': 1,
+        'content_type': 'video',
+        'content': '', #How to pass in video?
+    }
+
+    def test_checkin_text_success(self): #test of successful text entry submission
+        # logging the test we are in
+        logging.info("TESTING CHECKIN_TEXT_SUCCESS....")
+        client = Client()
+
+        # Make a POST request to the checkin_view
+        response = client.post(reverse('checkin_view'), data=json.dumps(self.TEXT_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+    def test_checkin_photo_success(self): #test of successful photo entry submission
+        # logging the test we are in
+        logging.info("TESTING CHECKIN_PHOTO_SUCCESS....")
+        client = Client()
+
+        # Make a POST request to the checkin_view
+        response = client.post(reverse('checkin_view'), data=json.dumps(self.TEXT_PHOTO_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+    def test_checkin_audio_success(self): #test of successful audio entry submission
+        # logging the test we are in
+        logging.info("TESTING CHECKIN_AUDIO_SUCCESS....")
+        client = Client()
+
+        # Make a POST request to the checkin_view
+        response = client.post(reverse('checkin_view'), data=json.dumps(self.TEXT_AUDIO_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+    def test_checkin_video_success(self): #test of successful audio entry submission
+        # logging the test we are in
+        logging.info("TESTING CHECKIN_VIDEO_SUCCESS....")
+        client = Client()
+
+        # Make a POST request to the checkin_view
+        response = client.post(reverse('checkin_view'), data=json.dumps(self.TEXT_VIDEO_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+
+
+    
