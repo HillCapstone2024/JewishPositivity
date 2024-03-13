@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import TimeChange from './Times';
 import HomeScreen from './HomeScreen';
-import JournalEntry from "./journalEntry";
+import JournalEntry from "./CheckIn";
 
 const Tab = createBottomTabNavigator();
 

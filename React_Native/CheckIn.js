@@ -15,14 +15,17 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import * as Storage from "./AsyncStorage.js";
 
 export default function JournalEntry() {
+  const [username, setUsername] = useState("");
   const [media, setMedia] = useState(null);
   const [mediaBox, setMediaBox] = useState(false);
   const [mediaType, setMediaType] = useState();
   const [journalText, setJournalText] = useState();
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [imageUri, setImageUri] = useState(null);
+  const [checkInType, setCheckInType] = useState("");
   const inputAccessoryViewID = "cameraBar";
 
   const hideKeyboard = () => {
@@ -30,6 +33,12 @@ export default function JournalEntry() {
   };
 
   useEffect(() => {
+    const loadUsername = async () => {
+      const storedUsername = await Storage.getItem("@username");
+      setUsername(storedUsername || "No username");
+    };
+
+    loadUsername();
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
       (e) => {
@@ -101,6 +110,7 @@ export default function JournalEntry() {
   const deleteMedia = () => {
     setMedia(null);
     setMediaBox(false);
+    setMediaType(null);
   };
 
   const recordMedia = async () => {
@@ -108,6 +118,11 @@ export default function JournalEntry() {
   };
 
   const pickMedia = async () => {
+    const galleryPermission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!galleryPermission.granted) {
+      alert("Permissions to access camera and microphone are required!");
+      return;
+    }
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All, // Allows both videos and images
       allowsEditing: true, // Only applies to images
@@ -117,8 +132,9 @@ export default function JournalEntry() {
 
     if (!result.cancelled) {
       setMedia(result.assets[0].uri);
-      console.log('result: ', media);
+      console.log("result: ", result);
       setMediaBox(true);
+      setMediaType(result.asset[0].type)
     }
   };
 
@@ -141,6 +157,7 @@ export default function JournalEntry() {
       setMedia(result.assets[0].uri);
       console.log('result: ',result);
       setMediaBox(true);
+      setMediaType(result.asset[0].type);
     }
   };
 
