@@ -136,96 +136,102 @@ const handleTimeChange = async () => {
 };
 
   return (
-      <View style={styles.container}>
-        {errorMessage}
+    <View style={styles.container}>
+      {errorMessage}
 
-        <View style={{ flexDirection: "column" }}>
-        <Pressable onPress={showDatePicker1}>
-              <LinearGradient
-                  // Button Linear Gradient
-                  colors={["#69a5ff", "#10c3e3"]}
-                  start={[0, 1]}
-                  end={[1, 0]}
-                  style={styles.button}
-                >
-                <Text style={styles.buttonText}>{timeOne.toLocaleTimeString()}</Text>
-                </LinearGradient>
-                
-                <DateTimePickerModal
-                isVisible={isDatePickerVisible1}
-                mode="time"
-                value = {timeOne}
-                onConfirm={handleConfirmOne}
-                onCancel={hideDatePicker1}
-                display="spinner"
-                isDarkModeEnabled={handleTheme}
-                minuteInterval={5}
-                is24Hour={false}
-              />
-                
-            </Pressable>
-            <Pressable onPress={showDatePicker2}>
-              <LinearGradient
-                  // Button Linear Gradient
-                  colors={["#69a5ff", "#10c3e3"]}
-                  start={[0, 1]}
-                  end={[1, 0]}
-                  style={styles.button}
-                >
-                <Text style={styles.buttonText}>{timeTwo.toLocaleTimeString()}</Text>
-                </LinearGradient>
-                <DateTimePickerModal
-                isVisible={isDatePickerVisible2}
-                mode="time"
-                value = {timeTwo}
-                onConfirm={handleConfirmTwo}
-                onCancel={hideDatePicker2}
-                display="spinner"
-                isDarkModeEnabled={handleTheme}
-                minuteInterval={5}
-                is24Hour={false}
-              />
-            </Pressable>
+      <View style={{ flexDirection: "column" }}>
+        <Pressable testID="dateTimePicker1" onPress={showDatePicker1}>
+          <LinearGradient
+            // Button Linear Gradient
+            colors={["#69a5ff", "#10c3e3"]}
+            start={[0, 1]}
+            end={[1, 0]}
+            style={styles.button}
+          >
+            <Text testID="timeOneText" style={styles.buttonText}>
+              {timeOne.toLocaleTimeString()}
+            </Text>
+          </LinearGradient>
 
-            <Pressable onPress={showDatePicker3}>
-              <LinearGradient
-                  // Button Linear Gradient
-                  colors={["#69a5ff", "#10c3e3"]}
-                  start={[0, 1]}
-                  end={[1, 0]}
-                  style={styles.button}
-                >
-                <Text style={styles.buttonText}>{timeThree.toLocaleTimeString()}</Text>
-                </LinearGradient>
-                <DateTimePickerModal
-                isVisible={isDatePickerVisible3}
-                mode="time"
-                value = {timeThree}
-                onConfirm={handleConfirmThree}
-                onCancel={hideDatePicker3}
-                display="spinner"
-                isDarkModeEnabled={handleTheme}
-                minuteInterval={5}
-                is24Hour={false}
-              />
-            </Pressable>
-            </View>
+          <DateTimePickerModal
+            isVisible={isDatePickerVisible1}
+            mode="time"
+            value={timeOne}
+            onConfirm={handleConfirmOne}
+            onCancel={hideDatePicker1}
+            display="spinner"
+            isDarkModeEnabled={handleTheme}
+            minuteInterval={5}
+            is24Hour={false}
+            testID="dateTimePickerModal1"
+          />
+        </Pressable>
+        <Pressable onPress={showDatePicker2}>
+          <LinearGradient
+            // Button Linear Gradient
+            colors={["#69a5ff", "#10c3e3"]}
+            start={[0, 1]}
+            end={[1, 0]}
+            style={styles.button}
+          >
+            <Text testID="timeTwoText" style={styles.buttonText}>
+              {timeTwo.toLocaleTimeString()}
+            </Text>
+          </LinearGradient>
+          <DateTimePickerModal
+            isVisible={isDatePickerVisible2}
+            mode="time"
+            value={timeTwo}
+            onConfirm={handleConfirmTwo}
+            onCancel={hideDatePicker2}
+            display="spinner"
+            isDarkModeEnabled={handleTheme}
+            minuteInterval={5}
+            is24Hour={false}
+            testID="dateTimePickerModal2"
+          />
+        </Pressable>
 
-            <View style={{ flexDirection: "row" }}>
-
-            <Pressable onPress={handleTimeChange}>
-                <LinearGradient
-                  // Button Linear Gradient
-                  colors={["#69a5ff", "#10c3e3"]}
-                  start={[0, 1]}
-                  end={[1, 0]}
-                  style={styles.button}
-                >
-                  <Text style={styles.buttonText}>Submit Changes</Text>
-                </LinearGradient>
-              </Pressable>
-            </View>
+        <Pressable onPress={showDatePicker3}>
+          <LinearGradient
+            // Button Linear Gradient
+            colors={["#69a5ff", "#10c3e3"]}
+            start={[0, 1]}
+            end={[1, 0]}
+            style={styles.button}
+          >
+            <Text testID="timeThreeText" style={styles.buttonText}>
+              {timeThree.toLocaleTimeString()}
+            </Text>
+          </LinearGradient>
+          <DateTimePickerModal
+            isVisible={isDatePickerVisible3}
+            mode="time"
+            value={timeThree}
+            onConfirm={handleConfirmThree}
+            onCancel={hideDatePicker3}
+            display="spinner"
+            isDarkModeEnabled={handleTheme}
+            minuteInterval={5}
+            is24Hour={false}
+          />
+        </Pressable>
       </View>
+
+      <View style={{ flexDirection: "row" }}>
+        <Pressable onPress={handleTimeChange}>
+          <LinearGradient
+            // Button Linear Gradient
+            colors={["#69a5ff", "#10c3e3"]}
+            start={[0, 1]}
+            end={[1, 0]}
+            style={styles.button}
+          >
+            <Text style={styles.buttonText}>Submit Changes</Text>
+          </LinearGradient>
+        </Pressable>
+      </View>
+    </View>
     // </View>
   );
 };
