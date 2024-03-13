@@ -1,7 +1,7 @@
 import React from "react";
 import { fireEvent, render, waitFor } from "@testing-library/react-native";
 import axios from "axios";
-import Login from "../Login";
+import Login from "../screens/auth/Login";
 
 //mock axios call
 jest.mock("axios");
@@ -48,7 +48,7 @@ describe("Login Component", () => {
     });
   });
 
-  it("Navigates to 'Main' on successful login", async () => {
+  it("Navigates to 'Drawer' on successful login", async () => {
     axios.get.mockResolvedValue({ data: { csrfToken: "test-csrf-token" } });
     const mockLoginResponse = {
         data: "Login successful!",
@@ -58,7 +58,7 @@ describe("Login Component", () => {
     const { getByText, getByTestId } = render(<Login navigation={navigationMock}/>);
     fireEvent.changeText(getByTestId("usernameInput"), "testuser");
     fireEvent.changeText(getByTestId("passwordInput"), "password");
-    fireEvent.press(getByText("Login"));
+    fireEvent.press(getByTestId("loginButton"));
 
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith("Drawer");
