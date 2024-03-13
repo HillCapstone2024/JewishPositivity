@@ -9,9 +9,9 @@ const Landing = ({ navigation }) => {
 
     useEffect(() => {
         if (colorScheme === 'dark') {
-            setVideoName(require("./assets/LandingDark.mp4"));
+            setVideoName(require("../../assets/LandingDark.mp4"));
         } else {
-            setVideoName(require("./assets/LandingLight.mp4"));
+            setVideoName(require("../../assets/LandingLight.mp4"));
         }
     }, [colorScheme]);
     const words = [

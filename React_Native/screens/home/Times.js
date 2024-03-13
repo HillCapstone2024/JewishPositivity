@@ -12,9 +12,9 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import axios from "axios";
-import TopBar from "./topBar";
-import IP_ADDRESS from "./ip.js";
-import * as Storage from "./AsyncStorage.js";
+import TopBar from "../../navigations/topBar.js";
+import IP_ADDRESS from "../../ip.js";
+import * as Storage from "../../AsyncStorage.js";
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 

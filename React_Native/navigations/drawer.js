@@ -9,10 +9,10 @@ import { View, Image, StyleSheet, Text, LinearGradient, Settings, Alert, Keyboar
 import React, { useEffect, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import Layout from "./Layout";
-import Times from "./Times";
-import UserProfile from "./Profile";
-import SettingsPage from "./Settings";
-import * as Storage from "./AsyncStorage.js";
+import Times from "../screens/home/Times.js";
+import UserProfile from "../screens/home/Profile.js";
+import SettingsPage from "../screens/home/Settings.js";
+import * as Storage from "../AsyncStorage.js";
 import { createAvatar } from '@dicebear/core';
 import { micah } from '@dicebear/collection';
 import { SvgXml } from 'react-native-svg';

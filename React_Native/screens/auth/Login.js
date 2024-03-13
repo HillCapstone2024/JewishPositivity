@@ -13,8 +13,8 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import axios from "axios";
-import IP_ADDRESS from "./ip.js";
-import * as Storage from "./AsyncStorage.js";
+import IP_ADDRESS from "../../ip.js";
+import * as Storage from "../../AsyncStorage.js";
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 console.log(API_URL);
@@ -102,7 +102,7 @@ const Login = ({ navigation }) => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
       >
-        <Image source={require("./assets/logo.png")} style={styles.logo} />
+        <Image source={require("../../assets/logo.png")} style={styles.logo} />
         {errorMessage}
         <TextInput
           style={styles.input}

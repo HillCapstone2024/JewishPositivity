@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, Image, StyleSheet, TextInput, Button } from "react-native";
-import BottomTab from "./BottomTab";
+import BottomTab from "../../navigations/BottomTab";
 
 //temporary profile page
 const UserProfile = () => {
@@ -9,7 +9,7 @@ const UserProfile = () => {
     username: "@johndoe",
     dateJoined: "January 1, 2021",
     journalEntries: 120,
-    profilePicture: "./assets/logo.png",
+    profilePicture: "../../assets/logo.png",
   });
 
   const [newPassword, setNewPassword] = useState("");
@@ -25,7 +25,7 @@ const UserProfile = () => {
     <View style={styles.container}>
       <View>
         <Image
-          source={require("./assets/logo.png")}
+          source={require("../../assets/logo.png")}
           style={styles.profilePic}
         />
         {/* <Button>Change Avatar</Button> */}
