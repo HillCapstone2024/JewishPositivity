@@ -8,6 +8,7 @@ from django.contrib.auth.models import UserManager
 from Jewish_Positivity_Django.managers import CustomUserManager
 
 class User(AbstractUser):
+    # id= models.AutoField(primary_key= True) #the autoincremented ID field for user
     last_login = models.DateTimeField(blank=True, null=True)
     first_name = models.CharField(db_column='first_Name', max_length=100)  # Field name made lowercase.
     last_name = models.CharField(db_column='last_Name', max_length=100)  # Field name made lowercase.
@@ -25,3 +26,12 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['email']
     USERNAME_FIELD = 'username'
 
+
+class Checkin(models.Model): #to store checkin moments data
+    checkin_id= models.AutoField(primary_key= True) #the autoincremented ID field for checkins
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_column='id')  #referencing id of user model 
+    date = models.DateField() 
+    moment_number = models.IntegerField() #should be 1,2, or 3
+    content_type = models.CharField(max_length=100) #either of following option: photo, text, audio, video
+    content = models.BinaryField() #actual content
+    
