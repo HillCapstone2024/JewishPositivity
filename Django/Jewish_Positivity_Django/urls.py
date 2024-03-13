@@ -1,6 +1,6 @@
 # in Jewish_Positivity_Django/urls.py
 
-from .views import login_view, create_user_view, logout_view, update_times_view, get_times_view
+from .views import login_view, create_user_view, logout_view, update_times_view, get_times_view, send_report_email_view
 from django.urls import path
 from django.contrib import admin
 from .views import csrf_token_view
@@ -14,4 +14,6 @@ urlpatterns = [
     path('update-times/', update_times_view, name='update_times_view'),
     path('get_times/', get_times_view, name='get_times_view'),
     path('check-in/', get_times_view, name='checkin_view'),
+    path('send_report_email/', send_report_email_view, name='send_report_email_view'),
+
 ]

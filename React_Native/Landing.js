@@ -6,10 +6,9 @@ const Landing = ({ navigation }) => {
     const [videoName, setVideoName] = useState(null);
     const colorScheme = useColorScheme();
     const isDarkMode = colorScheme === 'dark';
-    
+
     useEffect(() => {
         if (colorScheme === 'dark') {
-
             setVideoName(require("./assets/LandingDark.mp4"));
         } else {
             setVideoName(require("./assets/LandingLight.mp4"));
@@ -72,9 +71,7 @@ const Landing = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            <Text>
-                Jewish Positivity
-            </Text>
+            <Text style={styles.header}>Jewish Positivity</Text>
             <Video
                 ref={video}
                 style={styles.backgroundVideo}
@@ -86,16 +83,18 @@ const Landing = ({ navigation }) => {
                 isMuted={true}
             />
             <View style={styles.wordContainer}>
-                <Text style={styles.header}>Jewish Positivity</Text>
                 <Animated.View style={[styles.wordPair, { transform: [{ translateX }] }]}>
                     <Text style={[styles.wordOne, { color: isDarkMode ? 'white' : 'black' }]}>{words[currentIndex][0]}</Text>
                     <Text style={[styles.wordTwo, { color: isDarkMode ? 'white' : 'black' }]}>{words[currentIndex][1]}</Text>
                 </Animated.View>
             </View>
-
-            <TouchableOpacity onPress={handleLogin} style={[styles.continueButton, { top: screenHeight * 0.3 }]}>
-                <Text style={[styles.buttonText]}>Continue</Text>
-            </TouchableOpacity>
+            <View style={styles.contentContainer}>
+            </View>
+            <View style={styles.footer}>
+                <TouchableOpacity onPress={handleLogin} style={styles.continueButton}>
+                    <Text style={[styles.buttonText]}>Continue</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     );
 };
@@ -103,8 +102,7 @@ const Landing = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
+        padding: 20,
     },
     backgroundVideo: {
         position: 'absolute',
@@ -114,10 +112,7 @@ const styles = StyleSheet.create({
         right: 0,
     },
     wordContainer: {
-        position: 'absolute',
         width: '100%',
-        alignItems: 'center',
-        justifyContent: 'center',
         top: Dimensions.get('window').height / 4,
     },
     wordPair: {
@@ -125,39 +120,50 @@ const styles = StyleSheet.create({
         alignItems: 'left',
     },
     wordOne: {
-        fontSize: Dimensions.get('window').width/7,
+        fontSize: Dimensions.get('window').width / 9,
         fontWeight: 'bold',
         marginHorizontal: 10,
     },
     wordTwo: {
-        fontSize: Dimensions.get('window').width/5,
+        fontSize: Dimensions.get('window').width / 6,
         color: 'white',
         fontWeight: 'bold',
         marginHorizontal: 10,
     },
     continueButton: {
         backgroundColor: '#96d7ff',
+        textAlign: 'center',
+        alignContent: 'center',
         paddingVertical: 10,
         paddingHorizontal: 20,
+        width: Dimensions.get('window').width / 3.6,
+        height: Dimensions.get('window').width / 9.5,
         borderRadius: 15,
-        elevation: 5, // Add elevation for the glow effect
-        marginVertical: 20,
-        bottom: 0,
     },
     buttonText: {
+        alignContent: 'center',
+        textAlign: 'center',
         color: 'white',
         fontSize: 20,
         fontWeight: 'bold',
     },
     header: {
+        alignContent: 'center',
+        textAlign: 'center',
         fontSize: 30,
+        top: 21,
         fontWeight: 'bold',
-        top: -130,
-        marginBottom: 100,
-        shadowColor: '#fff',
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 1,
-        shadowRadius: 3,
+        zIndex: 1,
+    },
+    contentContainer: {
+        marginTop: 50,
+        flex: 1 // pushes the footer to the end of the screen
+    },
+    footer: {
+        height: 100,
+        alignContent: 'center',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });
 

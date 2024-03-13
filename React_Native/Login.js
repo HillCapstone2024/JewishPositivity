@@ -33,10 +33,10 @@ const Login = ({ navigation }) => {
     console.log("successfully saved username")
   };
 
-
   const navigateSignOn = () => {
     navigation.navigate("Signup");
   };
+
   const navigateDrawer = () => {
     navigation.reset({
       index: 0,
@@ -44,9 +44,11 @@ const Login = ({ navigation }) => {
     });
     navigation.navigate("Drawer");
   };
+
   const navigateTemp = () => {
     navigation.navigate("Main");
   };
+
   const handleLogin = async () => {
     const getCsrfToken = async () => {
       try {

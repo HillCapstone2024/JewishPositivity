@@ -15,7 +15,7 @@ import Landing from "./Landing";
 import LoadingScreen from "./Loading";
 import TermsofUse from "./TermsofUse";
 import Layout from "./Layout";
-import MyDrawer from "./drawer";
+import MyDrawer from "./Drawer.js";
 import HomeScreen from "./HomeScreen";
 import PrivacyPolicy from "./PrivacyPolicy";
 
@@ -26,7 +26,6 @@ import PrivacyPolicy from "./PrivacyPolicy";
 
 const Stack = createNativeStackNavigator();
 AppRegistry.registerComponent("X", () => App);
-
 
 export default function App() {
   const [initialRouteName, setInitialRouteName] = useState("Landing");
