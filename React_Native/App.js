@@ -8,16 +8,16 @@ import { AppRegistry, Platform } from "react-native";
 // import { LogLevel, OneSignal } from "react-native-onesignal";
 // import Constants from "expo-constants";
 
-import Login from "./Login";
-import Signup from "./Signup";
-import Times from "./Times";
-import Landing from "./Landing";
-import LoadingScreen from "./Loading";
-import TermsofUse from "./TermsofUse";
-import Layout from "./Layout";
-import MyDrawer from "./Drawer.js";
-import HomeScreen from "./HomeScreen";
-import PrivacyPolicy from "./PrivacyPolicy";
+import Login from "./screens/auth/Login.js";
+import Signup from "./screens/auth/Signup.js";
+import Times from "./screens/home/Times.js";
+import Landing from "./screens/greet/Landing.js";
+import LoadingScreen from "./screens/greet/Loading.js";
+import TermsofUse from "./screens/home/TermsofUse.js";
+import Layout from "./navigations/Layout.js";
+import MyDrawer from "./navigations/drawer.js";
+import HomeScreen from "./screens/home/HomeScreen.js";
+import PrivacyPolicy from "./screens/home/PrivacyPolicy.js";
 
 // OneSignal.Debug.setLogLevel(LogLevel.Verbose);
 // OneSignal.initialize(Constants.expoConfig.extra.oneSignalAppId);
@@ -27,8 +27,9 @@ import PrivacyPolicy from "./PrivacyPolicy";
 const Stack = createNativeStackNavigator();
 AppRegistry.registerComponent("X", () => App);
 
+
 export default function App() {
-  const [initialRouteName, setInitialRouteName] = useState("Landing");
+  const [initialRouteName, setInitialRouteName] = useState("Drawer");
   const [isLoading, setIsLoading] = useState(true);
 
   const setRouteName = async () => {

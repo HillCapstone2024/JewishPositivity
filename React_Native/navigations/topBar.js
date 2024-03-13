@@ -9,18 +9,18 @@ const TopBar = ({ navigation }) => {
           onPress={() => navigation.navigate("Profile")}
           style={styles.button}
         >
-          <Image source={require("./assets/user.png")} style={styles.icon} />
+          <Image source={require("../assets/user.png")} style={styles.icon} />
         </TouchableOpacity>
 
         <View style={styles.logoContainer}>
-          <Image source={require("./assets/logo.png")} style={styles.logo} />
+          <Image source={require("../assets/logo.png")} style={styles.logo} />
         </View>
 
         <TouchableOpacity
           onPress={() => navigation.navigate("Settings")}
           style={styles.button}
         >
-          <Image source={require("./assets/setting.png")} style={styles.icon} />
+          <Image source={require("../assets/setting.png")} style={styles.icon} />
         </TouchableOpacity>
       </View>
     </View>

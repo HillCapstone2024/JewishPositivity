@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Switch, StyleSheet, Button, Alert, Appearance } from 'react-native';
 import axios from "axios";
-import IP_ADDRESS from "./ip.js";
+import IP_ADDRESS from "../../ip.js";
 import * as WebBrowser from 'expo-web-browser';
 import RNPickerSelect from 'react-native-picker-select';
-import * as Storage from "./AsyncStorage.js";
+import * as Storage from "../../AsyncStorage.js";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from 'expo-haptics';
 import Times from "./Times.js";
