@@ -24,11 +24,7 @@ const Times = ({ navigation }) => {
   const [timeTwo, setTimeTwo] = useState(new Date(2024,2,28,15,0,0));
   const [timeThree, setTimeThree] = useState(new Date(2024,2,28,21,0,0));
   const [username, setUsername] = useState("");
-  const [errorMessage, setErrorMessage] = useState(
-    <View style = {styles.errorMessageBoxInvisible}>
-      <Text style = {styles.errorMessageTextInvisible}>Null</Text>
-    </View>
-  );
+  const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
     const loadUsername = async () => {
@@ -228,18 +224,6 @@ const handleTimeChange = async () => {
                   <Text style={styles.buttonText}>Submit Changes</Text>
                 </LinearGradient>
               </Pressable>
-
-              <Pressable onPress={navigateHome}>
-                <LinearGradient
-                  // Button Linear Gradient
-                  colors={["#69a5ff", "#10c3e3"]}
-                  start={[0, 1]}
-                  end={[1, 0]}
-                  style={styles.button}
-                >
-                  <Text style={styles.buttonText}>Cancel Changes</Text>
-                </LinearGradient>
-              </Pressable>
             </View>
       </View>
     // </View>
@@ -251,26 +235,22 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "white",
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 20,
-    color: 'black',
   },
   input: {
     width: '80%',
     height: 40,
     borderStyle: 'solid',
-    borderBottomColor: '#e8bd25',
     borderBottomWidth: 2,
     // borderRadius: 10,
     marginBottom: 10,
     paddingHorizontal: 10,
   },
   button: {
-    backgroundColor: '#6c94b4',
     paddingVertical: 10,
     paddingHorizontal: 20,
     marginTop: 10,

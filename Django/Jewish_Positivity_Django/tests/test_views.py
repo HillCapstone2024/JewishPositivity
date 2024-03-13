@@ -38,7 +38,12 @@ class CreateUserViewTestCase(TestCase):
 
     POST_DATA_FAILURE_MISSING_KEYS = {
         # Missing required fields
-        'email': 'example@example.com',
+        'username': '',
+        'password': '',
+        'reentered_password': '',
+        'firstname': '',
+        'lastname': '',
+        'email': '',
     }
 
     POST_DATA_FAILURE_PASSWORDS_DONT_MATCH = {
@@ -94,8 +99,46 @@ class CreateUserViewTestCase(TestCase):
         'email': 'test8@example.com',
     }
 
+    POST_DATA_FAILURE_MISSING_FIRST_NAME = {
+        'username': 'testuser7',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': '',
+        'lastname': 'User',
+        'email': 'test8@example.com',
+    }
+
+    POST_DATA_FAILURE_MISSING_LAST_NAME = {
+        'username': 'testuser7',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'firstname',
+        'lastname': '',
+        'email': 'test8@example.com',
+    }
+
+    POST_DATA_FAILURE_MISSING_PASSWORD = {
+        'username': 'testuser7',
+        'password': '',
+        'reentered_password': '',
+        'firstname': 'firstname',
+        'lastname': 'HI',
+        'email': 'test8@example.com',
+    }
+
+    POST_DATA_FAILURE_WHITESPACE = {
+        'username': ' ',
+        'password': '   ',
+        'reentered_password': 'testpassword',
+        'firstname': 'firstname',
+        'lastname': 'HEY',
+        'email': 'test8@example.com',
+    }
 
     def test_create_user_success(self):
+        # logging the test we are in
+        logging.info("TESTING CREATE_USER_SUCCESS....")
+       
         # Test if user was successfully made
         client = Client()
 
@@ -108,8 +151,10 @@ class CreateUserViewTestCase(TestCase):
         # Check if a user with the specified username was created
         self.assertTrue(User.objects.filter(username='testuser').exists())
 
-
     def test_create_user_failure_missing_keys(self):
+        # logging the test we are in
+        logging.info("TESTING CREATE_USER_MISSING_KEYS....")
+
         # Test if view will correctly fail to create user with missing keys
         client = Client()
 
@@ -119,8 +164,63 @@ class CreateUserViewTestCase(TestCase):
         # Check if the response status code is 400 (specified in view as missing key status code)
         self.assertEqual(response.status_code, 400)
 
+    def test_create_user_failure_missing_first_name(self):
+        # logging the test we are in
+        logging.info("TESTING CREATE_USER_MISSING_FIRST_NAME....")
+
+        # Test if view will correctly fail to create user with missing keys
+        client = Client()
+
+        # Make a POST request with invalid data
+        response = client.post(reverse('create_user_view'), data=json.dumps(self.POST_DATA_FAILURE_MISSING_FIRST_NAME), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400 (specified in view as missing key status code)
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_user_failure_missing_last_name(self):
+        # logging the test we are in
+        logging.info("TESTING CREATE_USER_MISSING_LAST_NAME....")
+
+        # Test if view will correctly fail to create user with missing keys
+        client = Client()
+
+        # Make a POST request with invalid data
+        response = client.post(reverse('create_user_view'), data=json.dumps(self.POST_DATA_FAILURE_MISSING_LAST_NAME), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400 (specified in view as missing key status code)
+        self.assertEqual(response.status_code, 400)
+    
+    def test_create_user_failure_missing_password(self):
+        # logging the test we are in
+        logging.info("TESTING CREATE_USER_MISSING_PASSWORD....")
+
+        # Test if view will correctly fail to create user with missing keys
+        client = Client()
+
+        # Make a POST request with invalid data
+        response = client.post(reverse('create_user_view'), data=json.dumps(self.POST_DATA_FAILURE_MISSING_PASSWORD), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400 (specified in view as missing key status code)
+        self.assertEqual(response.status_code, 400)
+    
+    def test_create_user_failure_entering_whitespace(self):
+        # logging the test we are in
+        logging.info("TESTING CREATE_USER_MISSING_ENTERING_WHITESPACE...")
+
+
+        # Test if view will correctly fail to create user with missing keys
+        client = Client()
+
+        # Make a POST request with invalid data
+        response = client.post(reverse('create_user_view'), data=json.dumps(self.POST_DATA_FAILURE_WHITESPACE), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400 (specified in view as missing key status code)
+        self.assertEqual(response.status_code, 400)
 
     def test_create_user_passwords(self):
+        # logging the test we are in
+        logging.info("TESTING CREATE_USER_PASSWORD....")
+
         # Test if passwords don't match that correct error will appear
         client = Client()
 
@@ -130,8 +230,10 @@ class CreateUserViewTestCase(TestCase):
         # Check if the response status code is 400
         self.assertEqual(response.status_code, 400)
 
-
     def test_create_user_emailValidation(self):
+        # logging the test we are in
+        logging.info("TESTING CREATE_USER_EMAILVALIDATION....")
+
         # Test if emails not in correct format that correct error will appear
         client = Client()
 
@@ -141,8 +243,10 @@ class CreateUserViewTestCase(TestCase):
         # Check if the response status code is 400
         self.assertEqual(response.status_code, 400)
 
-
     def test_create_user_duplicate_email(self):
+        # logging the test we are in
+        logging.info("TESTING CREATE_USER_DUPLICATE_EMAIL....")
+
         # Test that error appears when trying to add duplicate emails
         client = Client()
 
@@ -156,8 +260,10 @@ class CreateUserViewTestCase(TestCase):
         # Check if the response status code is 400 for second user (duplicate user error)
         self.assertEqual(response2.status_code, 400)
 
-
     def test_create_user_duplicate_username(self):
+        # logging the test we are in
+        logging.info("TESTING CREATE_USER_DUPLICATE_USERNAME....")
+
         # Test that error appears when trying to add duplicate usernames
         client = Client()
 
@@ -170,7 +276,6 @@ class CreateUserViewTestCase(TestCase):
 
         # Check if the response status code is 400 for second user (duplicate user error)
         self.assertEqual(response2.status_code, 400)
-
 
 class SetTimesViewTestCase(TestCase):
 
@@ -333,3 +438,82 @@ class GetTimesViewTestCase(TestCase):
             logging.info(LOG_MSG_FORMAT, LOG_TIME2, obj.time2)
             logging.info(LOG_MSG_FORMAT, LOG_TIME3, obj.time3)
             logging.info('')   
+
+class CheckinViewTestCase(TestCase): #to test handling of checkin post for text, photo, video and audio
+    
+    # Define post data
+    TEXT_DATA_SUCCESS = {
+        'username': 'admin',
+        'moment_number': 1,
+        'content_type': 'text',
+        'content': '', #fill in with example entry
+    }
+
+    PHOTO_DATA_SUCCESS = {
+        'username': 'admin',
+        'moment_number': 2,
+        'content_type': 'photo',
+        'content': '', #How to pass in photo?
+    }
+
+    AUDIO_DATA_SUCCESS = {
+        'username': 'admin',
+        'moment_number': 3,
+        'content_type': 'audio',
+        'content': '', #How to pass in audio?
+    }
+
+    VIDEO_DATA_SUCCESS = {
+        'username': 'admin2',
+        'moment_number': 1,
+        'content_type': 'video',
+        'content': '', #How to pass in video?
+    }
+
+    def test_checkin_text_success(self): #test of successful text entry submission
+        # logging the test we are in
+        logging.info("TESTING CHECKIN_TEXT_SUCCESS....")
+        client = Client()
+
+        # Make a POST request to the checkin_view
+        response = client.post(reverse('checkin_view'), data=json.dumps(self.TEXT_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+    def test_checkin_photo_success(self): #test of successful photo entry submission
+        # logging the test we are in
+        logging.info("TESTING CHECKIN_PHOTO_SUCCESS....")
+        client = Client()
+
+        # Make a POST request to the checkin_view
+        response = client.post(reverse('checkin_view'), data=json.dumps(self.TEXT_PHOTO_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+    def test_checkin_audio_success(self): #test of successful audio entry submission
+        # logging the test we are in
+        logging.info("TESTING CHECKIN_AUDIO_SUCCESS....")
+        client = Client()
+
+        # Make a POST request to the checkin_view
+        response = client.post(reverse('checkin_view'), data=json.dumps(self.TEXT_AUDIO_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+    def test_checkin_video_success(self): #test of successful audio entry submission
+        # logging the test we are in
+        logging.info("TESTING CHECKIN_VIDEO_SUCCESS....")
+        client = Client()
+
+        # Make a POST request to the checkin_view
+        response = client.post(reverse('checkin_view'), data=json.dumps(self.TEXT_VIDEO_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+
+
+    
