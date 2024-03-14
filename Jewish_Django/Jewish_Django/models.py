@@ -5,7 +5,7 @@ import datetime
 from django.utils import timezone
 from django.contrib.auth.models import AbstractBaseUser, AbstractUser
 from django.contrib.auth.models import UserManager
-from Jewish_Positivity_Django.managers import CustomUserManager
+from Jewish_Django.managers import CustomUserManager
 
 class User(AbstractUser):
     id = models.AutoField(primary_key= True) #the autoincremented ID field for user
@@ -27,11 +27,12 @@ class User(AbstractUser):
     USERNAME_FIELD = 'username'
 
 
-class Checkin(models.Model): #to store checkin moments data
-    checkin_id= models.AutoField(primary_key= True) #the autoincremented ID field for checkins
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_column='id')  #referencing id of user model 
-    date = models.DateField() 
-    moment_number = models.IntegerField() #should be 1,2, or 3
-    content_type = models.CharField(max_length=100) #either of following option: photo, text, audio, video
-    content = models.BinaryField() #actual content
+# class Checkin(models.Model): #to store checkin moments data
+#     checkin_id= models.AutoField(primary_key= True) #the autoincremented ID field for checkins
+#     user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_column='id')  #referencing id of user model 
+#     date = models.DateField() 
+#     moment_number = models.IntegerField() #should be 1,2, or 3
+#     content_type = models.CharField(max_length=100) #either of following option: photo, text, audio, video
+#     content = models.BinaryField() #actual content
+    
     
