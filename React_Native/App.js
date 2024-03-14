@@ -15,7 +15,7 @@ import Landing from "./screens/greet/Landing.js";
 import LoadingScreen from "./screens/greet/Loading.js";
 import TermsofUse from "./screens/home/TermsofUse.js";
 import Layout from "./navigations/Layout.js";
-import MyDrawer from "./navigations/Drawer.js";
+import MyDrawer from "./navigations/drawer.js";
 import HomeScreen from "./screens/home/HomeScreen.js";
 import PrivacyPolicy from "./screens/home/PrivacyPolicy.js";
 
