@@ -1,1 +1,0 @@
-//Here is where check in screen jest tests will go

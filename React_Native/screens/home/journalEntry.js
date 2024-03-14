@@ -13,8 +13,10 @@ import {
   Image,
   SafeAreaView,
 } from "react-native";
+import RecordingAccessoryBar from "./RecordingBar";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import { Audio } from "expo-av";
 
 export default function JournalEntry() {
   const [media, setMedia] = useState(null);
@@ -23,7 +25,12 @@ export default function JournalEntry() {
   const [journalText, setJournalText] = useState();
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [imageUri, setImageUri] = useState(null);
-  const inputAccessoryViewID = "cameraBar";
+  const [savedRecordingUri, setSavedRecordingUri] = useState("");
+  const [showRecordingBar, setShowRecordingBar] = useState(false);
+  const [showMediaBar, setShowMediaBar] = useState(true);
+
+  const mediaAccessoryViewID = "RecordingBar";
+  const recordingAccessoryViewID = "RecordingBar";
 
   const hideKeyboard = () => {
     Keyboard.dismiss();
@@ -103,9 +110,6 @@ export default function JournalEntry() {
     setMediaBox(false);
   };
 
-  const recordMedia = async () => {
-    console.log("recording media");
-  };
 
   const pickMedia = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -117,7 +121,7 @@ export default function JournalEntry() {
 
     if (!result.cancelled) {
       setMedia(result.assets[0].uri);
-      console.log('result: ', media);
+      console.log("result: ", media);
       setMediaBox(true);
     }
   };
@@ -139,9 +143,17 @@ export default function JournalEntry() {
 
     if (result && !result.cancelled) {
       setMedia(result.assets[0].uri);
-      console.log('result: ',result);
+      console.log("result: ", result);
       setMediaBox(true);
     }
+  };
+
+  const handleRecordingComplete = (uri) => {
+    console.log("Received saved recording URI:", uri);
+    setSavedRecordingUri(uri);
+    setShowRecordingBar(false);
+    setShowMediaBar(true);
+    // Here you can do further processing, like updating state or saving the URI
   };
 
   return (
@@ -161,7 +173,7 @@ export default function JournalEntry() {
         {/* Journal Text box View */}
         <TextInput
           style={styles.journalInput}
-          inputAccessoryViewID={inputAccessoryViewID}
+          inputAccessoryViewID={mediaAccessoryViewID}
           placeholder={"Please type here…"}
           value={journalText}
           onChange={(text) => setJournalText(text)}
@@ -169,12 +181,24 @@ export default function JournalEntry() {
           numberOfLines={4}
         />
       </ScrollView>
+      {showRecordingBar ?       
+      <View>
+        <RecordingAccessoryBar onRecordingComplete={handleRecordingComplete} />
+      </View>
+      :
+      null}
+
 
       {/* Keyboard bar view below */}
-      <InputAccessoryView nativeID={inputAccessoryViewID}>
+      {showMediaBar ? 
+      <InputAccessoryView nativeID={mediaAccessoryViewID}>
         <View style={styles.barContainer}>
           <View style={{ flex: 1 }}>
-            <TouchableOpacity style={styles.barButton} onPress={recordMedia}>
+            <TouchableOpacity style={styles.barButton} 
+            onPress={() => {
+              // setShowMediaBar(false);
+              setShowRecordingBar(true);
+              }}>
               <Ionicons name="mic" size={25} color="white" />
             </TouchableOpacity>
           </View>
@@ -195,6 +219,8 @@ export default function JournalEntry() {
           </View>
         </View>
       </InputAccessoryView>
+      :
+      null}
     </SafeAreaView>
   );
 }
@@ -225,8 +251,8 @@ const styles = StyleSheet.create({
     padding: 5,
     // marginHorizontal: 10,
     // flex: 1,
-    alignSelf: 'stretch',
-    flexDirection: 'row',
+    alignSelf: "stretch",
+    flexDirection: "row",
   },
 
   journalInput: {
@@ -240,12 +266,12 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   scrollingInput: {
-    flexGrow: 1
+    flexGrow: 1,
   },
   submitButton: {
-    color: 'black',
-    fontSize: '14',
-    backgroundColor: 'white',
+    color: "black",
+    fontSize: "14",
+    backgroundColor: "white",
     margin: 10,
     padding: 15,
   },

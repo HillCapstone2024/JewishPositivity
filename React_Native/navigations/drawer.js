@@ -5,47 +5,49 @@ import {
   DrawerItem,
 } from "@react-navigation/drawer";
 import { Ionicons } from "@expo/vector-icons";
-import { View, Image, StyleSheet, Text, LinearGradient, Settings, Alert, Keyboard } from "react-native";
+import {
+  View,
+  Image,
+  StyleSheet,
+  Text,
+  LinearGradient,
+  Settings,
+  Alert,
+  Keyboard,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
-import Layout from "./Layout";
-import Times from "../screens/home/Times.js";
+import Layout from "./Layout.js";
 import UserProfile from "../screens/home/Profile.js";
 import SettingsPage from "../screens/home/Settings.js";
 import * as Storage from "../AsyncStorage.js";
-import { createAvatar } from '@dicebear/core';
-import { micah } from '@dicebear/collection';
-import { SvgXml } from 'react-native-svg';
+import { createAvatar } from "@dicebear/core";
+import { micah } from "@dicebear/collection";
+import { SvgXml } from "react-native-svg";
 
 const Drawer = createDrawerNavigator();
-
 
 const CustomDrawerContent = (props) => {
   const [username, setUsername] = useState("");
   const avatar = createAvatar(micah, {
     seed: Storage.getItem("@username") || "No username",
     radius: 50,
-    mouth: ["smile","smirk","laughing"]
+    mouth: ["smile", "smirk", "laughing"],
   }).toString();
-
 
   const handleLogout = () => {
     const logout = async () => {
       await Storage.removeItem("@username");
       props.navigation.reset({
         index: 0,
-        routes: [{ name: "Landing" }]
+        routes: [{ name: "Landing" }],
       });
-      props.navigation.navigate('Landing')
-    }
-    Alert.alert(
-      "Logout?",
-      "Are you sure you want to log out?",
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Logout", onPress: () => logout() }
-      ]
-    );
+      props.navigation.navigate("Landing");
+    };
+    Alert.alert("Logout?", "Are you sure you want to log out?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Logout", onPress: () => logout() },
+    ]);
   };
 
   useEffect(() => {
@@ -59,11 +61,8 @@ const CustomDrawerContent = (props) => {
   return (
     <DrawerContentScrollView {...props}>
       <View style={styles.drawerHeader}>
-        <SvgXml
-          xml={avatar} 
-          style={styles.drawerImage}
-        />
-        <Text style={styles.drawerUsername}>{username}</Text>
+        <SvgXml xml={avatar} style={styles.drawerImage} />
+        <Text testID="usernameText" style={styles.drawerUsername}>{username}</Text>
       </View>
       <DrawerItem
         label="Home"
@@ -76,6 +75,7 @@ const CustomDrawerContent = (props) => {
       />
       <DrawerItem
         label="Profile"
+        testID="profileButton"
         icon={({ color, size }) => (
           <Ionicons name="person" color={color} size={size} />
         )}
@@ -110,19 +110,18 @@ const CustomDrawerContent = (props) => {
   );
 };
 
-
 const MyDrawer = ({ navigation }) => {
   //work in progress
-    useFocusEffect(
-      React.useCallback(() => {
-        const unsubscribe = navigation.addListener("drawerOpen", () => {
-          // Dismiss the keyboard when the drawer is opened
-          Keyboard.dismiss();
-        });
+  useFocusEffect(
+    React.useCallback(() => {
+      const unsubscribe = navigation.addListener("drawerOpen", () => {
+        // Dismiss the keyboard when the drawer is opened
+        Keyboard.dismiss();
+      });
 
-        return unsubscribe;
-      }, [navigation])
-    );
+      return unsubscribe;
+    }, [navigation])
+  );
   return (
     <Drawer.Navigator
       initialRouteName="Layout"
