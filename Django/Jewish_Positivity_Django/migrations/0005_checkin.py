@@ -8,7 +8,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('Jewish_Positivity_Django', '0003_user_time1_user_time2_user_time3'),
+        ('Jewish_Positivity_Django', '0004_user_id_alter_user_email'),
     ]
 
     operations = [
