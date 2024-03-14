@@ -62,7 +62,7 @@ def login_view(request):
         logging.info("password: %s", password)
         if user is not None:
             login(request, user)
-            # return redirect('home')  # Redirect to home page after successful login
+
             return HttpResponse("Login successful!", status=200)
         else:
             # Return an error message or handle unsuccessful login
@@ -122,7 +122,6 @@ def create_user_view(request):
             )
             user.save()
 
-            # return redirect('home')  # Redirect to home page after successful user creation
             return HttpResponse("Create a new user successful!")
         except:  # IntegrityError
             return HttpResponse(

@@ -6,19 +6,20 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('Jewish_Positivity_Django', '0004_checkin'),
+        ('Jewish_Positivity_Django', '0003_user_time1_user_time2_user_time3'),
     ]
 
     operations = [
+        migrations.AlterField(
+            model_name='user',
+            name='email',
+            field=models.CharField(max_length=254, unique=True, primary_key=False),
+        ),
+
         migrations.AddField(
             model_name='user',
             name='id',
             field=models.AutoField(primary_key=True, serialize=False),
             preserve_default=False,
-        ),
-        migrations.AlterField(
-            model_name='user',
-            name='email',
-            field=models.CharField(max_length=254, unique=True),
         ),
     ]
