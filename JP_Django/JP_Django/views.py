@@ -249,24 +249,25 @@ def send_report_email_view(request):
 def checkin_view(request): # to handle checkin moment POST data 
     if request.method == 'POST':
         data = json.loads(request.body)
-        logging.info("Parsed JSON data: %s", data)
+        #logging.info("Parsed JSON data: %s", data)
 
         non_integer_keys = []# Iterate over the keys and filter out non-integer fields
         for key, value in data.items():
             try:
-                # Try to retrieve the field from the model
-                field = Checkin._meta.get_field(key)
-                if not isinstance(field, models.IntegerField):
+                if not isinstance(value, (int, type(None))):
                     non_integer_keys.append(key)
+                    logging.info("APPENDED: %s, %s", key, value)
             except:
                 # Handle case where key does not correspond to a field in the model
                 return HttpResponse("error retrieving IntegerFields", status=400)
         logging.info("NON-INTEGER KEYS: %s", non_integer_keys)
         # Iterate through the data and get keys that are not integer fields and not empty
-        missing_keys = [
-            key for key, value in data.items() 
-            if key in non_integer_keys and (value is None or value.strip() == "") #cannot trim an integer field 
-        ]
+        missing_keys = []
+        for key, value in data.items():
+            if key in non_integer_keys:
+                if value is None or value.strip() == "": #cannot trim an integer field 
+                    missing_keys.append(key) 
+            
         logging.info("Missing keys: %s", missing_keys)
 
         # Make sure no fields are empty in the POST data, else return the empty fields
@@ -280,8 +281,8 @@ def checkin_view(request): # to handle checkin moment POST data
         content_type = data["content_type"]
         current_date = date.today()
         username = data["username"]
-        logging.info("view.py checkin view post data: \nMoment Number: %s \nContent64-Encoded: %s content_Type%s \n Current Date:%s \nUsername: %s", 
-                     moment_number, content_64_encoded, content_type, current_date,username)
+        logging.info("view.py checkin view post data: \nMoment Number: %s content_Type%s \n Current Date:%s \nUsername: %s", 
+                     moment_number, content_type, current_date,username)
 
         try:
             # Retrieve the user object and its id to store 
@@ -294,7 +295,7 @@ def checkin_view(request): # to handle checkin moment POST data
 
             #convert the string (base64 format) passed in as content to a binary field encoding compatible with checkin model
             content_binary_encoded = base64.b64decode(content_64_encoded)
-            logging.info("Checkin view: Content Binary Encoded: %s", content_binary_encoded)
+            #logging.info("Checkin view: Content Binary Encoded: %s", content_binary_encoded)
 
             #create a checkin object
             checkin = Checkin.objects.create(
@@ -304,7 +305,9 @@ def checkin_view(request): # to handle checkin moment POST data
                 content_type=content_type,
                 checkin_date=current_date
                 )
+            logging.info("Got past creating checkin object")
             checkin.save()
+
             return HttpResponse('Data saved successfully', status=200)
         except:
             return HttpResponse("Check-in failed to save", status=400)

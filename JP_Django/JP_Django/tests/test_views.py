@@ -460,19 +460,19 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
     photo_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64photo.txt'))
     photoFile = open(photo_file_path, 'r')
     photo = photoFile.read()
-    logging.info("PHOTO: %s", photo)
+    #logging.info("PHOTO: %s", photo)
     photoFile.close()
 
     audio_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64audio.txt'))
     audioFile = open(audio_file_path, 'r')
     audio = audioFile.read()
-    logging.info("AUDIO: %s", audio)
+    #logging.info("AUDIO: %s", audio)
     audioFile.close()
 
     video_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64video.txt'))
     videoFile = open(video_file_path, 'r')
     video = videoFile.read()
-    logging.info("VIDEO: %s", video)
+    #logging.info("VIDEO: %s", video)
     videoFile.close()
     
     # Define constant post data
@@ -559,7 +559,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
 
     MISSING_MOMENT_NUMBER = {
         'username': 'testuser2',
-        'moment_number': '',
+        'moment_number': None,
         'content_type': 'text',
         'content': text, 
     }
@@ -649,7 +649,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         queryset = Checkin.objects.all()
         for obj in queryset:
             logging.info(LOG_MSG_FORMAT, LOG_CHECKIN_ID, obj.checkin_id)
-            logging.info(LOG_MSG_FORMAT, LOG_CONTENT, obj.content)
+            #logging.info(LOG_MSG_FORMAT, LOG_CONTENT, obj.content)
             logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
             logging.info(LOG_MSG_FORMAT, LOG_MOMENT_NUMBER, obj.moment_number)
             logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
@@ -743,6 +743,8 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
 
         # Check if the response status code is 400
         self.assertEqual(response.status_code, 400)
+
+        
 
     def test_checkin_failure_wrong_content_type_photo(self): #test of failure due to wrong content type for photo
         # logging the test we are in
