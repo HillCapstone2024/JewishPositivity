@@ -440,6 +440,23 @@ class GetTimesViewTestCase(TestCase):
             logging.info('')   
 
 class CheckinViewTestCase(TestCase): #to test handling of checkin post for text, photo, video and audio
+
+    # Stored as base64 encoded strings
+    textFile = open('test_resources/b64text.txt', 'r')
+    text = textFile.read()
+    textFile.close()
+
+    photoFile = open('test_resources/b64photo.txt', 'r')
+    photo = photoFile.read()
+    photoFile.close()
+
+    audioFile = open('test_resources/b64audio.txt', 'r')
+    audio = audioFile.read()
+    audioFile.close()
+    
+    videoFile = open('test_resources/b64video.txt', 'r')
+    video = videoFile.read()
+    videoFile.close()
     
     # Define constant post data
     CREATE_USER_1 = {
@@ -492,49 +509,49 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'username': 'testuser1',
         'moment_number': 1,
         'content_type': 'text',
-        'content': 'this is a test check-in moment.', #fill in with example entry
+        'content': text, #fill in with example entry
     }
 
     PHOTO_DATA_SUCCESS = {
         'username': 'testuser1',
         'moment_number': 2,
         'content_type': 'photo',
-        'content': '', #How to pass in photo?
+        'content': photo, #How to pass in photo?
     }
 
     AUDIO_DATA_SUCCESS = {
         'username': 'testuser1',
         'moment_number': 3,
         'content_type': 'audio',
-        'content': '', #How to pass in audio?
+        'content': audio, #How to pass in audio?
     }
 
     VIDEO_DATA_SUCCESS = {
         'username': 'testuser2',
         'moment_number': 1,
         'content_type': 'video',
-        'content': '', #How to pass in video?
+        'content': video, #How to pass in video?
     }
 
     MISSING_USERNAME = {
         'username': '',
         'moment_number': 2,
         'content_type': 'text',
-        'content': 'Test Missing Username',
+        'content': text,
     }
 
     MISSING_MOMENT_NUMBER = {
         'username': 'testuser2',
         'moment_number': '',
         'content_type': 'text',
-        'content': 'Test Missing Moment Number', 
+        'content': text, 
     }
 
     MISSING_CONTENT_TYPE = { 
         'username': 'testuser3',
         'moment_number': 1,
         'content_type': '',
-        'content': 'Test Missing Content Type', 
+        'content': text, 
     }
         
     MISSING_CONTENT = {
@@ -548,42 +565,42 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'username': 'testuser3',
         'moment_number': 3,
         'content_type': 'photo',
-        'content': '', # Add photo here
+        'content': photo, # Add photo here
     }
 
     WRONG_TYPE_PHOTO = {
         'username': 'testuser4',
         'moment_number': 1,
         'content_type': 'text',
-        'content': 'This is a text entry instead of a photo',
+        'content': text,
     }
 
     WRONG_TYPE_AUDIO = {
         'username': 'testuser4',
         'moment_number': 2,
         'content_type': 'text',
-        'content': 'This is a text entry instead of an audio entry',
+        'content': text,
     }
 
     WRONG_TYPE_VIDEO = {
         'username': 'testuser4',
         'moment_number': 3,
         'content_type': 'text',
-        'content': 'This is a text entry instead of a video entry',
+        'content': text,
     }
 
     INVALID_USERID = { 
         'username': 'admin45678901',
         'moment_number': 1,
         'content_type': 'text',
-        'content': 'Invalid user id.',
+        'content': text,
     }
 
     DUPLICATE_MOMENT = {
         'username': 'testuser5',
         'moment_number': 1,
         'content_type': 'text',
-        'content': 'This is a duplicate moment.',
+        'content': text,
     }
 
 
