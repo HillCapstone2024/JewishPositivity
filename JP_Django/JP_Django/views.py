@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
 from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
-#from JP_Django.models import Checkin
+from JP_Django.models import Checkin
 from django.middleware.csrf import get_token
 from django.http import JsonResponse
 from django.core.validators import validate_email
@@ -16,6 +16,9 @@ from datetime import date
 import logging
 from django.core.mail import send_mail
 from django.http import JsonResponse
+from django.db import models
+import base64
+
 
 
 # configure logging
@@ -244,46 +247,64 @@ def send_report_email_view(request):
 
 
 def checkin_view(request): # to handle checkin moment POST data 
-    pass
-    # if request.method == 'POST':
-    #     data = json.loads(request.body)
-    #     logging.info("Parsed JSON data: %s", data)
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        logging.info("Parsed JSON data: %s", data)
 
-    #     #check for empty keys in the Post data
-    #     missing_keys = [
-    #         key for key, value in data.items() if value is None or value.strip() == ""
-    #     ]
-    #     logging.info("Missing keys: %s", missing_keys)
+        non_integer_keys = []
+        # Iterate over the keys and filter out non-integer fields
+        for key, value in data.items():
+            try:
+                # Try to retrieve the field from the model
+                field = Checkin._meta.get_field(key)
+                if not isinstance(field, models.IntegerField):
+                    non_integer_keys.append(key)
+            except:
+                # Handle case where key does not correspond to a field in the model
+                return HttpResponse("error retrieving IntegerFields", status=400)
 
-    #     # Make sure no fields are empty in the POST data, else return the empty fields
-    #     if missing_keys:
-    #         error_message = f"Missing required keys: {', '.join(missing_keys)}"  # tells which keys missing in error message
-    #         return HttpResponse(error_message, status=400)
+        # Iterate through the data and get keys that are not integer fields and not empty
+        missing_keys = [
+            key for key, value in data.items() 
+            if key in non_integer_keys and (value is None or value.strip() == "") #cannot trim an integer field 
+        ]
+        logging.info("Missing keys: %s", missing_keys)
+
+        # Make sure no fields are empty in the POST data, else return the empty fields
+        if missing_keys:
+            error_message = f"Missing required keys: {', '.join(missing_keys)}"  # tells which keys missing in error message
+            return HttpResponse(error_message, status=400)
         
-    #     #retrieve the Post data and get the current date
-    #     moment_number = data["moment_number"]
-    #     content = data["content"]
-    #     content_type = data["content_type"]
-    #     current_date = date.today()
-    #     username = data["username"]
+        #retrieve the Post data and get the current date
+        moment_number = data["moment_number"]
+        content_64_encoded = data["content"] #This is in string format - base64 format
+        content_type = data["content_type"]
+        current_date = date.today()
+        username = data["username"]
 
-    #     try:
-    #         # Retrieve the user where 
-    #         user = User.objects.get(username=username)
-    #         fk_userid = user.pk # should retrieve id
+        try:
+            # Retrieve the user object and its id to store 
+            user = User.objects.get(username=username)
+            if user is not None: #found user
+                fk_userid = user.pk # should retrieve id
+            else: 
+                return HttpResponse("Username does not exist", status=400)
 
-    #         checkin = Checkin.objects.create(
-    #             userid= fk_userid,
-    #             moment_number=moment_number,
-    #             content=content,
-    #             content_type=content_type,
-    #             checkin_date=current_date
-    #             )
-    #         checkin.save()
-    #     except:
-    #         return HttpResponse("Moment insertion failure", status=400)
+            #convert the string (base64 format) passed in as content to a binary field encoding compatible with checkin model
+            content_binary_encoded = base64.b64decode(content_64_encoded)
 
-        
+            #create a checkin object
+            checkin = Checkin.objects.create(
+                userid= fk_userid,
+                moment_number=moment_number,
+                content=content_binary_encoded,
+                content_type=content_type,
+                checkin_date=current_date
+                )
+            checkin.save()
+            return HttpResponse('Data saved successfully', status=200)
+        except:
+            return HttpResponse("Check-in failed to save", status=400)
 
 
 def csrf_token_view(request):
