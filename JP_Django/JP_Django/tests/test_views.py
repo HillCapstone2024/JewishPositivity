@@ -442,8 +442,8 @@ class GetTimesViewTestCase(TestCase):
 class CheckinViewTestCase(TestCase): #to test handling of checkin post for text, photo, video and audio
     
     # Define constant post data
-    POST_DATA_SUCCESS = {
-        'username': 'testuser',
+    CREATE_USER_1 = {
+        'username': 'testuser1',
         'password': 'testpassword',
         'reentered_password': 'testpassword',
         'firstname': 'Test',
@@ -486,7 +486,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         client = Client()
 
         # Make a POST request to create a test user
-        client.post(reverse('create_user_view'), data=json.dumps(self.POST_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
+        client.post(reverse('create_user_view'), data=json.dumps(self.CREATE_USER_1), content_type=CONTENT_TYPE_JSON)
 
     def test_checkin_text_success(self): #test of successful text entry submission
         # logging the test we are in
@@ -537,20 +537,44 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         logging.info(("TESTING CHECKIN_failure_missing_username....").upper())
         client = Client()
 
+        # Make a POST request to the checkin_view
+        response = client.post(reverse('checkin_view'), data=json.dumps(self.MISSING_USERNAME), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400
+        self.assertEqual(response.status_code, 400)
+
     def test_checkin_failure_missing_moment_number(self): #test of failure due to missing moment number
         # logging the test we are in
         logging.info(("TESTING CHECKIN_failure_missing_moment_number....").upper())
         client = Client()
+
+        # Make a POST request to the checkin_view
+        response = client.post(reverse('checkin_view'), data=json.dumps(self.MISSING_MOMENT_NUMBER), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400
+        self.assertEqual(response.status_code, 400)
 
     def test_checkin_failure_missing_content_type(self): #test of failure due to missing content type
         # logging the test we are in
         logging.info(("TESTING CHECKIN_failure_missing_content_type....").upper())
         client = Client()
 
+        # Make a POST request to the checkin_view
+        response = client.post(reverse('checkin_view'), data=json.dumps(self.MISSING_CONTENT_TYPE), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400
+        self.assertEqual(response.status_code, 400)
+
     def test_checkin_failure_missing_content(self): #test of failure due to missing content
         # logging the test we are in
         logging.info(("TESTING CHECKIN_failure_missing_content....").upper())
         client = Client()
+
+        # Make a POST request to the checkin_view
+        response = client.post(reverse('checkin_view'), data=json.dumps(self.MISSING_CONTENT), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400
+        self.assertEqual(response.status_code, 400)
 
     def test_checkin_failure_wrong_content_type_text(self): #test of failure due to wrong content type for text
         # logging the test we are in
