@@ -23,44 +23,12 @@ export default function JournalEntry() {
   const [media, setMedia] = useState(null);
   const [mediaBox, setMediaBox] = useState(false);
   const [mediaType, setMediaType] = useState();
-  const [journalText, setJournalText] = useState();
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [journalText, setJournalText] = useState("");
   const [imageUri, setImageUri] = useState(null);
   const [savedRecordingUri, setSavedRecordingUri] = useState("");
-  const [showRecordingBar, setShowRecordingBar] = useState(false);
-  const [showMediaBar, setShowMediaBar] = useState(true);
+  const [showMediaBar, setShowMediaBar] = useState(false);
 
-  const mediaAccessoryViewID = "RecordingBar";
-  // const recordingAccessoryViewID = "RecordingBar";
-  const recordingInputRef = useRef(null);
-
-    //   useEffect(() => {
-    //     const keyboardDidShowListener = Keyboard.addListener(
-    //     "keyboardDidShow",
-    //     (e) => {
-    //         console.log("keyboard activated");
-    //         setKeyboardHeight(e.endCoordinates.height);
-    //         console.log(e.endCoordinates.height);
-    //     }
-    //     );
-    //     const keyboardDidHideListener = Keyboard.addListener(
-    //     "keyboardDidHide",
-    //     () => {
-    //         console.log("keyboard hidden");
-    //         setKeyboardHeight(0);
-    //         console.log(keyboardHeight);
-    //     }
-    //     );
-
-    //     return () => {
-    //     keyboardDidShowListener.remove();
-    //     keyboardDidHideListener.remove();
-    //     };
-    // }, []);
-
-    //   const hideKeyboard = () => {
-    //     Keyboard.dismiss();
-    //   };
+  const mediaAccessoryViewID = "MediaBar";
 
   const submitJournal = async () => {
     Alert.alert(
@@ -113,48 +81,12 @@ export default function JournalEntry() {
   };
 
 
-  // const pickMedia = async () => {
-  //   let result = await ImagePicker.launchImageLibraryAsync({
-  //     mediaTypes: ImagePicker.MediaTypeOptions.All, // Allows both videos and images
-  //     allowsEditing: true, // Only applies to images
-  //     aspect: [4, 3],
-  //     quality: 1,
-  //   });
-
-  //   if (!result.cancelled) {
-  //     setMedia(result.assets[0].uri);
-  //     console.log("result: ", media);
-  //     setMediaBox(true);
-  //   }
-  // };
-
-  // const takeMedia = async () => {
-  //   // Request camera and microphone permissions if not already granted
-  //   const cameraPermission = await ImagePicker.requestCameraPermissionsAsync();
-  //   if (!cameraPermission.granted) {
-  //     alert("Permissions to access camera and microphone are required!");
-  //     return;
-  //   }
-
-  //   let result = await ImagePicker.launchCameraAsync({
-  //     mediaTypes: ImagePicker.MediaTypeOptions.All, // This will still default to capturing images
-  //     allowsEditing: true, // Only applies to images
-  //     aspect: [4, 3],
-  //     quality: 1,
-  //   });
-
-  //   if (result && !result.cancelled) {
-  //     setMedia(result.assets[0].uri);
-  //     console.log("result: ", result);
-  //     setMediaBox(true);
-  //   }
-  // };
-
   const handleRecordingComplete = (uri) => {
-    console.log("Received saved recording URI:", uri);
+    console.log("Received saved from recording bar:", uri);
     setSavedRecordingUri(uri);
-    setShowRecordingBar(false);
     setShowMediaBar(true);
+    setMediaBox(true);
+    setMedia(uri);
   };
 
   const handleMediaComplete = (uri) => {
@@ -196,21 +128,24 @@ export default function JournalEntry() {
           {/* <Text>{toString(showMediaBar)}</Text> */}
         </View>
       </ScrollView>
-      {/* {showRecordingBar ? (
-        <View>
-          <RecordingAccessoryBar
-            onRecordingComplete={handleRecordingComplete}
-          />
-        </View>
-      ) : null} */}
 
       {/* Keyboard bar view below */}
-      { showMediaBar ? <InputAccessoryView nativeID={mediaAccessoryViewID}>
-      <MediaAccessoryBar onMediaComplete={handleMediaComplete} toggleRecording={handleToggle}/>
-      </InputAccessoryView> : <InputAccessoryView nativeID={mediaAccessoryViewID}>
-      <RecordingAccessoryBar onRecodingComplete={handleRecordingComplete}/>
-      </InputAccessoryView>}
-          </SafeAreaView>
+      {showMediaBar ? (
+        <InputAccessoryView nativeID={mediaAccessoryViewID}>
+          <MediaAccessoryBar
+            onMediaComplete={handleMediaComplete}
+            toggleRecording={handleToggle}
+          />
+        </InputAccessoryView>
+      ) : (
+        <InputAccessoryView nativeID={mediaAccessoryViewID}>
+          <RecordingAccessoryBar
+            onRecordingComplete={handleRecordingComplete}
+            toggleRecording={handleToggle}
+          />
+        </InputAccessoryView>
+      )}
+    </SafeAreaView>
   );
 }
 
