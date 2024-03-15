@@ -92,7 +92,6 @@ python manage.py runserver 0.0.0.0:8000
 You need to add a .env file with the credentials and your IP Address to get the backend to work. Contact the development team for how to set this up. 
 
 ### Adding Unit tests to the Pipeline
-
 For any Python unit tests, be sure to add them to the `Django` folder so they can be properly accessed by the pipeline files. Then to add the tests to the suite, open the `django.yml` file found in `/.github/workflows`. Within this file, scroll to the bottom of the page where you can find a section with named `Run Tests`.
 
 Underneath there is a run section with a default Python test called `manage.py`. Copy the same syntax as that for your own tests and **be sure to commit and push your tests to the repository before adding them** with the same indentation as the previous tests. For example, `python mytest.py test` would run perfectly fine on the pipeline.
@@ -135,7 +134,6 @@ A QR code will appear in the terminal, scan the QR code to run the app on your p
 If tunneling prevents your app from working, you can try the following: 'npx expo start --reset-cache' or disable firewall and antivirus software.
 
 ## Running Frontend Jest Tests
-
 CD into the React_Native folder then run 'npm test'. All frontend tests should be located in the **test** directory inside of React_Native
 
 ```bash

@@ -8,16 +8,7 @@ import { AppRegistry, Platform } from "react-native";
 // import { LogLevel, OneSignal } from "react-native-onesignal";
 // import Constants from "expo-constants";
 
-import Login from "./Login";
-import Signup from "./Signup";
-import Times from "./Times";
-import Landing from "./Landing";
-import LoadingScreen from "./Loading";
-import TermsofUse from "./TermsofUse";
-import Layout from "./Layout";
-import MyDrawer from "./drawer";
-import HomeScreen from "./HomeScreen";
-import PrivacyPolicy from "./PrivacyPolicy";
+import AuthNavigator from "./navigations/AuthNavigator.js";
 
 // OneSignal.Debug.setLogLevel(LogLevel.Verbose);
 // OneSignal.initialize(Constants.expoConfig.extra.oneSignalAppId);
@@ -27,46 +18,10 @@ import PrivacyPolicy from "./PrivacyPolicy";
 const Stack = createNativeStackNavigator();
 AppRegistry.registerComponent("X", () => App);
 
-
 export default function App() {
-  const [initialRouteName, setInitialRouteName] = useState("Landing");
-  const [isLoading, setIsLoading] = useState(true);
-
-  const setRouteName = async () => {
-    await Storage.getItem("@username").then((username) => {
-      if (username) {
-        setInitialRouteName("Drawer");
-      }
-    });
-  };
-
-  useEffect(() => {
-    setRouteName();
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 4000);
-  }, []);
-
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName={initialRouteName}>
-        <Stack.Screen name="Landing" component={Landing} />
-        <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="Signup" component={Signup} />
-        <Stack.Screen name="Main" component={Layout} />
-        <Stack.Screen name="Drawer" component={MyDrawer} />
-        <Stack.Screen name="Times" component={Times} />
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="TermsofUse" component={TermsofUse} />
-        <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
-        {/* <Stack.Screen name="Times" component={Times} />
-        <Stack.Screen name="Profile" component={ProfileScreen} />
-        <Stack.Screen name="Settings" component={SettingsScreen} />
-        <Stack.Screen name="BottomTab" component={BottomTab} /> */}
-      </Stack.Navigator>
+        <AuthNavigator />
     </NavigationContainer>
   );
 }
