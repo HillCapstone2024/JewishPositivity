@@ -15,7 +15,12 @@ def create_user():
     return requests.post(url, json=payload, headers=headers)
 
 # print(create_user().text)
-#bla
+#this is making me not happy
+#
+#
+#
+#
+#
 
 def create_subscription():
     app_id = 'ec16a462-d3d0-4fa3-85cd-d4bdaa8e98a8'
