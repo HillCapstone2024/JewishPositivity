@@ -11,12 +11,15 @@ import {
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { Audio } from "expo-av";
+import * as FileSystem from "expo-file-system";
+
 
 export default function RecordingAccessoryBar({ onRecordingComplete }) {
     const [startedRecording, setStartedRecording] = useState(false);
+    const [stoppedRecording, setStoppedRecording] = useState(false);
   const [recording, setRecording] = useState(null);
   const [isRecordingPaused, setIsRecordingPaused] = useState(false);
-  const [audioPermission, setAudioPermission] = useState();
+  const [audioPermission, setAudioPermission] = useState(true);
 
   const [sound, setSound] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -56,53 +59,106 @@ export default function RecordingAccessoryBar({ onRecordingComplete }) {
     return () => clearInterval(timerRef.current);
   }, [timerRunning]);
 
+    useEffect(() => {
+      return () => {
+        recording && cleanupRecording();
+      };
+    }, [recording]);
+
+    const cleanupRecording = async () => {
+      try {
+        await recording.stopAndUnloadAsync();
+      } catch (error) {
+        console.error("Failed to unload the recording", error);
+      }
+      setRecording(null);
+      setStartedRecording(false);
+    };
+
 
   async function requestAudioPermissions() {
     const response = await Audio.requestPermissionsAsync();
     setAudioPermission(response.status === "granted");
   }
+
+  // const startRecording = async () => {
+  //   // Ensure we clean up the previous recording if it exists
+  //   if (recording) {
+  //     await cleanupRecording();
+  //   }
+
+  //   const newRecording = new Audio.Recording();
+
+  //   try {
+  //     const permission = await Audio.requestPermissionsAsync();
+  //     if (permission.status !== "granted") {
+  //       throw new Error("Permission to access microphone is required.");
+  //     }
+
+  //     await Audio.setAudioModeAsync({
+  //       allowsRecordingIOS: true,
+  //       playsInSilentModeIOS: true,
+  //       shouldDuckAndroid: true,
+  //       interruptionModeIOS: 1,
+  //       interruptionModeAndroid: 1,
+  //     });
+
+  //     await newRecording.prepareToRecordAsync(
+  //       Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
+  //     );
+  //     await newRecording.startAsync();
+  //     console.log('started recording');
+  //     setStartedRecording(true);
+  //     setRecording(newRecording);
+  //     setDuration(0);
+  //     setTimerRunning(true);
+  //   } catch (err) {
+  //     console.error("Failed to start recording:", err);
+  //     // Cleanup the failed recording attempt
+  //     await newRecording.stopAndUnloadAsync();
+  //     setRecording(null);
+  //     setStartedRecording(false);
+  //     throw err; // Handle or log the error as needed
+  //   }
+  // };
+
   async function startRecording() {
-    console.log("recording media");
-    if (!audioPermission) {
-      await requestAudioPermissions();
+    try {
+      // if (permissionResponse.status !== "granted") {
+      //   console.log("Requesting permission..");
+      //   await requestPermission();
+      // }
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+
+      console.log("Starting recording..");
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
+      setRecording(recording);
+      console.log("Recording started");
+      setStartedRecording(true);
+      setDuration(0);
+      setTimerRunning(true);
+    } catch (err) {
+      console.error("Failed to start recording", err);
     }
-    console.log(audioPermission);
-    if (audioPermission) {
-      console.log("attempting to record, granted perms");
-      try {
-        await Audio.setAudioModeAsync({
-          allowsRecordingIOS: true,
-          playsInSilentModeIOS: true,
-          shouldDuckAndroid: true,
-          interruptionModeIOS: 1,
-          interruptionModeAndroid: 1,
-        });
+  }
 
-        const { recording } = await Audio.Recording.createAsync(
-          Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
-        );
-            setStartedRecording(true);
-        setRecording(recording);
-        console.log("recording is :", recording);
-        setDuration(0);
-        setTimerRunning(true);
-      } catch (err) {
-        console.error("Failed to start recording", err);
-      }
-    } else {
-      alert("Audio recording permissions are required to use this feature.");
-    }
-  };
-
-  const stopRecording = async () => {
-    if (!recording) return;
-
+  async function stopRecording() {
+    console.log("Stopping recording..");
+    setTimerRunning(false);
     await recording.stopAndUnloadAsync();
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+    });
     const uri = recording.getURI();
     setRecordingUri(uri);
-    setRecording(null);
-    setTimerRunning(false);
-  };
+        setRecording(null);
+    console.log("Recording stopped and stored at", uri);
+  }
 
   const pauseRecording = async () => {
     if (!recording) return;
@@ -112,12 +168,12 @@ export default function RecordingAccessoryBar({ onRecordingComplete }) {
     setTimerRunning(false);
     const uri = recording.getURI();
     setRecordingUri(uri);
-    console.log('recording paused');
+    console.log('recording paused', recordingUri);
   };
 
   const resumeRecording = async () => {
     if (!recording) return;
-
+    console.log("recording resumed");
     await recording.startAsync();
     setIsRecordingPaused(false);
     setTimerRunning(true);
@@ -131,18 +187,44 @@ export default function RecordingAccessoryBar({ onRecordingComplete }) {
     }
   };
 
+  const deleteRecording = async (recordingUri) => {
+    try {
+      await FileSystem.deleteAsync(recordingUri);
+      console.log("Recording deleted successfully");
+      // Additional logic after successful deletion (e.g., update state)
+    } catch (error) {
+      console.error("Error deleting recording:", error);
+    }
+  };
+
   async function playRecording() {
     if (!recordingUri) return;
 
-    console.log("Loading Sound");
-    const { sound } = await Audio.Sound.createAsync(
-      { uri: recordingUri },
-      { shouldPlay: true }
-    );
-
+    console.log("Loading Sound", recordingUri);
+    // Set the audio mode to play through the speakers
+    // await Audio.setAudioModeAsync({
+    //   allowsRecordingIOS: false,
+    //   interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
+    //   playsInSilentModeIOS: true,
+    //   interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
+    //   shouldDuckAndroid: true,
+    //   staysActiveInBackground: false,
+    //   playThroughEarpieceAndroid: false, // Ensure sound plays through the speaker
+    // });
+    console.log("got past audio settings");
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: recordingUri },
+        { shouldPlay: true }
+      );
+      setSound(sound);
+    } catch (error) {
+      console.error("Failed to load the sound", error);
+    }
+    console.log("got past sound await");
     setSound(sound);
 
-    console.log("Playing Sound");
+    console.log("Playing Sound", sound);
     await sound.playAsync();
     setIsPlaying(true);
 
@@ -154,81 +236,56 @@ export default function RecordingAccessoryBar({ onRecordingComplete }) {
         setSound(null);
       }
     });
-  }
+  };
 
   return (
     <View style={{ flex: 1 }}>
-      <TextInput
+      {/* <TextInput
         style={{ height: 40, borderColor: "gray", borderWidth: 1 }}
         placeholder="Tap here to show the keyboard"
         inputAccessoryViewID={accessoryViewID}
-      />
-      <InputAccessoryView nativeID={accessoryViewID}>
-        <View style={styles.barContainer}>
-          <Text>Recording: {duration} seconds</Text>
-          {/* {recording && !isRecordingPaused ? (
-            <Button title="Pause" onPress={pauseRecording} />
-          ) : (
-            <Button
-              title="Resume"
-              onPress={resumeRecording}
-              disabled={!recording}
-              styles={styles.barButton}
-            />
-          )} */}
-          <TouchableOpacity
-            style={styles.barButton}
-            onPress={
-              !isRecordingPaused && startedRecording
-                ? pauseRecording
-                : startedRecording
-                ? resumeRecording
-                : startRecording()
-            }
-          >
-            <Ionicons
-              name={isRecordingPaused || !startedRecording ? "play" : "pause"}
-              size={25}
-              color="white"
-            />
-          </TouchableOpacity>
-          {/* <Button
-            title={recording ? "Stop" : "Start"}
-            onPress={recording ? stopRecording : startRecording}
-          /> */}
-          {/* <TouchableOpacity
-            style={styles.barButton}
-            onPress={recording ? stopRecording : startRecording}
-          >
-            <Ionicons
-              name={recording ? "pause" : "play"}
-              size={25}
-              color="white"
-            />
-          </TouchableOpacity> */}
-          {/* <Button
-            title="Save"
-            onPress={saveRecording}
-            disabled={!recordingUri}
-          /> */}
+      /> */}
 
-          {/* <Button
-            title="Play Recording"
-            onPress={playRecording}
-            disabled={!recordingUri || isPlaying}
-          /> */}
-          <TouchableOpacity
-            style={styles.barButton}
-            onPress={playRecording}
-            disabled={!recordingUri || isPlaying}
-          >
-            <Ionicons name="headset" size={25} color="white" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.barButton} onPress={saveRecording}>
-            <Ionicons name="send" size={25} color="white" />
-          </TouchableOpacity>
-        </View>
-      </InputAccessoryView>
+      {!stoppedRecording ? (
+          <View style={styles.barContainer}>
+            <TouchableOpacity
+              style={styles.barButton}
+              disabled="true"
+            >
+              <Ionicons
+                name={"mic"}
+                size={25}
+                color="lightgrey"
+              />
+            </TouchableOpacity>
+            <Text>Recording: {duration} seconds</Text>
+            <TouchableOpacity
+              style={styles.barButton}
+              onPress={startedRecording ? stopRecording : startRecording}
+            >
+              <Ionicons
+                name={!startedRecording ? "play" : "pause"}
+                size={25}
+                color="white"
+              />
+            </TouchableOpacity>
+          </View>
+      ) : (
+          <View style={styles.barContainer}>
+            <TouchableOpacity
+              style={styles.barButton}
+              onPress={deleteRecording}
+            >
+              <Ionicons name={"close"} size={25} color="white" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.barButton} onPress={playRecording}>
+              <Ionicons name={"headset"} size={25} color="white" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.barButton} onPress={saveRecording}>
+              <Ionicons name={"send"} size={25} color="white" />
+            </TouchableOpacity>
+          </View>
+      )}
     </View>
   );
 }

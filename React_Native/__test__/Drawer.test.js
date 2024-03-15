@@ -1,7 +1,7 @@
 import React from "react";
 import { fireEvent, render, waitFor } from "@testing-library/react-native";
 import axios from "axios";
-import MyDrawer from "../navigations/drawer.js";
+import MyDrawer from "../navigations/DrawerNavigator.js";
 import * as Storage from "../AsyncStorage.js";
 import IP_ADDRESS from "../ip.js";
 const API_URL = "http://" + IP_ADDRESS + ":8000";
