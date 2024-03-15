@@ -3,7 +3,6 @@ import { View, Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 
-import TimeChange from '../screens/home/Times';
 import HomeScreen from '../screens/home/HomeScreen';
 import JournalEntry from "../screens/home/journalEntry";
 
@@ -24,7 +23,7 @@ const screenOptions = {
     },null]
 };
 
-const BottomTab = () => {
+const BottomTabNavigator = () => {
   return (
     <Tab.Navigator initialRouteName="Home" screenOptions={screenOptions}>
       <Tab.Screen
@@ -51,4 +50,4 @@ const BottomTab = () => {
   );
 };
 
-export default BottomTab;
+export default BottomTabNavigator;

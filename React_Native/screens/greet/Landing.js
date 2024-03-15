@@ -102,7 +102,8 @@ const Landing = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
+        padding: 5,
+        paddingVertical: 50,
     },
     backgroundVideo: {
         position: 'absolute',
@@ -136,8 +137,8 @@ const styles = StyleSheet.create({
         alignContent: 'center',
         paddingVertical: 10,
         paddingHorizontal: 20,
-        width: Dimensions.get('window').width / 3.6,
-        height: Dimensions.get('window').width / 9.5,
+        width: Dimensions.get('window').width / 3,
+        height: Dimensions.get('window').width / 9,
         borderRadius: 15,
     },
     buttonText: {

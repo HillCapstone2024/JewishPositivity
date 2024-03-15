@@ -17,13 +17,13 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
-import Layout from "./Layout.js";
 import UserProfile from "../screens/home/Profile.js";
 import SettingsPage from "../screens/home/Settings.js";
 import * as Storage from "../AsyncStorage.js";
 import { createAvatar } from "@dicebear/core";
 import { micah } from "@dicebear/collection";
 import { SvgXml } from "react-native-svg";
+import BottomTabNavigator from "./BottomTabNavigator.js";
 
 const Drawer = createDrawerNavigator();
 
@@ -64,17 +64,15 @@ const CustomDrawerContent = (props) => {
         <SvgXml xml={avatar} style={styles.drawerImage} />
         <Text testID="usernameText" style={styles.drawerUsername}>{username}</Text>
       </View>
-      <DrawerItem
-        label="Home"
+      <DrawerItem label="Home"
         icon={({ color, size }) => (
           <Ionicons name="home" color={color} size={size} />
         )}
         inactiveBackgroundColor="white"
-        component={Layout}
-        onPress={() => props.navigation.navigate("Layout")}
+        component={BottomTabNavigator}
+        onPress={() => props.navigation.navigate("Home")}
       />
-      <DrawerItem
-        label="Profile"
+      <DrawerItem label="Profile"
         testID="profileButton"
         icon={({ color, size }) => (
           <Ionicons name="person" color={color} size={size} />
@@ -83,23 +81,20 @@ const CustomDrawerContent = (props) => {
         component={UserProfile}
         onPress={() => props.navigation.navigate("UserProfile")}
       />
-      <DrawerItem
-        label="Settings"
+      <DrawerItem label="Settings"
         icon={({ color, size }) => (
           <Ionicons name="settings" color={color} size={size} />
         )}
         inactiveBackgroundColor="white"
         onPress={() => props.navigation.navigate("SettingsPage")}
       />
-      <DrawerItem
-        label="My Communities"
+      <DrawerItem label="My Communities"
         icon={({ color, size }) => (
           <Ionicons name="people" color={color} size={size} />
         )}
         inactiveBackgroundColor="white"
       />
-      <DrawerItem
-        label="Logout"
+      <DrawerItem label="Logout"
         icon={({ color, size }) => (
           <Ionicons name="exit" color={color} size={size} />
         )}
@@ -123,8 +118,7 @@ const MyDrawer = ({ navigation }) => {
     }, [navigation])
   );
   return (
-    <Drawer.Navigator
-      initialRouteName="Layout"
+    <Drawer.Navigator initialRouteName="BottomTabNavigator"
       screenOptions={{
         drawerStyle: {
           backgroundColor: "#4A90E2",
@@ -136,7 +130,7 @@ const MyDrawer = ({ navigation }) => {
       }}
       drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
-      <Drawer.Screen name="Layout" component={Layout} />
+      <Drawer.Screen name="Home" component={BottomTabNavigator} />
       <Drawer.Screen name="UserProfile" component={UserProfile} />
       <Drawer.Screen name="SettingsPage" component={SettingsPage} />
       {/* <DrawerItemList/> */}

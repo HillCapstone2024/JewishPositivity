@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, Image, StyleSheet, TextInput, Button } from "react-native";
-import BottomTab from "../../navigations/BottomTab";
+import BottomTab from "../../navigations/BottomTabNavigator";
 
 //temporary profile page
 const UserProfile = () => {
