@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
 from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
-#from Jewish_Django.models import Checkin
+#from JP_Django.models import Checkin
 from django.middleware.csrf import get_token
 from django.http import JsonResponse
 from django.core.validators import validate_email
@@ -52,7 +52,7 @@ def login_view(request):
             error_message = f"Missing required keys: {', '.join(missing_keys)}"  # tells which keys missing in error message
             return HttpResponse(error_message, status=400)
 
-        # Define variables for Jewish_Django Database
+        # Define variables for JP_Django Database
         username = data["username"]
         password = data["password"]
         user = authenticate(request, username=username, password=password)

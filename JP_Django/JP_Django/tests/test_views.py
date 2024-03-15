@@ -1,9 +1,9 @@
 from django.test import TestCase, Client  #Client class to simulate HTTP requests
 from django.urls import reverse #reverse allows you to generate URLs for Django views by providing the view name
-from Jewish_Django.views import create_user_view
+from JP_Django.views import create_user_view
 import datetime
 import json
-from Jewish_Django.models import User #import model to access printing users in the test DB
+from JP_Django.models import User #import model to access printing users in the test DB
 import logging
 
 

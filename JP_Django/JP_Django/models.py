@@ -5,7 +5,7 @@ import datetime
 from django.utils import timezone
 from django.contrib.auth.models import AbstractBaseUser, AbstractUser
 from django.contrib.auth.models import UserManager
-from Jewish_Django.managers import CustomUserManager
+from JP_Django.managers import CustomUserManager
 
 class User(AbstractUser):
     id = models.AutoField(primary_key= True) #the autoincremented ID field for user
