@@ -243,42 +243,45 @@ def send_report_email_view(request):
         return JsonResponse({"status": 400})
 
 
-# def checkin_view(request): # to handle checkin moment POST data 
-#     if request.method == 'POST':
-#         data = json.loads(request.body)
-#         logging.info("Parsed JSON data: %s", data)
-#         missing_keys = [
-#             key for key, value in data.items() if value is None or value.strip() == ""
-#         ]
-#         logging.info("Missing keys: %s", missing_keys)
+def checkin_view(request): # to handle checkin moment POST data 
+    pass
+    # if request.method == 'POST':
+    #     data = json.loads(request.body)
+    #     logging.info("Parsed JSON data: %s", data)
 
-#         # Make sure no fields are empty in the POST data, else return the empty fields
-#         if missing_keys:
-#             error_message = f"Missing required keys: {', '.join(missing_keys)}"  # tells which keys missing in error message
-#             return HttpResponse(error_message, status=400)
+    #     #check for empty keys in the Post data
+    #     missing_keys = [
+    #         key for key, value in data.items() if value is None or value.strip() == ""
+    #     ]
+    #     logging.info("Missing keys: %s", missing_keys)
+
+    #     # Make sure no fields are empty in the POST data, else return the empty fields
+    #     if missing_keys:
+    #         error_message = f"Missing required keys: {', '.join(missing_keys)}"  # tells which keys missing in error message
+    #         return HttpResponse(error_message, status=400)
         
-#         moment_number = data["moment_number"]
-#         content = data["content"]
-#         content_type = data["content_type"]
-#         current_date = date.today()
-#         username = data["username"]
+    #     #retrieve the Post data and get the current date
+    #     moment_number = data["moment_number"]
+    #     content = data["content"]
+    #     content_type = data["content_type"]
+    #     current_date = date.today()
+    #     username = data["username"]
 
-#         try:
-#             # Retrieve the user where 
-#             user = User.objects.get(username=username)
+    #     try:
+    #         # Retrieve the user where 
+    #         user = User.objects.get(username=username)
+    #         fk_userid = user.pk # should retrieve id
 
-#             fk_userid = user.pk
-
-#             checkin = Checkin.objects.create(
-#                 userid= fk_userid,
-#                 moment_number=moment_number,
-#                 content=content,
-#                 content_type=content_type,
-#                 checkin_date=current_date
-#                 )
-#             checkin.save()
-#         except:
-#             return HttpResponse("Moment insertion failure", status=400)
+    #         checkin = Checkin.objects.create(
+    #             userid= fk_userid,
+    #             moment_number=moment_number,
+    #             content=content,
+    #             content_type=content_type,
+    #             checkin_date=current_date
+    #             )
+    #         checkin.save()
+    #     except:
+    #         return HttpResponse("Moment insertion failure", status=400)
 
         
 

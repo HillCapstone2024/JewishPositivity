@@ -5,6 +5,7 @@ import datetime
 import json
 from JP_Django.models import User #import model to access printing users in the test DB
 import logging
+import os
 
 
 #a test for the create_user_view
@@ -442,19 +443,23 @@ class GetTimesViewTestCase(TestCase):
 class CheckinViewTestCase(TestCase): #to test handling of checkin post for text, photo, video and audio
 
     # Stored as base64 encoded strings
-    textFile = open('test_resources/b64text.txt', 'r')
+    text_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64text.txt'))
+    textFile = open(text_file_path, 'r')
     text = textFile.read()
     textFile.close()
 
-    photoFile = open('test_resources/b64photo.txt', 'r')
+    photo_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64photo.txt'))
+    photoFile = open(photo_file_path, 'r')
     photo = photoFile.read()
     photoFile.close()
 
-    audioFile = open('test_resources/b64audio.txt', 'r')
+    audio_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64audio.txt'))
+    audioFile = open(audio_file_path, 'r')
     audio = audioFile.read()
     audioFile.close()
-    
-    videoFile = open('test_resources/b64video.txt', 'r')
+
+    video_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64video.txt'))
+    videoFile = open(video_file_path, 'r')
     video = videoFile.read()
     videoFile.close()
     
@@ -758,8 +763,8 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         response2 = client.post(reverse('checkin_view'), data=json.dumps(self.DUPLICATE_MOMENT), content_type=CONTENT_TYPE_JSON)
 
         # Check if the response status code is 400
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response2.status_code, 400) 
+        self.assertEqual(response.status_code, 200) #first should work
+        self.assertEqual(response2.status_code, 400) #second should cause error
 
     def test_checkin_failure_invalid_userid(self): #test of failure due to invalid user id (foreign key)
         # logging the test we are in
