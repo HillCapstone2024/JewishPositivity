@@ -251,8 +251,7 @@ def checkin_view(request): # to handle checkin moment POST data
         data = json.loads(request.body)
         logging.info("Parsed JSON data: %s", data)
 
-        non_integer_keys = []
-        # Iterate over the keys and filter out non-integer fields
+        non_integer_keys = []# Iterate over the keys and filter out non-integer fields
         for key, value in data.items():
             try:
                 # Try to retrieve the field from the model
@@ -262,7 +261,7 @@ def checkin_view(request): # to handle checkin moment POST data
             except:
                 # Handle case where key does not correspond to a field in the model
                 return HttpResponse("error retrieving IntegerFields", status=400)
-
+        logging.info("NON-INTEGER KEYS: %s", non_integer_keys)
         # Iterate through the data and get keys that are not integer fields and not empty
         missing_keys = [
             key for key, value in data.items() 
@@ -281,17 +280,21 @@ def checkin_view(request): # to handle checkin moment POST data
         content_type = data["content_type"]
         current_date = date.today()
         username = data["username"]
+        logging.info("view.py checkin view post data: \nMoment Number: %s \nContent64-Encoded: %s content_Type%s \n Current Date:%s \nUsername: %s", 
+                     moment_number, content_64_encoded, content_type, current_date,username)
 
         try:
             # Retrieve the user object and its id to store 
             user = User.objects.get(username=username)
             if user is not None: #found user
                 fk_userid = user.pk # should retrieve id
+                logging.info("Checkin view: Userid found: %s", fk_userid)
             else: 
                 return HttpResponse("Username does not exist", status=400)
 
             #convert the string (base64 format) passed in as content to a binary field encoding compatible with checkin model
             content_binary_encoded = base64.b64decode(content_64_encoded)
+            logging.info("Checkin view: Content Binary Encoded: %s", content_binary_encoded)
 
             #create a checkin object
             checkin = Checkin.objects.create(

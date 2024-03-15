@@ -3,7 +3,7 @@ from django.urls import reverse #reverse allows you to generate URLs for Django 
 from JP_Django.views import create_user_view
 import datetime
 import json
-from JP_Django.models import User #import model to access printing users in the test DB
+from JP_Django.models import User, Checkin #import model to access printing users in the test DB
 import logging
 import os
 
@@ -17,14 +17,22 @@ CONTENT_TYPE_JSON = 'application/json'
 # Define format for user log message
 LOG_MSG_FORMAT = '%s: %s'
 
-# Define constant strings for logging
+# Define constant strings for logging USER
 LOG_USER = 'User'
+LOG_ID = 'ID'
 LOG_FIRST_NAME = 'First Name'
 LOG_LAST_NAME = 'Last Name'
 LOG_TIME1 = 'Time1'
 LOG_TIME2 = 'Time2'
 LOG_TIME3 = 'Time3'
 
+# Define constant strings for logging CHECKIN
+LOG_CHECKIN_ID = 'Check-In ID'
+LOG_DATE = 'Date'
+LOG_CONTENT_TYPE = 'Content Type'
+LOG_CONTENT = 'Content'
+LOG_MOMENT_NUMBER = 'Moment Number'
+LOG_USER_ID = 'User ID'
 class CreateUserViewTestCase(TestCase):
     
     # Define constant post data
@@ -446,21 +454,25 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
     text_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64text.txt'))
     textFile = open(text_file_path, 'r')
     text = textFile.read()
+    logging.info("TEXT: %s", text)
     textFile.close()
 
     photo_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64photo.txt'))
     photoFile = open(photo_file_path, 'r')
     photo = photoFile.read()
+    logging.info("PHOTO: %s", photo)
     photoFile.close()
 
     audio_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64audio.txt'))
     audioFile = open(audio_file_path, 'r')
     audio = audioFile.read()
+    logging.info("AUDIO: %s", audio)
     audioFile.close()
 
     video_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64video.txt'))
     videoFile = open(video_file_path, 'r')
     video = videoFile.read()
+    logging.info("VIDEO: %s", video)
     videoFile.close()
     
     # Define constant post data
@@ -611,6 +623,8 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
 
     # Set up method to create a test user
     def setUp(self):
+        logging.info("SETTING UP CHECKIN....")
+
         # Initialize the Django test client
         client = Client()
 
@@ -631,6 +645,16 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
 
         # Check if the response status code is 200
         self.assertEqual(response.status_code, 200)
+
+        queryset = Checkin.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_CHECKIN_ID, obj.checkin_id)
+            logging.info(LOG_MSG_FORMAT, LOG_CONTENT, obj.content)
+            logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
+            logging.info(LOG_MSG_FORMAT, LOG_MOMENT_NUMBER, obj.moment_number)
+            logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
+            logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.user_id)
+            logging.info('')   
 
     def test_checkin_photo_success(self): #test of successful photo entry submission
         # logging the test we are in
