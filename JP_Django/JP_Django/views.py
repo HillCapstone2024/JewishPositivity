@@ -256,7 +256,6 @@ def checkin_view(request): # to handle checkin moment POST data
             try:
                 if not isinstance(value, (int, type(None))):
                     non_integer_keys.append(key)
-                    logging.info("APPENDED: %s, %s", key, value)
             except:
                 # Handle case where key does not correspond to a field in the model
                 return HttpResponse("error retrieving IntegerFields", status=400)
