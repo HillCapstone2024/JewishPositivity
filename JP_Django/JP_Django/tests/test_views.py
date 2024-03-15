@@ -755,10 +755,11 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
 
         # Make two POST requests to the checkin_view to simulate a duplicate moment
         response = client.post(reverse('checkin_view'), data=json.dumps(self.DUPLICATE_MOMENT), content_type=CONTENT_TYPE_JSON)
-        response = client.post(reverse('checkin_view'), data=json.dumps(self.DUPLICATE_MOMENT), content_type=CONTENT_TYPE_JSON)
+        response2 = client.post(reverse('checkin_view'), data=json.dumps(self.DUPLICATE_MOMENT), content_type=CONTENT_TYPE_JSON)
 
         # Check if the response status code is 400
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response2.status_code, 400) 
 
     def test_checkin_failure_invalid_userid(self): #test of failure due to invalid user id (foreign key)
         # logging the test we are in
