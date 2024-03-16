@@ -60,7 +60,7 @@ const ForgotPassword = ({ navigation }) => {
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={[styles.container, theme['background']]}
             >
-                <Image source={require("../../assets/logo.png")} style={styles.logo} />
+                <Image source={require("../../assets/images/logo.png")} style={styles.logo} />
                 <TextInput
                     style={[styles.input, theme["color"]]}
                     placeholder="Username"
