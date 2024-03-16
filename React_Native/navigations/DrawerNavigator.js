@@ -17,14 +17,15 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
-import UserProfile from "../screens/home/Profile.js";
-import SettingsPage from "../screens/home/Settings.js";
 import * as Storage from "../AsyncStorage.js";
 import { createAvatar } from "@dicebear/core";
 import { micah } from "@dicebear/collection";
 import { SvgXml } from "react-native-svg";
 import BottomTabNavigator from "./BottomTabNavigator.js";
 import makeThemeStyle from '../Theme.js';
+
+import UserProfile from "../screens/home/Profile.js";
+import SettingsPage from "../screens/home/Settings.js";
 
 const Drawer = createDrawerNavigator();
 
@@ -90,7 +91,7 @@ const CustomDrawerContent = (props) => {
           <Ionicons name="settings" color={color} size={size} />
         )}
         inactiveBackgroundColor="white"
-        onPress={() => props.navigation.navigate("SettingsPage")}
+        onPress={() => props.navigation.navigate("Settings")}
       />
       <DrawerItem label="My Communities"
         icon={({ color, size }) => (
@@ -136,7 +137,7 @@ const MyDrawer = ({ navigation }) => {
     >
       <Drawer.Screen name="Home" component={BottomTabNavigator} />
       <Drawer.Screen name="UserProfile" component={UserProfile} />
-      <Drawer.Screen name="SettingsPage" component={SettingsPage} />
+      <Drawer.Screen name="Settings" component={SettingsPage} />
       {/* <DrawerItemList/> */}
     </Drawer.Navigator>
   );
