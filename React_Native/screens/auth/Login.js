@@ -13,6 +13,7 @@ import {
   Keyboard,
 } from "react-native";
 import axios from "axios";
+import { LinearGradient } from "expo-linear-gradient";
 import IP_ADDRESS from "../../ip.js";
 import * as Storage from "../../AsyncStorage.js";
 import makeThemeStyle from '../../Theme.js';
@@ -140,6 +141,11 @@ const Login = ({ navigation }) => {
               <Text style={styles.forgotText}>Forgot Password?</Text>
             </TouchableOpacity>
           </View>
+
+          {/* <TouchableOpacity style={styles.button} onPress={navigateDrawer}>
+                <Text style={styles.buttonText}>Temp Drawer</Text> 
+          </TouchableOpacity> */}
+
         </View>
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
