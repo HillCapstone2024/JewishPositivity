@@ -8,6 +8,7 @@ import {
     TextInput,
     Keyboard,
     InputAccessoryView,
+    Animated
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -17,6 +18,18 @@ export default function MediaAccessoryBar({ onMediaComplete, toggleRecording }) 
     const [media, setMedia] = useState(null);
     const [keyboardHeight, setKeyboardHeight] = useState(0);
     const [recordingState, setRecordingState] = useState(false);
+
+    //animation logic below
+
+    const mediaButtonAnim = useRef(new Animated.Value(-100)).current; // Initial position off-screen
+    useEffect(() => {
+        Animated.timing(mediaButtonAnim, {
+          toValue: 0,
+          duration: 80,
+          useNativeDriver: true,
+        }).start();
+    }, []);
+
 
     useEffect(() => {
         const keyboardDidShowListener = Keyboard.addListener(
@@ -46,7 +59,7 @@ export default function MediaAccessoryBar({ onMediaComplete, toggleRecording }) 
         Keyboard.dismiss();
     };
 
-
+    //sending media and recording toggle back to parent component
     useEffect(() => {
         if (media) {
         sendMedia();
@@ -59,6 +72,8 @@ export default function MediaAccessoryBar({ onMediaComplete, toggleRecording }) 
         }
     }, [recordingState]);
 
+    //media logic (camera and gallery) below
+
     const pickMedia = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.All, // Allows both videos and images
@@ -70,7 +85,6 @@ export default function MediaAccessoryBar({ onMediaComplete, toggleRecording }) 
         if (!result.cancelled) {
         setMedia(result.assets[0].uri);
         console.log("result: ", media);
-        //   sendMedia();
         }
     };
 
@@ -112,61 +126,75 @@ export default function MediaAccessoryBar({ onMediaComplete, toggleRecording }) 
     };
 
     return (
-        <View style={styles.barContainer}>
-        <View style={{ flex: 1 }}>
-            <TouchableOpacity
+      <View style={styles.barContainer}>
+        <Animated.View
+          style={[
+            { flex: 1 },
+            { transform: [{ translateX: mediaButtonAnim }] },
+          ]}
+        >
+          <TouchableOpacity
             style={styles.barButton}
             onPress={() => {
-                if (onMediaComplete) {
-                    console.log('toggled recording');
-                    toggleRecording(true);
-            }
+              if (onMediaComplete) {
+                console.log("toggled recording");
+                toggleRecording(true);
+              }
             }}
-            >
+          >
             <Ionicons name="mic" size={25} color="white" />
-            </TouchableOpacity>
-        </View>
-        <View style={{ flex: 1 }}>
-            <TouchableOpacity style={styles.barButton} onPress={takeMedia}>
+          </TouchableOpacity>
+        </Animated.View>
+
+        <Animated.View
+          style={[
+            { flex: 1 },
+            { transform: [{ translateX: mediaButtonAnim }] },
+          ]}
+        >
+          <TouchableOpacity style={styles.barButton} onPress={takeMedia}>
             <Ionicons name="camera" size={25} color="white" />
-            </TouchableOpacity>
-        </View>
-        <View style={{ flex: 1 }}>
-            <TouchableOpacity style={styles.barButton} onPress={pickMedia}>
+          </TouchableOpacity>
+        </Animated.View>
+        <Animated.View
+          style={[
+            { flex: 1 },
+            { transform: [{ translateX: mediaButtonAnim }] },
+          ]}
+        >
+          <TouchableOpacity style={styles.barButton} onPress={pickMedia}>
             <Ionicons name="images" size={25} color="white" />
-            </TouchableOpacity>
-        </View>
-        <View style={{ flex: 1 }}>
-            <TouchableOpacity style={styles.barButton} onPress={hideKeyboard}>
+          </TouchableOpacity>
+        </Animated.View>
+        <Animated.View
+          style={[
+            { flex: 1 },
+            { transform: [{ translateX: mediaButtonAnim }] },
+          ]}
+        >
+          <TouchableOpacity style={styles.barButton} onPress={hideKeyboard}>
             <Ionicons name="checkmark" size={25} color="white" />
-            </TouchableOpacity>
-        </View>
-        </View>
+          </TouchableOpacity>
+        </Animated.View>
+      </View>
     );
 };
 
 const styles = StyleSheet.create({
   barContainer: {
     flexDirection: "row",
-    // justifyContent: "space-around",
-    // position: "absolute",
     alignItems: "center",
-    // left: 0,
-    // right: 0,
-    backgroundColor: "yellow",
+    backgroundColor: "#d0d3d9",
     flex: 1,
+    // borderBottomWidth: 1,
+    borderTopWidth:1,
+    borderColor: "#bbbec3",
   },
   barButton: {
-    // flex: 1,
-    // width: '100%',
-    backgroundColor: "lightgrey",
-    // borderWidth: 1,
-    // borderColor: "grey",
-    justifyContent: "center", // Centers child components (the icon) vertically
+    backgroundColor: "#d0d3d9",
+    justifyContent: "center",
     alignItems: "center",
     padding: 7,
-    // marginHorizontal: 10,
-    // flex: 1,
     alignSelf: "stretch",
     flexDirection: "row",
   },

@@ -15,9 +15,11 @@ import {
 } from "react-native";
 import RecordingAccessoryBar from "./RecordingBar";
 import MediaAccessoryBar from "./MediaBar";
+// import VideoThumbnail from "./VideoThumbnail";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { Audio } from "expo-av";
+import RNThumbnail from "react-native-thumbnail";
+import * as VideoThumbnails from "expo-video-thumbnails";
 
 export default function JournalEntry() {
   const [media, setMedia] = useState(null);
@@ -26,7 +28,9 @@ export default function JournalEntry() {
   const [journalText, setJournalText] = useState("");
   const [imageUri, setImageUri] = useState(null);
   const [savedRecordingUri, setSavedRecordingUri] = useState("");
-  const [showMediaBar, setShowMediaBar] = useState(false);
+  const [showMediaBar, setShowMediaBar] = useState(true);
+
+  const [videoThumbnail, setVideoThumbnail] = useState();
 
   const mediaAccessoryViewID = "MediaBar";
 
@@ -75,11 +79,26 @@ export default function JournalEntry() {
     }
   };
 
+  const generateThumbnail = async () => {
+    try {
+      const { thumbnailUri } = await VideoThumbnails.getThumbnailAsync(
+        media,
+        {
+          time: 15000,
+        }
+      );
+      // setImage(thumbnailUri);
+      setVideoThumbnail(thumbnailUri);
+      console.log('thumbnailUri',thumbnailUri);
+    } catch (e) {
+      console.warn(e);
+    }
+  };
+
   const deleteMedia = () => {
     setMedia(null);
     setMediaBox(false);
   };
-
 
   const handleRecordingComplete = (uri) => {
     console.log("Received saved from recording bar:", uri);
@@ -90,15 +109,17 @@ export default function JournalEntry() {
   };
 
   const handleMediaComplete = (uri) => {
-    console.log('received data from mediabar', uri);
+    console.log("received data from mediabar", uri);
     setMedia(uri);
     setMediaBox(true);
-  }
+    setMediaType("video");
+    generateThumbnail;
+  };
 
   const handleToggle = (toggle) => {
-    console.log('journal side:', toggle);
+    console.log("journal side:", toggle);
     setShowMediaBar(!toggle);
-  }
+  };
 
   return (
     <SafeAreaView style={styles.overallcontainter}>
@@ -106,7 +127,12 @@ export default function JournalEntry() {
       {/* Media Box Below */}
       {mediaBox ? (
         <View style={styles.mediaContainer}>
-          <Image source={{ uri: media }} style={styles.image} />
+          {/* {mediaType === "video" ? (
+            <Image source={{ uri: videoThumbnail }} style={styles.image} />
+          ) : ( */}
+            <Image source={{ uri: media }} style={styles.image} />
+          {/* )} */}
+          {/* <Image source={{ uri: media }} style={styles.image} /> */}
           <TouchableOpacity style={styles.deleteMedia} onPress={deleteMedia}>
             <Ionicons name="close-circle" size={25} color="white" />
           </TouchableOpacity>
@@ -151,34 +177,8 @@ export default function JournalEntry() {
 
 const styles = StyleSheet.create({
   overallcontainter: {
-    // justifyContent: "flex-end", // Pushes the TextInput to the bottom
-    // paddingBottom: 20,
     backgroundColor: "#4F8EF7",
   },
-  barContainer: {
-    flexDirection: "row",
-    // justifyContent: "space-around",
-    // position: "absolute",
-    alignItems: "center",
-    // left: 0,
-    // right: 0,
-    backgroundColor: "yellow",
-    flex: 1,
-  },
-  barButton: {
-    // flex: 1,
-    // width: '100%',
-    backgroundColor: "#4F8EF7",
-    // borderWidth: 1,
-    // borderColor: "black",
-    alignItems: "center",
-    padding: 5,
-    // marginHorizontal: 10,
-    // flex: 1,
-    alignSelf: "stretch",
-    flexDirection: "row",
-  },
-
   journalInput: {
     backgroundColor: "lightgrey",
     marginTop: 20,
@@ -219,12 +219,5 @@ const styles = StyleSheet.create({
   deleteMedia: {
     justifyContent: "center",
     marginTop: 10,
-  },
-  hiddenInput: {
-    position: "absolute",
-    top: -1000, // Position it off-screen
-    left: 0,
-    width: 1,
-    height: 1,
   },
 });

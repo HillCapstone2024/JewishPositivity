@@ -7,13 +7,17 @@ import {
   TextInput,
   Keyboard,
   InputAccessoryView,
+  Animated,
 } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { Audio } from "expo-av";
 import * as FileSystem from "expo-file-system";
 
-export default function RecordingAccessoryBar({ onRecordingComplete, toggleRecording }) {
+export default function RecordingAccessoryBar({
+  onRecordingComplete,
+  toggleRecording,
+}) {
   const [startedRecording, setStartedRecording] = useState(false);
   const [stoppedRecording, setStoppedRecording] = useState(false);
   const [recording, setRecording] = useState(null);
@@ -33,12 +37,60 @@ export default function RecordingAccessoryBar({ onRecordingComplete, toggleRecor
   const [recordingUri, setRecordingUri] = useState(null);
   const [recordingState, setRecordingState] = useState(false);
 
+  //Animation logic below
+
+  const playButtonAnim = useRef(new Animated.Value(-100)).current;
+  const [iconAnim] = useState(new Animated.Value(0));
+
+  const startThrobAnimation = () => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(iconAnim, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: false,
+        }),
+        Animated.timing(iconAnim, {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: false,
+        }),
+      ])
+    ).start();
+  };
+
+  const iconColor = iconAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["white", "red"], // Change 'red' to your desired color
+  });
+  const AnimatedIcon = Animated.createAnimatedComponent(Ionicons);
+
+  useEffect(() => {
+    if (isPlaying) {
+      startThrobAnimation();
+    } else {
+      iconAnim.setValue(0); // Reset the animation value
+      // Stop all animations
+      Animated.loop(Animated.timing(iconAnim)).stop();
+    }
+  }, [isPlaying]);
+
+  useEffect(() => {
+    console.log("stopped recording state change.");
+    playButtonAnim.setValue(-100);
+    Animated.timing(playButtonAnim, {
+      toValue: 0,
+      duration: 80,
+      useNativeDriver: true,
+    }).start();
+  }, [stoppedRecording]);
+
+  //toggle which bar to show
   useEffect(() => {
     if (recordingState) {
-        sendRecordingState();
+      sendRecordingState();
     }
-}, [recordingState]);
-
+  }, [recordingState]);
 
   useEffect(() => {
     return sound
@@ -50,21 +102,20 @@ export default function RecordingAccessoryBar({ onRecordingComplete, toggleRecor
   }, [sound]);
 
   useEffect(() => {
+    //use effect for incrementing timer
     if (timerRunning) {
-      // Start the timer
       timerRef.current = setInterval(() => {
         setDuration((prevDuration) => prevDuration + 1);
       }, 1000);
     } else if (!timerRunning && timerRef.current) {
-      // Clear the timer if it's running
       clearInterval(timerRef.current);
     }
 
-    // Cleanup on component unmount
     return () => clearInterval(timerRef.current);
   }, [timerRunning]);
 
   useEffect(() => {
+    //formatting the time
     setFormattedDuration(formatSeconds(duration));
   }, [duration]);
 
@@ -76,13 +127,15 @@ export default function RecordingAccessoryBar({ onRecordingComplete, toggleRecor
     const formattedSeconds = seconds.toString().padStart(2, "0");
 
     return `${formattedMinutes}:${formattedSeconds}`;
-  };
+  }
 
   // useEffect(() => {
   //   return () => {
   //     recording && cleanupRecording();
   //   };
   // }, [recording]);
+
+  //Recording functionality below
 
   const cleanupRecording = async () => {
     try {
@@ -99,9 +152,8 @@ export default function RecordingAccessoryBar({ onRecordingComplete, toggleRecor
     setAudioPermission(response.status === "granted");
   }
 
-
   const saveRecording = () => {
-    // Logic to save the recordingUri somewhere permanent
+    //To send the uri back to parent page
     console.log("Recording saved at:", recordingUri);
     if (onRecordingComplete) {
       onRecordingComplete(recordingUri);
@@ -120,7 +172,6 @@ export default function RecordingAccessoryBar({ onRecordingComplete, toggleRecor
       console.error("Error deleting recording:", error);
     }
   };
-
 
   async function startRecording() {
     if (!audioPermission) {
@@ -171,36 +222,36 @@ export default function RecordingAccessoryBar({ onRecordingComplete, toggleRecor
 
   async function playRecording() {
     if (recordingUri) {
+      setIsPlaying(true);
       console.log("playing recording...");
       const sound = new Audio.Sound();
       try {
         await sound.loadAsync({ uri: recordingUri });
         await sound.playAsync();
+        setIsPlaying(false);
       } catch (error) {
         console.error("Failed to play the recording", error);
+        setIsPlaying(false);
       }
     }
   }
 
-      function sendRecordingState() {
-        console.log("sending recording state");
-        if (toggleRecording) {
-            toggleRecording(!recordingState);
-        }
-    };
+  function sendRecordingState() {
+    console.log("sending recording state");
+    if (toggleRecording) {
+      toggleRecording(!recordingState);
+    }
+  }
 
   return (
     <View style={{ flex: 1 }}>
-      {/* <TextInput
-        style={{ height: 40, borderColor: "gray", borderWidth: 1 }}
-        placeholder="Tap here to show the keyboard"
-        inputAccessoryViewID={accessoryViewID}
-      /> */}
-
       {!stoppedRecording ? (
         <View style={styles.barContainer}>
           <TouchableOpacity
-            style={styles.micButton}
+            style={[
+              styles.returnButton,
+              { transform: [{ translateX: playButtonAnim }] },
+            ]}
             // disabled="true"
             onPress={() => {
               if (toggleRecording) {
@@ -209,24 +260,47 @@ export default function RecordingAccessoryBar({ onRecordingComplete, toggleRecor
               }
             }}
           >
-            <Ionicons name={"mic"} size={25} color="grey" />
+            <Ionicons name={"return-up-back"} size={25} color="white" />
           </TouchableOpacity>
-          <Text>{formattedDuration}</Text>
-          <TouchableOpacity
-            style={styles.barButton}
-            onPress={startedRecording ? stopRecording : startRecording}
+          <Animated.View
+            style={[
+              styles.durationTextContainer,
+              { transform: [{ translateX: playButtonAnim }] },
+            ]}
+            v={formattedDuration}
           >
-            <Ionicons
-              name={!startedRecording ? "play" : "pause"}
-              size={25}
-              color="white"
-            />
-          </TouchableOpacity>
+            <Text style={styles.durationText}>{formattedDuration}</Text>
+          </Animated.View>
+          <Animated.View
+            style={[
+              styles.playButton,
+              { transform: [{ translateX: playButtonAnim }] },
+            ]}
+          >
+            <TouchableOpacity
+              onPress={startedRecording ? stopRecording : startRecording}
+            >
+              <Ionicons
+                name={!startedRecording ? "play" : "pause"}
+                size={25}
+                color="white"
+              />
+            </TouchableOpacity>
+          </Animated.View>
         </View>
       ) : (
         <View style={styles.barContainer}>
+          {/* <Animated.View
+            style={[
+              styles.returnButton,
+              { transform: [{ translateX: playButtonAnim }] },
+            ]}
+          > */}
           <TouchableOpacity
-            style={styles.micButton}
+            style={[
+              styles.returnButton,
+              { transform: [{ translateX: playButtonAnim }] },
+            ]}
             // disabled="true"
             onPress={() => {
               if (toggleRecording) {
@@ -235,18 +309,39 @@ export default function RecordingAccessoryBar({ onRecordingComplete, toggleRecor
               }
             }}
           >
-            <Ionicons name={"mic"} size={25} color="grey" />
+            <Ionicons name={"return-up-back"} size={25} color="white" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.barButton} onPress={deleteRecording}>
-            <Ionicons name={"close"} size={25} color="white" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.barButton} onPress={playRecording}>
-            <Ionicons name={"headset"} size={25} color="white" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.sendButton} 
-          onPress={saveRecording}>
-            <Ionicons name={"send"} size={25} color="white" />
-          </TouchableOpacity>
+          {/* </Animated.View> */}
+          <Animated.View
+            style={[
+              styles.deleteButton,
+              { transform: [{ translateX: playButtonAnim }] },
+            ]}
+          >
+            <TouchableOpacity onPress={deleteRecording}>
+              <Ionicons name={"close"} size={25} color="white" />
+            </TouchableOpacity>
+          </Animated.View>
+          <Animated.View
+            style={[
+              styles.listenButton,
+              { transform: [{ translateX: playButtonAnim }] },
+            ]}
+          >
+            <TouchableOpacity onPress={playRecording}>
+              <Ionicons name={"headset"} size={25} color="white" />
+            </TouchableOpacity>
+          </Animated.View>
+          <Animated.View
+            style={[
+              styles.sendButton,
+              { transform: [{ translateX: playButtonAnim }] },
+            ]}
+          >
+            <TouchableOpacity onPress={saveRecording}>
+              <Ionicons name={"send"} size={25} color="white" />
+            </TouchableOpacity>
+          </Animated.View>
         </View>
       )}
     </View>
@@ -256,45 +351,79 @@ export default function RecordingAccessoryBar({ onRecordingComplete, toggleRecor
 const styles = StyleSheet.create({
   barContainer: {
     flexDirection: "row",
-    // justifyContent: "space-around",
-    // position: "absolute",
     alignItems: "center",
-    // left: 0,
-    // right: 0,
-    backgroundColor: "yellow",
+    backgroundColor: "#d0d3d9",
     flex: 1,
-    borderBottomWidth: 1,
     borderColor: "grey",
+    borderTopWidth: 1,
+    borderColor: "#bbbec3",
   },
   barButton: {
-    backgroundColor: "lightgrey",
-    padding: 7,
+    backgroundColor: "#d0d3d9",
     alignSelf: "stretch",
     flexDirection: "row",
-    justifyContent: "center", // Centers child components (the icon) vertically
+    justifyContent: "center",
     alignItems: "center",
   },
-  micButton: {
-    // backgroundColor: "black",
+  playButton: {
+    backgroundColor: "#d0d3d9",
     padding: 7,
     alignSelf: "stretch",
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "lightgrey",
+  },
+  returnButton: {
     padding: 7,
     alignSelf: "stretch",
     flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#d0d3d9",
+    flex: 1,
+  },
+  durationTextContainer: {
+    padding: 7,
+    alignSelf: "stretch",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#d0d3d9",
+    flex: 1,
+    color: "white",
+  },
+  durationText: {
+    color: "white",
   },
   sendButton: {
-    backgroundColor: "lightgrey",
+    backgroundColor: "#d0d3d9",
     alignItems: "center",
     padding: 7,
     alignSelf: "stretch",
     flexDirection: "row",
-    marginLeft: "70%",
-    justifyContent: "center", // Centers child components (the icon) vertically
+    marginLeft: "0%",
+    justifyContent: "center",
     alignItems: "center",
-    // marginRight: "5"
+    marginHorizontal: 10,
+  },
+  listenButton: {
+    backgroundColor: "#d0d3d9",
+    alignItems: "center",
+    padding: 7,
+    justifyContent: "center",
+    alignSelf: "stretch",
+    flexDirection: "row",
+    // marginLeft: "30%",
+    marginHorizontal: 10,
+  },
+  deleteButton: {
+    backgroundColor: "#d0d3d9",
+    alignItems: "center",
+    padding: 7,
+    justifyContent: "center",
+    alignSelf: "stretch",
+    flexDirection: "row",
+    // marginHorizontal: 10,
+    marginLeft: 220,
   },
 });
