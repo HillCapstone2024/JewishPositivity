@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { View, Text } from 'react-native';
+import React from "react";
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -9,18 +8,20 @@ import JournalEntry from "../screens/home/journalEntry";
 const Tab = createBottomTabNavigator();
 
 const screenOptions = {
-    "headerShown": false,
-    "tabBarActiveBackgroundColor": "#4A90E2",
-    "tabBarInactiveBackgroundColor": "#4A90E2",
-    "tabBarActiveTintColor": "#FFD700",
-    "tabBarInactiveTintColor": "black",
-    "tabBarLabelStyle": {
+  "headerShown": false,
+  "tabBarActiveBackgroundColor": "#4A90E2",
+  "tabBarInactiveBackgroundColor": "#4A90E2",
+  "tabBarActiveTintColor": "black",
+  "tabBarInactiveTintColor": "white",
+  "tabBarLabelStyle": {
     "paddingBottom": 5,
     "fontSize": 10
-    },
-    "tabBarStyle": [{
+  },
+  "tabBarStyle": [{
     "display": "flex"
-    },null]
+  }, null],
+  "tabBarShowLabel": true,
+  "tabBarStyle": { backgroundColor: "#4A90E2" },
 };
 
 const BottomTabNavigator = () => {

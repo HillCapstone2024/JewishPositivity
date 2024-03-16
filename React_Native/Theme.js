@@ -1,30 +1,36 @@
-import React from 'react';
+import React, { useState } from "react";
 import * as Storage from "./AsyncStorage.js";
+import { Appearance } from "react-native";
 
-const Theme = {
-    light: {
-        backgroundColor: '#fff',
-        color: '#000',
-    },
-    dark: {
-        backgroundColor: '#000',
-        color: '#fff',
-    },
-    system: {
-        backgroundColor: 'system',
-        color: 'system',
-    },
-    currentTheme: async () => {
+export default makeThemeStyle = () => {
+    const [theme, setTheme] = useState(false);
+    const [storage_theme, setStorageTheme] = useState('system');
+
+    const getTheme = async () => {
         try {
-            const theme = await Storage.getItem('@theme');
-            return theme;
+            setStorageTheme(await Storage.getItem('@theme'));
+            if (storage_theme === 'dark') {
+                setTheme(true)
+            } else if (storage_theme === 'light') {
+                setTheme(false)
+            } else {
+                if (Appearance.getColorScheme() == 'dark') {
+                    setTheme(true)
+                } else {
+                    setTheme(false)
+                }
+            }
         }
         catch (e) {
-            await Storage.setItem('@theme', 'light');
+            await Storage.setItem('@theme', 'system');
             console.log(e);
         }
+    };
+    getTheme()
+
+    return {
+        "background": {backgroundColor: theme ? '#333333' : '#FFFFFF',},
+        "color": {color: theme ? '#FFFFFF' : '#333333',},
+        "theme": storage_theme,
     }
-}
-
-
-export default Theme;
+};

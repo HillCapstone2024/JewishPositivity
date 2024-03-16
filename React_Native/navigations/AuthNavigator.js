@@ -8,6 +8,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import Login from "../screens/auth/Login.js";
 import Signup from "../screens/auth/Signup.js";
+import ForgotPassword from "../screens/auth/ForgotPassword.js";
 import LoadingScreen from "../screens/greet/Loading.js";
 import MyDrawer from "./DrawerNavigator.js";
 import Landing from "../screens/greet/Landing.js";
@@ -38,9 +39,10 @@ export default function AuthNavigator() {
     }, 4000);
   }, []);
 
-  if (isLoading) {
+  if (isLoading && initialRouteName === "Drawer") {
     return <LoadingScreen />;
-  }
+  } 
+  
   return (
       <Stack.Navigator initialRouteName={initialRouteName}
         screenOptions={{
@@ -53,7 +55,8 @@ export default function AuthNavigator() {
       >
         <Stack.Screen name="Landing" component={Landing} options={{headerShown: false}}/>
         <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="Signup" component={Signup} />
+        <Stack.Screen name="Signup" component={Signup} options={{headerTitle: "Sign up"}}/>
+        <Stack.Screen name="ForgotPassword" component={ForgotPassword} options={{headerTitle: "Forgot Password?"}}/>
         <Stack.Screen name="Drawer" component={MyDrawer} options={{headerShown: false}}/>
       </Stack.Navigator>
   );
