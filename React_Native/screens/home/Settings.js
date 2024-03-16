@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Switch, StyleSheet, Button, Alert, Appearance } from 'react-native';
+import { View, Text, Switch, StyleSheet, Button, Alert, Appearance, Pressable } from 'react-native';
 import axios from "axios";
 import IP_ADDRESS from "../../ip.js";
 import * as WebBrowser from 'expo-web-browser';
@@ -8,6 +8,7 @@ import * as Storage from "../../AsyncStorage.js";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from 'expo-haptics';
 import Times from "./Times.js";
+import { LinearGradient } from "expo-linear-gradient";
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
@@ -200,7 +201,8 @@ const SettingsScreen = ({ navigation }) => {
       <View style={styles.setting}>
         <Times />
       </View>
-      <View style={styles.contentContainer}>
+
+      {/* <View style={styles.contentContainer}>
         <Button title="Report" onPress={
           () => { handleReport(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }
         } />
@@ -213,7 +215,34 @@ const SettingsScreen = ({ navigation }) => {
         <Button title="Delete Account" color="red" onPress={
           () => { handleDeleteAccount(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }
         } />
+      </View> */}
+
+      <View style={styles.contentContainer}>
+        <Pressable style={styles.button} onPress={ () => { handleReport(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }}>
+          <Text style={styles.normalText}>
+              Report
+            </Text>
+        </Pressable>
+
+        <Pressable style={styles.button} onPress={ () => { handleTermsofUse(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null;  }}>
+          <Text style={styles.normalText}>
+              Terms of Use
+            </Text>
+        </Pressable>
+
+        <Pressable style={styles.button} onPress={ () => { handlePrivacyPolicy(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }}>
+          <Text style={styles.normalText}>
+              Privacy Policy
+            </Text>
+        </Pressable>
+
+        <Pressable style={styles.button} onPress={ () => { handleDeleteAccount(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }}>
+          <Text style={styles.redText}>
+              DELETE ACCOUNT
+            </Text>
+        </Pressable>
       </View>
+
       <View style={styles.footer}>
         <Text style={[themeStyle, styles.version]}>Version: 1.0.0</Text>
       </View>
@@ -250,6 +279,31 @@ const styles = StyleSheet.create({
     fontSize: 20,
     bottom: 10,
     textAlign: 'center',
+  },
+  button: {
+    //backgroundColor: "#4A90E2",
+    opacity: 100,
+    paddingVertical: 10,
+    paddingHorizontal: 50,
+    marginTop: 10,
+    marginHorizontal: 5,
+    borderRadius: 5,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    shadowOpacity: 0.16,
+    alignItems: 'center',
+  },
+  redText: {
+    color: "red",
+    fontSize: 16,
+    textDecorationLine: "underline",
+  },
+
+  normalText: {
+    color: "white",
+    fontSize: 16,
+    textDecorationLine: "underline",
   },
 });
 

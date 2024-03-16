@@ -85,7 +85,7 @@ For working with the database, install [MySQL Workbench](https://www.mysql.com/p
 ### Backend
 
 ```bash
-cd Django
+cd JP_Django
 python manage.py runserver 0.0.0.0:8000
 ```
 ### Env File for Backend

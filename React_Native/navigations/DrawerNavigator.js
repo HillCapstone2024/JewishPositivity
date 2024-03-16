@@ -24,16 +24,13 @@ import { createAvatar } from "@dicebear/core";
 import { micah } from "@dicebear/collection";
 import { SvgXml } from "react-native-svg";
 import BottomTabNavigator from "./BottomTabNavigator.js";
+import makeThemeStyle from '../Theme.js';
 
 const Drawer = createDrawerNavigator();
 
 const CustomDrawerContent = (props) => {
   const [username, setUsername] = useState("");
-  const avatar = createAvatar(micah, {
-    seed: Storage.getItem("@username") || "No username",
-    radius: 50,
-    mouth: ["smile", "smirk", "laughing"],
-  }).toString();
+  const theme = makeThemeStyle();
 
   const handleLogout = () => {
     const logout = async () => {
@@ -58,11 +55,18 @@ const CustomDrawerContent = (props) => {
 
     loadUsername();
   }, []);
+
+  const avatar = createAvatar(micah, {
+    seed: username,
+    radius: 50,
+    mouth: ["smile", "smirk", "laughing"],
+  }).toString();
+
   return (
     <DrawerContentScrollView {...props}>
       <View style={styles.drawerHeader}>
         <SvgXml xml={avatar} style={styles.drawerImage} />
-        <Text testID="usernameText" style={styles.drawerUsername}>{username}</Text>
+        <Text testID="usernameText" style={[styles.drawerUsername, theme["color"]]}>{username}</Text>
       </View>
       <DrawerItem label="Home"
         icon={({ color, size }) => (
