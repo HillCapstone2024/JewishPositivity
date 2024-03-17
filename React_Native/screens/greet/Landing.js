@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 10,
     },
     wordTwo: {
-        fontSize: Dimensions.get('window').width / 6,
+        fontSize: Dimensions.get('window').width / 6.5,
         fontWeight: 'bold',
         marginHorizontal: 10,
     },

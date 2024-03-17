@@ -29,7 +29,7 @@ export default makeThemeStyle = () => {
     getTheme()
 
     return {
-        "background": {backgroundColor: theme ? '#333333' : '#FFFFFF',},
+        "background": {backgroundColor: theme ? '#333333' : '#ececf6',}, //#ececf6 or #f2f2f2 or #ffffff
         "color": {color: theme ? '#FFFFFF' : '#333333',},
         "theme": storage_theme,
     }
