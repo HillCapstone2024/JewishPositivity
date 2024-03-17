@@ -248,21 +248,10 @@ def send_report_email_view(request):
         return JsonResponse({"status": 400})
 
 
-<<<<<<< HEAD
-# def checkin_view(request): # to handle checkin moment POST data 
-#     if request.method == 'POST':
-#         data = json.loads(request.body)
-#         logging.info("Parsed JSON data: %s", data)
-#         missing_keys = [
-#             key for key, value in data.items() if value is None or value.strip() == ""
-#         ]
-#         logging.info(constMissingKey, missing_keys)
-=======
 def checkin_view(request): # to handle checkin moment POST data 
     if request.method == 'POST':
         data = json.loads(request.body)
         #logging.info("Parsed JSON data: %s", data)
->>>>>>> 2b11a55817b5ab276600647e2f4404a83d94dd62
 
         non_integer_keys = []# Iterate over the keys and filter out non-integer fields
         for key, value in data.items():
