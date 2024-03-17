@@ -25,7 +25,7 @@ const UserProfile = () => {
     <View style={styles.container}>
       <View>
         <Image
-          source={require("../../assets/logo.png")}
+          source={require("../../assets/images/logo.png")}
           style={styles.profilePic}
         />
         {/* <Button>Change Avatar</Button> */}

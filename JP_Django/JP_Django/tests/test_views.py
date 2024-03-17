@@ -3,8 +3,9 @@ from django.urls import reverse #reverse allows you to generate URLs for Django 
 from JP_Django.views import create_user_view
 import datetime
 import json
-from JP_Django.models import User #import model to access printing users in the test DB
+from JP_Django.models import User, Checkin #import model to access printing users in the test DB
 import logging
+import os
 
 
 #a test for the create_user_view
@@ -16,14 +17,22 @@ CONTENT_TYPE_JSON = 'application/json'
 # Define format for user log message
 LOG_MSG_FORMAT = '%s: %s'
 
-# Define constant strings for logging
+# Define constant strings for logging USER
 LOG_USER = 'User'
+LOG_ID = 'ID'
 LOG_FIRST_NAME = 'First Name'
 LOG_LAST_NAME = 'Last Name'
 LOG_TIME1 = 'Time1'
 LOG_TIME2 = 'Time2'
 LOG_TIME3 = 'Time3'
 
+# Define constant strings for logging CHECKIN
+LOG_CHECKIN_ID = 'Check-In ID'
+LOG_DATE = 'Date'
+LOG_CONTENT_TYPE = 'Content Type'
+LOG_CONTENT = 'Content'
+LOG_MOMENT_NUMBER = 'Moment Number'
+LOG_USER_ID = 'User ID'
 class CreateUserViewTestCase(TestCase):
     
     # Define constant post data
@@ -440,6 +449,31 @@ class GetTimesViewTestCase(TestCase):
             logging.info('')   
 
 class CheckinViewTestCase(TestCase): #to test handling of checkin post for text, photo, video and audio
+
+    # Stored as base64 encoded strings
+    text_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64text.txt'))
+    textFile = open(text_file_path, 'r')
+    text = textFile.read()
+    logging.info("TEXT: %s", text)
+    textFile.close()
+
+    photo_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64photo.txt'))
+    photoFile = open(photo_file_path, 'r')
+    photo = photoFile.read()
+    #logging.info("PHOTO: %s", photo)
+    photoFile.close()
+
+    audio_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64audio.txt'))
+    audioFile = open(audio_file_path, 'r')
+    audio = audioFile.read()
+    #logging.info("AUDIO: %s", audio)
+    audioFile.close()
+
+    video_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64video.txt'))
+    videoFile = open(video_file_path, 'r')
+    video = videoFile.read()
+    #logging.info("VIDEO: %s", video)
+    videoFile.close()
     
     # Define constant post data
     CREATE_USER_1 = {
@@ -448,45 +482,158 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'reentered_password': 'testpassword',
         'firstname': 'Test',
         'lastname': 'User',
-        'email': 'success2@example.com',
+        'email': 'success21@example.com',
+    }
+
+    CREATE_USER_2 = {
+        'username': 'testuser2',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'success22@example.com',
+    }
+
+    CREATE_USER_3 = {
+        'username': 'testuser3',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'success23@example.com',
+    }
+
+    CREATE_USER_4 = {
+        'username': 'testuser4',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'success24@example.com',
+    }
+
+    CREATE_USER_5 = {
+        'username': 'testuser5',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'success25@example.com',
     }
 
     # Define post data
     TEXT_DATA_SUCCESS = {
-        'username': 'admin',
+        'username': 'testuser1',
         'moment_number': 1,
         'content_type': 'text',
-        'content': '', #fill in with example entry
+        'content': text, #fill in with example entry
     }
 
     PHOTO_DATA_SUCCESS = {
-        'username': 'admin',
+        'username': 'testuser1',
         'moment_number': 2,
         'content_type': 'photo',
-        'content': '', #How to pass in photo?
+        'content': photo, #How to pass in photo?
     }
 
     AUDIO_DATA_SUCCESS = {
-        'username': 'admin',
+        'username': 'testuser1',
         'moment_number': 3,
         'content_type': 'audio',
-        'content': '', #How to pass in audio?
+        'content': audio, #How to pass in audio?
     }
 
     VIDEO_DATA_SUCCESS = {
-        'username': 'admin2',
+        'username': 'testuser2',
         'moment_number': 1,
         'content_type': 'video',
-        'content': '', #How to pass in video?
+        'content': video, #How to pass in video?
     }
+
+    MISSING_USERNAME = {
+        'username': '',
+        'moment_number': 2,
+        'content_type': 'text',
+        'content': text,
+    }
+
+    MISSING_MOMENT_NUMBER = {
+        'username': 'testuser2',
+        'moment_number': None,
+        'content_type': 'text',
+        'content': text, 
+    }
+
+    MISSING_CONTENT_TYPE = { 
+        'username': 'testuser3',
+        'moment_number': 1,
+        'content_type': '',
+        'content': text, 
+    }
+        
+    MISSING_CONTENT = {
+        'username': 'testuser3',
+        'moment_number': 2,
+        'content_type': 'text',
+        'content': '',
+    }
+
+    WRONG_TYPE_TEXT = {
+        'username': 'testuser3',
+        'moment_number': 3,
+        'content_type': 'photo',
+        'content': photo, # Add photo here
+    }
+
+    WRONG_TYPE_PHOTO = {
+        'username': 'testuser4',
+        'moment_number': 1,
+        'content_type': 'text',
+        'content': text,
+    }
+
+    WRONG_TYPE_AUDIO = {
+        'username': 'testuser4',
+        'moment_number': 2,
+        'content_type': 'text',
+        'content': text,
+    }
+
+    WRONG_TYPE_VIDEO = {
+        'username': 'testuser4',
+        'moment_number': 3,
+        'content_type': 'text',
+        'content': text,
+    }
+
+    INVALID_USERID = { 
+        'username': 'admin45678901',
+        'moment_number': 1,
+        'content_type': 'text',
+        'content': text,
+    }
+
+    DUPLICATE_MOMENT = {
+        'username': 'testuser5',
+        'moment_number': 1,
+        'content_type': 'text',
+        'content': text,
+    }
+
 
     # Set up method to create a test user
     def setUp(self):
+        logging.info("SETTING UP CHECKIN....")
+
         # Initialize the Django test client
         client = Client()
 
         # Make a POST request to create a test user
         client.post(reverse('create_user_view'), data=json.dumps(self.CREATE_USER_1), content_type=CONTENT_TYPE_JSON)
+        client.post(reverse('create_user_view'), data=json.dumps(self.CREATE_USER_2), content_type=CONTENT_TYPE_JSON)
+        client.post(reverse('create_user_view'), data=json.dumps(self.CREATE_USER_3), content_type=CONTENT_TYPE_JSON)
+        client.post(reverse('create_user_view'), data=json.dumps(self.CREATE_USER_4), content_type=CONTENT_TYPE_JSON)
+        client.post(reverse('create_user_view'), data=json.dumps(self.CREATE_USER_5), content_type=CONTENT_TYPE_JSON)
 
     def test_checkin_text_success(self): #test of successful text entry submission
         # logging the test we are in
@@ -499,13 +646,23 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         # Check if the response status code is 200
         self.assertEqual(response.status_code, 200)
 
+        queryset = Checkin.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_CHECKIN_ID, obj.checkin_id)
+            #logging.info(LOG_MSG_FORMAT, LOG_CONTENT, obj.content)
+            logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
+            logging.info(LOG_MSG_FORMAT, LOG_MOMENT_NUMBER, obj.moment_number)
+            logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
+            logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.user_id)
+            logging.info('')   
+
     def test_checkin_photo_success(self): #test of successful photo entry submission
         # logging the test we are in
         logging.info("TESTING CHECKIN_PHOTO_SUCCESS....")
         client = Client()
 
         # Make a POST request to the checkin_view
-        response = client.post(reverse('checkin_view'), data=json.dumps(self.TEXT_PHOTO_SUCCESS), content_type=CONTENT_TYPE_JSON)
+        response = client.post(reverse('checkin_view'), data=json.dumps(self.PHOTO_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
 
         # Check if the response status code is 200
         self.assertEqual(response.status_code, 200)
@@ -516,7 +673,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         client = Client()
 
         # Make a POST request to the checkin_view
-        response = client.post(reverse('checkin_view'), data=json.dumps(self.TEXT_AUDIO_SUCCESS), content_type=CONTENT_TYPE_JSON)
+        response = client.post(reverse('checkin_view'), data=json.dumps(self.AUDIO_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
 
         # Check if the response status code is 200
         self.assertEqual(response.status_code, 200)
@@ -527,7 +684,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         client = Client()
 
         # Make a POST request to the checkin_view
-        response = client.post(reverse('checkin_view'), data=json.dumps(self.TEXT_VIDEO_SUCCESS), content_type=CONTENT_TYPE_JSON)
+        response = client.post(reverse('checkin_view'), data=json.dumps(self.VIDEO_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
 
         # Check if the response status code is 200
         self.assertEqual(response.status_code, 200)
@@ -581,30 +738,70 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         logging.info(("TESTING CHECKIN_failure_wrong_content_type_text....").upper())
         client = Client()
 
+        # Make a POST request to the checkin_view
+        response = client.post(reverse('checkin_view'), data=json.dumps(self.WRONG_TYPE_TEXT), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400
+        self.assertEqual(response.status_code, 400)
+
+        
+
     def test_checkin_failure_wrong_content_type_photo(self): #test of failure due to wrong content type for photo
         # logging the test we are in
         logging.info(("TESTING CHECKIN_failure_wrong_content_type_photo....").upper())
         client = Client()
+
+        # Make a POST request to the checkin_view
+        response = client.post(reverse('checkin_view'), data=json.dumps(self.WRONG_TYPE_PHOTO), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400
+        self.assertEqual(response.status_code, 400)
 
     def test_checkin_failure_wrong_content_type_audio(self): #test of failure due to wrong content type for audio
         # logging the test we are in
         logging.info(("TESTING CHECKIN_failure_wrong_content_type_audio....").upper())
         client = Client()
 
+         # Make a POST request to the checkin_view
+        response = client.post(reverse('checkin_view'), data=json.dumps(self.WRONG_TYPE_AUDIO), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400
+        self.assertEqual(response.status_code, 400)
+
     def test_checkin_failure_wrong_content_type_video(self): #test of failure due to wrong content type for video
         # logging the test we are in
         logging.info(("TESTING CHECKIN_failure_wrong_content_type_video....").upper())
         client = Client()
+
+         # Make a POST request to the checkin_view
+        response = client.post(reverse('checkin_view'), data=json.dumps(self.WRONG_TYPE_VIDEO), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400
+        self.assertEqual(response.status_code, 400)
 
     def test_checkin_failure_duplicate_moment(self): #test of failure due to duplicate moment for the same day and user
         # logging the test we are in
         logging.info(("TESTING CHECKIN_failure_duplicate_moment....").upper())
         client = Client()
 
+        # Make two POST requests to the checkin_view to simulate a duplicate moment
+        response = client.post(reverse('checkin_view'), data=json.dumps(self.DUPLICATE_MOMENT), content_type=CONTENT_TYPE_JSON)
+        response2 = client.post(reverse('checkin_view'), data=json.dumps(self.DUPLICATE_MOMENT), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400
+        self.assertEqual(response.status_code, 200) #first should work
+        self.assertEqual(response2.status_code, 400) #second should cause error
+
     def test_checkin_failure_invalid_userid(self): #test of failure due to invalid user id (foreign key)
         # logging the test we are in
         logging.info(("TESTING CHECKIN_failure_invalid_userid....").upper())
         client = Client()
+
+        # Make a POST request to the checkin_view
+        response = client.post(reverse('checkin_view'), data=json.dumps(self.INVALID_USERID), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400
+        self.assertEqual(response.status_code, 400)
 
 
 

@@ -9,12 +9,14 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Platform,
+  ActivityIndicator,
   Keyboard,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import axios from "axios";
+import { LinearGradient } from "expo-linear-gradient";
 import IP_ADDRESS from "../../ip.js";
 import * as Storage from "../../AsyncStorage.js";
+import makeThemeStyle from '../../Theme.js';
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 console.log(API_URL);
@@ -22,19 +24,20 @@ console.log(API_URL);
 const Login = ({ navigation }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState(
-    <View style={styles.errorMessageBoxInvisible}>
-      <Text testID="errorMessage" style={styles.errorMessageTextInvisible}>Null</Text>
-    </View>
-  );
+  const [errorMessage, setErrorMessage] = useState(null);
+  const theme = makeThemeStyle();
 
   const saveUsername = async () => {
     await Storage.setItem("@username", username);
     console.log("successfully saved username")
   };
 
-  const navigateSignOn = () => {
+  const navigateSignUp = () => {
     navigation.navigate("Signup");
+  };
+
+  const navigateForgotPassword = () => {
+    navigation.navigate("ForgotPassword");
   };
 
   const navigateDrawer = () => {
@@ -50,6 +53,9 @@ const Login = ({ navigation }) => {
   };
 
   const handleLogin = async () => {
+    setErrorMessage(
+      <ActivityIndicator />
+    );
     const getCsrfToken = async () => {
       try {
         const response = await axios.get(`${API_URL}/csrf-token/`);
@@ -100,19 +106,21 @@ const Login = ({ navigation }) => {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}
+        style={[styles.container, theme["background"]]}
       >
-        <Image source={require("../../assets/logo.png")} style={styles.logo} />
+        <Image source={require("../../assets/images/logo.png")} style={styles.logo} />
         {errorMessage}
         <TextInput
-          style={styles.input}
+          style={[styles.input, theme["color"]]}
+          placeholderTextColor={theme["color"].color}
           placeholder="Username"
           onChangeText={(text) => setUsername(text)}
           value={username}
           testID="usernameInput"
         />
         <TextInput
-          style={styles.input}
+          style={[styles.input, theme["color"]]}
+          placeholderTextColor={theme["color"].color}
           placeholder="Password"
           onChangeText={(text) => setPassword(text)}
           value={password}
@@ -121,27 +129,23 @@ const Login = ({ navigation }) => {
         />
         <View>
           <View style={{ flexDirection: "row" }}>
-            <TouchableOpacity onPress={handleLogin} testID="loginButton">
-              <LinearGradient
-                colors={["#69a5ff", "#10c3e3"]}
-                start={[0, 1]}
-                end={[1, 0]}
-                style={styles.button}
-              >
-                <Text style={styles.buttonText}>Login</Text>
-              </LinearGradient>
+            <TouchableOpacity style={styles.button} onPress={handleLogin} testID="loginButton">
+              <Text style={styles.buttonText}>Login</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={navigateSignOn}>
-              <LinearGradient
-                colors={["#69a5ff", "#10c3e3"]}
-                start={[0, 1]}
-                end={[1, 0]}
-                style={styles.button}
-              >
-                <Text style={styles.buttonText}>Sign Up</Text>
-              </LinearGradient>
+            <TouchableOpacity style={styles.button} onPress={navigateSignUp}>
+              <Text style={styles.buttonText}>Sign Up</Text>
             </TouchableOpacity>
           </View>
+          <View style={styles.forgot}>
+            <TouchableOpacity onPress={navigateForgotPassword}>
+              <Text style={styles.forgotText}>Forgot Password?</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* <TouchableOpacity style={styles.button} onPress={navigateDrawer}>
+                <Text style={styles.buttonText}>Temp Drawer</Text> 
+          </TouchableOpacity> */}
+
         </View>
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
@@ -182,7 +186,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   button: {
-    backgroundColor: "#6c94b4",
+    backgroundColor: "#4A90E2",
     paddingVertical: 10,
     paddingHorizontal: 50,
     marginTop: 10,
@@ -218,20 +222,27 @@ const styles = StyleSheet.create({
     color: "#ff0000",
   },
   errorMessageBoxInvisible: {
-    backgroundColor: "white",
     paddingVertical: 10,
     paddingHorizontal: 50,
     marginTop: 5,
     marginBottom: 10,
     marginHorizontal: 5,
     width: "80%",
-    shadowColor: "white",
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 6,
     shadowOpacity: 0.06,
   },
   errorMessageTextInvisible: {
     color: "white",
+  },
+  forgot: {
+    marginTop: 50,
+    alignContent: "center",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  forgotText: {
+    color: "#4A90E2",
   },
 });
 

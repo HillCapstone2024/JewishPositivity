@@ -7,29 +7,90 @@ import {
   TextInput,
   Keyboard,
   InputAccessoryView,
+  Animated,
 } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { Audio } from "expo-av";
+import * as FileSystem from "expo-file-system";
 
-export default function RecordingAccessoryBar({ onRecordingComplete }) {
-    const [startedRecording, setStartedRecording] = useState(false);
+export default function RecordingAccessoryBar({
+  onRecordingComplete,
+  toggleRecording,
+}) {
+  const [startedRecording, setStartedRecording] = useState(false);
+  const [stoppedRecording, setStoppedRecording] = useState(false);
   const [recording, setRecording] = useState(null);
-  const [isRecordingPaused, setIsRecordingPaused] = useState(false);
-  const [audioPermission, setAudioPermission] = useState();
+  const [audioPermission, setAudioPermission] = useState(true);
 
   const [sound, setSound] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
   const [timerRunning, setTimerRunning] = useState(false);
   const timerRef = useRef();
-  const [duration, setDuration] = useState(0); // Duration of the recording in seconds
+  const [duration, setDuration] = useState(0);
+  const [formattedDuration, setFormattedDuration] = useState("0:01");
 
   const durationRef = useRef(duration);
   durationRef.current = duration;
 
   const [recordingUri, setRecordingUri] = useState(null);
-  const accessoryViewID = "recordingview";
+  const [recordingState, setRecordingState] = useState(false);
+
+  //Animation logic below
+
+  const playButtonAnim = useRef(new Animated.Value(-100)).current;
+  const [iconAnim] = useState(new Animated.Value(0));
+
+  const startThrobAnimation = () => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(iconAnim, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: false,
+        }),
+        Animated.timing(iconAnim, {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: false,
+        }),
+      ])
+    ).start();
+  };
+
+  const iconColor = iconAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["white", "red"], // Change 'red' to your desired color
+  });
+  const AnimatedIcon = Animated.createAnimatedComponent(Ionicons);
+
+  useEffect(() => {
+    if (isPlaying) {
+      startThrobAnimation();
+    } else {
+      iconAnim.setValue(0); // Reset the animation value
+      // Stop all animations
+      Animated.loop(Animated.timing(iconAnim)).stop();
+    }
+  }, [isPlaying]);
+
+  useEffect(() => {
+    console.log("stopped recording state change.");
+    playButtonAnim.setValue(-100);
+    Animated.timing(playButtonAnim, {
+      toValue: 0,
+      duration: 80,
+      useNativeDriver: true,
+    }).start();
+  }, [stoppedRecording]);
+
+  //toggle which bar to show
+  useEffect(() => {
+    if (recordingState) {
+      sendRecordingState();
+    }
+  }, [recordingState]);
 
   useEffect(() => {
     return sound
@@ -40,36 +101,85 @@ export default function RecordingAccessoryBar({ onRecordingComplete }) {
       : undefined;
   }, [sound]);
 
-
   useEffect(() => {
+    //use effect for incrementing timer
     if (timerRunning) {
-      // Start the timer
       timerRef.current = setInterval(() => {
         setDuration((prevDuration) => prevDuration + 1);
       }, 1000);
     } else if (!timerRunning && timerRef.current) {
-      // Clear the timer if it's running
       clearInterval(timerRef.current);
     }
 
-    // Cleanup on component unmount
     return () => clearInterval(timerRef.current);
   }, [timerRunning]);
 
+  useEffect(() => {
+    //formatting the time
+    setFormattedDuration(formatSeconds(duration));
+  }, [duration]);
+
+  function formatSeconds(secondsString) {
+    const totalSeconds = parseInt(secondsString, 10);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    const formattedMinutes = minutes.toString().padStart(2, "0");
+    const formattedSeconds = seconds.toString().padStart(2, "0");
+
+    return `${formattedMinutes}:${formattedSeconds}`;
+  }
+
+  // useEffect(() => {
+  //   return () => {
+  //     recording && cleanupRecording();
+  //   };
+  // }, [recording]);
+
+  //Recording functionality below
+
+  const cleanupRecording = async () => {
+    try {
+      await recording.stopAndUnloadAsync();
+    } catch (error) {
+      console.error("Failed to unload the recording", error);
+    }
+    setRecording(null);
+    setStartedRecording(false);
+  };
 
   async function requestAudioPermissions() {
     const response = await Audio.requestPermissionsAsync();
     setAudioPermission(response.status === "granted");
   }
+
+  const saveRecording = () => {
+    //To send the uri back to parent page
+    console.log("Recording saved at:", recordingUri);
+    if (onRecordingComplete) {
+      onRecordingComplete(recordingUri);
+    }
+  };
+
+  const deleteRecording = async () => {
+    try {
+      await FileSystem.deleteAsync(recordingUri);
+      console.log("Recording deleted successfully");
+      // Additional logic after successful deletion (e.g., update state)
+      setRecordingUri(null);
+      setStoppedRecording(false);
+      setDuration(0);
+    } catch (error) {
+      console.error("Error deleting recording:", error);
+    }
+  };
+
   async function startRecording() {
-    console.log("recording media");
     if (!audioPermission) {
       await requestAudioPermissions();
     }
-    console.log(audioPermission);
     if (audioPermission) {
-      console.log("attempting to record, granted perms");
       try {
+        console.log("beginning recording...");
         await Audio.setAudioModeAsync({
           allowsRecordingIOS: true,
           playsInSilentModeIOS: true,
@@ -77,158 +187,163 @@ export default function RecordingAccessoryBar({ onRecordingComplete }) {
           interruptionModeIOS: 1,
           interruptionModeAndroid: 1,
         });
-
-        const { recording } = await Audio.Recording.createAsync(
+        const newRecording = new Audio.Recording();
+        await newRecording.prepareToRecordAsync(
           Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
         );
-            setStartedRecording(true);
-        setRecording(recording);
-        console.log("recording is :", recording);
+        await newRecording.startAsync();
+        setRecording(newRecording);
+        setStartedRecording(true);
         setDuration(0);
         setTimerRunning(true);
+        console.log("recording now");
       } catch (err) {
         console.error("Failed to start recording", err);
       }
     } else {
       alert("Audio recording permissions are required to use this feature.");
     }
-  };
+  }
 
-  const stopRecording = async () => {
-    if (!recording) return;
-
-    await recording.stopAndUnloadAsync();
-    const uri = recording.getURI();
-    setRecordingUri(uri);
-    setRecording(null);
-    setTimerRunning(false);
-  };
-
-  const pauseRecording = async () => {
-    if (!recording) return;
-
-    await recording.pauseAsync();
-    setIsRecordingPaused(true);
-    setTimerRunning(false);
-    const uri = recording.getURI();
-    setRecordingUri(uri);
-    console.log('recording paused');
-  };
-
-  const resumeRecording = async () => {
-    if (!recording) return;
-
-    await recording.startAsync();
-    setIsRecordingPaused(false);
-    setTimerRunning(true);
-  };
-
-  const saveRecording = () => {
-    // Logic to save the recordingUri somewhere permanent
-    console.log("Recording saved at:", recordingUri);
-    if (onRecordingComplete) {
-      onRecordingComplete(recordingUri);
+  async function stopRecording() {
+    if (recording) {
+      console.log("stopping recording...");
+      setRecording(null);
+      await recording.stopAndUnloadAsync();
+      const uri = recording.getURI();
+      setRecordingUri(uri);
+      console.log("Recording stopped and stored at", uri);
+      setStoppedRecording(true);
+      setStartedRecording(false);
+      setTimerRunning(false);
+    } else {
     }
-  };
+  }
 
   async function playRecording() {
-    if (!recordingUri) return;
-
-    console.log("Loading Sound");
-    const { sound } = await Audio.Sound.createAsync(
-      { uri: recordingUri },
-      { shouldPlay: true }
-    );
-
-    setSound(sound);
-
-    console.log("Playing Sound");
-    await sound.playAsync();
-    setIsPlaying(true);
-
-    // Stop and unload sound when playback is done
-    sound.setOnPlaybackStatusUpdate(async (playbackStatus) => {
-      if (!playbackStatus.isLoaded || playbackStatus.didJustFinish) {
+    if (recordingUri) {
+      setIsPlaying(true);
+      console.log("playing recording...");
+      const sound = new Audio.Sound();
+      try {
+        await sound.loadAsync({ uri: recordingUri });
+        await sound.playAsync();
         setIsPlaying(false);
-        await sound.unloadAsync();
-        setSound(null);
+      } catch (error) {
+        console.error("Failed to play the recording", error);
+        setIsPlaying(false);
       }
-    });
+    }
+  }
+
+  function sendRecordingState() {
+    console.log("sending recording state");
+    if (toggleRecording) {
+      toggleRecording(!recordingState);
+    }
   }
 
   return (
     <View style={{ flex: 1 }}>
-      <TextInput
-        style={{ height: 40, borderColor: "gray", borderWidth: 1 }}
-        placeholder="Tap here to show the keyboard"
-        inputAccessoryViewID={accessoryViewID}
-      />
-      <InputAccessoryView nativeID={accessoryViewID}>
+      {!stoppedRecording ? (
         <View style={styles.barContainer}>
-          <Text>Recording: {duration} seconds</Text>
-          {/* {recording && !isRecordingPaused ? (
-            <Button title="Pause" onPress={pauseRecording} />
-          ) : (
-            <Button
-              title="Resume"
-              onPress={resumeRecording}
-              disabled={!recording}
-              styles={styles.barButton}
-            />
-          )} */}
           <TouchableOpacity
-            style={styles.barButton}
-            onPress={
-              !isRecordingPaused && startedRecording
-                ? pauseRecording
-                : startedRecording
-                ? resumeRecording
-                : startRecording()
-            }
+            style={[
+              styles.returnButton,
+              { transform: [{ translateX: playButtonAnim }] },
+            ]}
+            // disabled="true"
+            onPress={() => {
+              if (toggleRecording) {
+                console.log("toggled recording");
+                toggleRecording(false);
+              }
+            }}
           >
-            <Ionicons
-              name={isRecordingPaused || !startedRecording ? "play" : "pause"}
-              size={25}
-              color="white"
-            />
+            <Ionicons name={"return-up-back"} size={25} color="white" />
           </TouchableOpacity>
-          {/* <Button
-            title={recording ? "Stop" : "Start"}
-            onPress={recording ? stopRecording : startRecording}
-          /> */}
-          {/* <TouchableOpacity
-            style={styles.barButton}
-            onPress={recording ? stopRecording : startRecording}
+          <Animated.View
+            style={[
+              styles.durationTextContainer,
+              { transform: [{ translateX: playButtonAnim }] },
+            ]}
+            v={formattedDuration}
           >
-            <Ionicons
-              name={recording ? "pause" : "play"}
-              size={25}
-              color="white"
-            />
-          </TouchableOpacity> */}
-          {/* <Button
-            title="Save"
-            onPress={saveRecording}
-            disabled={!recordingUri}
-          /> */}
-
-          {/* <Button
-            title="Play Recording"
-            onPress={playRecording}
-            disabled={!recordingUri || isPlaying}
-          /> */}
-          <TouchableOpacity
-            style={styles.barButton}
-            onPress={playRecording}
-            disabled={!recordingUri || isPlaying}
+            <Text style={styles.durationText}>{formattedDuration}</Text>
+          </Animated.View>
+          <Animated.View
+            style={[
+              styles.playButton,
+              { transform: [{ translateX: playButtonAnim }] },
+            ]}
           >
-            <Ionicons name="headset" size={25} color="white" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.barButton} onPress={saveRecording}>
-            <Ionicons name="send" size={25} color="white" />
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={startedRecording ? stopRecording : startRecording}
+            >
+              <Ionicons
+                name={!startedRecording ? "play" : "pause"}
+                size={25}
+                color="white"
+              />
+            </TouchableOpacity>
+          </Animated.View>
         </View>
-      </InputAccessoryView>
+      ) : (
+        <View style={styles.barContainer}>
+          {/* <Animated.View
+            style={[
+              styles.returnButton,
+              { transform: [{ translateX: playButtonAnim }] },
+            ]}
+          > */}
+          <TouchableOpacity
+            style={[
+              styles.returnButton,
+              { transform: [{ translateX: playButtonAnim }] },
+            ]}
+            // disabled="true"
+            onPress={() => {
+              if (toggleRecording) {
+                console.log("toggled recording");
+                toggleRecording(false);
+              }
+            }}
+          >
+            <Ionicons name={"return-up-back"} size={25} color="white" />
+          </TouchableOpacity>
+          {/* </Animated.View> */}
+          <Animated.View
+            style={[
+              styles.deleteButton,
+              { transform: [{ translateX: playButtonAnim }] },
+            ]}
+          >
+            <TouchableOpacity onPress={deleteRecording}>
+              <Ionicons name={"close"} size={25} color="white" />
+            </TouchableOpacity>
+          </Animated.View>
+          <Animated.View
+            style={[
+              styles.listenButton,
+              { transform: [{ translateX: playButtonAnim }] },
+            ]}
+          >
+            <TouchableOpacity onPress={playRecording}>
+              <Ionicons name={"headset"} size={25} color="white" />
+            </TouchableOpacity>
+          </Animated.View>
+          <Animated.View
+            style={[
+              styles.sendButton,
+              { transform: [{ translateX: playButtonAnim }] },
+            ]}
+          >
+            <TouchableOpacity onPress={saveRecording}>
+              <Ionicons name={"send"} size={25} color="white" />
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
+      )}
     </View>
   );
 }
@@ -236,25 +351,79 @@ export default function RecordingAccessoryBar({ onRecordingComplete }) {
 const styles = StyleSheet.create({
   barContainer: {
     flexDirection: "row",
-    // justifyContent: "space-around",
-    // position: "absolute",
     alignItems: "center",
-    // left: 0,
-    // right: 0,
-    backgroundColor: "yellow",
+    backgroundColor: "#d0d3d9",
     flex: 1,
+    borderColor: "grey",
+    borderTopWidth: 1,
+    borderColor: "#bbbec3",
   },
   barButton: {
-    // flex: 1,
-    // width: '100%',
-    backgroundColor: "#4F8EF7",
-    // borderWidth: 1,
-    // borderColor: "black",
-    alignItems: "center",
-    padding: 5,
-    // marginHorizontal: 10,
-    // flex: 1,
+    backgroundColor: "#d0d3d9",
     alignSelf: "stretch",
     flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  playButton: {
+    backgroundColor: "#d0d3d9",
+    padding: 7,
+    alignSelf: "stretch",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  returnButton: {
+    padding: 7,
+    alignSelf: "stretch",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#d0d3d9",
+    flex: 1,
+  },
+  durationTextContainer: {
+    padding: 7,
+    alignSelf: "stretch",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#d0d3d9",
+    flex: 1,
+    color: "white",
+  },
+  durationText: {
+    color: "white",
+  },
+  sendButton: {
+    backgroundColor: "#d0d3d9",
+    alignItems: "center",
+    padding: 7,
+    alignSelf: "stretch",
+    flexDirection: "row",
+    marginLeft: "0%",
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 10,
+  },
+  listenButton: {
+    backgroundColor: "#d0d3d9",
+    alignItems: "center",
+    padding: 7,
+    justifyContent: "center",
+    alignSelf: "stretch",
+    flexDirection: "row",
+    // marginLeft: "30%",
+    marginHorizontal: 10,
+  },
+  deleteButton: {
+    backgroundColor: "#d0d3d9",
+    alignItems: "center",
+    padding: 7,
+    justifyContent: "center",
+    alignSelf: "stretch",
+    flexDirection: "row",
+    // marginHorizontal: 10,
+    marginLeft: 220,
   },
 });

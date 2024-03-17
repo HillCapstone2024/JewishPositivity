@@ -1,30 +1,31 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Dimensions, useColorScheme } from 'react-native';
 import { Video, ResizeMode } from 'expo-av';
+import LoadingScreen from './Loading';
+import makeThemeStyle from '../../Theme.js';
 
 const Landing = ({ navigation }) => {
     const [videoName, setVideoName] = useState(null);
-    const colorScheme = useColorScheme();
-    const isDarkMode = colorScheme === 'dark';
+    const theme = makeThemeStyle();
 
     useEffect(() => {
-        if (colorScheme === 'dark') {
+        if (theme['theme'] == 'dark') {
             setVideoName(require("../../assets/LandingDark.mp4"));
         } else {
             setVideoName(require("../../assets/LandingLight.mp4"));
         }
-    }, [colorScheme]);
+    });
+
     const words = [
         ["Practice", "Gratitude"],
         ["Share", "Positivity"],
         ["Spread", "Kindness"],
-        ["Foster", "Unity"],
         ["Engage in your", "Community"],
-        ["Embrace", "Empathy"],
-        ["Cultivate", "Resilience"],
+        ["Promote", "Inclusivity"],
         ["Encourage", "Compassion"],
+        ["Foster", "Unity"],
+        ["Embrace", "Empathy"],
         ["Cherish", "Friendship"],
-        ["Promote", "Inclusivity"]
     ];
 
     const handleLogin = () => {
@@ -37,6 +38,7 @@ const Landing = ({ navigation }) => {
     const screenWidth = Dimensions.get('window').width;
     const screenHeight = Dimensions.get('window').height;
     const translateX = useRef(new Animated.Value(-screenWidth)).current;
+    const translateX2 = useRef(new Animated.Value(-screenWidth)).current;
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -59,8 +61,25 @@ const Landing = ({ navigation }) => {
                 toValue: 0,
                 duration: 1000,
                 useNativeDriver: true,
+                delay: 100
             }),
             Animated.timing(translateX, {
+                toValue: -screenWidth,
+                duration: 1000,
+                useNativeDriver: true,
+                delay: 3150 // Delay before sliding out
+            })
+        ]).start();
+
+        translateX2.setValue(-screenWidth);
+
+        Animated.sequence([
+            Animated.timing(translateX2, {
+                toValue: 0,
+                duration: 1000,
+                useNativeDriver: true,
+            }),
+            Animated.timing(translateX2, {
                 toValue: -screenWidth,
                 duration: 1000,
                 useNativeDriver: true,
@@ -70,8 +89,8 @@ const Landing = ({ navigation }) => {
     }, [currentIndex]);
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.header}>Jewish Positivity</Text>
+        <View style={[styles.container, theme["background"]]}>
+            <Text style={[styles.header, theme["color"]]}>Jewish Positivity</Text>
             <Video
                 ref={video}
                 style={styles.backgroundVideo}
@@ -84,8 +103,10 @@ const Landing = ({ navigation }) => {
             />
             <View style={styles.wordContainer}>
                 <Animated.View style={[styles.wordPair, { transform: [{ translateX }] }]}>
-                    <Text style={[styles.wordOne, { color: isDarkMode ? 'white' : 'black' }]}>{words[currentIndex][0]}</Text>
-                    <Text style={[styles.wordTwo, { color: isDarkMode ? 'white' : 'black' }]}>{words[currentIndex][1]}</Text>
+                    <Text style={[styles.wordOne, theme["color"]]}>{words[currentIndex][0]}</Text>
+                </Animated.View>
+                <Animated.View style={[styles.wordPair, { transform: [{ translateX: translateX2 }] }]}>
+                    <Text style={[styles.wordTwo, theme["color"]]}>{words[currentIndex][1]}</Text>
                 </Animated.View>
             </View>
             <View style={styles.contentContainer}>
@@ -111,6 +132,7 @@ const styles = StyleSheet.create({
         left: 0,
         bottom: 0,
         right: 0,
+        opacity: 0.5,
     },
     wordContainer: {
         width: '100%',
@@ -121,25 +143,23 @@ const styles = StyleSheet.create({
         alignItems: 'left',
     },
     wordOne: {
-        fontSize: Dimensions.get('window').width / 9,
+        fontSize: Dimensions.get('window').width / 10,
         fontWeight: 'bold',
         marginHorizontal: 10,
     },
     wordTwo: {
         fontSize: Dimensions.get('window').width / 6,
-        color: 'white',
         fontWeight: 'bold',
         marginHorizontal: 10,
     },
     continueButton: {
-        backgroundColor: '#96d7ff',
+        backgroundColor: '#4A90E2',
         textAlign: 'center',
         alignContent: 'center',
         paddingVertical: 10,
         paddingHorizontal: 20,
-        width: Dimensions.get('window').width / 3,
-        height: Dimensions.get('window').width / 9,
         borderRadius: 15,
+        shadowColor: "4A90E2",
     },
     buttonText: {
         alignContent: 'center',
@@ -152,7 +172,7 @@ const styles = StyleSheet.create({
         alignContent: 'center',
         textAlign: 'center',
         fontSize: 30,
-        top: 21,
+        paddingTop: 50,
         fontWeight: 'bold',
         zIndex: 1,
     },

@@ -1,51 +1,24 @@
-import onesignal
-from onesignal.api import default_api
-from onesignal.model.generic_error import GenericError
-from onesignal.model.rate_limiter_error import RateLimiterError
-from onesignal.model.notification import Notification
-from onesignal.model.create_notification_success_response import CreateNotificationSuccessResponse
-from pprint import pprint
 import requests
-import datetime
-import pytz
+from pathlib import Path
+import os
+from dotenv import load_dotenv
+load_dotenv()
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-# See configuration.py for a list of all supported configuration parameters.
-# Some of the OneSignal endpoints require USER_KEY bearer token for authorization as long as others require APP_KEY
-# (also knows as REST_API_KEY). We recommend adding both of them in the configuration page so that you will not need
-# to figure it yourself.
-configuration = onesignal.Configuration(
-    app_key = "ec16a462-d3d0-4fa3-85cd-d4bdaa8e98a8",
-    user_key = "Mzk5MzcxMzgtNDQ2MS00OGFiLThkZTgtYWFkNzQ5NjVlMWNi"
-)
-rest_api_key = '\u003cZmM3MzI1ZTMtY2E1NC00ZDMwLTk0YTMtNDI5ODQzMmU5MmQy\u003e'
+App_Key = os.getenv("App_Key")
+Rest_API_KEY = os.getenv("Rest_API_KEY")
+
 headers = {
-    'Authorization': f"Basic {rest_api_key}",
+    'Authorization': f"Basic \u003c{Rest_API_KEY}\u003e",
     'Content-Type': 'application/json'
 }
 
-# print(headers)
-# Define the Eastern Timezone (EST/EDT)
-est_timezone = pytz.timezone('America/New_York')
-
-# Create a datetime object for March 14th, 2024, 5:00 PM EST
-scheduled_time_est = est_timezone.localize(datetime.datetime(2024, 3, 14, 17, 5, 0))
-
-# Convert the scheduled time to UTC
-scheduled_time_utc = scheduled_time_est.astimezone(pytz.utc)
-
-# Format the UTC time according to OneSignal's format
-send_after = scheduled_time_utc.strftime('%Y-%m-%d %H:%M:%S GMT')
-
-print("Scheduled Time (EST):", scheduled_time_est)
-print("Scheduled Time (UTC):", scheduled_time_utc)
-print("Formatted Send After:", send_after)
-
 payload = {
-    "app_id": configuration.app_key,
-    "contents": {"en": "Testing sending to specific users."},
+    "app_id": App_Key,
+    "contents": {"en": "Testing sending to test_brian user."},
     "target_channel": "push",
-    "include_aliases": { "external_id": ["admin2"]}
-    #"send_after": send_after,
+    "include_aliases": { "external_id": ["brian_test"]}
 }
 
 response = requests.post("https://onesignal.com/api/v1/notifications", headers=headers, json=payload)

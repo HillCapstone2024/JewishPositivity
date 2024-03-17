@@ -10,13 +10,20 @@ import {
   Image,
   TouchableWithoutFeedback,
   Keyboard,
+  ActivityIndicator
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import axios from "axios";
 import IP_ADDRESS from "../../ip.js";
 import * as Storage from "../../AsyncStorage.js";
+import makeThemeStyle from '../../Theme.js';
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
+
+// import { LogLevel, OneSignal } from "react-native-onesignal";
+// import Constants from "expo-constants";
+
+// OneSignal.Debug.setLogLevel(LogLevel.Verbose);
+// OneSignal.initialize(Constants.expoConfig.extra.oneSignalAppId);
 
 const Signup = ({ navigation }) => {
   const [username, setUsername] = useState("");
@@ -25,11 +32,8 @@ const Signup = ({ navigation }) => {
   const [lastname, setLastname] = useState("");
   const [email, setEmail] = useState("");
   const [reentered_password, setReentered_password] = useState("");
-  const [errorMessage, setErrorMessage] = useState(
-    <View style={styles.errorMessageBoxInvisible}>
-      <Text style={styles.errorMessageTextInvisible}>Null</Text>
-    </View>
-  );
+  const [errorMessage, setErrorMessage] = useState(null);
+  const theme = makeThemeStyle();
 
   const saveUsername = async () => {
     await Storage.setItem("@username", username);
@@ -40,11 +44,16 @@ const Signup = ({ navigation }) => {
     navigation.navigate("Login");
   };
 
-  const navigateTimes = () => {
+  const navigateDrawer = () => {
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "Drawer" }]
+    });
     navigation.navigate("Drawer");
   };
 
   const handleSignup = async () => {
+    setErrorMessage(<ActivityIndicator/>);
     const getCsrfToken = async () => {
       try {
         const response = await axios.get(`${API_URL}/csrf-token/`);
@@ -77,7 +86,10 @@ const Signup = ({ navigation }) => {
       );
       console.log("Signup response:", response.data);
       saveUsername();
-      navigateTimes();
+      // OneSignal.login(username);
+      // console.log("OneSignal login successful");
+      // console.log(username);
+      navigateDrawer();
     } catch (error) {
       console.log(error)
       setErrorMessage(
@@ -91,52 +103,57 @@ const Signup = ({ navigation }) => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}
+        style={[styles.container, theme["background"]]}
       >
-        <Image source={require("../../assets/logo.png")} style={styles.logo} />
+        <Image source={require("../../assets/images/logo.png")} style={styles.logo} />
         {errorMessage}
         <TextInput
-          style={styles.input}
+          style={[styles.input, theme["color"]]}
           placeholder="Email"
+          placeholderTextColor={theme["color"].color}
           onChangeText={(text) => setEmail(text)}
           value={email}
           testID="emailInput"
         />
         <TextInput
-          style={styles.input}
+          style={[styles.input, theme["color"]]}
           placeholder="Username"
+          placeholderTextColor={theme["color"].color}
           onChangeText={(text) => setUsername(text)}
           value={username}
           testID="usernameInput"
         />
         <TextInput
-          style={styles.input}
+          style={[styles.input, theme["color"]]}
           placeholder="First Name"
+          placeholderTextColor={theme["color"].color}
           onChangeText={(text) => setFirstname(text)}
           value={firstname}
           testID="firstNameInput"
         />
         <TextInput
-          style={styles.input}
+          style={[styles.input, theme["color"]]}
           placeholder="Last Name"
+          placeholderTextColor={theme["color"].color}
           onChangeText={(text) => setLastname(text)}
           value={lastname}
           testID="lastNameInput"
         />
         <TextInput
-          style={styles.input}
+          style={[styles.input, theme["color"]]}
           placeholder="Password"
+          placeholderTextColor={theme["color"].color}
           onChangeText={(text) => setPassword(text)}
           value={password}
           secureTextEntry
           testID="passwordInput"
         />
         <TextInput
-          style={styles.input}
+          style={[styles.input, theme["color"]]}
           placeholder="Verify Password"
+          placeholderTextColor={theme["color"].color}
           onChangeText={(text) => setReentered_password(text)}
           value={reentered_password}
           secureTextEntry
@@ -144,29 +161,13 @@ const Signup = ({ navigation }) => {
         />
         <View>
           <View style={{ flexDirection: "column" }}>
-            <TouchableOpacity onPress={handleSignup}>
-              <LinearGradient
-                // Button Linear Gradient
-                colors={["#69a5ff", "#10c3e3"]}
-                start={[0, 1]}
-                end={[1, 0]}
-                style={styles.button}
-              >
-                <Text testID="signupButton" style={styles.buttonText}>
-                  Sign Up
-                </Text>
-              </LinearGradient>
+            <TouchableOpacity style={styles.button} onPress={handleSignup}>
+              <Text testID="signupButton" style={styles.buttonText}>
+                Sign Up
+              </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={navigateLogin}>
-              <LinearGradient
-                // Button Linear Gradient
-                colors={["#69a5ff", "#10c3e3"]}
-                start={[0, 1]}
-                end={[1, 0]}
-                style={styles.button}
-              >
-                <Text style={styles.buttonText}>Already a Member?</Text>
-              </LinearGradient>
+            <TouchableOpacity style={styles.button} onPress={navigateLogin}>
+              <Text style={styles.buttonText}>Already a Member?</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -183,8 +184,8 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   logo: {
-    width: 150,
-    height: 150,
+    width: 180,
+    height: 180,
     shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 6,
@@ -206,7 +207,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   button: {
-    //backgroundColor: '#6c94b4',
+    backgroundColor: '#4A90E2',
     paddingVertical: 10,
     paddingHorizontal: 50,
     marginTop: 10,

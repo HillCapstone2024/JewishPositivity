@@ -14,26 +14,26 @@ import {
   Settings,
   Alert,
   Keyboard,
+  ImageBackground,
+  TouchableOpacity,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
-import UserProfile from "../screens/home/Profile.js";
-import SettingsPage from "../screens/home/Settings.js";
 import * as Storage from "../AsyncStorage.js";
 import { createAvatar } from "@dicebear/core";
 import { micah } from "@dicebear/collection";
 import { SvgXml } from "react-native-svg";
 import BottomTabNavigator from "./BottomTabNavigator.js";
+import makeThemeStyle from '../Theme.js';
+
+import UserProfile from "../screens/home/Profile.js";
+import SettingsPage from "../screens/home/Settings.js";
 
 const Drawer = createDrawerNavigator();
 
 const CustomDrawerContent = (props) => {
   const [username, setUsername] = useState("");
-  const avatar = createAvatar(micah, {
-    seed: Storage.getItem("@username") || "No username",
-    radius: 50,
-    mouth: ["smile", "smirk", "laughing"],
-  }).toString();
+  const theme = makeThemeStyle();
 
   const handleLogout = () => {
     const logout = async () => {
@@ -58,50 +58,45 @@ const CustomDrawerContent = (props) => {
 
     loadUsername();
   }, []);
+
+  const avatar = createAvatar(micah, {
+    seed: username,
+    radius: 50,
+    mouth: ["smile", "smirk", "laughing"],
+  }).toString();
+
   return (
-    <DrawerContentScrollView {...props}>
-      <View style={styles.drawerHeader}>
+    <View style={{flex: 1}}>
+      <DrawerContentScrollView
+        {...props}
+        contentContainerStyle={{backgroundColor: '#4A90E2'}}>
+        <ImageBackground
+          source={require('../assets/images/profile_background.png')}
+          style={{padding: 20}}>
         <SvgXml xml={avatar} style={styles.drawerImage} />
-        <Text testID="usernameText" style={styles.drawerUsername}>{username}</Text>
+        <Text testID="usernameText" style={[styles.drawerUsername, theme["color"]]}>{username}</Text>
+        </ImageBackground>
+        <View style={{flex: 1, backgroundColor: '#fff', paddingTop: 10}}>
+          <DrawerItemList {...props} />
+        </View>
+      </DrawerContentScrollView>
+
+      <View style={{padding: 20, borderTopWidth: 1, borderTopColor: '#ccc'}}>
+        {/* <TouchableOpacity onPress={() => {}} style={{paddingVertical: 15}}>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Ionicons name="share-social-outline" size={22} />
+            <Text style={styles.drawerText}> Share </Text>
+          </View>
+        </TouchableOpacity> */}
+
+        <TouchableOpacity onPress={handleLogout} style={{paddingVertical: 15}}>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Ionicons name="exit-outline" size={22} />
+            <Text style={styles.drawerText}> Logout </Text>
+          </View>
+        </TouchableOpacity>   
       </View>
-      <DrawerItem label="Home"
-        icon={({ color, size }) => (
-          <Ionicons name="home" color={color} size={size} />
-        )}
-        inactiveBackgroundColor="white"
-        component={BottomTabNavigator}
-        onPress={() => props.navigation.navigate("Home")}
-      />
-      <DrawerItem label="Profile"
-        testID="profileButton"
-        icon={({ color, size }) => (
-          <Ionicons name="person" color={color} size={size} />
-        )}
-        inactiveBackgroundColor="white"
-        component={UserProfile}
-        onPress={() => props.navigation.navigate("UserProfile")}
-      />
-      <DrawerItem label="Settings"
-        icon={({ color, size }) => (
-          <Ionicons name="settings" color={color} size={size} />
-        )}
-        inactiveBackgroundColor="white"
-        onPress={() => props.navigation.navigate("SettingsPage")}
-      />
-      <DrawerItem label="My Communities"
-        icon={({ color, size }) => (
-          <Ionicons name="people" color={color} size={size} />
-        )}
-        inactiveBackgroundColor="white"
-      />
-      <DrawerItem label="Logout"
-        icon={({ color, size }) => (
-          <Ionicons name="exit" color={color} size={size} />
-        )}
-        inactiveBackgroundColor="white"
-        onPress={handleLogout}
-      />
-    </DrawerContentScrollView>
+    </View>
   );
 };
 
@@ -121,7 +116,6 @@ const MyDrawer = ({ navigation }) => {
     <Drawer.Navigator initialRouteName="BottomTabNavigator"
       screenOptions={{
         drawerStyle: {
-          backgroundColor: "#4A90E2",
           width: "70%",
         },
         headerStyle: {
@@ -130,29 +124,32 @@ const MyDrawer = ({ navigation }) => {
       }}
       drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
-      <Drawer.Screen name="Home" component={BottomTabNavigator} />
-      <Drawer.Screen name="UserProfile" component={UserProfile} />
-      <Drawer.Screen name="SettingsPage" component={SettingsPage} />
-      {/* <DrawerItemList/> */}
+      <Drawer.Screen name="Home" component={BottomTabNavigator} options={{drawerIcon: ({color}) => (<Ionicons name="home" size={22} color={color} />),}}/>
+      <Drawer.Screen name="UserProfile" component={UserProfile} testID="profileButton" options={{drawerIcon: ({color}) => (<Ionicons name="person" size={22} color={color} />),}}/>
+      <Drawer.Screen name="Settings" component={SettingsPage} options={{drawerIcon: ({color}) => (<Ionicons name="settings" size={22} color={color} />),}}/>
+      {/* <Drawer.Screen name="My Communities" component={CommunitiesPage} options={{drawerIcon: ({color}) => (<Ionicons name="people" size={22} color={color} />),}}/> */}
     </Drawer.Navigator>
   );
 };
 
 const styles = StyleSheet.create({
-  drawerHeader: {
-    alignItems: "center",
-    paddingVertical: 20,
-  },
   drawerUsername: {
-    color: "white",
+    color: '#fff',
     fontSize: 20,
-    fontWeight: "bold",
-    paddingTop: 20,
+    // fontFamily: 'Roboto-Medium',
+    fontWeight: 600,
+    marginBottom: 5,
   },
   drawerImage: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
+    height: 80, 
+    width: 80, 
+    borderRadius: 40, 
+    marginBottom: 10,
+  },
+  drawerText: {
+    fontSize: 15,
+    marginLeft: 5,
+    // fontFamily: 'Roboto-Medium',
   },
 });
 
