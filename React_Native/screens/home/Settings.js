@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
   },
 
   normalText: {
-    color: "white",
+    color: "grey",
     fontSize: 16,
     textDecorationLine: "underline",
   },
