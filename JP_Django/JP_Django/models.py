@@ -2,9 +2,9 @@
 
 from django.db import models
 import datetime
-from django.utils import timezone
-from django.contrib.auth.models import AbstractBaseUser, AbstractUser
-from django.contrib.auth.models import UserManager
+import time
+import pytz
+from django.contrib.auth.models import AbstractUser
 from JP_Django.managers import CustomUserManager
 
 class User(AbstractUser):
@@ -15,11 +15,22 @@ class User(AbstractUser):
     email = models.CharField(unique=True, max_length=254)
     password = models.CharField(max_length=100)
     username = models.CharField(unique=True, max_length=100)
+    profile_picture = models.BinaryField(blank=True, null=True) #profile picture in binary format
 
-    #scheduling fields- with default times 
-    time1 = models.TimeField(auto_now=False, auto_now_add=False, default= datetime.time(8, 00))
-    time2 = models.TimeField(auto_now=False, auto_now_add=False, default= datetime.time(15, 00))
-    time3 = models.TimeField(auto_now=False, auto_now_add=False, default= datetime.time(21, 00))
+    # Consider default times to be UTC
+    current_date = datetime.datetime.now().date() # Get current date
+    time1_default = datetime.time(8,00) # Default time for first checkin moment
+    datetime1_entry = datetime.datetime.combine(current_date, time1_default) # Combine date and time
+    time2_default = datetime.time(15,00)
+    datetime2_entry = datetime.datetime.combine(current_date, time2_default)
+    time3_default = datetime.time(21,00)
+    datetime3_entry = datetime.datetime.combine(current_date, time3_default)
+
+    # time scheduling fields - with default times
+    timezone = models.CharField(max_length=100, default='UTC')
+    time1 = models.DateTimeField(auto_now=False, auto_now_add=False, default=datetime1_entry)
+    time2 = models.DateTimeField(auto_now=False, auto_now_add=False, default=datetime2_entry)
+    time3 = models.DateTimeField(auto_now=False, auto_now_add=False, default=datetime3_entry)
 
     objects = CustomUserManager()
 
