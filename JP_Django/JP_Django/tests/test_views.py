@@ -425,6 +425,7 @@ class UpdateUserInfoViewTestCase(TestCase):
         'firstname': 'Test',
         'lastname': 'User',
         'email': 'testuser@example.com',
+        'timezone': 'EST',
     }
 
     USER_CREATION_DATA_2 = {
@@ -434,6 +435,7 @@ class UpdateUserInfoViewTestCase(TestCase):
         'firstname': 'Test2',
         'lastname': 'User2',
         'email': 'testuser2@example.com',
+        'timezone': 'EST',
     }
 
     UPDATE_TIMES_DATA_SUCCESS = {
@@ -522,36 +524,6 @@ class UpdateUserInfoViewTestCase(TestCase):
         self.client.post(reverse('create_user_view'), data=json.dumps(self.USER_CREATION_DATA), content_type=CONTENT_TYPE_JSON)
         self.client.post(reverse('create_user_view'), data=json.dumps(self.USER_CREATION_DATA_2), content_type=CONTENT_TYPE_JSON)
 
-    def test_update_times_success(self):
-        logging.info("test_update_times_success ....")
-        
-        # Make a POST request to update the times
-        response = self.client.post(reverse('update_user_information_view'), data=json.dumps(self.UPDATE_TIMES_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON) 
-        
-        # Query the database and print its contents AFTER updating the times
-        queryset = User.objects.all() 
-        for obj in queryset:
-            # Log user information
-            logging.info(LOG_MSG_FORMAT, LOG_USER, obj.username)
-            logging.info(LOG_MSG_FORMAT, LOG_FIRST_NAME, obj.first_name)
-            logging.info(LOG_MSG_FORMAT, LOG_LAST_NAME, obj.last_name)
-            logging.info(LOG_MSG_FORMAT, LOG_TIME1, obj.time1)
-            logging.info(LOG_MSG_FORMAT, LOG_TIME2, obj.time2)
-            logging.info(LOG_MSG_FORMAT, LOG_TIME3, obj.time3)
-            logging.info('')   
-
-        # Check if the response status code is 200 indicating success
-        self.assertEqual(response.status_code, 200) 
-
-    def test_update_times_invalid_order_fail(self):
-        logging.info("test_update_times_invalid_order_fail ....")
-
-        # Make a POST request to the update_user_information_view
-        response = self.client.post(reverse('update_user_information_view'), data=json.dumps(self.UPDATE_TIMES_INVALID_ORDER_FAIL), content_type=CONTENT_TYPE_JSON) 
-
-        # Check if the response status code is 400 indicating error
-        self.assertEqual(response.status_code, 400)
-    
     def test_update_user_username_success(self):
         logging.info("test_update_user_username_success ....")
 

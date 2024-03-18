@@ -235,77 +235,96 @@ def update_user_information_view(request):
 
         #if (any possible key) is present update accordingly
         if 'newusername' in keys:
-            try:
-                user.username = data["newusername"]
-                user.save()
-                logging.info("SUCCESS! \"%s's\" username has been updated to \"%s\"", username, user.username)
-            except Exception as e:
-                logging.info("ERROR IN CHANGING USERNAME: %s", e)
-                return HttpResponse("ERROR",e , status=400)
-        if 'password' in keys:
-            try:
-                user.set_password(data["password"])
-                user.save()
-                logging.info("SUCCESS! \"%s's\" password has been updated to \"%s\"", username, user.password)
-            except Exception as e:
-                logging.info("ERROR IN CHANGING PASSWORD: %s", e)
-                return HttpResponse("ERROR",e , status=400)
-        if 'email' in keys:
-            try:
-                user.email = data["email"]
-                user.save()
-                logging.info("SUCCESS! \"%s's\" email has been updated to \"%s\"", username, user.email)
-            except Exception as e:
-                logging.info("ERROR IN CHANGING EMAIL: %s", e)
-                return HttpResponse("ERROR", e, status=400)
-        if 'time1' in keys or 'time2' in keys or 'time3' in keys:
-            try:
-                time1 = data.get("time1")
-                time2 = data.get("time2")
-                time3 = data.get("time3")
-                logging.info("TIMES: TIME1: %s,TIME2: %s,TIME3: %s; FOR USER \"%s\"",  time1, time2, time3, username)
 
-                if time1 < time2 < time3:
-                    user = User.objects.get(username=username) 
-                    user.time1 = time1
-                    user.time2 = time2
-                    user.time3 = time3
-                    user.save()  # Saving
-                else:
-                    logging.info("EROR UPDATING TIMES; INVALID ORDERING")
-                    return HttpResponse("Invalid ordering", status=400)
-            except Exception as e:
-                logging.info("EROR UPDATING TIMES", e)
-                return HttpResponse("Updating user times failed: " + str(e), status=400)
+            #this method is void unless it errors
+            error_response = update_username(user, data["newusername"])
+            if error_response:
+                return error_response
+        if 'password' in keys:
+
+            #this method is void unless it errors
+            error_response = update_password(user, data["password"])
+            if error_response:
+                return error_response
+        if 'email' in keys:
+            #this method is void unless it errors
+            error_response = update_email(user, data["email"])
+            if error_response:
+                return error_response
         if 'lastname' in keys:
-            try:
-                user.last_name = data["lastname"]
-                user.save()
-                logging.info("SUCCESS! \"%s's\" last name has been updated to \"%s\"", username, user.last_name)
-            except Exception as e:
-                logging.info("ERROR IN CHANGING LAST NAME: %s", e)
-                return HttpResponse("ERROR", e, status=400)
+            #this method is void unless it errors
+            error_response = update_last_name(user, data["lastname"])
+            if error_response:
+                return error_response
         if 'firstname' in keys:
-            try:
-                user.first_name = data["firstname"]
-                user.save()
-                logging.info("SUCCESS! \"%s's\" last name has been updated to \"%s\"", username, user.first_name)
-            except Exception as e:
-                logging.info("ERROR IN CHANGING LAST NAME: %s", e)
+            #this method is void unless it errors
+            error_response = update_first_name(user, data["firstname"])
+            if error_response:
+                return error_response
         if 'profilepicture' in keys:
-            try:
-                content_64_encoded = data["profilepicture"]
-                content_binary_encoded = base64.b64decode(content_64_encoded)
-                user.profile_picture = content_binary_encoded
-                user.save()
-                logging.info("SUCCESS! \"%s's\" profile picture has been updated!", username)
-            except Exception as e:
-                logging.info("ERROR IN CHANGING PROFILE PICTURE: %s", e)
-                return HttpResponse("ERROR", e, status=400)
+            #this method is void unless it errors
+            error_response = update_profile_picture(user, data["profilepicture"])
+            if error_response:
+                return error_response
 
         return HttpResponse("Changes Successful!")
     return HttpResponse(constNotPost, status = 400)
 
+def update_username(user, new_username):
+    try:
+        user.username = new_username
+        user.save()
+        logging.info("SUCCESS! Username has been updated to \"%s\"", user.username)
+    except Exception as e:
+        logging.info("ERROR IN CHANGING USERNAME: %s", e)
+        return HttpResponse("Error in updating username", status=400)
+
+def update_password(user, new_password):
+    try:
+        user.set_password(new_password)
+        user.save()
+        logging.info("SUCCESS! Password has been updated")
+    except Exception as e:
+        logging.info("ERROR IN CHANGING PASSWORD: %s", e)
+        return HttpResponse("Error in updating password", status=400)
+    
+def update_last_name(user, last_name):
+    try:
+        user.last_name = last_name
+        user.save()
+        logging.info("SUCCESS! \"%s's\" last name has been updated to \"%s\"", user.username, user.last_name)
+    except Exception as e:
+        logging.info("ERROR IN CHANGING LAST NAME: %s", e)
+        return HttpResponse("Error in updating last name", status=400)
+
+def update_first_name(user, first_name):
+    try:
+        user.first_name = first_name
+        user.save()
+        logging.info("SUCCESS! \"%s's\" first name has been updated to \"%s\"", user.username, user.first_name)
+    except Exception as e:
+        logging.info("ERROR IN CHANGING FIRST NAME: %s", e)
+        return HttpResponse("Error in updating first name", status=400)
+    
+def update_email(user, email):
+    try:
+        user.email = email
+        user.save()
+        logging.info("SUCCESS! \"%s's\" email has been updated to \"%s\"", user.username, user.email)
+    except Exception as e:
+        logging.info("ERROR IN CHANGING EMAIL: %s", e)
+        return HttpResponse("Error in updating email", status=400)
+
+def update_profile_picture(user, profile_picture_data):
+    try:
+        content_binary_encoded = base64.b64decode(profile_picture_data)
+        user.profile_picture = content_binary_encoded
+        user.save()
+        logging.info("SUCCESS! \"%s's\" profile picture has been updated!", user.username)
+    except Exception as e:
+        logging.info("ERROR IN CHANGING PROFILE PICTURE: %s", e)
+        return HttpResponse("Error in updating profile picture", status=400)
+    
 #send all user information to the front end
 def get_user_information_view(request):
     if request.method == "GET":
