@@ -448,6 +448,75 @@ class GetTimesViewTestCase(TestCase):
             logging.info(LOG_MSG_FORMAT, LOG_TIME3, obj.time3)
             logging.info('')   
 
+class GetUserInformationViewTestCase(TestCase):
+
+    # Define constant user data
+    USER_DATA = {
+        'username': 'testuser',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+    }
+
+    def setUp(self):
+        # Initialize the Django test client
+        client = Client()
+
+        # Make a POST request to create a test user to display information of
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER_DATA), content_type=CONTENT_TYPE_JSON)
+
+    def test_get_user_information_success(self): # Successfully retrieves a valid user's information from the database
+        client = Client()
+
+        # Create test data
+        get_data = {'username': 'testuser'}
+
+        # Send GET request to get_user_information_view
+        response = client.get(reverse('get_user_information_view'), data=get_data)
+
+        # Check if response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+        # Printing DB after attempted getting of info
+        logging.info('Response: %s', response)
+        logging.info('')
+        queryset = User.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_USER, obj.username)
+            logging.info(LOG_MSG_FORMAT, LOG_FIRST_NAME, obj.first_name)
+            logging.info(LOG_MSG_FORMAT, LOG_LAST_NAME, obj.last_name)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME1, obj.time1)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME2, obj.time2)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME3, obj.time3)
+            logging.info('')   
+
+    def test_get_times_fail(self): # Fails to get times in database due to user not existing
+        client = Client()
+
+        # Create test data
+        get_data = {'username': 'doesnotexist'}
+
+        # Send GET request to get_user_information_view
+        response = client.get(reverse('get_user_information_view'), data=get_data)
+
+        # Check if response status code is 400 -- failure
+        self.assertEqual(response.status_code, 400)
+
+        # Printing DB after attempted getting of times
+        logging.info('Response: %s', response)
+        logging.info('')
+        queryset = User.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_USER, obj.username)
+            logging.info(LOG_MSG_FORMAT, LOG_FIRST_NAME, obj.first_name)
+            logging.info(LOG_MSG_FORMAT, LOG_LAST_NAME, obj.last_name)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME1, obj.time1)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME2, obj.time2)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME3, obj.time3)
+            logging.info('')   
+
 class CheckinViewTestCase(TestCase): #to test handling of checkin post for text, photo, video and audio
 
     # Stored as base64 encoded strings

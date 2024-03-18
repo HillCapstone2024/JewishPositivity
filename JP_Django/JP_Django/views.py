@@ -194,11 +194,9 @@ def update_times_view(request):
     return HttpResponse(constNotPost)
 
 #send all user information to the front end
-def get_userinformation_view(request):
+def get_user_information_view(request):
     if request.method == "GET":
-        username = request.GET.get(
-            "username"
-        )  # JSON is not typically used for GET requests here
+        username = request.GET.get("username")  # JSON is not typically used for GET requests here
 
         # Make sure the get data is not empty
         if username is not None:
@@ -216,20 +214,17 @@ def get_userinformation_view(request):
                 }
 
                 logging.info(response_data)
-                return HttpResponse(
-                    response_data
-                )  # returning a DICTIONARY -do not change
-            except:
+                return HttpResponse(response_data)  # returning a DICTIONARY -do not change
+            except Exception as e:
+                logging.info(e)
                 return HttpResponse("User does not exist", status=400)
         else:  # username was empty
             return HttpResponse("Username not provided", status=400)
-    return HttpResponse("Not a GET request!")
+    return HttpResponse("Not a GET request")
 
 def get_times_view(request):
     if request.method == "GET":
-        username = request.GET.get(
-            "username"
-        )  # JSON is not typically used for GET requests here
+        username = request.GET.get("username")  # JSON is not typically used for GET requests here
 
         # Make sure the get data is not empty
         if username is not None:
