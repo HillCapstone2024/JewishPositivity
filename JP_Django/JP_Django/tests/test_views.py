@@ -33,6 +33,7 @@ LOG_CONTENT_TYPE = 'Content Type'
 LOG_CONTENT = 'Content'
 LOG_MOMENT_NUMBER = 'Moment Number'
 LOG_USER_ID = 'User ID'
+
 class CreateUserViewTestCase(TestCase):
     
     # Define constant post data
@@ -376,6 +377,243 @@ class SetTimesViewTestCase(TestCase):
 
         # Status code of 400 means updating times fails due to incorrect order 
         self.assertEqual(response.status_code, 400)
+
+class UpdateUserInfoViewTestCase(TestCase):
+    #class for testing any updates specific to user fields
+
+    USER_CREATION_DATA = {
+        'username': 'testuser',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'testuser@example.com',
+    }
+
+    USER_CREATION_DATA_2 = {
+        'username': 'testuser2',
+        'password': 'testpassword2',
+        'reentered_password': 'testpassword2',
+        'firstname': 'Test2',
+        'lastname': 'User2',
+        'email': 'testuser2@example.com',
+    }
+
+    UPDATE_TIMES_DATA_SUCCESS = {
+        'username' : 'testuser',
+        'time1': datetime.time(8, 15).strftime('%H:%M:%S'),
+        'time2': datetime.time(16, 35).strftime('%H:%M:%S'),
+        'time3': datetime.time(19, 00).strftime('%H:%M:%S'),
+    }
+
+    UPDATE_TIMES_INVALID_ORDER_FAIL = {
+            'username': 'testuser',
+            'time1': datetime.time(17, 35).strftime('%H:%M:%S'),
+            'time2': datetime.time(7, 35).strftime('%H:%M:%S'),
+            'time3': datetime.time(19, 00).strftime('%H:%M:%S'),
+    }
+
+    UPDATE_USERNAME_SUCCESS = {
+        'username': 'testuser',
+        'newusername': 'newtestuser',
+    }
+    UPDATE_USERNAME_FAIL = {
+        'username': 'testuser2',
+        'newusername': 'testuser',
+    }
+
+    UPDATE_PASSWORD_SUCCESS = {
+        'username': 'testuser',
+        'password': 'newpassword',
+    }
+
+    UPDATE_PASSWORD_FAIL = {
+        'username': 'testuser',
+        'password': '',
+    }
+
+    UPDATE_EMAIL_SUCCESS = {
+        'username': 'testuser',
+        'email' : 'newEmail@example.com', 
+    }
+
+    UPDATE_EMAIL_FAIL = {
+        'username': 'testuser',
+        'email' : 'testuser2@example.com', 
+    }
+
+    UPDATE_FIRST_NAME_SUCCESS = {
+        'username': 'testuser',
+        'firstname' : 'NewFirst',
+    }
+
+    UPDATE_FIRST_NAME_FAIL = {
+        'username': 'testuser',
+        'firstname' : '',
+    }
+
+    UPDATE_LAST_NAME_SUCCESS = {
+        'username': 'testuser',
+        'lastname' : 'NewLast',
+    }
+
+    UPDATE_LAST_NAME_FAIL = {
+        'username': 'testuser',
+        'lastname' : '',
+    }
+
+    photo_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64photo.txt'))
+    photoFile = open(photo_file_path, 'r')
+    photo = photoFile.read()
+    #logging.info("PHOTO: %s", photo)
+    photoFile.close()
+
+    UPDATE_PHOTO_SUCCESS = {
+        'username': 'testuser',
+        'profilepicture' : photo, 
+    }
+
+    # Initialize the Django test client
+    client = Client()
+
+    # Set up method to create a test user
+    def setUp(self):
+        logging.info("")
+        logging.info("")
+        logging.info("BEGINNING NEW TEST...")
+        # Make a POST request to create 2 test users for testing
+        self.client.post(reverse('create_user_view'), data=json.dumps(self.USER_CREATION_DATA), content_type=CONTENT_TYPE_JSON)
+        self.client.post(reverse('create_user_view'), data=json.dumps(self.USER_CREATION_DATA_2), content_type=CONTENT_TYPE_JSON)
+
+    def test_update_times_success(self):
+        logging.info("test_update_times_success ....")
+        
+        # Make a POST request to update the times
+        response = self.client.post(reverse('update_user_information_view'), data=json.dumps(self.UPDATE_TIMES_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON) 
+        
+        # Query the database and print its contents AFTER updating the times
+        queryset = User.objects.all() 
+        for obj in queryset:
+            # Log user information
+            logging.info(LOG_MSG_FORMAT, LOG_USER, obj.username)
+            logging.info(LOG_MSG_FORMAT, LOG_FIRST_NAME, obj.first_name)
+            logging.info(LOG_MSG_FORMAT, LOG_LAST_NAME, obj.last_name)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME1, obj.time1)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME2, obj.time2)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME3, obj.time3)
+            logging.info('')   
+
+        # Check if the response status code is 200 indicating success
+        self.assertEqual(response.status_code, 200) 
+
+    def test_update_times_invalid_order_fail(self):
+        logging.info("test_update_times_invalid_order_fail ....")
+
+        # Make a POST request to the update_user_information_view
+        response = self.client.post(reverse('update_user_information_view'), data=json.dumps(self.UPDATE_TIMES_INVALID_ORDER_FAIL), content_type=CONTENT_TYPE_JSON) 
+
+        # Check if the response status code is 400 indicating error
+        self.assertEqual(response.status_code, 400)
+    
+    def test_update_user_username_success(self):
+        logging.info("test_update_user_username_success ....")
+
+        # Make a POST request to the update_user_information_view
+        response = self.client.post(reverse('update_user_information_view'), data=json.dumps(self.UPDATE_USERNAME_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 200 indicating success
+        self.assertEqual(response.status_code, 200)
+    
+    def test_update_user_username_fail(self):
+        logging.info("test_update_user_username_fail ....")
+
+        # Make a POST request to the update_user_information_view
+        response = self.client.post(reverse('update_user_information_view'), data=json.dumps(self.UPDATE_USERNAME_FAIL), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400 for failure
+        self.assertEqual(response.status_code, 400)
+    
+    def test_update_user_passwords_success(self):
+        logging.info("test_update_user_passwords_success ....")
+
+        # Make a POST request to the update_user_information_view
+        response = self.client.post(reverse('update_user_information_view'), data=json.dumps(self.UPDATE_PASSWORD_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 200 indicating success
+        self.assertEqual(response.status_code, 200)
+    
+    def test_update_user_passwords_fail(self):
+        logging.info("test_update_user_passwords_fail ....")
+
+        # Make a POST request to the update_user_information_view
+        response = self.client.post(reverse('update_user_information_view'), data=json.dumps(self.UPDATE_PASSWORD_FAIL), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400 indicating error
+        self.assertEqual(response.status_code, 400)
+
+    def test_update_user_email_success(self):
+        logging.info("test_update_user_email_success ....") 
+
+        # Make a POST request to the update_user_information_view
+        response = self.client.post(reverse('update_user_information_view'), data=json.dumps(self.UPDATE_EMAIL_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 200 indicating success
+        self.assertEqual(response.status_code, 200)
+    
+    def test_update_user_email_fail(self):
+        logging.info("test_update_user_email_fail ....") 
+
+        # Make a POST request to the update_user_information_view
+        response = self.client.post(reverse('update_user_information_view'), data=json.dumps(self.UPDATE_EMAIL_FAIL), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400 indicating error
+        self.assertEqual(response.status_code, 400)
+
+    def test_update_user_first_name_success(self):
+        logging.info("test_update_user_first_name_success ....")
+
+        # Make a POST request to the update_user_information_view
+        response = self.client.post(reverse('update_user_information_view'), data=json.dumps(self.UPDATE_FIRST_NAME_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 200 indicating success
+        self.assertEqual(response.status_code, 200)
+    
+    def test_update_user_first_name_fail(self):
+        logging.info("test_update_user_first_name_fail ....")
+
+        # Make a POST request to the update_user_information_view
+        response = self.client.post(reverse('update_user_information_view'), data=json.dumps(self.UPDATE_FIRST_NAME_FAIL), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400 indicating error
+        self.assertEqual(response.status_code, 400)
+    
+    def test_update_user_last_name_success(self):
+        logging.info("test_update_user_last_name_success ....")
+
+        # Make a POST request to the update_user_information_view
+        response = self.client.post(reverse('update_user_information_view'), data=json.dumps(self.UPDATE_LAST_NAME_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 200 indicating success
+        self.assertEqual(response.status_code, 200)
+    
+    def test_update_user_last_name_fail(self):
+        logging.info("test_update_user_last_name_fail ....")
+
+        # Make a POST request to the update_user_information_view
+        response = self.client.post(reverse('update_user_information_view'), data=json.dumps(self.UPDATE_LAST_NAME_FAIL), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400 indicating error
+        self.assertEqual(response.status_code, 400)
+
+    def test_update_user_profile_picture_success(self):
+        logging.info("test_update_user_profile_picture_success ....") 
+
+        # Make a POST request to the update_user_information_view
+        response = self.client.post(reverse('update_user_information_view'), data=json.dumps(self.UPDATE_PHOTO_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 200 indicating success
+        self.assertEqual(response.status_code, 200)
+    
 
 class GetTimesViewTestCase(TestCase):
 

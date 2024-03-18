@@ -61,9 +61,7 @@ def login_view(request):
         username = data["username"]
         password = data["password"]
         user = authenticate(request, username=username, password=password)
-        logging.info(
-            "username: %s", username
-        )  # %s is a placeholder for where var should be inserted
+        logging.info( "username: %s", username)  # %s is a placeholder for where var should be inserted
         logging.info("password: %s", password)
         if user is not None:
             login(request, user)
@@ -80,6 +78,7 @@ def create_user_view(request):
 
         # Load POST data
         data = json.loads(request.body)
+        logging.info("IN CREATE_USER_VIEW....")
         logging.info("Parsed JSON data: %s", data)
         missing_keys = [
             key for key, value in data.items() if value is None or value.strip() == ""
@@ -92,7 +91,6 @@ def create_user_view(request):
             return HttpResponse(error_message, status=400)
 
         # Create a new user
-        data = json.loads(request.body)
         username = data["username"]
         password = data["password"]
         password2 = data["reentered_password"]  # must match frontend
@@ -159,6 +157,7 @@ def update_times_view(request):
         time1_str = data.get("time1")
         time2_str = data.get("time2")
         time3_str = data.get("time3")
+        logging.info("TIMES: TIME1: %s,TIME2: %s,TIME3: %s", time1_str, time2_str, time3_str)
 
         try:
             # Convert strings of posted times to time objects
@@ -186,6 +185,103 @@ def update_times_view(request):
         except Exception as e:
             return HttpResponse("Updating user times failed: " + str(e), status=400)
     return HttpResponse(constNotPost)
+
+def update_user_information_view(request):
+    if request.method == "POST":
+        # Load POST data
+        data = json.loads(request.body)
+
+        #getting all fields from POST
+        keys = [key for key, value in data.items()]
+
+        #try to get the username (unique) field for the row we intend to update
+        try:
+            username = data["username"]
+            user = User.objects.get(username=username)
+        except Exception as e:
+            logging.info("ERROR RETRIEVING USER: %s", e)
+            return HttpResponse("Username is in invalid format or does not exist", status=400)
+        
+        missing_keys = [key for key, value in data.items() if value is None or value.strip() == ""]
+
+        # Make sure no fields are empty in the POST data, else return the empty fields
+        if missing_keys:
+            logging.info(constMissingKey, missing_keys)
+            error_message = f"Missing required keys: {', '.join(missing_keys)}"  # tells which keys missing in error message
+            return HttpResponse(error_message, status=400)
+
+        #if (any possible key) is present update accordingly
+        if 'newusername' in keys:
+            try:
+                user.username = data["newusername"]
+                user.save()
+                logging.info("SUCCESS! \"%s's\" username has been updated to \"%s\"", username, user.username)
+            except Exception as e:
+                logging.info("ERROR IN CHANGING USERNAME: %s", e)
+                return HttpResponse("ERROR",e , status=400)
+        if 'password' in keys:
+            try:
+                user.set_password(data["password"])
+                user.save()
+                logging.info("SUCCESS! \"%s's\" password has been updated to \"%s\"", username, user.password)
+            except Exception as e:
+                logging.info("ERROR IN CHANGING PASSWORD: %s", e)
+                return HttpResponse("ERROR",e , status=400)
+        if 'email' in keys:
+            try:
+                user.email = data["email"]
+                user.save()
+                logging.info("SUCCESS! \"%s's\" email has been updated to \"%s\"", username, user.email)
+            except Exception as e:
+                logging.info("ERROR IN CHANGING EMAIL: %s", e)
+                return HttpResponse("ERROR", e, status=400)
+        if 'time1' in keys or 'time2' in keys or 'time3' in keys:
+            try:
+                time1 = data.get("time1")
+                time2 = data.get("time2")
+                time3 = data.get("time3")
+                logging.info("TIMES: TIME1: %s,TIME2: %s,TIME3: %s; FOR USER \"%s\"",  time1, time2, time3, username)
+
+                if time1 < time2 < time3:
+                    user = User.objects.get(username=username) 
+                    user.time1 = time1
+                    user.time2 = time2
+                    user.time3 = time3
+                    user.save()  # Saving
+                else:
+                    logging.info("EROR UPDATING TIMES; INVALID ORDERING")
+                    return HttpResponse("Invalid ordering", status=400)
+            except Exception as e:
+                logging.info("EROR UPDATING TIMES", e)
+                return HttpResponse("Updating user times failed: " + str(e), status=400)
+        if 'lastname' in keys:
+            try:
+                user.last_name = data["lastname"]
+                user.save()
+                logging.info("SUCCESS! \"%s's\" last name has been updated to \"%s\"", username, user.last_name)
+            except Exception as e:
+                logging.info("ERROR IN CHANGING LAST NAME: %s", e)
+                return HttpResponse("ERROR", e, status=400)
+        if 'firstname' in keys:
+            try:
+                user.first_name = data["firstname"]
+                user.save()
+                logging.info("SUCCESS! \"%s's\" last name has been updated to \"%s\"", username, user.first_name)
+            except Exception as e:
+                logging.info("ERROR IN CHANGING LAST NAME: %s", e)
+        if 'profilepicture' in keys:
+            try:
+                content_64_encoded = data["profilepicture"]
+                content_binary_encoded = base64.b64decode(content_64_encoded)
+                user.profile_picture = content_binary_encoded
+                user.save()
+                logging.info("SUCCESS! \"%s's\" profile picture has been updated!", username)
+            except Exception as e:
+                logging.info("ERROR IN CHANGING PROFILE PICTURE: %s", e)
+                return HttpResponse("ERROR", e, status=400)
+
+        return HttpResponse("Changes Successful!")
+    return HttpResponse(constNotPost, status = 400)
 
 #send all user information to the front end
 def get_user_information_view(request):
