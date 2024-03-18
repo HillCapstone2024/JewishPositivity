@@ -127,7 +127,7 @@ export default function JournalEntry() {
   return (
     <SafeAreaView style={[styles.container, theme['background']]}>
       <TextInput style={[styles.title, theme['color']]} placeholder="Header..." placeholderTextColor='grey'></TextInput>
-      <View style={styles.separator} />
+      <View style={[styles.separator, { borderBottomColor: theme['color']['color'] }]} />
       <Text style={[styles.datetime, theme['color']]}> {formattedDateTime} </Text>
       {/* <ScrollView keyboardDismissMode="interactive"> */}
       {/* Media Box Below */}
@@ -233,7 +233,6 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   separator: {
-    borderBottomColor: 'black',
     borderBottomWidth: StyleSheet.hairlineWidth,
     marginVertical: 10,
   },
