@@ -194,6 +194,37 @@ def update_times_view(request):
             return HttpResponse("Updating user times failed: " + str(e), status=400)
     return HttpResponse(constNotPost)
 
+#send all user information to the front end
+def get_userinformation_view(request):
+    if request.method == "GET":
+        username = request.GET.get(
+            "username"
+        )  # JSON is not typically used for GET requests here
+
+        # Make sure the get data is not empty
+        if username is not None:
+            try:
+                # Retrieve the user from the database by username
+                user = User.objects.get(username=username)
+
+                # get all of the information for the user
+                response_data = {
+                    "username":user.username,
+                    "password":user.password,
+                    "email":user.email,
+                    "first_name":user.first_name,
+                    "last_name":user.last_name,
+                }
+
+                logging.info(response_data)
+                return HttpResponse(
+                    response_data
+                )  # returning a DICTIONARY -do not change
+            except:
+                return HttpResponse("User does not exist", status=400)
+        else:  # username was empty
+            return HttpResponse("Username not provided", status=400)
+    return HttpResponse("Not a GET request!")
 
 def get_times_view(request):
     if request.method == "GET":
