@@ -6,11 +6,13 @@ import {
     Animated,
     Easing,
 } from "react-native";
+import makeThemeStyle from '../../Theme.js';
 
 const LoadingScreen = () => {
     const floatAnim = useRef(new Animated.Value(0)).current;
     const spinValue = useRef(new Animated.Value(0)).current;
     const wobbleAnim = useRef(new Animated.Value(0)).current;
+    theme = makeThemeStyle();
 
     useEffect(() => {
         const spin = Animated.timing(spinValue, {
@@ -79,7 +81,7 @@ const LoadingScreen = () => {
     });
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, theme['background']]}>
             <Image source={require("../../assets/images/nopen.png")} style={styles.book} />
             <Animated.Image
                 style={[{ transform: [{ translateY: floatAnim }, { rotate: spin }, { rotateZ: wobble }], }, styles.pen]}
