@@ -8,8 +8,7 @@ import * as Storage from "../../AsyncStorage.js";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from 'expo-haptics';
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { LinearGradient } from "expo-linear-gradient";
-
+import makeThemeStyle from '../../Theme.js';
 import Times from "./Times.js";
 import TermsofUse from './TermsofUse';
 
@@ -31,10 +30,7 @@ const SettingsScreen = ({ navigation }) => {
   const [isHapticFeedbackEnabled, setIsHapticFeedbackEnabled] = useState(false);
   const [theme, setTheme] = useState(false);
   const [storage_theme, setStorageTheme] = useState('system');
-  const themeStyle = {
-    backgroundColor: theme === false ? '#FFFFFF' : '#333333',
-    color: theme === false ? '#333333' : '#FFFFFF',
-  }
+  themeStyle = makeThemeStyle();
 
   const loadUsername = async () => {
     const storedUsername = await Storage.getItem("@username");
@@ -170,9 +166,9 @@ const SettingsScreen = ({ navigation }) => {
   const handleDeleteAccount = () => Alert.alert('Delete Account', 'Are you sure you want to delete your account?', [{ text: 'Cancel', style: 'cancel' }, { text: 'Delete', style: 'destructive', onPress: () => sendAccountDeletionRequest() }]);
 
   return (
-    <View style={[themeStyle, styles.container]}>
+    <View style={[themeStyle['background'], styles.container]}>
       <View style={styles.setting}>
-        <Text style={[themeStyle, styles.settingText]}>Theme</Text>
+        <Text style={[themeStyle['color'], styles.settingText]}>Theme</Text>
         <RNPickerSelect
           onValueChange={(value) => saveTheme(value)}
           items={[
@@ -204,32 +200,17 @@ const SettingsScreen = ({ navigation }) => {
       </View>
 
       <View style={styles.setting}>
-        <Text style={[themeStyle, styles.settingText]}>Haptic Feedback</Text>
+        <Text style={[themeStyle['color'], styles.settingText]}>Haptic Feedback</Text>
         <Switch
           onValueChange={toggleHapticFeedback}
           value={isHapticFeedbackEnabled}
         />
       </View>
-      <Text style={[themeStyle, styles.timesText]}>Check-Ins</Text>
+      <Text style={[themeStyle['color'], styles.timesText]}>Check-Ins</Text>
 
       <View style={styles.setting}>
         <Times />
       </View>
-
-      {/* <View style={styles.contentContainer}>
-        <Button title="Report" onPress={
-          () => { handleReport(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }
-        } />
-        <Button title="Terms of Use" onPress={
-          () => { handleTermsofUse(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }
-        } />
-        <Button title="Privacy Policy" onPress={
-          () => { handlePrivacyPolicy(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }
-        } />
-        <Button title="Delete Account" color="red" onPress={
-          () => { handleDeleteAccount(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }
-        } />
-      </View> */}
 
       <View style={styles.contentContainer}>
         <TouchableOpacity style={styles.button} onPress={() => { handleReport(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }}>
@@ -258,7 +239,7 @@ const SettingsScreen = ({ navigation }) => {
       </View>
 
       <View style={styles.footer}>
-        <Text style={[themeStyle, styles.version]}>Version: 1.0.0</Text>
+        <Text style={[themeStyle['color'], styles.version]}>Version: 1.0.0</Text>
       </View>
     </View>
   );

@@ -44,6 +44,7 @@ class CreateUserViewTestCase(TestCase):
         'firstname': 'Test',
         'lastname': 'User',
         'email': 'success@example.com',
+        'timezone': 'EST',
     }
 
     POST_DATA_FAILURE_MISSING_KEYS = {
@@ -54,6 +55,18 @@ class CreateUserViewTestCase(TestCase):
         'firstname': '',
         'lastname': '',
         'email': '',
+        'timezone': '',
+    }
+
+    POST_DATA_FAILURE_INVALID_TIMEZONE = {
+        # Invalid timezone
+        'username': 'testuser',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'success@example.com',
+        'timezone': 'ABC',
     }
 
     POST_DATA_FAILURE_PASSWORDS_DONT_MATCH = {
@@ -63,6 +76,7 @@ class CreateUserViewTestCase(TestCase):
         'firstname': 'Test',
         'lastname': 'User',
         'email': 'failure@example.com',
+        'timezone': 'EST',
     }
 
     POST_DATA_FAILURE_WRONG_EMAIL_FORMAT = {
@@ -72,6 +86,7 @@ class CreateUserViewTestCase(TestCase):
         'firstname': 'Test',
         'lastname': 'User',
         'email': 'wrongformat',
+        'timezone': 'EST',
     }
 
     POST_DATA_FAILURE_DUPLICATE_EMAIL = {
@@ -81,6 +96,7 @@ class CreateUserViewTestCase(TestCase):
         'firstname': 'Test',
         'lastname': 'User',
         'email': 'dupefailure@example.com',
+        'timezone': 'EST',
     }
     POST_DATA_FAILURE_DUPLICATE_EMAIL_2 = {
         'username': 'testuser5',
@@ -89,6 +105,7 @@ class CreateUserViewTestCase(TestCase):
         'firstname': 'Test',
         'lastname': 'User',
         'email': 'dupefailure@example.com',
+        'timezone': 'EST',
     }
 
     POST_DATA_FAILURE_DUPLICATE_USERNAME = {
@@ -98,6 +115,7 @@ class CreateUserViewTestCase(TestCase):
         'firstname': 'Test',
         'lastname': 'User',
         'email': 'test7@example.com',
+        'timezone': 'EST',
     }
 
     POST_DATA_FAILURE_DUPLICATE_USERNAME_2 = {
@@ -107,6 +125,7 @@ class CreateUserViewTestCase(TestCase):
         'firstname': 'Test',
         'lastname': 'User',
         'email': 'test8@example.com',
+        'timezone': 'EST',
     }
 
     POST_DATA_FAILURE_MISSING_FIRST_NAME = {
@@ -116,6 +135,7 @@ class CreateUserViewTestCase(TestCase):
         'firstname': '',
         'lastname': 'User',
         'email': 'test8@example.com',
+        'timezone': 'EST',
     }
 
     POST_DATA_FAILURE_MISSING_LAST_NAME = {
@@ -125,6 +145,7 @@ class CreateUserViewTestCase(TestCase):
         'firstname': 'firstname',
         'lastname': '',
         'email': 'test8@example.com',
+        'timezone': 'EST',
     }
 
     POST_DATA_FAILURE_MISSING_PASSWORD = {
@@ -134,6 +155,7 @@ class CreateUserViewTestCase(TestCase):
         'firstname': 'firstname',
         'lastname': 'HI',
         'email': 'test8@example.com',
+        'timezone': 'EST',
     }
 
     POST_DATA_FAILURE_WHITESPACE = {
@@ -143,6 +165,7 @@ class CreateUserViewTestCase(TestCase):
         'firstname': 'firstname',
         'lastname': 'HEY',
         'email': 'test8@example.com',
+        'timezone': 'EST',
     }
 
     def test_create_user_success(self):
@@ -170,6 +193,19 @@ class CreateUserViewTestCase(TestCase):
 
         # Make a POST request with invalid data
         response = client.post(reverse('create_user_view'), data=json.dumps(self.POST_DATA_FAILURE_MISSING_KEYS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400 (specified in view as missing key status code)
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_user_failure_invalid_timezone(self):
+        # logging the test we are in
+        logging.info("TESTING CREATE_USER_INVALID_TIMEZONE....")
+
+        # Test if view will correctly fail to create user with missing keys
+        client = Client()
+
+        # Make a POST request with invalid data
+        response = client.post(reverse('create_user_view'), data=json.dumps(self.POST_DATA_FAILURE_INVALID_TIMEZONE), content_type=CONTENT_TYPE_JSON)
 
         # Check if the response status code is 400 (specified in view as missing key status code)
         self.assertEqual(response.status_code, 400)
@@ -297,6 +333,7 @@ class SetTimesViewTestCase(TestCase):
         'firstname': 'Test',
         'lastname': 'User',
         'email': 'success2@example.com',
+        'timezone': 'EST',
     }
 
     # Set up method to create a test user
@@ -625,6 +662,7 @@ class GetTimesViewTestCase(TestCase):
         'firstname': 'Test',
         'lastname': 'User',
         'email': 'test@example.com',
+        'timezone': 'EST',
     }
 
     def setUp(self):
@@ -696,6 +734,7 @@ class GetUserInformationViewTestCase(TestCase):
         'firstname': 'Test',
         'lastname': 'User',
         'email': 'test@example.com',
+        'timezone': 'EST',
     }
 
     def setUp(self):
@@ -790,6 +829,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'firstname': 'Test',
         'lastname': 'User',
         'email': 'success21@example.com',
+        'timezone': 'EST',
     }
 
     CREATE_USER_2 = {
@@ -799,6 +839,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'firstname': 'Test',
         'lastname': 'User',
         'email': 'success22@example.com',
+        'timezone': 'EST',
     }
 
     CREATE_USER_3 = {
@@ -808,6 +849,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'firstname': 'Test',
         'lastname': 'User',
         'email': 'success23@example.com',
+        'timezone': 'EST',
     }
 
     CREATE_USER_4 = {
@@ -817,6 +859,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'firstname': 'Test',
         'lastname': 'User',
         'email': 'success24@example.com',
+        'timezone': 'EST',
     }
 
     CREATE_USER_5 = {
@@ -826,6 +869,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'firstname': 'Test',
         'lastname': 'User',
         'email': 'success25@example.com',
+        'timezone': 'EST',
     }
 
     # Define post data

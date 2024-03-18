@@ -2,16 +2,12 @@ import {
   createDrawerNavigator,
   DrawerContentScrollView,
   DrawerItemList,
-  DrawerItem,
 } from "@react-navigation/drawer";
 import { Ionicons } from "@expo/vector-icons";
 import {
   View,
-  Image,
   StyleSheet,
   Text,
-  LinearGradient,
-  Settings,
   Alert,
   Keyboard,
   ImageBackground,
@@ -25,9 +21,9 @@ import { micah } from "@dicebear/collection";
 import { SvgXml } from "react-native-svg";
 import BottomTabNavigator from "./BottomTabNavigator.js";
 import makeThemeStyle from '../Theme.js';
-
 import UserProfile from "../screens/home/Profile.js";
 import SettingsPage from "../screens/home/Settings.js";
+import * as Haptics from 'expo-haptics';
 
 const Drawer = createDrawerNavigator();
 
@@ -66,22 +62,21 @@ const CustomDrawerContent = (props) => {
   }).toString();
 
   return (
-    <View style={{flex: 1}}>
+    <View style={[{ flex: 1 }, theme['background']]}>
       <DrawerContentScrollView
-        {...props}
-        contentContainerStyle={{backgroundColor: '#4A90E2'}}>
+        {...props}>
         <ImageBackground
           source={require('../assets/images/profile_background.png')}
-          style={{padding: 20}}>
-        <SvgXml xml={avatar} style={styles.drawerImage} />
-        <Text testID="usernameText" style={[styles.drawerUsername, theme["color"]]}>{username}</Text>
+          style={{ padding: 20 }}>
+          <SvgXml xml={avatar} style={styles.drawerImage} />
+          <Text testID="usernameText" style={[styles.drawerUsername]}>{username}</Text>
         </ImageBackground>
-        <View style={{flex: 1, backgroundColor: '#fff', paddingTop: 10}}>
+        <View style={[{ flex: 1, backgroundColor: '#fff', paddingTop: 10 }, theme["background"]]}>
           <DrawerItemList {...props} />
         </View>
       </DrawerContentScrollView>
 
-      <View style={{padding: 20, borderTopWidth: 1, borderTopColor: '#ccc'}}>
+      <View style={[{ padding: 20, borderTopWidth: 1, borderTopColor: '#ccc' }]}>
         {/* <TouchableOpacity onPress={() => {}} style={{paddingVertical: 15}}>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Ionicons name="share-social-outline" size={22} />
@@ -89,12 +84,14 @@ const CustomDrawerContent = (props) => {
           </View>
         </TouchableOpacity> */}
 
-        <TouchableOpacity onPress={handleLogout} style={{paddingVertical: 15}}>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <Ionicons name="exit-outline" size={22} />
-            <Text style={styles.drawerText}> Logout </Text>
+        <TouchableOpacity
+          onPress={() => { handleLogout(); theme['hapticFeedback'] ? null : Haptics.selectionAsync(); }}
+          style={{ paddingVertical: 15 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Ionicons name="exit-outline" color={theme['color']['color']} size={22} />
+            <Text style={[styles.drawerText, theme["color"]]}> Logout </Text>
           </View>
-        </TouchableOpacity>   
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -118,15 +115,16 @@ const MyDrawer = ({ navigation }) => {
         drawerStyle: {
           width: "70%",
         },
-        headerStyle: {
-          backgroundColor: "#4A90E2",
-        },
+
+        drawerLabelStyle:
+          { ...theme['color'] }
+
       }}
       drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
-      <Drawer.Screen name="Home" component={BottomTabNavigator} options={{drawerIcon: ({color}) => (<Ionicons name="home" size={22} color={color} />),}}/>
-      <Drawer.Screen name="UserProfile" component={UserProfile} testID="profileButton" options={{drawerIcon: ({color}) => (<Ionicons name="person" size={22} color={color} />),}}/>
-      <Drawer.Screen name="Settings" component={SettingsPage} options={{drawerIcon: ({color}) => (<Ionicons name="settings" size={22} color={color} />),}}/>
+      <Drawer.Screen name="Home" component={BottomTabNavigator} options={{ drawerIcon: () => (<Ionicons name="home" size={22} color={theme['color']['color']} />), }} />
+      <Drawer.Screen name="Profile" component={UserProfile} testID="profileButton" options={{ drawerIcon: () => (<Ionicons name="person" size={22} color={theme['color']['color']} />), }} />
+      <Drawer.Screen name="Settings" component={SettingsPage} options={{ drawerIcon: () => (<Ionicons name="settings" size={22} color={theme['color']['color']} />), }} />
       {/* <Drawer.Screen name="My Communities" component={CommunitiesPage} options={{drawerIcon: ({color}) => (<Ionicons name="people" size={22} color={color} />),}}/> */}
     </Drawer.Navigator>
   );
@@ -134,16 +132,15 @@ const MyDrawer = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   drawerUsername: {
-    color: '#fff',
     fontSize: 20,
     // fontFamily: 'Roboto-Medium',
     fontWeight: 600,
     marginBottom: 5,
   },
   drawerImage: {
-    height: 80, 
-    width: 80, 
-    borderRadius: 40, 
+    height: 80,
+    width: 80,
+    borderRadius: 40,
     marginBottom: 10,
   },
   drawerText: {

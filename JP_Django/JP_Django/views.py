@@ -11,8 +11,10 @@ from django.middleware.csrf import get_token
 from django.http import JsonResponse
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
-from datetime import time
-from datetime import date
+import time
+import datetime
+from datetime import date, time
+import pytz
 import logging
 from django.core.mail import send_mail
 from django.http import JsonResponse
@@ -97,6 +99,11 @@ def create_user_view(request):
         first_name = data["firstname"]
         last_name = data["lastname"]
         email = data["email"]
+        timezone = data["timezone"]
+
+        #check if timezone is valid
+        if timezone not in pytz.all_timezones:
+            return HttpResponse("Invalid timezone", status=400)
 
         # Check if passwords match
         if password != password2:
@@ -114,7 +121,7 @@ def create_user_view(request):
         # Check if a user with the same username already exists
         if User.objects.filter(username=username).exists():
             return HttpResponse("Account with this username already exists", status=400)
-
+        
         try:
             user = User.objects.create_user(
                 username=username,
@@ -122,6 +129,7 @@ def create_user_view(request):
                 email=email,
                 first_name=first_name,
                 last_name=last_name,
+                timezone=timezone,
             )
             user.save()
 
@@ -164,14 +172,29 @@ def update_times_view(request):
             time1 = time.fromisoformat(time1_str)  # fromisoformat() expects format ("HH:MM:SS")
             time2 = time.fromisoformat(time2_str)
             time3 = time.fromisoformat(time3_str)
-
             if time1 < time2 < time3:
-                user = User.objects.get(
-                    username=username
-                )  # Retrieving user from the database
-                user.time1 = time1.strftime("%H:%M:%S")  # Convert time objects to strings
-                user.time2 = time2.strftime("%H:%M:%S")
-                user.time3 = time3.strftime("%H:%M:%S")
+                user = User.objects.get(username=username)  # Retrieving user from the database
+                # Get the user's timezone and current date
+                user_timezone = pytz.timezone(user.timezone) # Get user's timezone
+                current_date = datetime.datetime.now().date() # Get current date
+
+                # Set the times to UTC
+                datetime1_current = datetime.datetime.combine(current_date, time1) # Combine date and time to get local datetime
+                datetime1_local = user_timezone.localize(datetime1_current, is_dst=None)
+                datetime1_utc = datetime1_local.astimezone(pytz.utc)
+
+                datetime2_current = datetime.datetime.combine(current_date, time2) # Combine date and time to get local datetime
+                datetime2_local = user_timezone.localize(datetime2_current, is_dst=None)
+                datetime2_utc = datetime2_local.astimezone(pytz.utc)
+                
+                datetime3_current = datetime.datetime.combine(current_date, time3) # Combine date and time to get local datetime
+                datetime3_local = user_timezone.localize(datetime3_current, is_dst=None)
+                datetime3_utc = datetime3_local.astimezone(pytz.utc)
+
+                # Set the updated times to the user
+                user.time1 = datetime1_utc.strftime("%Y-%m-%d %H:%M:%S")  # Convert datetime objects to strings
+                user.time2 = datetime2_utc.strftime("%Y-%m-%d %H:%M:%S")
+                user.time3 = datetime3_utc.strftime("%Y-%m-%d %H:%M:%S")
                 user.save()  # Saving
 
                 response_data = {"message": "Success! Times have been updated"}
@@ -322,17 +345,27 @@ def get_times_view(request):
                 # Retrieve the user from the database by username
                 user = User.objects.get(username=username)
 
-                # get the times
+                # get the times as UTC + timezone
+                time1_utc = user.time1.time()
+                time2_utc = user.time2.time()
+                time3_utc = user.time3.time()
+                user_timezone = pytz.timezone(user.timezone) # Get timezone object
+                current_date = datetime.datetime.now().date() # Get current date
+                # Set the times to user's timezone
+                datetime1_utc = datetime.datetime.combine(current_date, time1_utc) # Combine date and time to get UTC datetime
+                datetime1 = datetime1_utc.astimezone(user_timezone) # Convert to timezone
+                datetime2_utc = datetime.datetime.combine(current_date, time2_utc) # Combine date and time to get UTC datetime
+                datetime2 = datetime2_utc.astimezone(user_timezone) # Convert to timezone
+                datetime3_utc = datetime.datetime.combine(current_date, time3_utc) # Combine date and time to get UTC datetime
+                datetime3 = datetime3_utc.astimezone(user_timezone) # Convert to timezone
                 response_data = {
-                    "time1": user.time1.strftime("%H:%M:%S"),
-                    "time2": user.time2.strftime("%H:%M:%S"),
-                    "time3": user.time3.strftime("%H:%M:%S"),
+                    "time1": datetime1.time().strftime("%H:%M:%S"),
+                    "time2": datetime2.time().strftime("%H:%M:%S"),
+                    "time3": datetime3.time().strftime("%H:%M:%S"),
                 }
 
                 logging.info(response_data)
-                return HttpResponse(
-                    response_data
-                )  # returning a DICTIONARY -do not change
+                return HttpResponse(response_data)  # returning a DICTIONARY - do not change
             except Exception as e:
                 logging.info(e)
                 return HttpResponse("User does not exist", status=400)
