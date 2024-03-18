@@ -80,10 +80,10 @@ const LoadingScreen = () => {
 
     return (
         <View style={styles.container}>
+            <Image source={require("../../assets/images/nopen.png")} style={styles.book} />
             <Animated.Image
                 style={[{ transform: [{ translateY: floatAnim }, { rotate: spin }, { rotateZ: wobble }], }, styles.pen]}
                 source={require("../../assets/images/pen.png")} />
-            <Image source={require("../../assets/images/nopen.png")} style={styles.book} />
         </View>
     );
 };
@@ -98,7 +98,6 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: '50%',
         left: '60%',
-        zIndex: 1,
         // transformOrigin: '20px',
         marginLeft: -25, 
         marginTop: -25, 
