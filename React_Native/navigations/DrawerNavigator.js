@@ -2,16 +2,12 @@ import {
   createDrawerNavigator,
   DrawerContentScrollView,
   DrawerItemList,
-  DrawerItem,
 } from "@react-navigation/drawer";
 import { Ionicons } from "@expo/vector-icons";
 import {
   View,
-  Image,
   StyleSheet,
   Text,
-  LinearGradient,
-  Settings,
   Alert,
   Keyboard,
   ImageBackground,
@@ -27,6 +23,7 @@ import BottomTabNavigator from "./BottomTabNavigator.js";
 import makeThemeStyle from '../Theme.js';
 import UserProfile from "../screens/home/Profile.js";
 import SettingsPage from "../screens/home/Settings.js";
+import * as Haptics from 'expo-haptics';
 
 const Drawer = createDrawerNavigator();
 
@@ -87,7 +84,9 @@ const CustomDrawerContent = (props) => {
           </View>
         </TouchableOpacity> */}
 
-        <TouchableOpacity onPress={handleLogout} style={{ paddingVertical: 15 }}>
+        <TouchableOpacity
+          onPress={() => { handleLogout(); theme['hapticFeedback'] ? null : Haptics.selectionAsync(); }}
+          style={{ paddingVertical: 15 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Ionicons name="exit-outline" color={theme['color']['color']} size={22} />
             <Text style={[styles.drawerText, theme["color"]]}> Logout </Text>
@@ -116,10 +115,10 @@ const MyDrawer = ({ navigation }) => {
         drawerStyle: {
           width: "70%",
         },
-        
-        drawerLabelStyle: 
-          {...theme['color']}
-        
+
+        drawerLabelStyle:
+          { ...theme['color'] }
+
       }}
       drawerContent={(props) => <CustomDrawerContent {...props} />}
     >

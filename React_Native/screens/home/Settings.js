@@ -212,21 +212,6 @@ const SettingsScreen = ({ navigation }) => {
         <Times />
       </View>
 
-      {/* <View style={styles.contentContainer}>
-        <Button title="Report" onPress={
-          () => { handleReport(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }
-        } />
-        <Button title="Terms of Use" onPress={
-          () => { handleTermsofUse(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }
-        } />
-        <Button title="Privacy Policy" onPress={
-          () => { handlePrivacyPolicy(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }
-        } />
-        <Button title="Delete Account" color="red" onPress={
-          () => { handleDeleteAccount(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }
-        } />
-      </View> */}
-
       <View style={styles.contentContainer}>
         <TouchableOpacity style={styles.button} onPress={() => { handleReport(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }}>
           <Text style={styles.normalText}>
