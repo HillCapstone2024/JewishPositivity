@@ -162,9 +162,7 @@ def update_times_view(request):
 
         try:
             # Convert strings of posted times to time objects
-            time1 = time.fromisoformat(
-                time1_str
-            )  # fromisoformat() expects format ("HH:MM:SS")
+            time1 = time.fromisoformat(time1_str)  # fromisoformat() expects format ("HH:MM:SS")
             time2 = time.fromisoformat(time2_str)
             time3 = time.fromisoformat(time3_str)
 
@@ -172,17 +170,13 @@ def update_times_view(request):
                 user = User.objects.get(
                     username=username
                 )  # Retrieving user from the database
-                user.time1 = time1.strftime(
-                    "%H:%M:%S"
-                )  # Convert time objects to strings
+                user.time1 = time1.strftime("%H:%M:%S")  # Convert time objects to strings
                 user.time2 = time2.strftime("%H:%M:%S")
                 user.time3 = time3.strftime("%H:%M:%S")
                 user.save()  # Saving
 
                 response_data = {"message": "Success! Times have been updated"}
-                return HttpResponse(
-                    json.dumps(response_data), content_type="application/json"
-                )
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
             else:
                 return HttpResponse("Invalid ordering", status=400)
         except User.DoesNotExist:
