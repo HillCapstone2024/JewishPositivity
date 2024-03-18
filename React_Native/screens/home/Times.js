@@ -50,7 +50,7 @@ const Times = ({ navigation }) => {
     if (colorScheme=='light'){
       handleTheme=true;
     } else {
-      handleTheme-false;
+      handleTheme=false;
     } };
  
   //Used to show or hide picker for each button  
@@ -78,13 +78,16 @@ const Times = ({ navigation }) => {
   //Updates time variable and hides time picker once time is confirmed
   const handleConfirmOne = (date) => {
     setTimeOne(date);
-    hideDatePicker1(); }
+    hideDatePicker1();
+    handleTimeChange(); }
   const handleConfirmTwo = (date) => {
    setTimeTwo(date);
-   hideDatePicker2(); }
+   hideDatePicker2();
+   handleTimeChange(); }
   const handleConfirmThree = (date) => {
     setTimeThree(date);
-    hideDatePicker3(); }
+    hideDatePicker3();
+    handleTimeChange(); }
 
   //POST
 const handleTimeChange = async () => {
@@ -218,7 +221,7 @@ const handleTimeChange = async () => {
         </Pressable>
       </View>
 
-      <View style={{ flexDirection: "row" }}>
+      {/* <View style={{ flexDirection: "row" }}>
         <Pressable onPress={handleTimeChange}>
           <LinearGradient
             // Button Linear Gradient
@@ -230,7 +233,7 @@ const handleTimeChange = async () => {
             <Text style={styles.buttonText}>Submit Changes</Text>
           </LinearGradient>
         </Pressable>
-      </View>
+      </View> */}
     </View>
     // </View>
   );
