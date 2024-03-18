@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Switch, StyleSheet, Button, Alert, Appearance, Pressable } from 'react-native';
+import { View, Text, Switch, StyleSheet, Button, Alert, Appearance, TouchableOpacity, Pressable } from 'react-native';
 import axios from "axios";
 import IP_ADDRESS from "../../ip.js";
 import * as WebBrowser from 'expo-web-browser';
@@ -11,7 +11,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { LinearGradient } from "expo-linear-gradient";
 
 import Times from "./Times.js";
-import TermsofUse from './TermsofUse'; 
+import TermsofUse from './TermsofUse';
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
@@ -20,7 +20,7 @@ const Stack = createNativeStackNavigator();
 const SettingsStackNavigator = () => {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="Settings" component={SettingsScreen} options={{headerShown: false}}/>
+      <Stack.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }} />
       <Stack.Screen name="TermsofUse" component={TermsofUse} />
     </Stack.Navigator>
   );
@@ -66,7 +66,7 @@ const SettingsScreen = ({ navigation }) => {
       } else if (storage_theme === 'light') {
         setTheme(false)
       } else {
-        if (Appearance.getColorScheme() == 'dark') {
+        if (Appearance.getColorScheme() === 'dark') {
           setTheme(true)
         } else {
           setTheme(false)
@@ -232,29 +232,29 @@ const SettingsScreen = ({ navigation }) => {
       </View> */}
 
       <View style={styles.contentContainer}>
-        <Pressable style={styles.button} onPress={ () => { handleReport(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }}>
+        <TouchableOpacity style={styles.button} onPress={() => { handleReport(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }}>
           <Text style={styles.normalText}>
-              Report
-            </Text>
-        </Pressable>
+            Report
+          </Text>
+        </TouchableOpacity>
 
-        <Pressable style={styles.button} onPress={ () => { handleTermsofUse(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null;  }}>
+        <TouchableOpacity style={styles.button} onPress={() => { handleTermsofUse(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }}>
           <Text style={styles.normalText}>
-              Terms of Use
-            </Text>
-        </Pressable>
+            Terms of Use
+          </Text>
+        </TouchableOpacity>
 
-        <Pressable style={styles.button} onPress={ () => { handlePrivacyPolicy(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }}>
+        <TouchableOpacity style={styles.button} onPress={() => { handlePrivacyPolicy(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }}>
           <Text style={styles.normalText}>
-              Privacy Policy
-            </Text>
-        </Pressable>
+            Privacy Policy
+          </Text>
+        </TouchableOpacity>
 
-        <Pressable style={styles.button} onPress={ () => { handleDeleteAccount(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }}>
+        <TouchableOpacity style={styles.button} onPress={() => { handleDeleteAccount(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }}>
           <Text style={styles.redText}>
-              DELETE ACCOUNT
-            </Text>
-        </Pressable>
+            Delete Account
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.footer}>
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     marginTop: 10,
-    flex: 1 // pushes the footer to the end of the screen
+    flex: 1 
   },
   footer: {
     height: 80
@@ -295,29 +295,20 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   button: {
-    //backgroundColor: "#4A90E2",
+    flex: 0,
     opacity: 100,
-    paddingVertical: 10,
-    paddingHorizontal: 50,
+    paddingVertical: 5,
     marginTop: 10,
-    marginHorizontal: 5,
     borderRadius: 5,
-    shadowColor: "black",
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
-    shadowOpacity: 0.16,
     alignItems: 'center',
   },
   redText: {
     color: "red",
-    fontSize: 16,
-    textDecorationLine: "underline",
+    fontSize: 20,
   },
-
   normalText: {
-    color: "grey",
-    fontSize: 16,
-    textDecorationLine: "underline",
+    color: "#007AFF",
+    fontSize: 20,
   },
 });
 

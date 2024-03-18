@@ -5,7 +5,7 @@ const TermsofUse = () => {
 
     return (
         <ScrollView style={styles.container}>
-            <Text style={styles.title}>Terms of Use</Text>
+            {/* <Text style={styles.title}>Terms of Use</Text> */}
             <Text>
                 App Terms of Use
                 Version 1.0
