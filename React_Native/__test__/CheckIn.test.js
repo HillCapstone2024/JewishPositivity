@@ -1,7 +1,7 @@
 import React from "react";
 import { fireEvent, render, waitFor } from "@testing-library/react-native";
 import axios from "axios";
-import journalEntry from "../screens/home/journalEntry";
+import JournalEntry from "../screens/home/CheckIn";
 
 //mock axios call
 jest.mock("axios");
@@ -19,7 +19,7 @@ jest.mock("@react-native-async-storage/async-storage", () => ({
 
 describe("Journal Component", () => {
     it("Successfully renders journal input", () => {
-        const {getByText, getByTestId} = render(<journalEntry/>);
+        const {getByTestId} = render(<JournalEntry/>);
         expect(getByTestId("journalInput")).toBeTruthy();
     });
 

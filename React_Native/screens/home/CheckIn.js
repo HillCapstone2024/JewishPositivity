@@ -189,6 +189,7 @@ export default function JournalEntry({ navigation }) {
             }}
             multiline
             numberOfLines={4}
+            testID="journalInput"
           />
           {/* <Text>{toString(showMediaBar)}</Text> */}
         </View>
