@@ -13,23 +13,16 @@ import {
   Image,
   SafeAreaView,
 } from "react-native";
-import axios from "axios";
-import RecordingAccessoryBar from "./RecordingBar.js";
-import MediaAccessoryBar from "./MediaBar.js";
+import RecordingAccessoryBar from "./RecordingBar";
+import MediaAccessoryBar from "./MediaBar";
 // import VideoThumbnail from "./VideoThumbnail";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import RNThumbnail from "react-native-thumbnail";
 import * as VideoThumbnails from "expo-video-thumbnails";
-import * as Storage from "../../AsyncStorage.js";
-import Theme from "../../Theme.js";
-import IP_ADDRESS from "../../ip.js";
-const API_URL = "http://" + IP_ADDRESS + ":8000";
-import * as FileSystem from "expo-file-system";
-// import RNFS from "react-native-fs";
+import Theme from "../../Theme";
 
-export default function JournalEntry({ navigation }) {
-  const [username, setUsername] = useState("");
+export default function JournalEntry() {
   const [media, setMedia] = useState(null);
   const [mediaBox, setMediaBox] = useState(false);
   const [mediaType, setMediaType] = useState();
@@ -37,69 +30,40 @@ export default function JournalEntry({ navigation }) {
   const [imageUri, setImageUri] = useState(null);
   const [savedRecordingUri, setSavedRecordingUri] = useState("");
   const [showMediaBar, setShowMediaBar] = useState(true);
-  const [momentType, setMomentType] = useState(1);
-  const [base64Media, setBase64Media] = useState("");
+
   const [videoThumbnail, setVideoThumbnail] = useState();
 
   const mediaAccessoryViewID = "MediaBar";
 
-  useEffect(() => {
-    const loadUsername = async () => {
-      const storedUsername = await Storage.getItem("@username");
-      if (storedUsername) {
-        setUsername(storedUsername);
-      } else {
-        setUsername("username not found");
+  const submitJournal = async () => {
+    Alert.alert(
+      "Submit Journal",
+      "Are you sure you want to share your journal?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Share",
+          style: "destructive",
+        },
+      ]
+    );
+    const getCsrfToken = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/csrf-token/`);
+        return response.data.csrfToken;
+      } catch (error) {
+        console.error("Error retrieving CSRF token:", error);
+        throw new Error("CSRF token retrieval failed");
       }
     };
-    loadUsername();
-  }, []);
-
-  async function readFileAsBase64(uri) {
-    try {
-      const base64Content = await FileSystem.readAsStringAsync(uri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-      console.log("Base64 content:", base64Content);
-      return base64Content;
-    } catch (error) {
-      console.error("Failed to read file as base64", error);
-      return null;
-    }
-  }
-
-  const getCsrfToken = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/csrf-token/`);
-      return response.data.csrfToken;
-    } catch (error) {
-      console.error("Error retrieving CSRF token:", error);
-      throw new Error("CSRF token retrieval failed");
-    }
-  };
-
-  const submitJournal = async () => {
-    console.log("attemping to submit journal");
-    const currentDate = new Date();
-    const dateString = currentDate.toISOString();
-    if (mediaType === "text" ) {
-      setBase64Media(journalText);
-    } else {
-      const base64String = await readFileAsBase64(media);
-      setBase64Media(base64String);
-    }
-    console.log("date to send: ", base64Media);
 
     try {
       const csrfToken = await getCsrfToken();
       const response = await axios.post(
-        `${API_URL}/check-in/`,
+        `${API_URL}/post_journal/`, //hook will change
         {
           username: username,
-          moment_number: momentType,
-          content: base64Media,
-          content_type: mediaType,
-          date: dateString,
+          journalText: journalInput, //this will also change
         },
         {
           headers: {
@@ -118,12 +82,15 @@ export default function JournalEntry({ navigation }) {
 
   const generateThumbnail = async () => {
     try {
-      const { thumbnailUri } = await VideoThumbnails.getThumbnailAsync(media, {
-        time: 15000,
-      });
+      const { thumbnailUri } = await VideoThumbnails.getThumbnailAsync(
+        media,
+        {
+          time: 15000,
+        }
+      );
       // setImage(thumbnailUri);
       setVideoThumbnail(thumbnailUri);
-      console.log("thumbnailUri", thumbnailUri);
+      console.log('thumbnailUri',thumbnailUri);
     } catch (e) {
       console.warn(e);
     }
@@ -134,20 +101,20 @@ export default function JournalEntry({ navigation }) {
     setMediaBox(false);
   };
 
-  const handleRecordingComplete = async (uri) => {
-    console.log("Received data from recording bar:", uri);
+  const handleRecordingComplete = (uri) => {
+    console.log("Received saved from recording bar:", uri);
     setSavedRecordingUri(uri);
     setShowMediaBar(true);
     setMediaBox(true);
     setMedia(uri);
-    setMediaType("recording");
   };
 
-  const handleMediaComplete = async (uri) => {
+  const handleMediaComplete = (uri) => {
     console.log("received data from mediabar", uri);
     setMedia(uri);
     setMediaBox(true);
-    setMediaType("image");
+    setMediaType("video");
+    generateThumbnail;
   };
 
   const handleToggle = (toggle) => {
@@ -164,7 +131,7 @@ export default function JournalEntry({ navigation }) {
           {/* {mediaType === "video" ? (
             <Image source={{ uri: videoThumbnail }} style={styles.image} />
           ) : ( */}
-          <Image source={{ uri: media }} style={styles.image} />
+            <Image source={{ uri: media }} style={styles.image} />
           {/* )} */}
           {/* <Image source={{ uri: media }} style={styles.image} /> */}
           <TouchableOpacity style={styles.deleteMedia} onPress={deleteMedia}>
@@ -173,27 +140,22 @@ export default function JournalEntry({ navigation }) {
         </View>
       ) : null}
 
-      <View style={styles.scrollingInput}>
+      <ScrollView style={styles.scrollingInput}>
         {/* Journal Text box View */}
         <View>
-          <Button onPress={submitJournal} title="submit">
-            Submit
-          </Button>
           <TextInput
             style={styles.journalInput}
             inputAccessoryViewID={mediaAccessoryViewID}
             placeholder={"Please type here…"}
-            onChange={(text) => {
-              setJournalText(text);
-              setMediaType("text");
-            }}
+            value={journalText}
+            onChange={(text) => setJournalText(text)}
             multiline
             numberOfLines={4}
-            testID="journalInput"
+            testID = "journalInput"
           />
           {/* <Text>{toString(showMediaBar)}</Text> */}
         </View>
-      </View>
+      </ScrollView>
 
       {/* Keyboard bar view below */}
       {showMediaBar ? (

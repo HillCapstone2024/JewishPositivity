@@ -5,6 +5,18 @@ import { Appearance } from "react-native";
 export default makeThemeStyle = () => {
     const [theme, setTheme] = useState(false);
     const [storage_theme, setStorageTheme] = useState('system');
+    const [hapticFeedback, setHapticFeedback] = useState(false);
+
+    const getHapticFeedback = async () => {
+        try {
+            setHapticFeedback(await Storage.getItem('@hapticFeedback'));
+        }
+        catch (e) {
+            await Storage.setItem('@hapticFeedback', 'false');
+            console.log(e);
+        }
+    };
+    getHapticFeedback();
 
     const getTheme = async () => {
         try {
@@ -32,5 +44,6 @@ export default makeThemeStyle = () => {
         "background": {backgroundColor: theme ? '#333333' : '#ececf6',}, //#ececf6 or #f2f2f2 or #ffffff
         "color": {color: theme ? '#FFFFFF' : '#333333',},
         "theme": storage_theme,
+        "hapticFeedback": hapticFeedback,
     }
 };
