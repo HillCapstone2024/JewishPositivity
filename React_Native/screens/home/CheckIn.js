@@ -20,7 +20,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import RNThumbnail from "react-native-thumbnail";
 import * as VideoThumbnails from "expo-video-thumbnails";
-import makeThemeStyle from '../../Theme.js';
+import Theme from "../../Theme";
 
 export default function JournalEntry() {
   const [media, setMedia] = useState(null);
@@ -30,11 +30,9 @@ export default function JournalEntry() {
   const [imageUri, setImageUri] = useState(null);
   const [savedRecordingUri, setSavedRecordingUri] = useState("");
   const [showMediaBar, setShowMediaBar] = useState(true);
+
   const [videoThumbnail, setVideoThumbnail] = useState();
-  const theme = makeThemeStyle();
-  const now = new Date();
-  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-  const formattedDateTime = new Intl.DateTimeFormat('en-US', options).format(now);
+
   const mediaAccessoryViewID = "MediaBar";
 
   const submitJournal = async () => {
@@ -92,7 +90,7 @@ export default function JournalEntry() {
       );
       // setImage(thumbnailUri);
       setVideoThumbnail(thumbnailUri);
-      console.log('thumbnailUri', thumbnailUri);
+      console.log('thumbnailUri',thumbnailUri);
     } catch (e) {
       console.warn(e);
     }
@@ -125,18 +123,15 @@ export default function JournalEntry() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, theme['background']]}>
-      <TextInput style={[styles.title, theme['color']]} placeholder="Header..." placeholderTextColor='grey'></TextInput>
-      <View style={[styles.separator, { borderBottomColor: theme['color']['color'] }]} />
-      <Text style={[styles.datetime, theme['color']]}> {formattedDateTime} </Text>
+    <SafeAreaView style={styles.overallcontainter}>
       {/* <ScrollView keyboardDismissMode="interactive"> */}
       {/* Media Box Below */}
       {mediaBox ? (
-        <View>
+        <View style={styles.mediaContainer}>
           {/* {mediaType === "video" ? (
             <Image source={{ uri: videoThumbnail }} style={styles.image} />
           ) : ( */}
-          <Image source={{ uri: media }} style={styles.image} />
+            <Image source={{ uri: media }} style={styles.image} />
           {/* )} */}
           {/* <Image source={{ uri: media }} style={styles.image} /> */}
           <TouchableOpacity style={styles.deleteMedia} onPress={deleteMedia}>
@@ -149,15 +144,14 @@ export default function JournalEntry() {
         {/* Journal Text box View */}
         <View>
           <TextInput
-            style={[styles.journalInput, theme['color']]}
+            style={styles.journalInput}
             inputAccessoryViewID={mediaAccessoryViewID}
             placeholder={"Please type here…"}
-            placeholderTextColor={"grey"}
             value={journalText}
             onChange={(text) => setJournalText(text)}
             multiline
             numberOfLines={4}
-            testID="journalInput"
+            testID = "journalInput"
           />
           {/* <Text>{toString(showMediaBar)}</Text> */}
         </View>
@@ -184,16 +178,17 @@ export default function JournalEntry() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 10,
+  overallcontainter: {
+    backgroundColor: "#4F8EF7",
   },
   journalInput: {
+    backgroundColor: "lightgrey",
     marginTop: 20,
     borderRadius: 5,
     padding: 10,
     color: "white",
     height: "100%",
+    flexGrow: 1,
     marginHorizontal: 5,
   },
   scrollingInput: {
@@ -226,22 +221,5 @@ const styles = StyleSheet.create({
   deleteMedia: {
     justifyContent: "center",
     marginTop: 10,
-  },
-  datetime: {
-    fontSize: 15,
-    paddingLeft: 10,
-    textAlign: "left",
-  },
-  separator: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    marginVertical: 10,
-  },
-  title: {
-    paddingRight: 10,
-    paddingLeft: 10,
-    paddingTop: 10,
-    fontSize: 40,
-    fontWeight: "bold",
-    textAlign: 'left',
   },
 });
