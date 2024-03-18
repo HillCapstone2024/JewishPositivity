@@ -128,10 +128,9 @@ def create_user_view(request):
             user.save()
 
             return HttpResponse("Create a new user successful!")
-        except:  # IntegrityError
-            return HttpResponse(
-                "User failed to be created.", status=400
-            )  # user failed to be created due to duplicate info
+        except Exception as e:  # IntegrityError
+            logging.info(e)
+            return HttpResponse("User failed to be created.", status=400)  # user failed to be created due to duplicate info
     return HttpResponse(constNotPost)
 
 
@@ -218,7 +217,8 @@ def get_times_view(request):
                 return HttpResponse(
                     response_data
                 )  # returning a DICTIONARY -do not change
-            except:
+            except Exception as e:
+                logging.info(e)
                 return HttpResponse("User does not exist", status=400)
         else:  # username was empty
             return HttpResponse("Username not provided", status=400)
@@ -258,14 +258,14 @@ def checkin_view(request): # to handle checkin moment POST data
             try:
                 if not isinstance(value, (int, type(None))):
                     non_integer_keys.append(key)
-            except:
+            except Exception as e:
                 # Handle case where key does not correspond to a field in the model
                 return HttpResponse("error retrieving IntegerFields", status=400)
         logging.info("NON-INTEGER KEYS: %s", non_integer_keys)
         # Iterate through the data and get keys that are not integer fields and not empty
         missing_keys = []
         for key, value in data.items():
-            if key in non_integer_keys:
+            if key in non_integer_keys: 
                 if value is None or value.strip() == "": #cannot trim an integer field 
                     missing_keys.append(key) 
             
