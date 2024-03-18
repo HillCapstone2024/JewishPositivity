@@ -289,28 +289,29 @@ def checkin_view(request): # to handle checkin moment POST data
             # Retrieve the user object and its id to store 
             user = User.objects.get(username=username)
             if user is not None: #found user
-                fk_userid = user.pk # should retrieve id
-                logging.info("Checkin view: Userid found: %s", fk_userid)
+                logging.info("Checkin view: User found")
             else: 
                 return HttpResponse("Username does not exist", status=400)
 
+            logging.info("Checkin view: BEFORE Binary Encoded")
             #convert the string (base64 format) passed in as content to a binary field encoding compatible with checkin model
             content_binary_encoded = base64.b64decode(content_64_encoded)
-            #logging.info("Checkin view: Content Binary Encoded: %s", content_binary_encoded)
+            logging.info("Checkin view: Content Binary Encoded")
 
             #create a checkin object
             checkin = Checkin.objects.create(
-                userid= fk_userid,
-                moment_number=moment_number,
-                content=content_binary_encoded,
-                content_type=content_type,
-                checkin_date=current_date
+                user_id = user,
+                moment_number = moment_number,
+                content = content_binary_encoded,
+                content_type = content_type,
+                date = current_date
                 )
             logging.info("Got past creating checkin object")
             checkin.save()
 
             return HttpResponse('Data saved successfully', status=200)
-        except:
+        except Exception as e:
+            logging.info("Checkin failed exception: %s",e )
             return HttpResponse("Check-in failed to save", status=400)
 
 
