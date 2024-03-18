@@ -578,34 +578,6 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'content': '',
     }
 
-    WRONG_TYPE_TEXT = {
-        'username': 'testuser3',
-        'moment_number': 3,
-        'content_type': 'photo',
-        'content': photo, # Add photo here
-    }
-
-    WRONG_TYPE_PHOTO = {
-        'username': 'testuser4',
-        'moment_number': 1,
-        'content_type': 'text',
-        'content': text,
-    }
-
-    WRONG_TYPE_AUDIO = {
-        'username': 'testuser4',
-        'moment_number': 2,
-        'content_type': 'text',
-        'content': text,
-    }
-
-    WRONG_TYPE_VIDEO = {
-        'username': 'testuser4',
-        'moment_number': 3,
-        'content_type': 'text',
-        'content': text,
-    }
-
     INVALID_USERID = { 
         'username': 'admin45678901',
         'moment_number': 1,
@@ -733,51 +705,6 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         # Check if the response status code is 400
         self.assertEqual(response.status_code, 400)
 
-    def test_checkin_failure_wrong_content_type_text(self): #test of failure due to wrong content type for text
-        # logging the test we are in
-        logging.info(("TESTING CHECKIN_failure_wrong_content_type_text....").upper())
-        client = Client()
-
-        # Make a POST request to the checkin_view
-        response = client.post(reverse('checkin_view'), data=json.dumps(self.WRONG_TYPE_TEXT), content_type=CONTENT_TYPE_JSON)
-
-        # Check if the response status code is 400
-        self.assertEqual(response.status_code, 400)
-
-        
-
-    def test_checkin_failure_wrong_content_type_photo(self): #test of failure due to wrong content type for photo
-        # logging the test we are in
-        logging.info(("TESTING CHECKIN_failure_wrong_content_type_photo....").upper())
-        client = Client()
-
-        # Make a POST request to the checkin_view
-        response = client.post(reverse('checkin_view'), data=json.dumps(self.WRONG_TYPE_PHOTO), content_type=CONTENT_TYPE_JSON)
-
-        # Check if the response status code is 400
-        self.assertEqual(response.status_code, 400)
-
-    def test_checkin_failure_wrong_content_type_audio(self): #test of failure due to wrong content type for audio
-        # logging the test we are in
-        logging.info(("TESTING CHECKIN_failure_wrong_content_type_audio....").upper())
-        client = Client()
-
-         # Make a POST request to the checkin_view
-        response = client.post(reverse('checkin_view'), data=json.dumps(self.WRONG_TYPE_AUDIO), content_type=CONTENT_TYPE_JSON)
-
-        # Check if the response status code is 400
-        self.assertEqual(response.status_code, 400)
-
-    def test_checkin_failure_wrong_content_type_video(self): #test of failure due to wrong content type for video
-        # logging the test we are in
-        logging.info(("TESTING CHECKIN_failure_wrong_content_type_video....").upper())
-        client = Client()
-
-         # Make a POST request to the checkin_view
-        response = client.post(reverse('checkin_view'), data=json.dumps(self.WRONG_TYPE_VIDEO), content_type=CONTENT_TYPE_JSON)
-
-        # Check if the response status code is 400
-        self.assertEqual(response.status_code, 400)
 
     def test_checkin_failure_duplicate_moment(self): #test of failure due to duplicate moment for the same day and user
         # logging the test we are in

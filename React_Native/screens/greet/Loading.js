@@ -82,8 +82,8 @@ const LoadingScreen = () => {
         <View style={styles.container}>
             <Animated.Image
                 style={[{ transform: [{ translateY: floatAnim }, { rotate: spin }, { rotateZ: wobble }], }, styles.pen]}
-                source={require("../../assets/pen.png")} />
-            <Image source={require("../../assets/nopen.png")} style={styles.book} />
+                source={require("../../assets/images/pen.png")} />
+            <Image source={require("../../assets/images/nopen.png")} style={styles.book} />
         </View>
     );
 };

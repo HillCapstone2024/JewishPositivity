@@ -20,6 +20,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import RNThumbnail from "react-native-thumbnail";
 import * as VideoThumbnails from "expo-video-thumbnails";
+import Theme from "../../Theme";
 
 export default function JournalEntry() {
   const [media, setMedia] = useState(null);

@@ -30,6 +30,8 @@ logging.basicConfig(
 )  # Choose file mode (overwrite in this case)
 
 User = get_user_model()
+constMissingKey = "Missing keys: %s"
+constNotPost = "Not a POST request!"
 
 
 def validate_email_format(email):  # To validate email format
@@ -48,7 +50,7 @@ def login_view(request):
         missing_keys = [
             key for key, value in data.items() if value is None or value.strip() == ""
         ]
-        logging.info("Missing keys: %s", missing_keys)
+        logging.info(constMissingKey, missing_keys)
 
         # Make sure no fields are empty in the POST data, else return the empty fields
         if missing_keys:
@@ -70,7 +72,7 @@ def login_view(request):
         else:
             # Return an error message or handle unsuccessful login
             return HttpResponse("Login failed!", status=400)
-    return HttpResponse("Not a POST request!")
+    return HttpResponse(constNotPost)
 
 
 def create_user_view(request):
@@ -82,7 +84,7 @@ def create_user_view(request):
         missing_keys = [
             key for key, value in data.items() if value is None or value.strip() == ""
         ]
-        logging.info("Missing keys: %s", missing_keys)
+        logging.info(constMissingKey, missing_keys)
 
         # Make sure no fields are empty in the POST data, else return the empty fields
         if missing_keys:
@@ -130,7 +132,7 @@ def create_user_view(request):
             return HttpResponse(
                 "User failed to be created.", status=400
             )  # user failed to be created due to duplicate info
-    return HttpResponse("Not a POST request!")
+    return HttpResponse(constNotPost)
 
 
 def logout_view(request):
@@ -190,7 +192,7 @@ def update_times_view(request):
             return HttpResponse("Invalid time format", status=400)
         except Exception as e:
             return HttpResponse("Updating user times failed: " + str(e), status=400)
-    return HttpResponse("Not a POST request!")
+    return HttpResponse(constNotPost)
 
 
 def get_times_view(request):
@@ -225,7 +227,7 @@ def get_times_view(request):
 
 def send_report_email_view(request):
     if request.method != "POST":
-        return HttpResponse("Not a POST request!", status=400)
+        return HttpResponse(constNotPost, status=400)
     
     data = json.loads(request.body)
     message = data["message"]
@@ -287,28 +289,29 @@ def checkin_view(request): # to handle checkin moment POST data
             # Retrieve the user object and its id to store 
             user = User.objects.get(username=username)
             if user is not None: #found user
-                fk_userid = user.pk # should retrieve id
-                logging.info("Checkin view: Userid found: %s", fk_userid)
+                logging.info("Checkin view: User found")
             else: 
                 return HttpResponse("Username does not exist", status=400)
 
+            logging.info("Checkin view: BEFORE Binary Encoded")
             #convert the string (base64 format) passed in as content to a binary field encoding compatible with checkin model
             content_binary_encoded = base64.b64decode(content_64_encoded)
-            #logging.info("Checkin view: Content Binary Encoded: %s", content_binary_encoded)
+            logging.info("Checkin view: Content Binary Encoded")
 
             #create a checkin object
             checkin = Checkin.objects.create(
-                userid= fk_userid,
-                moment_number=moment_number,
-                content=content_binary_encoded,
-                content_type=content_type,
-                checkin_date=current_date
+                user_id = user,
+                moment_number = moment_number,
+                content = content_binary_encoded,
+                content_type = content_type,
+                date = current_date
                 )
             logging.info("Got past creating checkin object")
             checkin.save()
 
             return HttpResponse('Data saved successfully', status=200)
-        except:
+        except Exception as e:
+            logging.info("Checkin failed exception: %s",e )
             return HttpResponse("Check-in failed to save", status=400)
 
 

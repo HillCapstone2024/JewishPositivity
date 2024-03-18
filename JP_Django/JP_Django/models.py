@@ -34,5 +34,9 @@ class Checkin(models.Model): #to store checkin moments data
     moment_number = models.IntegerField() #should be 1,2, or 3
     content_type = models.CharField(max_length=100) #either of following option: photo, text, audio, video
     content = models.BinaryField() #actual content
+
+    class Meta:
+        # Define unique constraint for composite key
+        unique_together = [('moment_number', 'user_id', 'date')]
     
     
