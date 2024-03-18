@@ -151,6 +151,7 @@ export default function JournalEntry() {
             onChange={(text) => setJournalText(text)}
             multiline
             numberOfLines={4}
+            testID = "journalInput"
           />
           {/* <Text>{toString(showMediaBar)}</Text> */}
         </View>
