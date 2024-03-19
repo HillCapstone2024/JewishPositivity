@@ -35,6 +35,8 @@ const Signup = ({ navigation }) => {
   const [errorMessage, setErrorMessage] = useState(null);
   const theme = makeThemeStyle();
 
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
   const saveUsername = async () => {
     await Storage.setItem("@username", username);
     console.log("successfully saved username: ", username);
@@ -75,6 +77,7 @@ const Signup = ({ navigation }) => {
           firstname: firstname,
           lastname: lastname,
           email: email,
+          timezone: timezone
         },
         {
           headers: {
