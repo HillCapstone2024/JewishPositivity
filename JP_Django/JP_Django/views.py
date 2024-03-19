@@ -76,9 +76,7 @@ def login_view(request):
 
 
 def create_user_view(request):
-    if request.method == "POST":
-
-        # Load POST data
+    if request.method == "POST": # Load POST data
         data = json.loads(request.body)
         logging.info("IN CREATE_USER_VIEW....")
         logging.info("Parsed JSON data: %s", data)
@@ -132,7 +130,6 @@ def create_user_view(request):
                 timezone=timezone,
             )
             user.save()
-
             return HttpResponse("Create a new user successful!")
         except Exception as e:  # IntegrityError
             logging.info(e)
