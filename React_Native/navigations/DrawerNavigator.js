@@ -117,7 +117,7 @@ const MyDrawer = ({ navigation }) => {
         },
 
         drawerLabelStyle:
-          { ...theme['color'] }
+          theme['color']
 
       }}
       drawerContent={(props) => <CustomDrawerContent {...props} />}
