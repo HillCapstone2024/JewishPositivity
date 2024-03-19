@@ -210,65 +210,52 @@ def update_times_view(request):
     return HttpResponse(constNotPost)
 
 def update_user_information_view(request):
-    if request.method == "POST":
-        # Load POST data
-        data = json.loads(request.body)
+    # Check if the request method is POST
+    if request.method != "POST":
+        # Return an HTTP 400 response if the method is not POST
+        return HttpResponse("Not a POST request", status=400)
 
-        #getting all fields from POST
-        keys = [key for key, value in data.items()]
+    # Parse the JSON data from the request body
+    data = json.loads(request.body)
 
-        #try to get the username (unique) field for the row we intend to update
-        try:
-            username = data["username"]
-            user = User.objects.get(username=username)
-        except Exception as e:
-            logging.info("ERROR RETRIEVING USER: %s", e)
-            return HttpResponse("Username is in invalid format or does not exist", status=400)
-        
-        missing_keys = [key for key, value in data.items() if value is None or value.strip() == ""]
+    # Attempt to retrieve the user object based on the username provided in the POST data
+    try:
+        username = data["username"]  # Get the username from the POST data
+        user = User.objects.get(username=username)  # Retrieve the user from the database
+    except Exception as e:
+        # Log the error and return an HTTP 400 response if the user cannot be retrieved
+        logging.info("ERROR RETRIEVING USER: %s", e)
+        return HttpResponse("Username is in invalid format or does not exist", status=400)
 
-        # Make sure no fields are empty in the POST data, else return the empty fields
-        if missing_keys:
-            logging.info(constMissingKey, missing_keys)
-            error_message = f"Missing required keys: {', '.join(missing_keys)}"  # tells which keys missing in error message
-            return HttpResponse(error_message, status=400)
+    # Check for any missing keys (i.e., fields with empty values) in the POST data
+    missing_keys = [key for key, value in data.items() if value is None or value.strip() == ""]
+    if missing_keys:
+        # Log the missing keys and return an HTTP 400 response listing them
+        logging.info("Missing required keys: %s", missing_keys)
+        return HttpResponse(f"Missing required keys: {', '.join(missing_keys)}", status=400)
 
-        #if (any possible key) is present update accordingly
-        if 'newusername' in keys:
+    # Define a dictionary mapping POST data keys to their respective update functions and expected values
+    update_actions = {
+        'newusername': (update_username, data.get("newusername")),
+        'password': (update_password, data.get("password")),
+        'email': (update_email, data.get("email")),
+        'lastname': (update_last_name, data.get("lastname")),
+        'firstname': (update_first_name, data.get("firstname")),
+        'profilepicture': (update_profile_picture, data.get("profilepicture"))
+    }
 
-            #this method is void unless it errors
-            error_response = update_username(user, data["newusername"])
-            if error_response:
-                return error_response
-        if 'password' in keys:
-
-            #this method is void unless it errors
-            error_response = update_password(user, data["password"])
-            if error_response:
-                return error_response
-        if 'email' in keys:
-            #this method is void unless it errors
-            error_response = update_email(user, data["email"])
-            if error_response:
-                return error_response
-        if 'lastname' in keys:
-            #this method is void unless it errors
-            error_response = update_last_name(user, data["lastname"])
-            if error_response:
-                return error_response
-        if 'firstname' in keys:
-            #this method is void unless it errors
-            error_response = update_first_name(user, data["firstname"])
-            if error_response:
-                return error_response
-        if 'profilepicture' in keys:
-            #this method is void unless it errors
-            error_response = update_profile_picture(user, data["profilepicture"])
+    # Iterate over the update_actions dictionary, where each entry contains a field to update and its corresponding update function.
+    for key, (update_func, value) in update_actions.items():
+        # Check if the key is in the POST data and has a non-empty value
+        if key in data and value:
+            # Call the respective update function with the user object and the value from the POST data
+            error_response = update_func(user, value)
+            # If the update function returns an error response, return it immediately
             if error_response:
                 return error_response
 
-        return HttpResponse("Changes Successful!")
-    return HttpResponse(constNotPost, status = 400)
+    # Return an HTTP 200 response indicating that the updates were successful
+    return HttpResponse("Changes Successful!")
 
 def update_username(user, new_username):
     try:
