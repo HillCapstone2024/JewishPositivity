@@ -21,9 +21,9 @@ from django.http import JsonResponse
 from django.db import models
 import base64
 
+# ########## Configuration & Constants ##########
 
 
-# configure logging
 logging.basicConfig(
     level=logging.INFO,  # Set the logging level to INFO
     format="%(asctime)s - %(levelname)s - %(message)s",  # Define log message format
@@ -36,6 +36,16 @@ constMissingKey = "Missing keys: %s"
 constNotPost = "Not a POST request!"
 
 
+
+
+
+
+# ########## Helper Functions ##########
+
+
+
+# ########## Helper Functions ##########
+
 def validate_email_format(email):  # To validate email format
     try:
         validate_email(email)
@@ -43,6 +53,52 @@ def validate_email_format(email):  # To validate email format
         return False
     return True
 
+def validate_data(data):
+    # Identify keys in the data that do not have integer values or are None
+    non_integer_keys = [key for key, value in data.items() if not isinstance(value, (int, type(None)))]
+    logging.info("NON-INTEGER KEYS: %s", non_integer_keys)
+
+    # Check for missing or empty required fields in the POST data
+    missing_keys = [key for key in non_integer_keys if not data.get(key)]
+    logging.info("Missing keys: %s", missing_keys)
+
+    # Return an error response if there are missing keys
+    if missing_keys:
+        error_message = f"Missing required keys: {', '.join(missing_keys)}"
+        return HttpResponse(error_message, status=400)
+
+    return None
+
+def check_missing_keys(data):
+    # Identify keys with None or empty string values
+    missing_keys = [key for key, value in data.items() if value is None or value.strip() == ""]
+    logging.info(constMissingKey, missing_keys)
+    
+    # Return an error response if there are missing keys
+    if missing_keys:
+        error_message = f"Missing required keys: {', '.join(missing_keys)}"
+        return HttpResponse(error_message, status=400)
+    return None
+
+def get_user(username):
+    # Retrieve the user object from the database using the username
+    try:
+        user = User.objects.get(username=username)
+        logging.info("Checkin view: User found")
+        return user, None
+    except User.DoesNotExist:
+        # Log and return an error response if the user does not exist
+        logging.info("Username does not exist")
+        return None, HttpResponse("Username does not exist", status=400)
+
+
+
+# ########## Authentication Views ##########
+    
+
+
+# ########## Authentication Views ##########
+    
 
 def login_view(request):
     if request.method == "POST":
@@ -76,65 +132,60 @@ def login_view(request):
 
 
 def create_user_view(request):
-    if request.method == "POST": # Load POST data
-        data = json.loads(request.body)
-        logging.info("IN CREATE_USER_VIEW....")
-        logging.info("Parsed JSON data: %s", data)
-        missing_keys = [
-            key for key, value in data.items() if value is None or value.strip() == ""
-        ]
-        logging.info(constMissingKey, missing_keys)
+    # Ensure the request method is POST
+    if request.method != "POST":
+        return HttpResponse(constNotPost)  # constNotPost should be defined elsewhere
 
-        # Make sure no fields are empty in the POST data, else return the empty fields
-        if missing_keys:
-            error_message = f"Missing required keys: {', '.join(missing_keys)}"  # tells which keys missing in error message
-            return HttpResponse(error_message, status=400)
+    # Parse the JSON body of the request
+    data = json.loads(request.body)
+    logging.info("IN CREATE_USER_VIEW....")
+    logging.info("Parsed JSON data: %s", data)
 
-        # Create a new user
-        username = data["username"]
-        password = data["password"]
-        password2 = data["reentered_password"]  # must match frontend
-        first_name = data["firstname"]
-        last_name = data["lastname"]
-        email = data["email"]
-        timezone = data["timezone"]
+    # Check for missing keys and return an error response if any are found
+    error_response = check_missing_keys(data)
+    if error_response:
+        return error_response
 
-        #check if timezone is valid
-        if timezone not in pytz.all_timezones:
-            return HttpResponse("Invalid timezone", status=400)
+    # Extract required fields from the POST data
+    username = data["username"]
+    password = data["password"]
+    password2 = data["reentered_password"]  # Confirmation password
+    email = data["email"]
+    timezone = data["timezone"]
 
-        # Check if passwords match
-        if password != password2:
-            return HttpResponse("Passwords do not match", status=400)
+    # Validate the timezone
+    if timezone not in pytz.all_timezones:
+        return HttpResponse("Invalid timezone", status=400)
+    
+    # Ensure the provided passwords match
+    if password != password2:
+        return HttpResponse("Passwords do not match", status=400)
+    
+    # Validate the email format
+    if not validate_email_format(email):  # Assumes validate_email_format function is defined elsewhere
+        return HttpResponse("Not a valid email address", status=400)
+    
+    # Check for existing users with the same email or username
+    if User.objects.filter(email=email).exists():
+        logging.info("Same email exists")
+        return HttpResponse("Account with this email already exists", status=400)
+    if User.objects.filter(username=username).exists():
+        return HttpResponse("Account with this username already exists", status=400)
 
-        # Regular expression pattern for validating email format
-        if not validate_email_format(email):  # function above using django validator
-            return HttpResponse("Not a valid email address", status=400)
-
-        # Check if a user with the same email already exists
-        if User.objects.filter(email=email).exists():
-            logging.info("Same email exists")
-            return HttpResponse("Account with this email already exists", status=400)
-
-        # Check if a user with the same username already exists
-        if User.objects.filter(username=username).exists():
-            return HttpResponse("Account with this username already exists", status=400)
-        
-        try:
-            user = User.objects.create_user(
-                username=username,
-                password=password,
-                email=email,
-                first_name=first_name,
-                last_name=last_name,
-                timezone=timezone,
-            )
-            user.save()
-            return HttpResponse("Create a new user successful!")
-        except Exception as e:  # IntegrityError
-            logging.info(e)
-            return HttpResponse("User failed to be created.", status=400)  # user failed to be created due to duplicate info
-    return HttpResponse(constNotPost)
+    # Attempt to create a new user
+    try:
+        User.objects.create_user(
+            username=username,
+            password=password,
+            email=email,
+            first_name=data["firstname"],
+            last_name=data["lastname"],
+            timezone=timezone,
+        )
+        return HttpResponse("User has been created!")
+    except Exception as e:  # Catch exceptions like IntegrityError
+        logging.info(e)
+        return HttpResponse("User failed to be created.", status=400)
 
 
 def logout_view(request):
@@ -153,6 +204,14 @@ def logout_view(request):
         )  # Redirect to login page after logout
 
 
+
+# ########## User Information Management ##########
+
+
+
+
+# ########## User Information Management ##########
+       
 def update_times_view(request):
     if request.method == "POST":
         # Retrieving username to access correct user in database
@@ -205,6 +264,46 @@ def update_times_view(request):
         except Exception as e:
             return HttpResponse("Updating user times failed: " + str(e), status=400)
     return HttpResponse(constNotPost)
+
+
+def get_times_view(request):
+    if request.method == "GET":
+        username = request.GET.get("username")  # JSON is not typically used for GET requests here
+
+        # Make sure the get data is not empty
+        if username is not None:
+            try:
+                # Retrieve the user from the database by username
+                user = User.objects.get(username=username)
+
+                # get the times as UTC + timezone
+                time1_utc = user.time1.time()
+                time2_utc = user.time2.time()
+                time3_utc = user.time3.time()
+                user_timezone = pytz.timezone(user.timezone) # Get timezone object
+                current_date = datetime.datetime.now().date() # Get current date
+                # Set the times to user's timezone
+                datetime1_utc = datetime.datetime.combine(current_date, time1_utc) # Combine date and time to get UTC datetime
+                datetime1 = datetime1_utc.astimezone(user_timezone) # Convert to timezone
+                datetime2_utc = datetime.datetime.combine(current_date, time2_utc) # Combine date and time to get UTC datetime
+                datetime2 = datetime2_utc.astimezone(user_timezone) # Convert to timezone
+                datetime3_utc = datetime.datetime.combine(current_date, time3_utc) # Combine date and time to get UTC datetime
+                datetime3 = datetime3_utc.astimezone(user_timezone) # Convert to timezone
+                response_data = {
+                    "time1": datetime1.time().strftime("%H:%M:%S"),
+                    "time2": datetime2.time().strftime("%H:%M:%S"),
+                    "time3": datetime3.time().strftime("%H:%M:%S"),
+                }
+
+                logging.info(response_data)
+                return HttpResponse(response_data)  # returning a DICTIONARY - do not change
+            except Exception as e:
+                logging.info(e)
+                return HttpResponse("User does not exist", status=400)
+        else:  # username was empty
+            return HttpResponse("Username not provided", status=400)
+    return HttpResponse("Not a GET request!")
+
 
 def update_user_information_view(request):
     # Check if the request method is POST
@@ -335,44 +434,72 @@ def get_user_information_view(request):
             return HttpResponse("Username not provided", status=400)
     return HttpResponse("Not a GET request")
 
-def get_times_view(request):
-    if request.method == "GET":
-        username = request.GET.get("username")  # JSON is not typically used for GET requests here
 
-        # Make sure the get data is not empty
-        if username is not None:
-            try:
-                # Retrieve the user from the database by username
-                user = User.objects.get(username=username)
 
-                # get the times as UTC + timezone
-                time1_utc = user.time1.time()
-                time2_utc = user.time2.time()
-                time3_utc = user.time3.time()
-                user_timezone = pytz.timezone(user.timezone) # Get timezone object
-                current_date = datetime.datetime.now().date() # Get current date
-                # Set the times to user's timezone
-                datetime1_utc = datetime.datetime.combine(current_date, time1_utc) # Combine date and time to get UTC datetime
-                datetime1 = datetime1_utc.astimezone(user_timezone) # Convert to timezone
-                datetime2_utc = datetime.datetime.combine(current_date, time2_utc) # Combine date and time to get UTC datetime
-                datetime2 = datetime2_utc.astimezone(user_timezone) # Convert to timezone
-                datetime3_utc = datetime.datetime.combine(current_date, time3_utc) # Combine date and time to get UTC datetime
-                datetime3 = datetime3_utc.astimezone(user_timezone) # Convert to timezone
-                response_data = {
-                    "time1": datetime1.time().strftime("%H:%M:%S"),
-                    "time2": datetime2.time().strftime("%H:%M:%S"),
-                    "time3": datetime3.time().strftime("%H:%M:%S"),
-                }
+# ########## Check-in Management ##########
 
-                logging.info(response_data)
-                return HttpResponse(response_data)  # returning a DICTIONARY - do not change
-            except Exception as e:
-                logging.info(e)
-                return HttpResponse("User does not exist", status=400)
-        else:  # username was empty
-            return HttpResponse("Username not provided", status=400)
-    return HttpResponse("Not a GET request!")
 
+
+# ########## Check-in Management ##########
+    
+def create_checkin(user, data):
+    # Create a check-in record in the database
+    try:
+        # Decode the base64 encoded content
+        content_binary_encoded = base64.b64decode(data["content"])
+        # Create the checkin object and save it to the database
+        checkin = Checkin.objects.create(
+            user_id=user,
+            moment_number=data["moment_number"],
+            content=content_binary_encoded,
+            content_type=data["content_type"],
+            date=date.today()
+        )
+        logging.info("Checkin object created")
+        checkin.save()
+        return HttpResponse('Data saved successfully', status=200)
+    except Exception as e:
+        # Log and return an error response if the check-in creation fails
+        logging.info("Checkin failed exception: %s", e)
+        return HttpResponse("Check-in failed to save", status=400)
+
+def checkin_view(request):
+    # Handle the check-in POST request
+    if request.method != 'POST':
+        # Return an error response if the request method is not POST
+        return HttpResponse("Invalid request method", status=405)
+
+    # Parse the JSON data from the request body
+    data = json.loads(request.body)
+    
+    # Validate the POST data
+    error_response = validate_data(data)
+    if error_response:
+        return error_response
+
+    # Retrieve the user associated with the check-in
+    user, error_response = get_user(data["username"])
+    if error_response:
+        return error_response
+
+    # Create the check-in record
+    return create_checkin(user, data)
+
+
+
+# ########## Utility Views ##########
+
+
+
+
+
+# ########## Utility Views ##########
+
+
+
+def csrf_token_view(request):
+    csrf_token = get_token(request)
+    return JsonResponse({"csrfToken": csrf_token})
 
 def send_report_email_view(request):
     if request.method != "POST":
@@ -395,75 +522,3 @@ def send_report_email_view(request):
     except Exception as e:
         logging.error("Error sending email: %s", e)
         return JsonResponse({"status": 400})
-
-
-def checkin_view(request): # to handle checkin moment POST data 
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        #logging.info("Parsed JSON data: %s", data)
-
-        non_integer_keys = []# Iterate over the keys and filter out non-integer fields
-        for key, value in data.items():
-            try:
-                if not isinstance(value, (int, type(None))):
-                    non_integer_keys.append(key)
-            except Exception as e:
-                # Handle case where key does not correspond to a field in the model
-                return HttpResponse("error retrieving IntegerFields", status=400)
-        logging.info("NON-INTEGER KEYS: %s", non_integer_keys)
-        # Iterate through the data and get keys that are not integer fields and not empty
-        missing_keys = []
-        for key, value in data.items():
-            if key in non_integer_keys: 
-                if value is None or value.strip() == "": #cannot trim an integer field 
-                    missing_keys.append(key) 
-            
-        logging.info("Missing keys: %s", missing_keys)
-
-        # Make sure no fields are empty in the POST data, else return the empty fields
-        if missing_keys:
-            error_message = f"Missing required keys: {', '.join(missing_keys)}"  # tells which keys missing in error message
-            return HttpResponse(error_message, status=400)
-        
-        #retrieve the Post data and get the current date
-        moment_number = data["moment_number"]
-        content_64_encoded = data["content"] #This is in string format - base64 format
-        content_type = data["content_type"]
-        current_date = date.today()
-        username = data["username"]
-        logging.info("view.py checkin view post data: \nMoment Number: %s content_Type%s \n Current Date:%s \nUsername: %s", 
-                     moment_number, content_type, current_date,username)
-
-        try:
-            # Retrieve the user object and its id to store 
-            user = User.objects.get(username=username)
-            if user is not None: #found user
-                logging.info("Checkin view: User found")
-            else: 
-                return HttpResponse("Username does not exist", status=400)
-
-            logging.info("Checkin view: BEFORE Binary Encoded")
-            #convert the string (base64 format) passed in as content to a binary field encoding compatible with checkin model
-            content_binary_encoded = base64.b64decode(content_64_encoded)
-            logging.info("Checkin view: Content Binary Encoded")
-
-            #create a checkin object
-            checkin = Checkin.objects.create(
-                user_id = user,
-                moment_number = moment_number,
-                content = content_binary_encoded,
-                content_type = content_type,
-                date = current_date
-                )
-            logging.info("Got past creating checkin object")
-            checkin.save()
-
-            return HttpResponse('Data saved successfully', status=200)
-        except Exception as e:
-            logging.info("Checkin failed exception: %s",e )
-            return HttpResponse("Check-in failed to save", status=400)
-
-
-def csrf_token_view(request):
-    csrf_token = get_token(request)
-    return JsonResponse({"csrfToken": csrf_token})
