@@ -14,8 +14,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
 
-export default function MediaAccessoryBar({ onMediaComplete, toggleRecording }) {
+export default function MediaAccessoryBar({ mediaProp, toggleRecording }) {
     const [media, setMedia] = useState(null);
+    const [mediaType, setMediaType] = useState(null);
     const [keyboardHeight, setKeyboardHeight] = useState(0);
     const [recordingState, setRecordingState] = useState(false);
 
@@ -61,7 +62,7 @@ export default function MediaAccessoryBar({ onMediaComplete, toggleRecording }) 
 
     //sending media and recording toggle back to parent component
     useEffect(() => {
-        if (media) {
+        if (media && mediaType) {
         sendMedia();
         }
     }, [media]);
@@ -83,8 +84,9 @@ export default function MediaAccessoryBar({ onMediaComplete, toggleRecording }) 
         });
 
         if (!result.cancelled) {
-        setMedia(result.assets[0].uri);
-        console.log("result: ", media);
+        setMediaType(result.assets[0].type);
+        setMedia(result);
+        console.log("result: ", result.assets[0]);
         }
     };
 
@@ -104,7 +106,8 @@ export default function MediaAccessoryBar({ onMediaComplete, toggleRecording }) 
         });
 
         if (result && !result.cancelled) {
-            setMedia(result.assets[0].uri);
+            setMediaType(result.assets[0].type);
+            setMedia(result);
             console.log("result: ", result);
         }
     };
@@ -113,8 +116,8 @@ export default function MediaAccessoryBar({ onMediaComplete, toggleRecording }) 
 
     function sendMedia() {
         console.log('sending media');
-        if (onMediaComplete) {
-            onMediaComplete(media);
+        if (mediaProp) {
+          mediaProp(media);
         }
     };
 
@@ -136,7 +139,7 @@ export default function MediaAccessoryBar({ onMediaComplete, toggleRecording }) 
           <TouchableOpacity
             style={styles.barButton}
             onPress={() => {
-              if (onMediaComplete) {
+              if (toggleRecording) {
                 console.log("toggled recording");
                 toggleRecording(true);
               }

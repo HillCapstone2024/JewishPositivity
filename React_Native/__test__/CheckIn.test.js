@@ -32,6 +32,8 @@ describe("Journal Component", () => {
     // records voice
     // check bar dismises keyboard
     // axios post works
+    //gets username from async storage
+    //deletes photo/video/recording
 
 
 });

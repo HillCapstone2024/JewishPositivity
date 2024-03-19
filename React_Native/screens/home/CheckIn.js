@@ -22,8 +22,8 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import RNThumbnail from "react-native-thumbnail";
 import * as FileSystem from "expo-file-system";
 import base64 from "react-native-base64";
-import * as VideoThumbnails from "expo-video-thumbnails";
-import makeThemeStyle from '../../Theme.js';
+import { Video, ResizeMode, Audio } from "expo-av";
+import makeThemeStyle from "../../Theme.js";
 import * as Storage from "../../AsyncStorage.js";
 import IP_ADDRESS from "../../ip.js";
 const API_URL = "http://" + IP_ADDRESS + ":8000";
@@ -37,12 +37,23 @@ export default function JournalEntry() {
   const [base64Data, setBase64Data] = useState("");
   const [journalText, setJournalText] = useState("");
   const [showMediaBar, setShowMediaBar] = useState(true);
-  const [videoThumbnail, setVideoThumbnail] = useState();
   const mediaAccessoryViewID = "MediaBar";
   const theme = makeThemeStyle();
   const now = new Date();
-  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-  const formattedDateTime = new Intl.DateTimeFormat('en-US', options).format(now);
+  const options = {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  };
+  const formattedDateTime = new Intl.DateTimeFormat("en-US", options).format(
+    now
+  );
+  const [sound, setSound] = useState();
+  const videoRef = useRef(null);
+  const [status, setStatus] = useState({});
 
   useEffect(() => {
     const loadUsername = async () => {
@@ -54,7 +65,43 @@ export default function JournalEntry() {
       }
     };
     loadUsername();
-    },[]);
+    configureAudioMode();
+  }, []);
+
+
+  async function configureAudioMode() {
+    try {
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        interruptionModeIOS: 1,
+        playsInSilentModeIOS: true,
+        interruptionModeAndroid: 1,
+        shouldDuckAndroid: true,
+        staysActiveInBackground: true,
+        playThroughEarpieceAndroid: false,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function playSound() {
+    console.log("Loading Sound");
+    const { sound } = await Audio.Sound.createAsync({ uri: mediaUri });
+    setSound(sound);
+
+    console.log("Playing Sound");
+    await sound.playAsync();
+  }
+
+  useEffect(() => {
+    return sound
+      ? () => {
+          console.log("Unloading Sound");
+          sound.unloadAsync();
+        }
+      : undefined;
+  }, [sound]);
 
   async function readFileAsBase64(uri) {
     try {
@@ -67,7 +114,7 @@ export default function JournalEntry() {
       console.error("Failed to read file as base64", error);
       return null;
     }
-  };
+  }
 
   const getCsrfToken = async () => {
     try {
@@ -85,7 +132,7 @@ export default function JournalEntry() {
       // const text64 = base64.encode(journalText);
       setBase64Data(journalText);
     }
-    console.log('got past', base64Data);
+    console.log("got past", base64Data);
     try {
       const csrfToken = await getCsrfToken();
       const response = await axios.post(
@@ -112,22 +159,6 @@ export default function JournalEntry() {
     }
   };
 
-  const generateThumbnail = async () => {
-    try {
-      const { thumbnailUri } = await VideoThumbnails.getThumbnailAsync(
-        mediaUri,
-        {
-          time: 15000,
-        }
-      );
-      // setImage(thumbnailUri);
-      setVideoThumbnail(thumbnailUri);
-      console.log('thumbnailUri', thumbnailUri);
-    } catch (error) {
-      console.warn(error);
-    }
-  };
-
   const deleteMedia = () => {
     setMediaUri(null);
     setMediaBox(false);
@@ -136,21 +167,19 @@ export default function JournalEntry() {
 
   const handleRecordingComplete = (uri) => {
     console.log("Received saved from recording bar:", uri);
-    // setShowMediaBar(true);
+    setShowMediaBar(true);
     setMediaBox(true);
     setMediaUri(uri);
   };
 
-  const handleMediaComplete = async (uri) => {
-    console.log("received data from mediabar", uri);
-    setMediaUri(uri);
-    setMediaType("image");
-    const base64String = await readFileAsBase64(uri);
-    setBase64Data(base64String);
+  const handleMediaComplete = async (mediaProp) => {
+    console.log("received data from mediabar", mediaProp);
+    setMediaUri(mediaProp.assets[0].uri);
+    setMediaType(mediaProp.assets[0].type);
+    // const base64String = await readFileAsBase64(uri);
+    // setBase64Data(base64String);
     setMediaBox(true);
-    console.log(base64String);
   };
-
 
   const handleToggle = (toggle) => {
     console.log("journal side:", toggle);
@@ -158,22 +187,81 @@ export default function JournalEntry() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, theme['background']]}>
-      <TextInput style={[styles.title, theme['color']]} placeholder="Header..." placeholderTextColor='grey'></TextInput>
-      <View style={[styles.separator, { borderBottomColor: theme['color']['color'] }]} />
-      <Text style={[styles.datetime, theme['color']]}> {formattedDateTime} </Text>
+    <SafeAreaView style={[styles.container, theme["background"]]}>
+      <TextInput
+        style={[styles.title, theme["color"]]}
+        placeholder="Header..."
+        placeholderTextColor="grey"
+      ></TextInput>
+      <View
+        style={[
+          styles.separator,
+          { borderBottomColor: theme["color"]["color"] },
+        ]}
+      />
+      <Text style={[styles.datetime, theme["color"]]}>
+        {" "}
+        {formattedDateTime}{" "}
+      </Text>
       {/* <ScrollView keyboardDismissMode="interactive"> */}
       {/* Media Box Below */}
       {mediaBox ? (
         <View style={styles.mediaContainer}>
-          {/* {mediaType === "video" ? (
-            <Image source={{ uri: videoThumbnail }} style={styles.image} />
-          ) : ( */}
-          <Image source={{ uri: mediaUri }} style={styles.image} />
+          {mediaType === "image" ? (
+            <Image source={{ uri: mediaUri }} style={styles.image} />
+          ) : mediaType === "video" ? (
+            <View>
+              <Video
+                source={{ uri: mediaUri }} // Can be a URL or a local file.
+                playsInSilentModeIOS={true}
+                useNativeControls
+                ref={videoRef}
+                style={styles.video}
+                controls={true} // Show the default video controls.
+                resizeMode={ResizeMode.CONTAIN} // The video's aspect ratio is preserved and fits within the bounds of the container.
+                onError={(e) => console.log("video error", e)} // Callback when video cannot be loaded
+                onTouchEnd={() => {
+                  videoRef.current?.presentFullscreenPlayer();
+                }}
+                onFullscreenUpdate={({ fullscreenUpdate }) => {
+                  switch (fullscreenUpdate) {
+                    case Video.FULLSCREEN_UPDATE_PLAYER_WILL_PRESENT:
+                      console.log("The fullscreen player is about to present.");
+                      break;
+                    case Video.FULLSCREEN_UPDATE_PLAYER_DID_PRESENT:
+                      console.log("The fullscreen player just presented.");
+                      break;
+                    case Video.FULLSCREEN_UPDATE_PLAYER_WILL_DISMISS:
+                      console.log("The fullscreen player is about to dismiss.");
+                      break;
+                    case Video.FULLSCREEN_UPDATE_PLAYER_DID_DISMISS:
+                      console.log("The fullscreen player just dismissed.");
+                  }
+                }}
+              />
+              {/* <Button
+                title={status.isPlaying ? "Pause" : "Play"}
+                onPress={() =>
+                  status.isPlaying
+                    ? videoRef.current.pauseAsync()
+                    : videoRef.current.playAsync()
+                }
+              /> */}
+              <Text>Video</Text>
+            </View>
+          ) : (
+            <View style={styles.container}>
+              <Button title="Play Sound" onPress={playSound} />
+            </View>
+          )}
           {/* )} */}
           {/* <Image source={{ uri: media }} style={styles.image} /> */}
           <TouchableOpacity style={styles.deleteMedia} onPress={deleteMedia}>
-            <Ionicons name="close-circle" size={25} color={theme['color']['color']} />
+            <Ionicons
+              name="close-circle"
+              size={25}
+              color={theme["color"]["color"]}
+            />
           </TouchableOpacity>
         </View>
       ) : null}
@@ -192,8 +280,7 @@ export default function JournalEntry() {
             numberOfLines={4}
             testID="journalInput"
           />
-          <Button onPress={submitJournal} title="Submit">
-          </Button>
+          <Button onPress={submitJournal} title="Submit"></Button>
         </View>
       </ScrollView>
 
@@ -201,7 +288,7 @@ export default function JournalEntry() {
       {showMediaBar ? (
         <InputAccessoryView nativeID={mediaAccessoryViewID}>
           <MediaAccessoryBar
-            onMediaComplete={handleMediaComplete}
+            mediaProp={handleMediaComplete}
             toggleRecording={handleToggle}
           />
         </InputAccessoryView>
@@ -257,6 +344,11 @@ const styles = StyleSheet.create({
     marginTop: 20,
     backgroundColor: "black",
   },
+  video: {
+    alignSelf: "center",
+    width: "100%",
+    height: 80,
+  },
   deleteMedia: {
     justifyContent: "center",
     marginTop: 10,
@@ -276,6 +368,6 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     fontSize: 40,
     fontWeight: "bold",
-    textAlign: 'left',
+    textAlign: "left",
   },
 });
