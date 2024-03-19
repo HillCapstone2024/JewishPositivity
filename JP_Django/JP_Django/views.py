@@ -245,13 +245,10 @@ def update_user_information_view(request):
     }
 
     # Iterate over the update_actions dictionary, where each entry contains a field to update and its corresponding update function.
-    for key, (update_func, value) in update_actions.items():
-        # Check if the key is in the POST data and has a non-empty value
-        if key in data and value:
-            # Call the respective update function with the user object and the value from the POST data
-            error_response = update_func(user, value)
-            # If the update function returns an error response, return it immediately
-            if error_response:
+    for key, (update_func, value) in update_actions.items(): 
+        if key in data and value: # Check if the key is in the POST data and has a non-empty value
+            error_response = update_func(user, value) # Call the respective update function with the user object and the value from the POST data
+            if error_response: # If the update function returns an error response, return it immediately
                 return error_response
 
     # Return an HTTP 200 response indicating that the updates were successful
