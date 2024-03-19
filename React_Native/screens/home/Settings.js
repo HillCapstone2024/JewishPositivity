@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Switch, StyleSheet, Button, Alert, Appearance, TouchableOpacity, Pressable } from 'react-native';
+import { View, Text, Switch, StyleSheet, Button, Alert, ScrollView, Appearance, TouchableOpacity, Pressable } from 'react-native';
 import axios from "axios";
 import IP_ADDRESS from "../../ip.js";
 import * as WebBrowser from 'expo-web-browser';
@@ -8,6 +8,7 @@ import * as Storage from "../../AsyncStorage.js";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from 'expo-haptics';
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+
 import makeThemeStyle from '../../Theme.js';
 import Times from "./Times.js";
 import TermsofUse from './TermsofUse';
@@ -51,7 +52,6 @@ const SettingsScreen = ({ navigation }) => {
     }
   };
   getHapticFeedback();
-
 
   const getTheme = async () => {
     try {
@@ -157,7 +157,6 @@ const SettingsScreen = ({ navigation }) => {
     }
   };
 
-
   const url = "https://drive.google.com/file/d/15TGCUb7dvpNorO9IcGfiyDL60WatPa07/edit";
   const toggleHapticFeedback = () => setHapticFeedback(!isHapticFeedbackEnabled);
   const handleReport = () => Alert.prompt('Report', 'Report something broken?', [{ text: 'Cancel', style: 'cancel' }, { text: 'Report', onPress: (inputValue) => handleReportEmail(inputValue) }]);
@@ -166,82 +165,94 @@ const SettingsScreen = ({ navigation }) => {
   const handleDeleteAccount = () => Alert.alert('Delete Account', 'Are you sure you want to delete your account?', [{ text: 'Cancel', style: 'cancel' }, { text: 'Delete', style: 'destructive', onPress: () => sendAccountDeletionRequest() }]);
 
   return (
-    <View style={[themeStyle['background'], styles.container]}>
-      <View style={styles.setting}>
-        <Text style={[themeStyle['color'], styles.settingText]}>Theme</Text>
-        <RNPickerSelect
-          onValueChange={(value) => saveTheme(value)}
-          items={[
-            { label: 'Dark', value: 'dark' },
-            { label: 'Light', value: 'light' },
-            { label: 'System', value: 'system' },
-          ]}
-          value={storage_theme}
-          Icon={() => (
-            <Ionicons style={{ top: 8 }} name="chevron-down-outline" size={24} color={theme === true ? "white" : "black"} />
-          )}
-          style={{
-            inputIOS: {
-              fontSize: 16,
-              color: theme === true ? "white" : "black",
-              paddingVertical: 12,
-              paddingHorizontal: 10,
-              paddingRight: 30,
-            },
-            inputAndroid: {
-              fontSize: 16,
-              color: theme === true ? "white" : "black",
-              paddingHorizontal: 10,
-              paddingVertical: 8,
-              paddingRight: 30,
-            },
-          }}
-        />
-      </View>
+    <ScrollView>
+      <View style={[themeStyle['background'], styles.container]}>
+        {/* preferences section */}
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}> Preferences</Text>
+          <View style={styles.horizontalLine} />
+        </View>
+          <View style={styles.Prefsetting}>
+            <Text style={[themeStyle, styles.settingText]}>Theme</Text>
+            <RNPickerSelect
+              onValueChange={(value) => saveTheme(value)}
+              items={[
+                { label: 'Dark', value: 'dark' },
+                { label: 'Light', value: 'light' },
+                { label: 'System', value: 'system' },
+              ]}
+              value={storage_theme}
+              Icon={() => (
+                <Ionicons style={{ top: 8 }} name="chevron-down-outline" size={24} color={theme === true ? "white" : "black"} />
+              )}
+              style={{
+                inputIOS: {
+                  fontSize: 16,
+                  color: theme === true ? "white" : "black",
+                  paddingVertical: 12,
+                  paddingHorizontal: 10,
+                  paddingRight: 30,
+                },
+                inputAndroid: {
+                  fontSize: 16,
+                  color: theme === true ? "white" : "black",
+                  paddingHorizontal: 10,
+                  paddingVertical: 8,
+                  paddingRight: 30,
+                },
+              }}
+            />
+          </View>
 
-      <View style={styles.setting}>
-        <Text style={[themeStyle['color'], styles.settingText]}>Haptic Feedback</Text>
-        <Switch
-          onValueChange={toggleHapticFeedback}
-          value={isHapticFeedbackEnabled}
-        />
-      </View>
-      <Text style={[themeStyle['color'], styles.timesText]}>Check-Ins</Text>
+          <View style={styles.Prefsetting}>
+            <Text style={[themeStyle, styles.settingText]}>Haptic Feedback</Text>
+            <Switch
+              onValueChange={toggleHapticFeedback}
+              value={isHapticFeedbackEnabled}
+            />
+          </View>
 
-      <View style={styles.setting}>
-        <Times />
-      </View>
+        {/* Check-in Notifications section */}
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}> Check-in notifications</Text>
+          <View style={styles.horizontalLine} />
+        </View>
+          <View>
+            <Times />
+          </View>
 
-      <View style={styles.contentContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => { handleReport(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }}>
-          <Text style={styles.normalText}>
-            Report
-          </Text>
-        </TouchableOpacity>
+        {/* Resources section */}
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}> Resources</Text>
+          <View style={styles.horizontalLine} />
+        </View>
+          <View style={styles.contentContainer}>
 
-        <TouchableOpacity style={styles.button} onPress={() => { handleTermsofUse(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }}>
-          <Text style={styles.normalText}>
-            Terms of Use
-          </Text>
-        </TouchableOpacity>
+            <Pressable style={styles.setting} onPress={ () => { handleTermsofUse(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null;  }}>
+              <Ionicons name="document-text" style={styles.icon}/>
+              <Text style={styles.normalText}> Terms of Use </Text>
+            </Pressable>
 
-        <TouchableOpacity style={styles.button} onPress={() => { handlePrivacyPolicy(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }}>
-          <Text style={styles.normalText}>
-            Privacy Policy
-          </Text>
-        </TouchableOpacity>
+            <Pressable style={styles.setting} onPress={ () => { handlePrivacyPolicy(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }}>
+              <Ionicons name="shield-checkmark" style={styles.icon}/>
+              <Text style={styles.normalText}> Privacy Policy </Text>
+            </Pressable>
 
-        <TouchableOpacity style={styles.button} onPress={() => { handleDeleteAccount(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }}>
-          <Text style={styles.redText}>
-            Delete Account
-          </Text>
-        </TouchableOpacity>
-      </View>
+            <Pressable style={styles.setting} onPress={ () => { handleReport(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }}>
+              <Ionicons name="alert" style={styles.icon}/>
+              <Text style={styles.normalText}> Report </Text>
+            </Pressable>
 
-      <View style={styles.footer}>
-        <Text style={[themeStyle['color'], styles.version]}>Version: 1.0.0</Text>
-      </View>
-    </View>
+            <Pressable style={styles.setting} onPress={ () => { handleDeleteAccount(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }}>
+              <Text style={styles.redText}> DELETE ACCOUNT </Text>
+            </Pressable>
+          </View>
+
+          <View style={styles.footer}>
+            <Text style={[themeStyle, styles.version]}>Version: 1.0.0</Text>
+          </View>
+        </View>    
+    </ScrollView> 
   );
 };
 
@@ -250,11 +261,44 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
+  sectionContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  horizontalLine: {
+    flex: 1,
+    height: 1.25, 
+    backgroundColor: '#9e9e9e',
+    marginLeft: 8, // Adjust spacing between title and line
+  },
   setting: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 35,
+    height: 50,
+    backgroundColor: '#f2f2f2',
+    borderRadius: 8,
+    marginBottom: 12,
+    paddingLeft: 12,
+    paddingRight: 12,
+  },
+  Prefsetting: {
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 50,
+    backgroundColor: '#f2f2f2',
+    borderRadius: 8,
+    marginBottom: 12,
+    paddingLeft: 12,
+    paddingRight: 12,
+  }, 
+  sectionTitle: {
+    paddingVertical: 12,
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#9e9e9e',
+    textTransform: 'uppercase',
+    letterSpacing: 1.1,
   },
   contentContainer: {
     marginTop: 10,
@@ -286,9 +330,16 @@ const styles = StyleSheet.create({
   redText: {
     color: "red",
     fontSize: 20,
+
   },
   normalText: {
-    color: "#007AFF",
+    // color: "#007AFF",
+    fontSize: 20,
+    paddingLeft: 5,
+  },
+  icon: {
+    color: '#007AFF',
+    marginRight: 5,
     fontSize: 20,
   },
 });
