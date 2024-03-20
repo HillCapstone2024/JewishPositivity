@@ -19,7 +19,6 @@ import MediaAccessoryBar from "./MediaBar.js";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import * as FileSystem from "expo-file-system";
-import base64 from "react-native-base64";
 import { Buffer } from "buffer";
 
 import { Video, ResizeMode, Audio } from "expo-av";
@@ -30,12 +29,12 @@ const API_URL = "http://" + IP_ADDRESS + ":8000";
 
 export default function JournalEntry() {
   const [username, setUsername] = useState("");
-  const [momentType, setMomentType] = useState(3);
+  const [momentType, setMomentType] = useState(7);
   const [mediaUri, setMediaUri] = useState(null);
   const [mediaBox, setMediaBox] = useState(false);
   const [mediaType, setMediaType] = useState("text");
   const [base64Data, setBase64Data] = useState("");
-  const [journalText, setJournalText] = useState("empty");
+  const [journalText, setJournalText] = useState("");
   const [showMediaBar, setShowMediaBar] = useState(true);
   const mediaAccessoryViewID = "MediaBar";
   const theme = makeThemeStyle();
@@ -102,12 +101,13 @@ export default function JournalEntry() {
       : undefined;
   }, [sound]);
 
+
   async function readFileAsBase64(uri) {
     try {
       const base64Content = await FileSystem.readAsStringAsync(uri, {
         encoding: FileSystem.EncodingType.Base64,
       });
-      console.log("Base64 content:", base64Content);
+      // console.log("Base64 content:", base64Content);
       return base64Content;
     } catch (error) {
       console.error("Failed to read file as base64", error);
@@ -115,9 +115,9 @@ export default function JournalEntry() {
     }
   }
 
-    const textToBase64 = (text) => {
-      return Buffer.from(text, "utf8").toString("base64");
-    };
+  const textToBase64 = (text) => {
+    return Buffer.from(text, "utf8").toString("base64");
+  };
 
   const getCsrfToken = async () => {
     try {
@@ -131,42 +131,42 @@ export default function JournalEntry() {
   };
 
   const submitJournal = async () => {
+    let base64JournalText = "";
     if (mediaType === "text") {
-      const base64JournalText = textToBase64(journalText);
+      base64JournalText = textToBase64(journalText);
       setBase64Data(base64JournalText);
-      console.log("media is text", base64JournalText);
     }
-    console.log("got past", mediaType);
-    try {
-      const csrfToken = await getCsrfToken();
-      const response = await axios.post(
-        `${API_URL}/check-in/`,
-        {
-          username: username,
-          moment_number: momentType,
-          content: base64Data,
-          content_type: mediaType,
-          date: formattedDateTime,
-        },
-        {
-          headers: {
-            "X-CSRFToken": csrfToken,
-            "Content-Type": "application/json",
+      console.log("check in type: ", mediaType);
+      try {
+        const csrfToken = await getCsrfToken();
+        const response = await axios.post(
+          `${API_URL}/check-in/`,
+          {
+            username: username,
+            moment_number: momentType,
+            content: mediaType === "text" ? base64JournalText : base64Data,
+            content_type: mediaType,
+            date: formattedDateTime,
           },
-          withCredentials: true,
-        }
-      );
-      console.log("check in response:", response.data);
-    } catch (error) {
-      console.log(error);
-      console.error("Journal Error:", error.response.data);
-    }
+          {
+            headers: {
+              "X-CSRFToken": csrfToken,
+              "Content-Type": "application/json",
+            },
+            withCredentials: true,
+          }
+        );
+        console.log("check in response:", response.data);
+      } catch (error) {
+        console.log(error);
+        console.error("Journal Error:", error.response.data);
+      }
   };
 
   const deleteMedia = () => {
     setMediaUri(null);
     setMediaBox(false);
-    setMediaType("");
+    setMediaType("text");
   };
 
   const handleRecordingComplete = async (uri) => {
@@ -285,13 +285,13 @@ export default function JournalEntry() {
             placeholder={"Please type here…"}
             placeholderTextColor={"grey"}
             // value={journalText}
-            onChange={(text) => setJournalText(text)}
+            onChangeText={(text) => setJournalText(text)}
             multiline
             numberOfLines={4}
             testID="journalInput"
           />
-          <Button 
-            onPress={submitJournal} 
+          <Button
+            onPress={submitJournal}
             title="Submit"
             testID="submitButton"
           ></Button>
