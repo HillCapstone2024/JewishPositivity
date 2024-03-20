@@ -20,8 +20,9 @@ jest.mock("@react-native-async-storage/async-storage", () => ({
 describe("Journal Component", () => {
     it("Successfully renders journal input", () => {
         const {getByTestId} = render(<JournalEntry/>);
-        expect(getByTestId("headerInput")).toBeTruthy(); 
+        expect(getByTestId("headerInput")).toBeTruthy();
         expect(getByTestId("journalInput")).toBeTruthy();
+        expect(getByTestId("submitButton")).toBeTruthy();
     });
 
     it("Successfully uploads journal entry", () => {
@@ -36,15 +37,16 @@ describe("Journal Component", () => {
         const {getByTestId} = render(<JournalEntry navigation={navigationMock}/>);
         fireEvent.changeText(getByTestId("headerInput"), "test header");
         fireEvent.changeText(getByTestId("journalInput"), "test journal");
+        fireEvent.press(getByTestId("submitButton"));
     });
 
+    // displays specific checkin moment
     // opens photos
     // opens camera
     // takes photo
     // takes video
     // records voice
     // check bar dismises keyboard
-    // axios post works
     //gets username from async storage
     //deletes photo/video/recording
 

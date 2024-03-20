@@ -290,7 +290,11 @@ export default function JournalEntry() {
             numberOfLines={4}
             testID="journalInput"
           />
-          <Button onPress={submitJournal} title="Submit"></Button>
+          <Button 
+            onPress={submitJournal} 
+            title="Submit"
+            testID="submitButton"
+          ></Button>
         </View>
       </ScrollView>
 
