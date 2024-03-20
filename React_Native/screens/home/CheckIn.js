@@ -201,6 +201,7 @@ export default function JournalEntry() {
         style={[styles.title, theme["color"]]}
         placeholder="Header..."
         placeholderTextColor="grey"
+        testID="headerInput"
       ></TextInput>
       <View
         style={[
