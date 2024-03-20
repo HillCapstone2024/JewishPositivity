@@ -19,7 +19,7 @@ jest.mock("@react-native-async-storage/async-storage", () => ({
 
 describe("Signup Component", () => {
   it("Successfully renders Signup page", () => {
-    const { getByText, getByTestId } = render(<Signup />);
+    const { getByTestId } = render(<Signup />);
     expect(getByTestId("emailInput")).toBeTruthy();
     expect(getByTestId("usernameInput")).toBeTruthy();
     expect(getByTestId("firstNameInput")).toBeTruthy();
