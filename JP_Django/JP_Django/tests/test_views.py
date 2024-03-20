@@ -623,7 +623,6 @@ class UpdateUserInfoViewTestCase(TestCase):
         # Check if the response status code is 200 indicating success
         self.assertEqual(response.status_code, 200)
     
-
 class GetTimesViewTestCase(TestCase):
 
     # Define constant user data
@@ -1052,6 +1051,147 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
 
         # Check if the response status code is 400
         self.assertEqual(response.status_code, 400)
+
+class GetCheckinViewsTestCase(TestCase): # to test retreving a checkin moment from backend to frontend
+    
+    #MEDIA
+    # Stored as base64 encoded strings
+    text_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64text.txt'))
+    textFile = open(text_file_path, 'r')
+    text = textFile.read()
+    logging.info("TEXT: %s", text)
+    textFile.close()
+
+    photo_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64photo.txt'))
+    photoFile = open(photo_file_path, 'r')
+    photo = photoFile.read()
+    #logging.info("PHOTO: %s", photo)
+    photoFile.close()
+
+    audio_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64audio.txt'))
+    audioFile = open(audio_file_path, 'r')
+    audio = audioFile.read()
+    #logging.info("AUDIO: %s", audio)
+    audioFile.close()
+
+    video_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64video.txt'))
+    videoFile = open(video_file_path, 'r')
+    video = videoFile.read()
+    #logging.info("VIDEO: %s", video)
+    videoFile.close()
+
+    # Define constant user data
+    USER1_DATA = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+    USER2_DATA = {
+        'username': 'testuser2',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test2@example.com',
+        'timezone': 'EST',
+    }
+
+    # Define post data
+    TEXT_DATA_SUCCESS = {
+        'username': 'testuser1',
+        'moment_number': 1,
+        'content_type': 'text',
+        'content': text, #fill in with example entry
+    }
+
+    PHOTO_DATA_SUCCESS = {
+        'username': 'testuser1',
+        'moment_number': 2,
+        'content_type': 'photo',
+        'content': photo, #How to pass in photo?
+    }
+
+    AUDIO_DATA_SUCCESS = {
+        'username': 'testuser1',
+        'moment_number': 3,
+        'content_type': 'audio',
+        'content': audio, #How to pass in audio?
+    }
+
+    VIDEO_DATA_SUCCESS = {
+        'username': 'testuser2',
+        'moment_number': 1,
+        'content_type': 'video',
+        'content': video, #How to pass in video?
+    }
+
+    def setUp(self):
+        # Initialize the Django test client
+        client = Client()
+
+        # Make a POST request to create test users and checkins
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)# make two users
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER2_DATA), content_type=CONTENT_TYPE_JSON)
+        client.post(reverse('checkin_view'), data=json.dumps(self.PHOTO_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON) #make checkins into DB
+        client.post(reverse('checkin_view'), data=json.dumps(self.AUDIO_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON) # one for each moment type
+        client.post(reverse('checkin_view'), data=json.dumps(self.TEXT_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
+        client.post(reverse('checkin_view'), data=json.dumps(self.VIDEO_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+
+    def test_get_checkins_success(self):# Successfully retrieves a valid user's checkins from the database
+        logging.info("TEST_get_checkins_success..........")
+        client = Client()
+
+        # Create test data
+        get_data = {'username': 'testuser1'} # to retrieve all (or if one add in moment#) checkins for this user
+
+        # Send GET request to get_checkin_info_view
+        response = client.get(reverse('get_checkin_info_view'), data=get_data)
+
+        # Check if response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+        # Printing DB after attempted getting of checkins
+        logging.info('Response: %s', response)
+        logging.info('')
+        queryset = Checkin.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_CHECKIN_ID, obj.checkin_id)
+            #logging.info(LOG_MSG_FORMAT, LOG_CONTENT, obj.content)
+            logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
+            logging.info(LOG_MSG_FORMAT, LOG_MOMENT_NUMBER, obj.moment_number)
+            logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
+            logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.user_id)
+            logging.info('')    
+
+    def test_get_checkins_fail_User_DNE(self):# Fails to get checkins in database due to user not existing
+        logging.info("TEST_get_checkins_fail_User_DNE..........")
+        client = Client()
+
+        # Create test data
+        get_data = {'username': 'doesnotexist'} 
+
+        # Send GET request to get_times_view
+        response = client.get(reverse('get_times_view'), data=get_data)
+
+        # Check if response status code is 400 -- failure
+        self.assertEqual(response.status_code, 400)
+
+        # Printing DB after attempted getting of checkins
+        queryset = Checkin.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_CHECKIN_ID, obj.checkin_id)
+            #logging.info(LOG_MSG_FORMAT, LOG_CONTENT, obj.content)
+            logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
+            logging.info(LOG_MSG_FORMAT, LOG_MOMENT_NUMBER, obj.moment_number)
+            logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
+            logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.user_id)
+            logging.info('')   
 
 
 

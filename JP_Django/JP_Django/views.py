@@ -484,6 +484,10 @@ def checkin_view(request):
     # Create the check-in record
     return create_checkin(user, data)
 
+def get_checkin_info_view(request): #To be filled out soon 
+    pass
+
+
 
 
 # ########## Utility Views ##########
