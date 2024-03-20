@@ -5,10 +5,10 @@ import Signup from "../screens/auth/Signup.js";
 
 //mock axios call
 jest.mock("axios");
-const mockNavigate = jest.fn();
-const navigationMock = {
-  navigate: mockNavigate,
-};
+
+//Mocking navigateDrawer
+const mockNavigateDrawer = jest.fn();
+const mockResetNavigation = jest.fn();
 
 jest.mock("@react-native-async-storage/async-storage", () => ({
   setItem: jest.fn(),
@@ -130,9 +130,15 @@ describe("Signup Component", () => {
     };
     axios.post.mockResolvedValue(mockLoginResponse);
 
-    const { getByText, getByTestId } = render(
-      <Signup navigation={navigationMock} />
+    const { getByTestId } = render(
+      <Signup
+        navigation={{
+          navigate: mockNavigateDrawer,
+          reset: mockResetNavigation, // Mocked reset function
+        }}
+      />
     );
+
     fireEvent.changeText(getByTestId("emailInput"), "test");
     fireEvent.changeText(getByTestId("usernameInput"), "testuser");
     fireEvent.changeText(getByTestId("firstNameInput"), "test");
@@ -141,8 +147,16 @@ describe("Signup Component", () => {
     fireEvent.changeText(getByTestId("passwordTwoInput"), "test");
     fireEvent.press(getByTestId("signupButton"));
 
+    // Wait for navigation to occur
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith("Drawer");
+      // Assert that mockResetNavigation was called with the correct parameters
+      expect(mockResetNavigation).toHaveBeenCalledWith({
+        index: 0,
+        routes: [{ name: "Drawer" }],
+      });
+  
+      // Assert that mockNavigateDrawer was called with "Drawer" route name
+      expect(mockNavigateDrawer).toHaveBeenCalledWith("Drawer");
     });
   });
 });
