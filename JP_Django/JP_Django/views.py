@@ -412,7 +412,7 @@ def get_times_view(request):
                 return HttpResponse(json.dumps(response_data), content_type="application/json")  # returning a DICTIONARY - do not change
             except Exception as e:
                 logging.info(e)
-                return HttpResponse(constUserDNE, status=400)
+                return HttpResponse(e, status=400)
         else:  # username was empty
             return HttpResponse(constUNnotProvided, status=400)
     return HttpResponse("Not a GET request!")
