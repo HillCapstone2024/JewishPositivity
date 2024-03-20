@@ -14,14 +14,14 @@ import {
   SafeAreaView,
 } from "react-native";
 import axios from "axios";
-import RecordingAccessoryBar from "./RecordingBar";
-import MediaAccessoryBar from "./MediaBar";
-// import VideoThumbnail from "./VideoThumbnail";
+import RecordingAccessoryBar from "./RecordingBar.js";
+import MediaAccessoryBar from "./MediaBar.js";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import RNThumbnail from "react-native-thumbnail";
 import * as FileSystem from "expo-file-system";
 import base64 from "react-native-base64";
+import { Buffer } from "buffer";
+
 import { Video, ResizeMode, Audio } from "expo-av";
 import makeThemeStyle from "../../Theme.js";
 import * as Storage from "../../AsyncStorage.js";
@@ -30,12 +30,12 @@ const API_URL = "http://" + IP_ADDRESS + ":8000";
 
 export default function JournalEntry() {
   const [username, setUsername] = useState("");
-  const [momentType, setMomentType] = useState(1);
+  const [momentType, setMomentType] = useState(3);
   const [mediaUri, setMediaUri] = useState(null);
   const [mediaBox, setMediaBox] = useState(false);
   const [mediaType, setMediaType] = useState("text");
   const [base64Data, setBase64Data] = useState("");
-  const [journalText, setJournalText] = useState("");
+  const [journalText, setJournalText] = useState("empty");
   const [showMediaBar, setShowMediaBar] = useState(true);
   const mediaAccessoryViewID = "MediaBar";
   const theme = makeThemeStyle();
@@ -67,7 +67,6 @@ export default function JournalEntry() {
     loadUsername();
     configureAudioMode();
   }, []);
-
 
   async function configureAudioMode() {
     try {
@@ -116,6 +115,10 @@ export default function JournalEntry() {
     }
   }
 
+    const textToBase64 = (text) => {
+      return Buffer.from(text, "utf8").toString("base64");
+    };
+
   const getCsrfToken = async () => {
     try {
       const response = await axios.get(`${API_URL}/csrf-token/`);
@@ -123,16 +126,17 @@ export default function JournalEntry() {
     } catch (error) {
       console.error("Error retrieving CSRF token:", error);
       throw new Error("CSRF token retrieval failed");
+      return "csrfToken retrieval failure";
     }
   };
 
   const submitJournal = async () => {
     if (mediaType === "text") {
-      console.log("media is text");
-      // const text64 = base64.encode(journalText);
-      setBase64Data(journalText);
+      const base64JournalText = textToBase64(journalText);
+      setBase64Data(base64JournalText);
+      console.log("media is text", base64JournalText);
     }
-    console.log("got past", base64Data);
+    console.log("got past", mediaType);
     try {
       const csrfToken = await getCsrfToken();
       const response = await axios.post(
@@ -152,7 +156,7 @@ export default function JournalEntry() {
           withCredentials: true,
         }
       );
-      console.log("Signup response:", response.data);
+      console.log("check in response:", response.data);
     } catch (error) {
       console.log(error);
       console.error("Journal Error:", error.response.data);
@@ -165,19 +169,24 @@ export default function JournalEntry() {
     setMediaType("");
   };
 
-  const handleRecordingComplete = (uri) => {
+  const handleRecordingComplete = async (uri) => {
     console.log("Received saved from recording bar:", uri);
     setShowMediaBar(true);
     setMediaBox(true);
     setMediaUri(uri);
+    setMediaType("recording");
+    const base64String = await readFileAsBase64(uri);
+    setBase64Data(base64String);
   };
 
   const handleMediaComplete = async (mediaProp) => {
     console.log("received data from mediabar", mediaProp);
     setMediaUri(mediaProp.assets[0].uri);
     setMediaType(mediaProp.assets[0].type);
-    // const base64String = await readFileAsBase64(uri);
-    // setBase64Data(base64String);
+    //sometimes mediaUri state doesn't update before next line
+    //pass mediaProp.assets[0].uri directly to fix this
+    const base64String = await readFileAsBase64(mediaProp.assets[0].uri);
+    setBase64Data(base64String);
     setMediaBox(true);
   };
 
@@ -274,7 +283,7 @@ export default function JournalEntry() {
             inputAccessoryViewID={mediaAccessoryViewID}
             placeholder={"Please type here…"}
             placeholderTextColor={"grey"}
-            value={journalText}
+            // value={journalText}
             onChange={(text) => setJournalText(text)}
             multiline
             numberOfLines={4}

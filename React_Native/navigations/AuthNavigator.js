@@ -39,7 +39,7 @@ export default function AuthNavigator() {
     }, 4000);
   }, []);
 
-  if (isLoading && initialRouteName === "Drawer") {
+  if (isLoading) {
     return <LoadingScreen />;
   } 
   

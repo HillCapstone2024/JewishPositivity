@@ -165,15 +165,14 @@ const SettingsScreen = ({ navigation }) => {
   const handleDeleteAccount = () => Alert.alert('Delete Account', 'Are you sure you want to delete your account?', [{ text: 'Cancel', style: 'cancel' }, { text: 'Delete', style: 'destructive', onPress: () => sendAccountDeletionRequest() }]);
 
   return (
-    <ScrollView>
-      <View style={[themeStyle['background'], styles.container]}>
+    <ScrollView style={[themeStyle['background'], styles.container]}>
         {/* preferences section */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}> Preferences</Text>
           <View style={styles.horizontalLine} />
         </View>
           <View style={styles.Prefsetting}>
-            <Text style={[themeStyle, styles.settingText]}>Theme</Text>
+            <Text style={[styles.settingText]}>Theme</Text>
             <RNPickerSelect
               onValueChange={(value) => saveTheme(value)}
               items={[
@@ -183,19 +182,19 @@ const SettingsScreen = ({ navigation }) => {
               ]}
               value={storage_theme}
               Icon={() => (
-                <Ionicons style={{ top: 8 }} name="chevron-down-outline" size={24} color={theme === true ? "white" : "black"} />
+                <Ionicons style={{ top: 12 }} name="chevron-down-outline" size={24} color={"black"} />
               )}
               style={{
                 inputIOS: {
                   fontSize: 16,
-                  color: theme === true ? "white" : "black",
-                  paddingVertical: 12,
+                  color: "black",
+                  paddingVertical: 16,
                   paddingHorizontal: 10,
                   paddingRight: 30,
                 },
                 inputAndroid: {
                   fontSize: 16,
-                  color: theme === true ? "white" : "black",
+                  color: "black",
                   paddingHorizontal: 10,
                   paddingVertical: 8,
                   paddingRight: 30,
@@ -205,7 +204,7 @@ const SettingsScreen = ({ navigation }) => {
           </View>
 
           <View style={styles.Prefsetting}>
-            <Text style={[themeStyle, styles.settingText]}>Haptic Feedback</Text>
+            <Text style={styles.settingText}>Haptic Feedback</Text>
             <Switch
               onValueChange={toggleHapticFeedback}
               value={isHapticFeedbackEnabled}
@@ -244,14 +243,13 @@ const SettingsScreen = ({ navigation }) => {
             </Pressable>
 
             <Pressable style={styles.setting} onPress={ () => { handleDeleteAccount(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }}>
-              <Text style={styles.redText}> DELETE ACCOUNT </Text>
+              <Text style={styles.redText}> Delete Account </Text>
             </Pressable>
           </View>
 
           <View style={styles.footer}>
-            <Text style={[themeStyle, styles.version]}>Version: 1.0.0</Text>
+            <Text style={[themeStyle['color'], styles.version]}>Version: 1.0.0</Text>
           </View>
-        </View>    
     </ScrollView> 
   );
 };
@@ -275,7 +273,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     height: 50,
-    backgroundColor: '#f2f2f2',
+    // backgroundColor: '#f2f2f2',
+    // borderWidth: 1,
     borderRadius: 8,
     marginBottom: 12,
     paddingLeft: 12,
@@ -286,7 +285,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     height: 50,
-    backgroundColor: '#f2f2f2',
+    // backgroundColor: '#f2f2f2',
     borderRadius: 8,
     marginBottom: 12,
     paddingLeft: 12,

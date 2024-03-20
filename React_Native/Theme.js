@@ -13,6 +13,7 @@ export default makeThemeStyle = () => {
         }
         catch (e) {
             await Storage.setItem('@hapticFeedback', 'false');
+            setHapticFeedback(false);
             console.log(e);
         }
     };
@@ -25,24 +26,28 @@ export default makeThemeStyle = () => {
                 setTheme(true)
             } else if (storage_theme === 'light') {
                 setTheme(false)
-            } else {
+            } else if (storage_theme === 'system') {
                 if (Appearance.getColorScheme() == 'dark') {
                     setTheme(true)
                 } else {
                     setTheme(false)
                 }
+            } else {
+                await Storage.setItem('@theme', 'system');
+                setTheme(false);
             }
         }
         catch (e) {
             await Storage.setItem('@theme', 'system');
+            setTheme(false)
             console.log(e);
         }
     };
     getTheme()
 
     return {
-        "background": {backgroundColor: theme ? '#333333' : '#ececf6',}, //#ececf6 or #f2f2f2 or #ffffff
-        "color": {color: theme ? '#FFFFFF' : '#333333',},
+        "background": { backgroundColor: theme ? '#333333' : '#ececf6', }, //#ececf6 or #f2f2f2 or #ffffff
+        "color": { color: theme ? '#FFFFFF' : '#333333', },
         "theme": storage_theme,
         "hapticFeedback": hapticFeedback,
     }

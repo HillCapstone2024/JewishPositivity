@@ -143,18 +143,12 @@ const handleTimeChange = async () => {
       {errorMessage}
 
       <View style={{ flexDirection: "column" }}>
-        <Pressable testID="dateTimePicker1" onPress={showDatePicker1}>
-          <LinearGradient
-            // Button Linear Gradient
-            colors={["#69a5ff", "#10c3e3"]}
-            start={[0, 1]}
-            end={[1, 0]}
-            style={styles.button}
-          >
-            <Text testID="timeOneText" style={styles.buttonText}>
-              {timeOne.toLocaleTimeString()}
-            </Text>
-          </LinearGradient>
+        <Pressable style={styles.button} testID="dateTimePicker1" onPress={showDatePicker1}>
+         
+          <Text testID="timeOneText" style={styles.buttonText}>
+            {timeOne.toLocaleTimeString()}
+          </Text>
+         
 
           <DateTimePickerModal
             isVisible={isDatePickerVisible1}
@@ -169,18 +163,12 @@ const handleTimeChange = async () => {
             testID="dateTimePickerModal1"
           />
         </Pressable>
-        <Pressable onPress={showDatePicker2}>
-          <LinearGradient
-            // Button Linear Gradient
-            colors={["#69a5ff", "#10c3e3"]}
-            start={[0, 1]}
-            end={[1, 0]}
-            style={styles.button}
-          >
-            <Text testID="timeTwoText" style={styles.buttonText}>
-              {timeTwo.toLocaleTimeString()}
-            </Text>
-          </LinearGradient>
+        <Pressable style={styles.button} onPress={showDatePicker2}>
+
+          <Text testID="timeTwoText" style={styles.buttonText}>
+            {timeTwo.toLocaleTimeString()}
+          </Text>
+
           <DateTimePickerModal
             isVisible={isDatePickerVisible2}
             mode="time"
@@ -195,18 +183,12 @@ const handleTimeChange = async () => {
           />
         </Pressable>
 
-        <Pressable onPress={showDatePicker3}>
-          <LinearGradient
-            // Button Linear Gradient
-            colors={["#69a5ff", "#10c3e3"]}
-            start={[0, 1]}
-            end={[1, 0]}
-            style={styles.button}
-          >
-            <Text testID="timeThreeText" style={styles.buttonText}>
-              {timeThree.toLocaleTimeString()}
-            </Text>
-          </LinearGradient>
+        <Pressable style={styles.button} onPress={showDatePicker3}>
+
+          <Text testID="timeThreeText" style={styles.buttonText}>
+            {timeThree.toLocaleTimeString()}
+          </Text>
+
           <DateTimePickerModal
             isVisible={isDatePickerVisible3}
             mode="time"
@@ -265,14 +247,18 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginHorizontal: 5,
     borderRadius: 5,
+    borderWidth: 1,
     shadowColor: 'black',
     shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
+    shadowRadius: 10,
     shadowOpacity: 0.16,
+    borderColor: "black",
+    backgroundColor: '#f2f2f2',
     alignItems: "center",
+    backgroundColor: '#f2f2f2',
   },
   buttonText: {
-    color: "white",
+    color: "black",
     fontSize: 16,
     fontWeight: "bold",
   },
