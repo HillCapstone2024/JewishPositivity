@@ -331,9 +331,9 @@ def get_user_information_view(request):
                     "first_name":user.first_name,
                     "last_name":user.last_name,
                 }
-
+                logging.info("get data:")
                 logging.info(response_data)
-                return HttpResponse(response_data)  # returning a DICTIONARY -do not change
+                return HttpResponse(json.dumps(response_data), content_type="application/json")
             except Exception as e:
                 logging.info(e)
                 return HttpResponse(constUserDNE, status=400)
