@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Alert, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, Alert, ActivityIndicator, StyleSheet, Button } from 'react-native';
 import makeThemeStyle from '../../Theme.js';
+import * as Storage from "../../AsyncStorage.js";
 import IP_ADDRESS from "../../ip.js";
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 import axios from 'axios';
@@ -12,40 +13,41 @@ export default function Archive({ navigaton }) {
     theme = makeThemeStyle();
     const index = 0;
 
-    handleGetEntries = async () => {
-        const getCsrfToken = async () => {
-            try {
-                const response = await axios.get(`${API_URL}/csrf-token/`);
-                return response.data.csrfToken;
-            } catch (error) {
-                console.error("Error retrieving CSRF token:", error);
-                throw new Error("CSRF token retrieval failed");
-            }
-        };
+    useEffect(() => {
+    const loadUsername = async () => {
+        const storedUsername = await Storage.getItem("@username");
+        setUsername(storedUsername || "No username");
+    };
 
+    loadUsername();
+    }, []);
+
+    const getCsrfToken = async () => {
         try {
-            const csrfToken = await getCsrfToken();
-            const response = await axios.post(
-                `${API_URL}/get_entries/`,
-                {
-                    username: username,
-                    index: index,
-                },
-                {
-                    headers: {
-                        "X-CSRFToken": csrfToken,
-                        "Content-Type": "application/json",
-                    },
-                    withCredentials: true,
-                }
-            );
-            console.log("Axios response:", response.data);
+        const response = await axios.get(`${API_URL}/csrf-token/`);
+        return response.data.csrfToken;
         } catch (error) {
-            console.log(error);
-            console.error("Entry Retrieval Error:", error.response.data);
+        console.error("Error retrieving CSRF token:", error);
+        throw new Error("CSRF token retrieval failed");
         }
     };
-    handleGetEntries();
+
+    handleGetEntries = async () => {
+        try {
+            const csrfToken = await getCsrfToken();
+            const response = await axios.get(`${API_URL}/get_checkin_info/`,
+            {
+                params: {
+                    username: username
+                }
+            });
+            console.log('RESPONSE:',typeof(response.data));
+            return response.data;
+        } catch (error) {
+            console.error("Error retrieving check in entries:", error);
+            throw new Error("Check in entries failed");
+        }
+    };
 
     useEffect(() => {
         if (entries.length == 0) {
@@ -56,6 +58,7 @@ export default function Archive({ navigaton }) {
     return (
         <View style={[{ flex: 1, alignItems: 'center', justifyContent: 'center' }, theme['background']]}>
             {message}
+            <Button title='GET ENTRIES' onPress={handleGetEntries}>Get entries</Button>
         </View >
     );
 }
