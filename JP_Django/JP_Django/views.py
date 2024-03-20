@@ -425,7 +425,7 @@ def get_times_view(request):
                 }
 
                 logging.info(response_data)
-                return HttpResponse(response_data)  # returning a DICTIONARY - do not change
+                return HttpResponse(json.dumps(response_data), content_type="application/json")  # returning a DICTIONARY - do not change
             except Exception as e:
                 logging.info(e)
                 return HttpResponse(constUserDNE, status=400)
@@ -511,7 +511,7 @@ def get_checkin_info_view(request): #To be filled out soon
                     response_data.append(current_checkin) #add checkin to the list to be returned
   
                 logging.info(response_data)
-                return HttpResponse(response_data)  # returning a LIST of DICTIONARIES where each dictionary is a checkin moment of the user specified - do not change
+                return HttpResponse(json.dumps(response_data), content_type="application/json")  # returning a LIST of DICTIONARIES where each dictionary is a checkin moment of the user specified - do not change
             except Exception as e:
                 logging.info(e)
                 return HttpResponse(constUserDNE, status=400)
