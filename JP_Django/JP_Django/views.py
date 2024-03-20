@@ -34,8 +34,8 @@ logging.basicConfig(
 User = get_user_model()
 constMissingKey = "Missing keys: %s"
 constNotPost = "Not a POST request!"
-
-
+constUserDNE = "User does not exist"
+constUNnotProvided= "Username not provided"
 
 
 
@@ -336,9 +336,9 @@ def get_user_information_view(request):
                 return HttpResponse(response_data)  # returning a DICTIONARY -do not change
             except Exception as e:
                 logging.info(e)
-                return HttpResponse("User does not exist", status=400)
+                return HttpResponse(constUserDNE, status=400)
         else:  # username was empty
-            return HttpResponse("Username not provided", status=400)
+            return HttpResponse(constUNnotProvided, status=400)
     return HttpResponse("Not a GET request")
        
 def update_times_view(request):
@@ -428,9 +428,9 @@ def get_times_view(request):
                 return HttpResponse(response_data)  # returning a DICTIONARY - do not change
             except Exception as e:
                 logging.info(e)
-                return HttpResponse("User does not exist", status=400)
+                return HttpResponse(constUserDNE, status=400)
         else:  # username was empty
-            return HttpResponse("Username not provided", status=400)
+            return HttpResponse(constUNnotProvided, status=400)
     return HttpResponse("Not a GET request!")
 
 
@@ -485,7 +485,39 @@ def checkin_view(request):
     return create_checkin(user, data)
 
 def get_checkin_info_view(request): #To be filled out soon 
-    pass
+    if request.method == "GET":
+        username = request.GET.get("username")  # JSON is not typically used for GET requests here
+
+        # Make sure the get data is not empty
+        if username is not None:
+            try:
+                # Retrieve the user from the database by username
+                user = User.objects.get(username=username)
+                user_id = user.pk # get foreign key reference field to look up in checkin userid column
+                
+                #Retrieve all checkins associated with this user
+                all_checkins = Checkin.objects.filter(user_id=user_id) # filter returns all matching objects, GET returns only if one matching object
+
+                response_data=[] #List of dictionaries holding all checkin moments of the user
+
+                for checkin in all_checkins: # looping through checkins for user specified
+                    current_checkin = { # dictionary to append to list
+                        "checkin_id": checkin.checkin_id,
+                        "content_type": checkin.content_type,
+                        "moment_number": checkin.moment_number,
+                        "content": base64.b64encode(checkin.content).decode('utf-8'),  #content converted from binary to base64 then to a base 64 string
+                        "user_id": checkin.user_id,
+                    }
+                    response_data.append(current_checkin) #add checkin to the list to be returned
+  
+                logging.info(response_data)
+                return HttpResponse(response_data)  # returning a LIST of DICTIONARIES where each dictionary is a checkin moment of the user specified - do not change
+            except Exception as e:
+                logging.info(e)
+                return HttpResponse(constUserDNE, status=400)
+        else:  # username was empty
+            return HttpResponse(constUNnotProvided, status=400)
+    return HttpResponse("Not a GET request!")
 
 
 

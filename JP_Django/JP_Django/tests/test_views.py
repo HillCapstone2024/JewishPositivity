@@ -1052,7 +1052,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         # Check if the response status code is 400
         self.assertEqual(response.status_code, 400)
 
-class GetCheckinViewsTestCase(TestCase): # to test retreving a checkin moment from backend to frontend
+class GetCheckinsViewTestCase(TestCase): # to test retreving all checkin moments from backend to frontend
     
     #MEDIA
     # Stored as base64 encoded strings
