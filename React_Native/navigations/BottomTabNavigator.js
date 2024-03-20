@@ -1,6 +1,8 @@
 import React from "react";
 import { useRef } from "react";
+//Possible fix to the Sonar issue - import React, { useRef } from "react";  --AG
 import { StyleSheet, View, Animated, Dimensions } from "react-native";
+//Is this "StyleSheet" import planning to be used? If not removing it will fix the smell
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
