@@ -359,32 +359,24 @@ def update_times_view(request):
             time3 = time.fromisoformat(time3_str)
             if time1 < time2 < time3:
                 user = User.objects.get(username=username)  # Retrieving user from the database
-                # Get the user's timezone and current date
-                user_timezone = pytz.timezone(user.timezone) # Get user's timezone
+                
+                # Get the user's current date
                 current_date = datetime.datetime.now().date() # Get current date
 
-                # Set the times to UTC
+                # Set the times to RAW date time user enters
                 datetime1_current = datetime.datetime.combine(current_date, time1) # Combine date and time to get local datetime
-                datetime1_local = user_timezone.localize(datetime1_current, is_dst=None)
-                datetime1_utc = datetime1_local.astimezone(pytz.utc)
-
                 datetime2_current = datetime.datetime.combine(current_date, time2) # Combine date and time to get local datetime
-                datetime2_local = user_timezone.localize(datetime2_current, is_dst=None)
-                datetime2_utc = datetime2_local.astimezone(pytz.utc)
-                
                 datetime3_current = datetime.datetime.combine(current_date, time3) # Combine date and time to get local datetime
-                datetime3_local = user_timezone.localize(datetime3_current, is_dst=None)
-                datetime3_utc = datetime3_local.astimezone(pytz.utc)
-
+                
                 # Set the updated times to the user
-                user.time1 = datetime1_utc.strftime("%Y-%m-%d %H:%M:%S")  # Convert datetime objects to strings
-                user.time2 = datetime2_utc.strftime("%Y-%m-%d %H:%M:%S")
-                user.time3 = datetime3_utc.strftime("%Y-%m-%d %H:%M:%S")
+                user.time1 = datetime1_current.strftime("%Y-%m-%d %H:%M:%S")  # Convert datetime objects to strings
+                user.time2 = datetime2_current.strftime("%Y-%m-%d %H:%M:%S")
+                user.time3 = datetime3_current.strftime("%Y-%m-%d %H:%M:%S")
                 user.save()  # Saving
 
                 response_data = {"message": "Success! Times have been updated"}
                 return HttpResponse(json.dumps(response_data), content_type="application/json")
-            else:
+            else: 
                 return HttpResponse("Invalid ordering", status=400)
         except User.DoesNotExist:
             return HttpResponse("User not found", status=400)
@@ -405,23 +397,15 @@ def get_times_view(request):
                 # Retrieve the user from the database by username
                 user = User.objects.get(username=username)
 
-                # get the times as UTC + timezone
-                time1_utc = user.time1.time()
-                time2_utc = user.time2.time()
-                time3_utc = user.time3.time()
-                user_timezone = pytz.timezone(user.timezone) # Get timezone object
-                current_date = datetime.datetime.now().date() # Get current date
-                # Set the times to user's timezone
-                datetime1_utc = datetime.datetime.combine(current_date, time1_utc) # Combine date and time to get UTC datetime
-                datetime1 = datetime1_utc.astimezone(user_timezone) # Convert to timezone
-                datetime2_utc = datetime.datetime.combine(current_date, time2_utc) # Combine date and time to get UTC datetime
-                datetime2 = datetime2_utc.astimezone(user_timezone) # Convert to timezone
-                datetime3_utc = datetime.datetime.combine(current_date, time3_utc) # Combine date and time to get UTC datetime
-                datetime3 = datetime3_utc.astimezone(user_timezone) # Convert to timezone
+                # get the times from the DateTime object in the DB
+                time1_time = user.time1.time()
+                time2_time = user.time2.time()
+                time3_time = user.time3.time()
+                
                 response_data = {
-                    "time1": datetime1.time().strftime("%H:%M:%S"),
-                    "time2": datetime2.time().strftime("%H:%M:%S"),
-                    "time3": datetime3.time().strftime("%H:%M:%S"),
+                    "time1": time1_time.strftime("%H:%M:%S"),
+                    "time2": time2_time.strftime("%H:%M:%S"),
+                    "time3": time3_time.strftime("%H:%M:%S"),
                 }
 
                 logging.info(response_data)
