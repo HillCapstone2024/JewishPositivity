@@ -303,6 +303,7 @@ export default function RecordingAccessoryBar({
             ]}
             // disabled="true"
             onPress={() => {
+              stopRecording();
               if (toggleRecording) {
                 console.log("toggled recording");
                 toggleRecording(false);

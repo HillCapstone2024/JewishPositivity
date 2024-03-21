@@ -39,6 +39,7 @@ export default function JournalEntry({handleCancel, handleSubmitClose}) {
   const [journalText, setJournalText] = useState("");
   const [showMediaBar, setShowMediaBar] = useState(true);
   const [selectedOption, setSelectedOption] = useState("");
+  const [disableSubmit, setDisableSubmit] = useState(true);
   const mediaAccessoryViewID = "MediaBar";
   const theme = makeThemeStyle();
   const now = new Date();
@@ -170,16 +171,19 @@ export default function JournalEntry({handleCancel, handleSubmitClose}) {
     setMediaUri(null);
     setMediaBox(false);
     setMediaType("text");
+    setDisableSubmit(journalText.trim().length === 0);
   };
 
   const handleRecordingComplete = async (uri) => {
     console.log("Received saved from recording bar:", uri);
     setShowMediaBar(true);
-    setMediaBox(true);
     setMediaUri(uri);
     setMediaType("recording");
+    setDisableSubmit(true);
     const base64String = await readFileAsBase64(uri);
     setBase64Data(base64String);
+    setMediaBox(true);
+    setDisableSubmit(false);
   };
 
   const handleMediaComplete = async (mediaProp) => {
@@ -188,9 +192,17 @@ export default function JournalEntry({handleCancel, handleSubmitClose}) {
     setMediaType(mediaProp.assets[0].type);
     //sometimes mediaUri state doesn't update before next line
     //pass mediaProp.assets[0].uri directly to fix this
+    setDisableSubmit(true);
     const base64String = await readFileAsBase64(mediaProp.assets[0].uri);
     setBase64Data(base64String);
     setMediaBox(true);
+    setDisableSubmit(false);
+  };
+
+  const handleTextComplete = (text) => {
+    setJournalText(text);
+    console.log(text);
+    setDisableSubmit(text.trim().length === 0);
   };
 
   const handleToggle = (toggle) => {
@@ -222,8 +234,14 @@ export default function JournalEntry({handleCancel, handleSubmitClose}) {
             </View>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.submitButton} onPress={submitJournal}>
-          <Text style={styles.submitText}>Submit</Text>
+        <TouchableOpacity
+          disabled={disableSubmit}
+          style={styles.submitButton}
+          onPress={submitJournal}
+        >
+          <Text style={disableSubmit ? styles.submitTextDisabled : styles.submitText}>
+            Submit
+          </Text>
         </TouchableOpacity>
       </View>
       {/* <View style={styles.horizontalBar} /> */}
@@ -321,7 +339,7 @@ export default function JournalEntry({handleCancel, handleSubmitClose}) {
             placeholder={"Please type here…"}
             placeholderTextColor={"grey"}
             // value={journalText}
-            onChangeText={(text) => setJournalText(text)}
+            onChangeText={handleTextComplete}
             multiline
             numberOfLines={4}
             testID="journalInput"
@@ -354,13 +372,13 @@ const pickerSelectStyles = StyleSheet.create({
     fontSize: 15,
     paddingVertical: 12,
     paddingHorizontal: 10,
-    // borderWidth: 1,
+    borderWidth: 1,
     // borderColor: 'grey',
-    // borderRadius: 8,
+    borderRadius: 8,
     color: 'black',
     paddingRight: 30,
     backgroundColor: 'white',
-    width: "100%"
+    width: "1000"
     // paddingTop: 20, // Adjust padding to move the text down
   },
   inputAndroid: {
@@ -387,6 +405,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     // marginBottom: 10,
     marginTop: 5,
+    // backgroundColor: "green",
+    justifyContent: "space-around",
+    marginBottom: 10,
   },
   dropdownLabel: {
     marginRight: 10,
@@ -474,6 +495,10 @@ const styles = StyleSheet.create({
   submitButton: {},
   submitText: {
     color: "#4A90E2",
+    fontSize: 19,
+  },
+  submitTextDisabled: {
+    color: "grey",
     fontSize: 19,
   },
   horizontalBar: {
