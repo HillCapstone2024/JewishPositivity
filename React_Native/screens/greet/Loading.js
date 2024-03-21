@@ -45,23 +45,23 @@ const LoadingScreen = () => {
         const float = Animated.loop(
             Animated.sequence([
                 Animated.timing(floatAnim, {
-                    toValue: -17,
-                    duration: 1000,
+                    toValue: 75,
+                    duration: 2000,
                     useNativeDriver: true,
                 }),
                 Animated.timing(floatAnim, {
-                    toValue: 13,
-                    duration: 1000,
+                    toValue: -20,
+                    duration: 500,
                     useNativeDriver: true,
                 }),
                 Animated.timing(floatAnim, {
-                    toValue: -17,
-                    duration: 1000,
+                    toValue: 75,
+                    duration: 2000,
                     useNativeDriver: true,
                 }),
                 Animated.timing(floatAnim, {
-                    toValue: 13,
-                    duration: 1000,
+                    toValue: -20,
+                    duration: 500,
                     useNativeDriver: true,
                 }),
             ])
@@ -72,7 +72,7 @@ const LoadingScreen = () => {
 
     const wobble = wobbleAnim.interpolate({
         inputRange: [-1, 1],
-        outputRange: ['-3deg', '3deg'],
+        outputRange: ['8deg', '15deg'],
     });
 
     const spin = spinValue.interpolate({
@@ -82,10 +82,11 @@ const LoadingScreen = () => {
 
     return (
         <View style={[styles.container, theme['background']]}>
-            <Image source={require("../../assets/images/nopen.png")} style={styles.book} />
+            {/* <SvgXml xml={logos['notebook.svg']} style={styles.book} /> */}
+            <Image source={require("../../assets/images/notebook.png")} style={styles.book} />
             <Animated.Image
-                style={[{ transform: [{ translateY: floatAnim }, { rotate: spin }, { rotateZ: wobble }], }, styles.pen]}
-                source={require("../../assets/images/pen.png")} />
+                style={[{ transform: [{ translateX: floatAnim }, { rotate: spin }, { rotateZ: wobble }], }, styles.pen]}
+                source={require("../../assets/images/new_pen.png")} />
         </View>
     );
 };
@@ -98,13 +99,10 @@ const styles = StyleSheet.create({
     },
     pen: {
         position: 'absolute',
-        top: '50%',
-        left: '60%',
-        // transformOrigin: '20px',
-        marginLeft: -25, 
-        marginTop: -25, 
-        width: 65,
-        height: 65,
+        top: '35%',
+        left: '45%',
+        width: 22,
+        height: 160,
     },
     book: {
         width: 200,

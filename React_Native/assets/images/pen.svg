@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Ringlet" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 49.86 198.14">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: url(#linear-gradient);
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4 {
+        stroke-width: 0px;
+      }
+
+      .cls-2 {
+        fill: #e2e2e2;
+        opacity: .19;
+      }
+
+      .cls-3 {
+        fill: url(#linear-gradient-2);
+      }
+
+      .cls-4 {
+        fill: url(#linear-gradient-3);
+      }
+    </style>
+    <linearGradient id="linear-gradient" x1="-26.4" y1="42.01" x2="77.73" y2="42.01" gradientTransform="translate(57.41 46.22) rotate(60)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#04172b"/>
+      <stop offset="1" stop-color="#1f527e"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-2" x1="24.93" y1="165.9" x2="42.79" y2="165.9" gradientTransform="translate(0 256.24) scale(1 -.41)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#e47a2e"/>
+      <stop offset="1" stop-color="#fffffd"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-3" x1="29.64" y1="153.37" x2="38.08" y2="153.37" gradientTransform="translate(0 256.24) scale(1 -.41)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0d0d0d"/>
+      <stop offset="1" stop-color="#707070"/>
+    </linearGradient>
+  </defs>
+  <g>
+    <rect class="cls-1" x="-55.59" y="80.03" width="178.9" height="18.84" rx="2.23" ry="2.23" transform="translate(-55.59 123.31) rotate(-90)"/>
+    <g>
+      <path class="cls-3" d="M33.07,197.64l-8.05-17.5c-.27-.58.16-1.24.79-1.24h16.11c.64,0,1.06.66.79,1.24l-8.05,17.5c-.31.68-1.28.68-1.59,0Z"/>
+      <path class="cls-4" d="M33.07,197.64l-3.34-7.27c-.27-.58.16-1.24.79-1.24h6.69c.64,0,1.06.66.79,1.24l-3.34,7.27c-.31.68-1.28.68-1.59,0Z"/>
+    </g>
+  </g>
+  <rect class="cls-2" x="17.5" y="2.77" width="6.32" height="173.36" rx="1.27" ry="1.27"/>
+</svg>

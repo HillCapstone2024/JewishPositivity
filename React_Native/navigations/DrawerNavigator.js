@@ -115,10 +115,9 @@ const MyDrawer = ({ navigation }) => {
         drawerStyle: {
           width: "70%",
         },
-
-        drawerLabelStyle:
+        drawerLabelStyle: 
           theme['color']
-
+        
       }}
       drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
