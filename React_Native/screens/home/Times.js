@@ -35,6 +35,10 @@ const Times = ({ navigation }) => {
     loadUsername();
   }, []);
 
+  useEffect(() => {
+    getIntialTimes();
+  }, [username]);
+
   const navigateHome = () => {
     navigation.navigate("Home");
   };
@@ -75,23 +79,34 @@ const Times = ({ navigation }) => {
     setDatePickerVisibility3(false);
   };
 
-  //Updates time variable and hides time picker once time is confirmed
-  const handleConfirmOne = (date) => {
-    setTimeOne(date);
-    hideDatePicker1();
-    handleTimeChange(); }
-  const handleConfirmTwo = (date) => {
-   setTimeTwo(date);
-   hideDatePicker2();
-   handleTimeChange(); }
-  const handleConfirmThree = (date) => {
-    setTimeThree(date);
-    hideDatePicker3();
-    handleTimeChange(); }
+  function parseTimeToCurrentDate(timeString) {
+    const [hours, minutes, seconds] = timeString.split(":");
+    const currentDate = new Date();
 
-  //POST
-const handleTimeChange = async () => {
-  //console.log("time1: " + timeOne.toTimeString().split(' ')[0] + " time2: " + timeTwo.toTimeString().split(' ')[0] + " time3: " + timeThree.toTimeString().split(' ')[0])
+    currentDate.setHours(parseInt(hours, 10));
+    currentDate.setMinutes(parseInt(minutes, 10));
+    currentDate.setSeconds(parseInt(seconds, 10));
+
+    return currentDate;
+  }
+
+  //Updates time variable and hides time picker once time is confirmed
+  const handleConfirmOne = (time) => {
+    // time = parseTimeToCurrentDate(time);
+    setTimeOne(time);
+    hideDatePicker1();
+    handleTimeChange(time, timeTwo, timeThree); }
+
+  const handleConfirmTwo = (time) => {
+   setTimeTwo(time);
+   hideDatePicker2();
+   handleTimeChange( timeOne, time, timeThree); }
+  const handleConfirmThree = (time) => {
+    setTimeThree(time);
+    hideDatePicker3();
+    handleTimeChange(timeOne, timeTwo, time );
+  }
+
   const getCsrfToken = async () => {
     try {
       const response = await axios.get(`${API_URL}/csrf-token/`);
@@ -101,15 +116,47 @@ const handleTimeChange = async () => {
       throw new Error("CSRF token retrieval failed");
     }
   };
+
+  //GET
+  const getIntialTimes = async () => {
+    console.log('username: ', username);
+    try {
+      const csrfToken = await getCsrfToken();
+      const response = await axios.get(`${API_URL}/get_times/`, {
+      params: {
+        username: username,
+      },
+      headers: {
+        "X-CSRFToken": csrfToken,
+        "Content-Type": "application/json",
+      },
+      withCredentials: true,
+    });
+    console.log('successful response:', response.data);
+    const timeOneDate = parseTimeToCurrentDate(response.data.time1);
+    setTimeOne(timeOneDate);
+    const timeTwoDate = parseTimeToCurrentDate(response.data.time2);
+    setTimeTwo(timeTwoDate);
+    const timeThreeDate = parseTimeToCurrentDate(response.data.time3);
+    setTimeThree(timeThreeDate);
+    } catch (error){
+      console.log('error getting the times from database: ', error);
+    }
+  };
+
+  //POST
+async function handleTimeChange (timeOneParam, timeTwoParam, timeThreeParam ){
+  //console.log("time1: " + timeOne.toTimeString().split(' ')[0] + " time2: " + timeTwo.toTimeString().split(' ')[0] + " time3: " + timeThree.toTimeString().split(' ')[0])
+
   try {
     const csrfToken = await getCsrfToken();
     const response = await axios.post(
       `${API_URL}/update-times/`,
       {
         username: username,
-        time1: timeOne.toTimeString().split(' ')[0],
-        time2: timeTwo.toTimeString().split(' ')[0],
-        time3: timeThree.toTimeString().split(' ')[0],
+        time1: timeOneParam.toTimeString().split(" ")[0],
+        time2: timeTwoParam.toTimeString().split(" ")[0],
+        time3: timeThreeParam.toTimeString().split(" ")[0],
       },
       {
         headers: {
@@ -126,7 +173,6 @@ const handleTimeChange = async () => {
         <Text style={styles.successMessageText}>{"Times Changed Successfully"}</Text>
       </View>
     );
-    //navigateHome();
   } catch (error) {
     console.log(error)
     setErrorMessage(
@@ -143,12 +189,14 @@ const handleTimeChange = async () => {
       {errorMessage}
 
       <View style={{ flexDirection: "column" }}>
-        <Pressable style={styles.button} testID="dateTimePicker1" onPress={showDatePicker1}>
-         
+        <Pressable
+          style={styles.button}
+          testID="dateTimePicker1"
+          onPress={showDatePicker1}
+        >
           <Text testID="timeOneText" style={styles.buttonText}>
             {timeOne.toLocaleTimeString()}
           </Text>
-         
 
           <DateTimePickerModal
             isVisible={isDatePickerVisible1}
@@ -157,14 +205,13 @@ const handleTimeChange = async () => {
             onConfirm={handleConfirmOne}
             onCancel={hideDatePicker1}
             display="spinner"
-            isDarkModeEnabled={handleTheme}
+            // isDarkModeEnabled={handleTheme}
             minuteInterval={5}
             is24Hour={false}
             testID="dateTimePickerModal1"
           />
         </Pressable>
         <Pressable style={styles.button} onPress={showDatePicker2}>
-
           <Text testID="timeTwoText" style={styles.buttonText}>
             {timeTwo.toLocaleTimeString()}
           </Text>
@@ -184,7 +231,6 @@ const handleTimeChange = async () => {
         </Pressable>
 
         <Pressable style={styles.button} onPress={showDatePicker3}>
-
           <Text testID="timeThreeText" style={styles.buttonText}>
             {timeThree.toLocaleTimeString()}
           </Text>
@@ -202,22 +248,7 @@ const handleTimeChange = async () => {
           />
         </Pressable>
       </View>
-
-      {/* <View style={{ flexDirection: "row" }}>
-        <Pressable onPress={handleTimeChange}>
-          <LinearGradient
-            // Button Linear Gradient
-            colors={["#69a5ff", "#10c3e3"]}
-            start={[0, 1]}
-            end={[1, 0]}
-            style={styles.button}
-          >
-            <Text style={styles.buttonText}>Submit Changes</Text>
-          </LinearGradient>
-        </Pressable>
-      </View> */}
     </View>
-    // </View>
   );
 };
 

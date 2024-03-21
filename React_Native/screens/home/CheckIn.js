@@ -55,7 +55,6 @@ export default function JournalEntry({handleCancel, handleSubmitClose}) {
   );
   const [sound, setSound] = useState();
   const videoRef = useRef(null);
-  const [status, setStatus] = useState({});
 
   useEffect(() => {
     const loadUsername = async () => {
@@ -109,7 +108,6 @@ export default function JournalEntry({handleCancel, handleSubmitClose}) {
       const base64Content = await FileSystem.readAsStringAsync(uri, {
         encoding: FileSystem.EncodingType.Base64,
       });
-      // console.log("Base64 content:", base64Content);
       return base64Content;
     } catch (error) {
       console.error("Failed to read file as base64", error);
@@ -128,7 +126,6 @@ export default function JournalEntry({handleCancel, handleSubmitClose}) {
     } catch (error) {
       console.error("Error retrieving CSRF token:", error);
       throw new Error("CSRF token retrieval failed");
-      return "csrfToken retrieval failure";
     }
   };
 
@@ -203,11 +200,15 @@ export default function JournalEntry({handleCancel, handleSubmitClose}) {
 
   const handleOptionChange = (itemValue) => {
     setSelectedOption(itemValue);
+    if (itemValue === "Modeh Ani") {
+      setMomentType(1);
+    } else if (itemValue === "Ashrei") {
+      setMomentType(2);
+    } else if (itemValue === "Shema") {
+      setMomentType(3);
+    }
   };
 
-  // const handleCancel = () => {
-
-  // }
 
   return (
     <SafeAreaView style={[styles.container, theme["background"]]}>
@@ -217,7 +218,7 @@ export default function JournalEntry({handleCancel, handleSubmitClose}) {
           <TouchableOpacity onPress={handleCancel}>
             <View style={styles.buttonContent}>
               <Ionicons name="caret-back" size={25} color="#4A90E2" />
-              <Text>Cancel</Text>
+              <Text style={styles.cancelText}>Cancel</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -225,19 +226,34 @@ export default function JournalEntry({handleCancel, handleSubmitClose}) {
           <Text style={styles.submitText}>Submit</Text>
         </TouchableOpacity>
       </View>
-      <View style={styles.horizontalBar} />
-      <TextInput
+      {/* <View style={styles.horizontalBar} /> */}
+      {/* end of cancel/submit section */}
+      {/* <TextInput
         style={[styles.title, theme["color"]]}
         placeholder="Header..."
         placeholderTextColor="grey"
         testID="headerInput"
-      ></TextInput>
+      ></TextInput> */}
       <View
         style={[
           styles.separator,
           { borderBottomColor: theme["color"]["color"] },
         ]}
       />
+      <View style={styles.dropdownContainer}>
+        {/* <Text style={styles.dropdownLabel}>Select a prayer:</Text> */}
+        <RNPickerSelect
+          style={pickerSelectStyles}
+          value={selectedOption}
+          placeholder={{ label: "Modeh Ani", value: "Modeh Ani" }}
+          onValueChange={handleOptionChange}
+          items={[
+            // { label: "Modeh Ani", value: "Modeh Ani" },
+            { label: "Ashrei", value: "Ashrei" },
+            { label: "Shema", value: "Shema" },
+          ]}
+        />
+      </View>
       <Text style={[styles.datetime, theme["color"]]}>
         {" "}
         {formattedDateTime}{" "}
@@ -278,14 +294,6 @@ export default function JournalEntry({handleCancel, handleSubmitClose}) {
                   }
                 }}
               />
-              {/* <Button
-                title={status.isPlaying ? "Pause" : "Play"}
-                onPress={() =>
-                  status.isPlaying
-                    ? videoRef.current.pauseAsync()
-                    : videoRef.current.playAsync()
-                }
-              /> */}
               <Text>Video</Text>
             </View>
           ) : (
@@ -293,8 +301,7 @@ export default function JournalEntry({handleCancel, handleSubmitClose}) {
               <Button title="Play Sound" onPress={playSound} />
             </View>
           )}
-          {/* )} */}
-          {/* <Image source={{ uri: media }} style={styles.image} /> */}
+
           <TouchableOpacity style={styles.deleteMedia} onPress={deleteMedia}>
             <Ionicons
               name="close-circle"
@@ -304,20 +311,6 @@ export default function JournalEntry({handleCancel, handleSubmitClose}) {
           </TouchableOpacity>
         </View>
       ) : null}
-
-      <View style={styles.dropdownContainer}>
-        <Text style={styles.dropdownLabel}>Select a prayer:</Text>
-        <RNPickerSelect
-          style={pickerSelectStyles}
-          value={selectedOption}
-          onValueChange={handleOptionChange}
-          items={[
-            { label: "Modeh Ani", value: "Modeh Ani" },
-            { label: "Ashrei", value: "Ashrei" },
-            { label: "Shema", value: "Shema" },
-          ]}
-        />
-      </View>
 
       <ScrollView style={styles.scrollingInput}>
         {/* Journal Text box View */}
@@ -361,12 +354,13 @@ const pickerSelectStyles = StyleSheet.create({
     fontSize: 15,
     paddingVertical: 12,
     paddingHorizontal: 10,
-    borderWidth: 1,
-    borderColor: 'grey',
-    borderRadius: 8,
+    // borderWidth: 1,
+    // borderColor: 'grey',
+    // borderRadius: 8,
     color: 'black',
     paddingRight: 30,
     backgroundColor: 'white',
+    width: "100%"
     // paddingTop: 20, // Adjust padding to move the text down
   },
   inputAndroid: {
@@ -471,6 +465,11 @@ const styles = StyleSheet.create({
   buttonContent: {
     flexDirection: "row",
     alignItems: "center",
+    fontSize: 19,
+  },
+  cancelText: {
+    fontSize: 19,
+    color: "#4A90E2",
   },
   submitButton: {},
   submitText: {
