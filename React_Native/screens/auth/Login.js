@@ -75,6 +75,7 @@ const Login = ({ navigation }) => {
 
     try {
       const csrfToken = await getCsrfToken();
+      console.log('hgfhfg');
       const response = await axios.post(`${API_URL}/login/`,
         {
           username: username,

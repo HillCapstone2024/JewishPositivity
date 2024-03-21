@@ -14,14 +14,13 @@ import {
   SafeAreaView,
 } from "react-native";
 import axios from "axios";
-import RecordingAccessoryBar from "./RecordingBar";
-import MediaAccessoryBar from "./MediaBar";
-// import VideoThumbnail from "./VideoThumbnail";
+import RecordingAccessoryBar from "./RecordingBar.js";
+import MediaAccessoryBar from "./MediaBar.js";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import RNThumbnail from "react-native-thumbnail";
 import * as FileSystem from "expo-file-system";
-import base64 from "react-native-base64";
+import { Buffer } from "buffer";
+
 import { Video, ResizeMode, Audio } from "expo-av";
 import makeThemeStyle from "../../Theme.js";
 import * as Storage from "../../AsyncStorage.js";
@@ -30,7 +29,7 @@ const API_URL = "http://" + IP_ADDRESS + ":8000";
 
 export default function JournalEntry() {
   const [username, setUsername] = useState("");
-  const [momentType, setMomentType] = useState(1);
+  const [momentType, setMomentType] = useState(7);
   const [mediaUri, setMediaUri] = useState(null);
   const [mediaBox, setMediaBox] = useState(false);
   const [mediaType, setMediaType] = useState("text");
@@ -68,7 +67,6 @@ export default function JournalEntry() {
     configureAudioMode();
   }, []);
 
-
   async function configureAudioMode() {
     try {
       await Audio.setAudioModeAsync({
@@ -103,18 +101,23 @@ export default function JournalEntry() {
       : undefined;
   }, [sound]);
 
+
   async function readFileAsBase64(uri) {
     try {
       const base64Content = await FileSystem.readAsStringAsync(uri, {
         encoding: FileSystem.EncodingType.Base64,
       });
-      console.log("Base64 content:", base64Content);
+      // console.log("Base64 content:", base64Content);
       return base64Content;
     } catch (error) {
       console.error("Failed to read file as base64", error);
       return null;
     }
   }
+
+  const textToBase64 = (text) => {
+    return Buffer.from(text, "utf8").toString("base64");
+  };
 
   const getCsrfToken = async () => {
     try {
@@ -123,61 +126,67 @@ export default function JournalEntry() {
     } catch (error) {
       console.error("Error retrieving CSRF token:", error);
       throw new Error("CSRF token retrieval failed");
+      return "csrfToken retrieval failure";
     }
   };
 
   const submitJournal = async () => {
+    let base64JournalText = "";
     if (mediaType === "text") {
-      console.log("media is text");
-      // const text64 = base64.encode(journalText);
-      setBase64Data(journalText);
+      base64JournalText = textToBase64(journalText);
+      setBase64Data(base64JournalText);
     }
-    console.log("got past", base64Data);
-    try {
-      const csrfToken = await getCsrfToken();
-      const response = await axios.post(
-        `${API_URL}/check-in/`,
-        {
-          username: username,
-          moment_number: momentType,
-          content: base64Data,
-          content_type: mediaType,
-          date: formattedDateTime,
-        },
-        {
-          headers: {
-            "X-CSRFToken": csrfToken,
-            "Content-Type": "application/json",
+      console.log("check in type: ", mediaType);
+      try {
+        const csrfToken = await getCsrfToken();
+        const response = await axios.post(
+          `${API_URL}/check-in/`,
+          {
+            username: username,
+            moment_number: momentType,
+            content: mediaType === "text" ? base64JournalText : base64Data,
+            content_type: mediaType,
+            date: formattedDateTime,
           },
-          withCredentials: true,
-        }
-      );
-      console.log("Signup response:", response.data);
-    } catch (error) {
-      console.log(error);
-      console.error("Journal Error:", error.response.data);
-    }
+          {
+            headers: {
+              "X-CSRFToken": csrfToken,
+              "Content-Type": "application/json",
+            },
+            withCredentials: true,
+          }
+        );
+        console.log("check in response:", response.data);
+      } catch (error) {
+        console.log(error);
+        console.error("Journal Error:", error.response.data);
+      }
   };
 
   const deleteMedia = () => {
     setMediaUri(null);
     setMediaBox(false);
-    setMediaType("");
+    setMediaType("text");
   };
 
-  const handleRecordingComplete = (uri) => {
+  const handleRecordingComplete = async (uri) => {
     console.log("Received saved from recording bar:", uri);
     setShowMediaBar(true);
     setMediaBox(true);
     setMediaUri(uri);
+    setMediaType("recording");
+    const base64String = await readFileAsBase64(uri);
+    setBase64Data(base64String);
   };
 
   const handleMediaComplete = async (mediaProp) => {
     console.log("received data from mediabar", mediaProp);
     setMediaUri(mediaProp.assets[0].uri);
     setMediaType(mediaProp.assets[0].type);
-    // const base64String = await readFileAsBase64(uri);
-    // setBase64Data(base64String);
+    //sometimes mediaUri state doesn't update before next line
+    //pass mediaProp.assets[0].uri directly to fix this
+    const base64String = await readFileAsBase64(mediaProp.assets[0].uri);
+    setBase64Data(base64String);
     setMediaBox(true);
   };
 
@@ -192,6 +201,7 @@ export default function JournalEntry() {
         style={[styles.title, theme["color"]]}
         placeholder="Header..."
         placeholderTextColor="grey"
+        testID="headerInput"
       ></TextInput>
       <View
         style={[
@@ -274,13 +284,17 @@ export default function JournalEntry() {
             inputAccessoryViewID={mediaAccessoryViewID}
             placeholder={"Please type here…"}
             placeholderTextColor={"grey"}
-            value={journalText}
-            onChange={(text) => setJournalText(text)}
+            // value={journalText}
+            onChangeText={(text) => setJournalText(text)}
             multiline
             numberOfLines={4}
             testID="journalInput"
           />
-          <Button onPress={submitJournal} title="Submit"></Button>
+          <Button
+            onPress={submitJournal}
+            title="Submit"
+            testID="submitButton"
+          ></Button>
         </View>
       </ScrollView>
 
