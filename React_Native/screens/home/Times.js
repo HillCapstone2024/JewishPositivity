@@ -47,15 +47,6 @@ const Times = ({ navigation }) => {
   const [isDatePickerVisible2, setDatePickerVisibility2] = useState(false);
   const [isDatePickerVisible3, setDatePickerVisibility3] = useState(false);
 
-  //Changes theme of spinner depending on OS' theme (resolves iOS issue)
-  const colorScheme = Appearance.getColorScheme();
-  const handleTheme = () => {
-    let handleTheme=false;
-    if (colorScheme=='light'){
-      handleTheme=true;
-    } else {
-      handleTheme=false;
-    } };
  
   //Used to show or hide picker for each button  
   const showDatePicker1 = () => {
@@ -205,7 +196,6 @@ async function handleTimeChange (timeOneParam, timeTwoParam, timeThreeParam ){
             onConfirm={handleConfirmOne}
             onCancel={hideDatePicker1}
             display="spinner"
-            // isDarkModeEnabled={handleTheme}
             minuteInterval={5}
             is24Hour={false}
             testID="dateTimePickerModal1"
@@ -223,7 +213,6 @@ async function handleTimeChange (timeOneParam, timeTwoParam, timeThreeParam ){
             onConfirm={handleConfirmTwo}
             onCancel={hideDatePicker2}
             display="spinner"
-            isDarkModeEnabled={handleTheme}
             minuteInterval={5}
             is24Hour={false}
             testID="dateTimePickerModal2"
@@ -242,7 +231,6 @@ async function handleTimeChange (timeOneParam, timeTwoParam, timeThreeParam ){
             onConfirm={handleConfirmThree}
             onCancel={hideDatePicker3}
             display="spinner"
-            isDarkModeEnabled={handleTheme}
             minuteInterval={5}
             is24Hour={false}
           />
@@ -279,10 +267,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     borderRadius: 5,
     borderWidth: 1,
-    shadowColor: 'black',
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 10,
-    shadowOpacity: 0.16,
     borderColor: "black",
     backgroundColor: '#f2f2f2',
     alignItems: "center",

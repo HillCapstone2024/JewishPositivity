@@ -126,6 +126,11 @@ const Communities = () => {
                     onRequestClose={() => setCreateModalVisible(false)}
                 />
             </View>
+            <View style={styles.middleView}>
+                <Text style={styles.noCommunities}>
+                    Join or create a community to get started!
+                </Text>
+            </View>
         </View>
         //     </KeyboardAvoidingView>
         // </TouchableWithoutFeedback>
@@ -224,6 +229,17 @@ const styles = StyleSheet.create({
         backgroundColor: 'gold',
         borderRadius: 10,
     },
+    noCommunities: {
+        fontSize: 30,
+        fontWeight: "bold",
+        textAlign: "center",
+        marginTop: 20,
+    },
+    middleView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+    }
 });
 
 export default Communities;
