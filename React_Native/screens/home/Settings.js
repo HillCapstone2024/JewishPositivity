@@ -7,24 +7,12 @@ import RNPickerSelect from 'react-native-picker-select';
 import * as Storage from "../../AsyncStorage.js";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from 'expo-haptics';
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import makeThemeStyle from '../../Theme.js';
 import Times from "./Times.js";
-import TermsofUse from './TermsofUse';
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
-const Stack = createNativeStackNavigator();
-
-const SettingsStackNavigator = () => {
-  return (
-    <Stack.Navigator>
-      <Stack.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="TermsofUse" component={TermsofUse} />
-    </Stack.Navigator>
-  );
-};
 
 const SettingsScreen = ({ navigation }) => {
   const [username, setUsername] = useState("");
@@ -343,4 +331,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SettingsStackNavigator;
+export default SettingsScreen;

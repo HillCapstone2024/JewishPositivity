@@ -105,8 +105,11 @@ const styles = StyleSheet.create({
         height: 160,
     },
     book: {
-        width: 200,
-        height: 200,
+        position: 'absolute',
+        top: '30%',
+        left: '20%',
+        height: 273,
+        width: 240,
     }
 });
 

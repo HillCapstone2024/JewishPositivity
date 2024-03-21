@@ -23,6 +23,7 @@ import BottomTabNavigator from "./BottomTabNavigator.js";
 import makeThemeStyle from '../Theme.js';
 import UserProfile from "../screens/home/Profile.js";
 import SettingsPage from "../screens/home/Settings.js";
+import Communities from "../screens/home/Communities.js";
 import * as Haptics from 'expo-haptics';
 
 const Drawer = createDrawerNavigator();
@@ -123,8 +124,8 @@ const MyDrawer = ({ navigation }) => {
     >
       <Drawer.Screen name="Home" component={BottomTabNavigator} options={{ drawerIcon: () => (<Ionicons name="home" size={22} color={theme['color']['color']} />), }} />
       <Drawer.Screen name="Profile" component={UserProfile} testID="profileButton" options={{ drawerIcon: () => (<Ionicons name="person" size={22} color={theme['color']['color']} />), }} />
+      <Drawer.Screen name="Communities" component={Communities} options={{drawerIcon: () => (<Ionicons name="people" size={22} color={theme['color']['color']} />),}}/>
       <Drawer.Screen name="Settings" component={SettingsPage} options={{ drawerIcon: () => (<Ionicons name="settings" size={22} color={theme['color']['color']} />), }} />
-      {/* <Drawer.Screen name="My Communities" component={CommunitiesPage} options={{drawerIcon: ({color}) => (<Ionicons name="people" size={22} color={color} />),}}/> */}
     </Drawer.Navigator>
   );
 };

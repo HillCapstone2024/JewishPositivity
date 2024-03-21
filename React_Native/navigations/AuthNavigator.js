@@ -12,6 +12,8 @@ import ForgotPassword from "../screens/auth/ForgotPassword.js";
 import LoadingScreen from "../screens/greet/Loading.js";
 import MyDrawer from "./DrawerNavigator.js";
 import Landing from "../screens/greet/Landing.js";
+import TermsofUse from '../screens/home/TermsofUse';
+
 
 // OneSignal.Debug.setLogLevel(LogLevel.Verbose);
 // OneSignal.initialize(Constants.expoConfig.extra.oneSignalAppId);
@@ -58,6 +60,7 @@ export default function AuthNavigator() {
         <Stack.Screen name="Signup" component={Signup} options={{headerTitle: "Sign up"}}/>
         <Stack.Screen name="ForgotPassword" component={ForgotPassword} options={{headerTitle: "Forgot Password?"}}/>
         <Stack.Screen name="Drawer" component={MyDrawer} options={{headerShown: false}}/>
+        <Stack.Screen name="TermsofUse" component={TermsofUse} />
       </Stack.Navigator>
   );
 }
