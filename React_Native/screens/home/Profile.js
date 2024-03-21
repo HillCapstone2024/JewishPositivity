@@ -23,7 +23,7 @@ const UserProfile = () => {
     email: "",
     //dateJoined: "January 1, 2021",
     //journalEntries: 120,
-    profilePicture: "../../assets/logo.png",
+    profilePicture: "../../assets/images/logo.png",
   });
 
 
@@ -122,7 +122,7 @@ const UserProfile = () => {
   
 
   return (
-    <View style={styles.container}>
+    <View style={[themeStyle['background'], styles.container]}>
       <TouchableOpacity onPress={handleEditProfilePicture} >
           <View style={styles.profilePicContainer}>
             <SvgXml xml={avatar} style={styles.profilePic} />
