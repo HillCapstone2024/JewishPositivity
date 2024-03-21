@@ -109,7 +109,7 @@ const BottomTabNavigator = () => {
                 <Ionicons name="journal" size={25} color={'#ffffff'} style={{
                   width: 25,
                   height: 25,
-                  tintColor: 'white',
+                  // tintColor: 'white',
                 }}/>
               </View>),
           }}
