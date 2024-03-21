@@ -1,18 +1,45 @@
-import React, { useRef } from "react";
-import { View, Animated, Dimensions } from "react-native";
+import React, { useRef, useState } from "react";
+import { View, Animated, Dimensions, TouchableOpacity  } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 // import { View } from "react-native-reanimated/lib/typescript/Animated";
 
 import HomeScreen from "../screens/home/HomeScreen";
 import JournalEntry from "../screens/home/CheckIn";
 import Archive from "../screens/home/Archive";
+import JournalModal from "../screens/home/JournalModal";
 
 const Tab = createBottomTabNavigator();
 
 const BottomTabNavigator = () => {
   const tabOffsetValue = useRef(new Animated.Value(0)).current;
+  const [showJournalModal, setShowJournalModal] = useState(false);
+  const translateY = useRef(new Animated.Value(1000)).current; // Initial position of the modal
+
+  const openJournalModal = () => {
+    setShowJournalModal(true);
+    Animated.timing(translateY, {
+      toValue: 0,
+      duration: 300, // Adjust duration as needed
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const closeJournalModal = () => {
+    Animated.timing(translateY, {
+      toValue: 1000,
+      duration: 300, // Adjust duration as needed
+      useNativeDriver: true,
+    }).start(() => {
+      setShowJournalModal(false);
+    });
+  };
+
+  const submitJournalEntry = () => {
+    // Implement your logic to submit journal entry
+    closeJournalModal();
+  };
 
   return (
     <NavigationContainer independent={true}>
@@ -70,38 +97,26 @@ const BottomTabNavigator = () => {
           component={JournalEntry}
           options={{
             tabBarIcon: ({ focused }) => (
-              // <View style={{
-              //   width: 55,
-              //   height: 55,
-              //   backgroundColor: '#4A90E2',
-              //   borderRadius: 30,
-              //   justifyContent: 'center',
-              //   alignItems: 'center',
-              //   marginBottom: 30
-              // }}>
-              //   <Ionicons name="journal" size={25} color={focused ? '#ffffff' : 'gray'} style={{
-              //     width: 25,
-              //     height: 25,
-              //     tintColor: 'white',
-              //   }}/>
-              // </View>),
-
-              <View style={{ position: "absolute", top: 15 }}>
-                <Ionicons
-                  name="journal"
-                  size={25}
-                  color={focused ? "#4A90E2" : "gray"}
-                />
-              </View>
-            ),
+              <View style={{
+                width: 55,
+                height: 55,
+                backgroundColor: '#4A90E2',
+                borderRadius: 30,
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginBottom: 30
+              }}>
+                <Ionicons name="journal" size={25} color={'#ffffff'} style={{
+                  width: 25,
+                  height: 25,
+                  tintColor: 'white',
+                }}/>
+              </View>),
           }}
           listeners={({ navigation, route }) => ({
-            // Onpress Update....
             tabPress: (e) => {
-              Animated.spring(tabOffsetValue, {
-                toValue: getWidth() * 1.66,
-                useNativeDriver: true,
-              }).start();
+              e.preventDefault(); // Prevent default behavior
+              openJournalModal(); // Call the openJournalModal function
             },
           })}
         />
@@ -138,13 +153,21 @@ const BottomTabNavigator = () => {
           height: 2,
           backgroundColor: "#4A90E2",
           position: "absolute",
-          bottom: 98,
-          // Horizontal Padding = 20...
+          bottom: 39,
           left: 70,
           borderRadius: 20,
           transform: [{ translateX: tabOffsetValue }],
         }}
       ></Animated.View>
+
+      {/* Journal modal */}
+      {showJournalModal && (
+        <JournalModal
+          translateY={translateY}
+          onClose={closeJournalModal}
+          onSubmit={submitJournalEntry}
+        />
+      )}
     </NavigationContainer>
   );
 };

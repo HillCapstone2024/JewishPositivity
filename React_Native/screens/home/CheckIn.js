@@ -20,6 +20,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import * as FileSystem from "expo-file-system";
 import { Buffer } from "buffer";
+import RNPickerSelect from 'react-native-picker-select';
+
 
 import { Video, ResizeMode, Audio } from "expo-av";
 import makeThemeStyle from "../../Theme.js";
@@ -36,6 +38,7 @@ export default function JournalEntry() {
   const [base64Data, setBase64Data] = useState("");
   const [journalText, setJournalText] = useState("");
   const [showMediaBar, setShowMediaBar] = useState(true);
+  const [selectedOption, setSelectedOption] = useState("");
   const mediaAccessoryViewID = "MediaBar";
   const theme = makeThemeStyle();
   const now = new Date();
@@ -101,7 +104,6 @@ export default function JournalEntry() {
       : undefined;
   }, [sound]);
 
-
   async function readFileAsBase64(uri) {
     try {
       const base64Content = await FileSystem.readAsStringAsync(uri, {
@@ -128,39 +130,6 @@ export default function JournalEntry() {
       throw new Error("CSRF token retrieval failed");
       return "csrfToken retrieval failure";
     }
-  };
-
-  const submitJournal = async () => {
-    let base64JournalText = "";
-    if (mediaType === "text") {
-      base64JournalText = textToBase64(journalText);
-      setBase64Data(base64JournalText);
-    }
-      console.log("check in type: ", mediaType);
-      try {
-        const csrfToken = await getCsrfToken();
-        const response = await axios.post(
-          `${API_URL}/check-in/`,
-          {
-            username: username,
-            moment_number: momentType,
-            content: mediaType === "text" ? base64JournalText : base64Data,
-            content_type: mediaType,
-            date: formattedDateTime,
-          },
-          {
-            headers: {
-              "X-CSRFToken": csrfToken,
-              "Content-Type": "application/json",
-            },
-            withCredentials: true,
-          }
-        );
-        console.log("check in response:", response.data);
-      } catch (error) {
-        console.log(error);
-        console.error("Journal Error:", error.response.data);
-      }
   };
 
   const deleteMedia = () => {
@@ -193,6 +162,10 @@ export default function JournalEntry() {
   const handleToggle = (toggle) => {
     console.log("journal side:", toggle);
     setShowMediaBar(!toggle);
+  };
+
+  const handleOptionChange = (itemValue) => {
+    setSelectedOption(itemValue);
   };
 
   return (
@@ -276,6 +249,20 @@ export default function JournalEntry() {
         </View>
       ) : null}
 
+      <View style={styles.dropdownContainer}>
+        <Text style={styles.dropdownLabel}>Select a prayer:</Text>
+        <RNPickerSelect
+          style={pickerSelectStyles}
+          value={selectedOption}
+          onValueChange={handleOptionChange}
+          items={[
+            { label: "Modeh Ani", value: "Modeh Ani" },
+            { label: "Ashrei", value: "Ashrei" },
+            { label: "Shema", value: "Shema" },
+          ]}
+        />
+      </View>
+
       <ScrollView style={styles.scrollingInput}>
         {/* Journal Text box View */}
         <View>
@@ -290,11 +277,6 @@ export default function JournalEntry() {
             numberOfLines={4}
             testID="journalInput"
           />
-          <Button
-            onPress={submitJournal}
-            title="Submit"
-            testID="submitButton"
-          ></Button>
         </View>
       </ScrollView>
 
@@ -318,13 +300,56 @@ export default function JournalEntry() {
   );
 }
 
+const pickerSelectStyles = StyleSheet.create({
+  inputIOS: {
+    fontSize: 15,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: 'grey',
+    borderRadius: 8,
+    color: 'black',
+    paddingRight: 30,
+    backgroundColor: 'white',
+    // paddingTop: 20, // Adjust padding to move the text down
+  },
+  inputAndroid: {
+    fontSize: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderWidth: 0.5,
+    borderColor: 'grey',
+    borderRadius: 8,
+    color: 'black',
+    paddingRight: 30,
+    backgroundColor: 'white',
+    paddingTop: 20, // Adjust padding to move the text down
+  },
+});
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
   },
+  dropdownContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    // marginBottom: 10,
+    marginTop: 5,
+  },
+  dropdownLabel: {
+    marginRight: 10,
+    fontSize: 15,
+    paddingLeft: 14,
+    // paddingTop: 10,
+    textAlign: "left",
+  },
+  RPNpicker: {
+    paddingTop: 10,
+  },
   journalInput: {
-    marginTop: 20,
+    marginTop: 10,
     borderRadius: 5,
     padding: 10,
     color: "white",
@@ -333,13 +358,6 @@ const styles = StyleSheet.create({
   },
   scrollingInput: {
     flexGrow: 1,
-  },
-  submitButton: {
-    color: "black",
-    fontSize: "14",
-    backgroundColor: "white",
-    margin: 10,
-    padding: 15,
   },
   mediaContainer: {
     flexDirection: "row",
