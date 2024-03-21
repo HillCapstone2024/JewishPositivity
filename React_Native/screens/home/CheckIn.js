@@ -29,9 +29,9 @@ import * as Storage from "../../AsyncStorage.js";
 import IP_ADDRESS from "../../ip.js";
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
-export default function JournalEntry() {
+export default function JournalEntry({handleCancel, handleSubmitClose}) {
   const [username, setUsername] = useState("");
-  const [momentType, setMomentType] = useState(7);
+  const [momentType, setMomentType] = useState(3);
   const [mediaUri, setMediaUri] = useState(null);
   const [mediaBox, setMediaBox] = useState(false);
   const [mediaType, setMediaType] = useState("text");
@@ -132,6 +132,43 @@ export default function JournalEntry() {
     }
   };
 
+  const submitJournal = async () => {
+    let base64JournalText = "";
+    if (mediaType === "text") {
+      base64JournalText = textToBase64(journalText);
+      setBase64Data(base64JournalText);
+    }
+    console.log("check in type: ", mediaType);
+    try {
+      const csrfToken = await getCsrfToken();
+      const response = await axios.post(
+        `${API_URL}/check-in/`,
+        {
+          username: username,
+          moment_number: momentType,
+          content: mediaType === "text" ? base64JournalText : base64Data,
+          content_type: mediaType,
+          date: formattedDateTime,
+        },
+        {
+          headers: {
+            "X-CSRFToken": csrfToken,
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+      console.log("check in response:", response.data);
+      //on successful submit close the page
+      if (handleSubmitClose) {
+        handleSubmitClose(true);
+      }
+    } catch (error) {
+      console.log(error);
+      console.error("Journal Error:", error.response.data);
+    }
+  };
+
   const deleteMedia = () => {
     setMediaUri(null);
     setMediaBox(false);
@@ -168,8 +205,27 @@ export default function JournalEntry() {
     setSelectedOption(itemValue);
   };
 
+  // const handleCancel = () => {
+
+  // }
+
   return (
     <SafeAreaView style={[styles.container, theme["background"]]}>
+      {/* View for cancel and submit buttons */}
+      <View style={styles.topBar}>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity onPress={handleCancel}>
+            <View style={styles.buttonContent}>
+              <Ionicons name="caret-back" size={25} color="#4A90E2" />
+              <Text>Cancel</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity style={styles.submitButton} onPress={submitJournal}>
+          <Text style={styles.submitText}>Submit</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.horizontalBar} />
       <TextInput
         style={[styles.title, theme["color"]]}
         placeholder="Header..."
@@ -401,5 +457,29 @@ const styles = StyleSheet.create({
     fontSize: 40,
     fontWeight: "bold",
     textAlign: "left",
+  },
+
+  topBar: {
+    flexDirection: "row",
+    margin: 10,
+    justifyContent: "space-between",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  submitButton: {},
+  submitText: {
+    color: "#4A90E2",
+    fontSize: 19,
+  },
+  horizontalBar: {
+    height: 1,
+    backgroundColor: "#ccc",
+    marginTop: 15,
   },
 });

@@ -8,45 +8,13 @@ const window = Dimensions.get('window');
 const windowHeight = window.height;
 const headerHeight = 99; // Adjust according to your header height
 
-const submitJournal = async () => {
-    let base64JournalText = "";
-    if (mediaType === "text") {
-        base64JournalText = textToBase64(journalText);
-        setBase64Data(base64JournalText);
-    }
-        console.log("check in type: ", mediaType);
-        try {
-        const csrfToken = await getCsrfToken();
-        const response = await axios.post(
-            `${API_URL}/check-in/`,
-            {
-            username: username,
-            moment_number: momentType,
-            content: mediaType === "text" ? base64JournalText : base64Data,
-            content_type: mediaType,
-            date: formattedDateTime,
-            },
-            {
-            headers: {
-                "X-CSRFToken": csrfToken,
-                "Content-Type": "application/json",
-            },
-            withCredentials: true,
-            }
-        );
-        console.log("check in response:", response.data);
-        } catch (error) {
-        console.log(error);
-        console.error("Journal Error:", error.response.data);
-        }
-    };
 
 const JournalModal = ({ onClose, onSubmit, translateY }) => {
   const modalHeight = windowHeight - headerHeight;
 
   return (
     <Animated.View style={[styles.container, { transform: [{ translateY }] }, { height: modalHeight }]}>
-      <View style={styles.buttonContainer}>
+      {/* <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
           <View style={styles.buttonContent}>
             <Ionicons name="caret-back" size={25} color="#4A90E2" />
@@ -56,14 +24,14 @@ const JournalModal = ({ onClose, onSubmit, translateY }) => {
         <TouchableOpacity style={styles.submitButton} onPress={onSubmit}>
           <Text style={styles.submitText}>Submit</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
 
       {/* Horizontal bar */}
-      <View style={styles.horizontalBar} />
+      {/* <View style={styles.horizontalBar} /> */}
 
       {/* journal entry */}
       <View style={styles.checkInView}>
-        <CheckIn />
+        <CheckIn handleCancel={onClose} handleSubmitClose={onSubmit}/>
       </View>
 
     </Animated.View>
