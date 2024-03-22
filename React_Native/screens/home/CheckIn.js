@@ -234,6 +234,9 @@ export default function JournalEntry({handleCancel, handleSubmitClose}) {
             </View>
           </TouchableOpacity>
         </View>
+
+        <Text style={styles.title}>Check In</Text>
+
         <TouchableOpacity
           disabled={disableSubmit}
           style={styles.submitButton}
@@ -466,17 +469,13 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   title: {
-    paddingRight: 10,
-    paddingLeft: 10,
-    paddingTop: 10,
-    fontSize: 40,
+    fontSize: 25,
     fontWeight: "bold",
-    textAlign: "left",
   },
-
   topBar: {
     flexDirection: "row",
-    margin: 10,
+    marginTop: 10,
+    marginRight: 15,
     justifyContent: "space-between",
   },
   buttonContainer: {

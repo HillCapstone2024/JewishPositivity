@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { View, Animated, Dimensions, TouchableOpacity  } from "react-native";
+import { View, Animated, Dimensions, TouchableOpacity } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,29 +15,16 @@ const Tab = createBottomTabNavigator();
 const BottomTabNavigator = () => {
   const tabOffsetValue = useRef(new Animated.Value(0)).current;
   const [showJournalModal, setShowJournalModal] = useState(false);
-  const translateY = useRef(new Animated.Value(1000)).current; // Initial position of the modal
 
   const openJournalModal = () => {
     setShowJournalModal(true);
-    Animated.timing(translateY, {
-      toValue: 0,
-      duration: 300, // Adjust duration as needed
-      useNativeDriver: true,
-    }).start();
   };
 
   const closeJournalModal = () => {
-    Animated.timing(translateY, {
-      toValue: 1000,
-      duration: 300, // Adjust duration as needed
-      useNativeDriver: true,
-    }).start(() => {
-      setShowJournalModal(false);
-    });
+    setShowJournalModal(false);
   };
 
   const submitJournalEntry = () => {
-    // Implement your logic to submit journal entry
     closeJournalModal();
   };
 
@@ -110,7 +97,7 @@ const BottomTabNavigator = () => {
                   width: 25,
                   height: 25,
                   // tintColor: 'white',
-                }}/>
+                }} />
               </View>),
           }}
           listeners={({ navigation, route }) => ({
@@ -163,9 +150,10 @@ const BottomTabNavigator = () => {
       {/* Journal modal */}
       {showJournalModal && (
         <JournalModal
-          translateY={translateY}
           onClose={closeJournalModal}
           onSubmit={submitJournalEntry}
+          visible={showJournalModal}
+          onRequestClose={() => setShowJournalModal(false)}
         />
       )}
     </NavigationContainer>
