@@ -27,16 +27,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 #SECRET_KEY = os.getenv("DJ_KEY")
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
+SECRET_KEY = os.getenv("DJ_KEY", get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
-DEBUG = os.getenv("DEBUG", "False") == "True"
+DEBUG = False
+#DEBUG = os.getenv("DEBUG", "False") == "True"
 
 #ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', f'{os.getenv("IP_ADDRESS")}']
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
-DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "False") == "True"
+# DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "False") == "True"
+DEVELOPMENT_MODE = False
 
 
 CORS_ORIGIN_WHITELIST = [
@@ -111,8 +112,8 @@ port = os.getenv("DB_PORT")
 if DEVELOPMENT_MODE is True:
     DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
+            "ENGINE": "django.db.backends.mysql",
+            "NAME": "production",
         }
     }
 elif len(sys.argv) > 0 and sys.argv[1] != 'collectstatic':
