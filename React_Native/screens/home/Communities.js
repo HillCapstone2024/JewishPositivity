@@ -109,7 +109,9 @@ const Communities = () => {
         //         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         //         style={[styles.container, theme["background"]]}
         //     >
-        <View style={[themeStyle['background'], styles.container]}>
+        <View style={[
+            // themeStyle['background'], 
+            styles.container]}>
             <View style={{ flexDirection: "row" }}>
                 <TouchableOpacity style={styles.join} onPress={() => setJoinModalVisible(true)}>
                     <Text style={styles.buttonText}>Join</Text>

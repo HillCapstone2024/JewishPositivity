@@ -194,6 +194,8 @@ const SettingsScreen = ({ navigation }) => {
           <View style={styles.Prefsetting}>
             <Text style={styles.settingText}>Haptic Feedback</Text>
             <Switch
+              trackColor={{ false: '#f2f2f2', true: '#4A90E2' }} // Update the background color
+              thumbColor={'#f2f2f2'} // Update the thumb color
               onValueChange={toggleHapticFeedback}
               value={isHapticFeedbackEnabled}
             />
@@ -253,7 +255,7 @@ const styles = StyleSheet.create({
   },
   horizontalLine: {
     flex: 1,
-    height: 1.25, 
+    height: 1.25,
     backgroundColor: '#9e9e9e',
     marginLeft: 8, // Adjust spacing between title and line
   },
@@ -262,11 +264,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: 50,
     backgroundColor: '#f2f2f2',
-    // borderWidth: 1,
     borderRadius: 8,
     marginBottom: 12,
     paddingLeft: 12,
     paddingRight: 12,
+    shadowColor: '#4A90E2', // Updated shadow color
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
   },
   Prefsetting: {
     justifyContent: 'space-between',
@@ -278,7 +287,15 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingLeft: 12,
     paddingRight: 12,
-  }, 
+    shadowColor: '#4A90E2', // Updated shadow color
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
   sectionTitle: {
     paddingVertical: 12,
     fontSize: 12,
@@ -289,10 +306,10 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     marginTop: 10,
-    flex: 1 
+    flex: 1,
   },
   footer: {
-    height: 80
+    height: 80,
   },
   version: {
     textAlign: 'center',
@@ -315,12 +332,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   redText: {
-    color: "red",
+    color: 'red',
     fontSize: 20,
-
   },
   normalText: {
-    // color: "#007AFF",
     fontSize: 20,
     paddingLeft: 5,
   },

@@ -179,62 +179,65 @@ async function handleTimeChange (timeOneParam, timeTwoParam, timeThreeParam ){
     <View style={styles.container}>
       {errorMessage}
 
-      <View style={{ flexDirection: "column" }}>
-        <Pressable
-          style={styles.button}
-          testID="dateTimePicker1"
-          onPress={showDatePicker1}
-        >
-          <Text testID="timeOneText" style={styles.buttonText}>
-            {timeOne.toLocaleTimeString()}
-          </Text>
+      <View style={styles.container}>
+        <View style={styles.rowContainer}>
+          <Text style={styles.descriptionText}>Modeh Ani:</Text>
+          <Pressable style={styles.button} testID="dateTimePicker1" onPress={showDatePicker1}>
+            <Text testID="timeOneText" style={styles.buttonText}>
+              {timeOne.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </Text>
+            <DateTimePickerModal
+              isVisible={isDatePickerVisible1}
+              mode="time"
+              value={timeOne}
+              onConfirm={handleConfirmOne}
+              onCancel={hideDatePicker1}
+              display="spinner"
+              minuteInterval={5}
+              is24Hour={false}
+              testID="dateTimePickerModal1"
+            />
+          </Pressable>
+        </View>
 
-          <DateTimePickerModal
-            isVisible={isDatePickerVisible1}
-            mode="time"
-            value={timeOne}
-            onConfirm={handleConfirmOne}
-            onCancel={hideDatePicker1}
-            display="spinner"
-            minuteInterval={5}
-            is24Hour={false}
-            testID="dateTimePickerModal1"
-          />
-        </Pressable>
-        <Pressable style={styles.button} onPress={showDatePicker2}>
-          <Text testID="timeTwoText" style={styles.buttonText}>
-            {timeTwo.toLocaleTimeString()}
-          </Text>
+        <View style={styles.rowContainer}>
+          <Text style={styles.descriptionText}>Ashrei:</Text>
+          <Pressable style={styles.button} onPress={showDatePicker2}>
+            <Text testID="timeTwoText" style={styles.buttonText}>
+              {timeTwo.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </Text>
+            <DateTimePickerModal
+              isVisible={isDatePickerVisible2}
+              mode="time"
+              value={timeTwo}
+              onConfirm={handleConfirmTwo}
+              onCancel={hideDatePicker2}
+              display="spinner"
+              minuteInterval={5}
+              is24Hour={false}
+              testID="dateTimePickerModal2"
+            />
+          </Pressable>
+        </View>
 
-          <DateTimePickerModal
-            isVisible={isDatePickerVisible2}
-            mode="time"
-            value={timeTwo}
-            onConfirm={handleConfirmTwo}
-            onCancel={hideDatePicker2}
-            display="spinner"
-            minuteInterval={5}
-            is24Hour={false}
-            testID="dateTimePickerModal2"
-          />
-        </Pressable>
-
-        <Pressable style={styles.button} onPress={showDatePicker3}>
-          <Text testID="timeThreeText" style={styles.buttonText}>
-            {timeThree.toLocaleTimeString()}
-          </Text>
-
-          <DateTimePickerModal
-            isVisible={isDatePickerVisible3}
-            mode="time"
-            value={timeThree}
-            onConfirm={handleConfirmThree}
-            onCancel={hideDatePicker3}
-            display="spinner"
-            minuteInterval={5}
-            is24Hour={false}
-          />
-        </Pressable>
+        <View style={styles.rowContainer}>
+          <Text style={styles.descriptionText}>Shema:</Text>
+          <Pressable style={styles.button} onPress={showDatePicker3}>
+            <Text testID="timeThreeText" style={styles.buttonText}>
+              {timeThree.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </Text>
+            <DateTimePickerModal
+              isVisible={isDatePickerVisible3}
+              mode="time"
+              value={timeThree}
+              onConfirm={handleConfirmThree}
+              onCancel={hideDatePicker3}
+              display="spinner"
+              minuteInterval={5}
+              is24Hour={false}
+            />
+          </Pressable>
+        </View>
       </View>
     </View>
   );
@@ -260,22 +263,36 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingHorizontal: 10,
   },
+  rowContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "85%",
+    marginBottom: 10,
+  },
   button: {
+    width: 120,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    marginTop: 10,
-    marginHorizontal: 5,
     borderRadius: 5,
     borderWidth: 1,
-    borderColor: "black",
-    backgroundColor: '#f2f2f2',
+    borderColor: "#4A90E2",
+    backgroundColor: '#4A90E2',
     alignItems: "center",
-    backgroundColor: '#f2f2f2',
   },
   buttonText: {
-    color: "black",
+    color: "white",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  descriptionText: {
+    // fontSize: 16,
+    // fontWeight: "bold",
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#9e9e9e',
+    // textTransform: 'uppercase',
+    // letterSpacing: 1.1,
   },
   errorMessageBox: {
     textAlign: "center",

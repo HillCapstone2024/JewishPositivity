@@ -122,7 +122,9 @@ const UserProfile = () => {
   
 
   return (
-    <View style={[themeStyle['background'], styles.container]}>
+    <View style={[
+      // themeStyle['background'], 
+      styles.container]}>
       <TouchableOpacity onPress={handleEditProfilePicture} >
           <View style={styles.profilePicContainer}>
             <SvgXml xml={avatar} style={styles.profilePic} />
