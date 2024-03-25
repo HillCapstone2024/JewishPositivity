@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import * as Storage from "./AsyncStorage.js";
 import { Appearance } from "react-native";
+import { useFocusEffect } from '@react-navigation/native';
 
 export default makeThemeStyle = () => {
     const [theme, setTheme] = useState(false);
@@ -44,6 +45,24 @@ export default makeThemeStyle = () => {
         }
     };
     getTheme()
+
+    useEffect(() => {
+        getHapticFeedback();
+        getTheme();
+    }, []);
+
+    useFocusEffect(
+        React.useCallback(() => {
+            // Do something when the screen is focused
+            getHapticFeedback();
+            getTheme();
+            return () => {
+                // Do something when the screen is unfocused
+                getHapticFeedback();
+                getTheme();
+            };
+        }, [])
+    );
 
     return {
         "background": { backgroundColor: theme ? '#333333' : '#ececf6', }, //#ececf6 or #f2f2f2 or #ffffff
