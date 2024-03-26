@@ -63,7 +63,7 @@ const JournalModal = ({ onClose, onSubmit, visible }) => {
             styles.bottomSheetContainer,
             { transform: [{ translateY: translateY }] },
           ]}
-          {...panResponder.panHandlers} // Pass panHandlers only to the Animated.View
+          //{...panResponder.panHandlers} // Pass panHandlers only to the Animated.View
         >
           <TouchableOpacity style={styles.dragIndicator}>
             <View style={styles.dragIndicatorInner} />
