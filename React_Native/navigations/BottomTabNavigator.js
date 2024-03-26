@@ -31,7 +31,7 @@ const BottomTabNavigator = () => {
   return (
     <NavigationContainer independent={true}>
       <Tab.Navigator
-        initialRouteName="Home"
+        initialRouteName="Feed"
         screenOptions={{
           tabBarShowLabel: false,
           headerShown: false,
@@ -55,14 +55,14 @@ const BottomTabNavigator = () => {
         }}
       >
         <Tab.Screen
-          name="Home"
+          name="Feed"
           component={HomeScreen}
           options={{
             tabBarIcon: ({ focused }) => (
               <View style={{ position: "absolute", top: 15 }}>
                 <Ionicons
-                  name="home"
-                  size={25}
+                  name="people"
+                  size={28}
                   color={focused ? "#4A90E2" : "gray"}
                 />
               </View>

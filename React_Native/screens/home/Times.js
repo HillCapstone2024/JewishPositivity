@@ -2,17 +2,11 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  TextInput,
-  TouchableOpacity,
   StyleSheet,
   Pressable,
-  Button,
-  Appearance
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import axios from "axios";
-import TopBar from "../../navigations/topBar.js";
 import IP_ADDRESS from "../../ip.js";
 import * as Storage from "../../AsyncStorage.js";
 
@@ -20,9 +14,9 @@ const API_URL = "http://" + IP_ADDRESS + ":8000";
 
 const Times = ({ navigation }) => {
   //Creates time variables with defaults built in
-  const [timeOne, setTimeOne] = useState(new Date(2024,2,28,8,0,0));
-  const [timeTwo, setTimeTwo] = useState(new Date(2024,2,28,15,0,0));
-  const [timeThree, setTimeThree] = useState(new Date(2024,2,28,21,0,0));
+  const [timeOne, setTimeOne] = useState(new Date(2024, 2, 28, 8, 0, 0));
+  const [timeTwo, setTimeTwo] = useState(new Date(2024, 2, 28, 15, 0, 0));
+  const [timeThree, setTimeThree] = useState(new Date(2024, 2, 28, 21, 0, 0));
   const [username, setUsername] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
 
@@ -47,7 +41,7 @@ const Times = ({ navigation }) => {
   const [isDatePickerVisible2, setDatePickerVisibility2] = useState(false);
   const [isDatePickerVisible3, setDatePickerVisibility3] = useState(false);
 
- 
+
   //Used to show or hide picker for each button  
   const showDatePicker1 = () => {
     setDatePickerVisibility1(true);
@@ -86,16 +80,18 @@ const Times = ({ navigation }) => {
     // time = parseTimeToCurrentDate(time);
     setTimeOne(time);
     hideDatePicker1();
-    handleTimeChange(time, timeTwo, timeThree); }
+    handleTimeChange(time, timeTwo, timeThree);
+  }
 
   const handleConfirmTwo = (time) => {
-   setTimeTwo(time);
-   hideDatePicker2();
-   handleTimeChange( timeOne, time, timeThree); }
+    setTimeTwo(time);
+    hideDatePicker2();
+    handleTimeChange(timeOne, time, timeThree);
+  }
   const handleConfirmThree = (time) => {
     setTimeThree(time);
     hideDatePicker3();
-    handleTimeChange(timeOne, timeTwo, time );
+    handleTimeChange(timeOne, timeTwo, time);
   }
 
   const getCsrfToken = async () => {
@@ -114,66 +110,66 @@ const Times = ({ navigation }) => {
     try {
       const csrfToken = await getCsrfToken();
       const response = await axios.get(`${API_URL}/get_times/`, {
-      params: {
-        username: username,
-      },
-      headers: {
-        "X-CSRFToken": csrfToken,
-        "Content-Type": "application/json",
-      },
-      withCredentials: true,
-    });
-    console.log('successful response:', response.data);
-    const timeOneDate = parseTimeToCurrentDate(response.data.time1);
-    setTimeOne(timeOneDate);
-    const timeTwoDate = parseTimeToCurrentDate(response.data.time2);
-    setTimeTwo(timeTwoDate);
-    const timeThreeDate = parseTimeToCurrentDate(response.data.time3);
-    setTimeThree(timeThreeDate);
-    } catch (error){
-      console.log('error getting the times from database: ', error);
-    }
-  };
-
-  //POST
-async function handleTimeChange (timeOneParam, timeTwoParam, timeThreeParam ){
-  //console.log("time1: " + timeOne.toTimeString().split(' ')[0] + " time2: " + timeTwo.toTimeString().split(' ')[0] + " time3: " + timeThree.toTimeString().split(' ')[0])
-
-  try {
-    const csrfToken = await getCsrfToken();
-    const response = await axios.post(
-      `${API_URL}/update-times/`,
-      {
-        username: username,
-        time1: timeOneParam.toTimeString().split(" ")[0],
-        time2: timeTwoParam.toTimeString().split(" ")[0],
-        time3: timeThreeParam.toTimeString().split(" ")[0],
-      },
-      {
+        params: {
+          username: username,
+        },
         headers: {
           "X-CSRFToken": csrfToken,
           "Content-Type": "application/json",
         },
         withCredentials: true,
-      }
-    );
-    console.log("Time change response:", response.data);
-    console.log("username is: ", username);
-    setErrorMessage(
-      <View style={styles.successMessageBox}>
-        <Text style={styles.successMessageText}>{"Times Changed Successfully"}</Text>
-      </View>
-    );
-  } catch (error) {
-    console.log(error)
-    setErrorMessage(
-      <View style={styles.errorMessageBox}>
-        <Text style={styles.errorMessageText}>{error.response.data}</Text>
-      </View>
-    );
-    console.error("Time change error:", error.response.data);
-  }
-};
+      });
+      console.log('successful response:', response.data);
+      const timeOneDate = parseTimeToCurrentDate(response.data.time1);
+      setTimeOne(timeOneDate);
+      const timeTwoDate = parseTimeToCurrentDate(response.data.time2);
+      setTimeTwo(timeTwoDate);
+      const timeThreeDate = parseTimeToCurrentDate(response.data.time3);
+      setTimeThree(timeThreeDate);
+    } catch (error) {
+      console.log('error getting the times from database: ', error);
+    }
+  };
+
+  //POST
+  async function handleTimeChange(timeOneParam, timeTwoParam, timeThreeParam) {
+    //console.log("time1: " + timeOne.toTimeString().split(' ')[0] + " time2: " + timeTwo.toTimeString().split(' ')[0] + " time3: " + timeThree.toTimeString().split(' ')[0])
+
+    try {
+      const csrfToken = await getCsrfToken();
+      const response = await axios.post(
+        `${API_URL}/update-times/`,
+        {
+          username: username,
+          time1: timeOneParam.toTimeString().split(" ")[0],
+          time2: timeTwoParam.toTimeString().split(" ")[0],
+          time3: timeThreeParam.toTimeString().split(" ")[0],
+        },
+        {
+          headers: {
+            "X-CSRFToken": csrfToken,
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+      console.log("Time change response:", response.data);
+      console.log("username is: ", username);
+      // setErrorMessage(
+      //   <View style={styles.successMessageBox}>
+      //     <Text style={styles.successMessageText}>{"Times Changed Successfully"}</Text>
+      //   </View>
+      // );
+    } catch (error) {
+      console.log(error)
+      setErrorMessage(
+        <View style={styles.errorMessageBox}>
+          <Text style={styles.errorMessageText}>{error.response.data}</Text>
+        </View>
+      );
+      console.error("Time change error:", error.response.data);
+    }
+  };
 
   return (
     <View style={styles.container}>
