@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     borderRadius: 5,
     padding: 10,
-    color: "white",
+    color: "black",
     height: "100%",
     marginHorizontal: 5,
   },
