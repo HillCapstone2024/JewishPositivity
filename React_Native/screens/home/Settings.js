@@ -7,24 +7,12 @@ import RNPickerSelect from 'react-native-picker-select';
 import * as Storage from "../../AsyncStorage.js";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from 'expo-haptics';
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import makeThemeStyle from '../../Theme.js';
 import Times from "./Times.js";
-import TermsofUse from './TermsofUse';
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
-const Stack = createNativeStackNavigator();
-
-const SettingsStackNavigator = () => {
-  return (
-    <Stack.Navigator>
-      <Stack.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="TermsofUse" component={TermsofUse} />
-    </Stack.Navigator>
-  );
-};
 
 const SettingsScreen = ({ navigation }) => {
   const [username, setUsername] = useState("");
@@ -160,7 +148,7 @@ const SettingsScreen = ({ navigation }) => {
   const url = "https://drive.google.com/file/d/15TGCUb7dvpNorO9IcGfiyDL60WatPa07/edit";
   const toggleHapticFeedback = () => setHapticFeedback(!isHapticFeedbackEnabled);
   const handleReport = () => Alert.prompt('Report', 'Report something broken?', [{ text: 'Cancel', style: 'cancel' }, { text: 'Report', onPress: (inputValue) => handleReportEmail(inputValue) }]);
-  const handleTermsofUse = () => Alert.alert('Terms of Use', 'Read the terms of use?', [{ text: 'Cancel', style: 'cancel' }, { text: 'Read', onPress: () => navigation.navigate('TermsofUse') }]);
+  const handleTermsofUse = () => Alert.alert('Terms of Use', 'Read the terms of use?', [{ text: 'Cancel', style: 'cancel' }, { text: 'Read', onPress: () => navigation.navigate('Terms of Use') }]);
   const handlePrivacyPolicy = () => Alert.alert('Privacy Policy', 'Read the privacy policy?', [{ text: 'Cancel', style: 'cancel' }, { text: 'Read', onPress: () => WebBrowser.openBrowserAsync(url) }]);
   const handleDeleteAccount = () => Alert.alert('Delete Account', 'Are you sure you want to delete your account?', [{ text: 'Cancel', style: 'cancel' }, { text: 'Delete', style: 'destructive', onPress: () => sendAccountDeletionRequest() }]);
 
@@ -206,6 +194,8 @@ const SettingsScreen = ({ navigation }) => {
           <View style={styles.Prefsetting}>
             <Text style={styles.settingText}>Haptic Feedback</Text>
             <Switch
+              trackColor={{ false: '#f2f2f2', true: '#4A90E2' }} // Update the background color
+              thumbColor={'#f2f2f2'} // Update the thumb color
               onValueChange={toggleHapticFeedback}
               value={isHapticFeedbackEnabled}
             />
@@ -265,7 +255,7 @@ const styles = StyleSheet.create({
   },
   horizontalLine: {
     flex: 1,
-    height: 1.25, 
+    height: 1.25,
     backgroundColor: '#9e9e9e',
     marginLeft: 8, // Adjust spacing between title and line
   },
@@ -273,24 +263,39 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     height: 50,
-    // backgroundColor: '#f2f2f2',
-    // borderWidth: 1,
+    backgroundColor: '#f2f2f2',
     borderRadius: 8,
     marginBottom: 12,
     paddingLeft: 12,
     paddingRight: 12,
+    shadowColor: '#4A90E2', // Updated shadow color
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
   },
   Prefsetting: {
     justifyContent: 'space-between',
     flexDirection: 'row',
     alignItems: 'center',
     height: 50,
-    // backgroundColor: '#f2f2f2',
+    backgroundColor: '#f2f2f2',
     borderRadius: 8,
     marginBottom: 12,
     paddingLeft: 12,
     paddingRight: 12,
-  }, 
+    shadowColor: '#4A90E2', // Updated shadow color
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
   sectionTitle: {
     paddingVertical: 12,
     fontSize: 12,
@@ -301,10 +306,10 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     marginTop: 10,
-    flex: 1 
+    flex: 1,
   },
   footer: {
-    height: 80
+    height: 80,
   },
   version: {
     textAlign: 'center',
@@ -327,12 +332,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   redText: {
-    color: "red",
+    color: 'red',
     fontSize: 20,
-
   },
   normalText: {
-    // color: "#007AFF",
     fontSize: 20,
     paddingLeft: 5,
   },
@@ -343,4 +346,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SettingsStackNavigator;
+export default SettingsScreen;

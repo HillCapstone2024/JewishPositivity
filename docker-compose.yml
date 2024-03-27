@@ -1,0 +1,10 @@
+version: '3'
+services:
+  api:
+    image: HillCapstone2024/jewishpositivity:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    

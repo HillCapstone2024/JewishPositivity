@@ -13,13 +13,13 @@ import {
   Keyboard,
 } from "react-native";
 import axios from "axios";
-import { LinearGradient } from "expo-linear-gradient";
+import logos from "../../assets/SVGs.js";
+import SvgXml from "react-native-svg";
 import IP_ADDRESS from "../../ip.js";
 import * as Storage from "../../AsyncStorage.js";
 import makeThemeStyle from '../../Theme.js';
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
-console.log(API_URL);
 
 const Login = ({ navigation }) => {
   const [username, setUsername] = useState("");
@@ -103,13 +103,18 @@ const Login = ({ navigation }) => {
     }
   };
 
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={[styles.container, theme["background"]]}
       >
-        <Image source={require("../../assets/images/logo.png")} style={styles.logo} />
+        {/* <SvgXml xml={logos['notebookPen.svg']} style={styles.logo} /> */}
+        {/* <SvgXml xml={logos['appTileFinal.svg']} style={styles.logo} /> */}
+        {/* <SvgXml xml={logos['notebook.svg']} style={styles.logo} /> */}
+        {/* <SvgXml xml={logos['pen.svg']} style={styles.logo} /> */}
+        <Image source={require("../../assets/images/notebookPen.png")} style={styles.logo} />
         {errorMessage}
         <TextInput
           style={[styles.input, theme["color"]]}

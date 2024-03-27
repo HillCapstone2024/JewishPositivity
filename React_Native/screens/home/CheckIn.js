@@ -19,8 +19,9 @@ import MediaAccessoryBar from "./MediaBar.js";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import * as FileSystem from "expo-file-system";
-import base64 from "react-native-base64";
 import { Buffer } from "buffer";
+import RNPickerSelect from 'react-native-picker-select';
+
 
 import { Video, ResizeMode, Audio } from "expo-av";
 import makeThemeStyle from "../../Theme.js";
@@ -28,15 +29,17 @@ import * as Storage from "../../AsyncStorage.js";
 import IP_ADDRESS from "../../ip.js";
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
-export default function JournalEntry() {
+export default function JournalEntry({handleCancel, handleSubmitClose}) {
   const [username, setUsername] = useState("");
   const [momentType, setMomentType] = useState(3);
   const [mediaUri, setMediaUri] = useState(null);
   const [mediaBox, setMediaBox] = useState(false);
   const [mediaType, setMediaType] = useState("text");
   const [base64Data, setBase64Data] = useState("");
-  const [journalText, setJournalText] = useState("empty");
+  const [journalText, setJournalText] = useState("");
   const [showMediaBar, setShowMediaBar] = useState(true);
+  const [selectedOption, setSelectedOption] = useState("");
+  const [disableSubmit, setDisableSubmit] = useState(true);
   const mediaAccessoryViewID = "MediaBar";
   const theme = makeThemeStyle();
   const now = new Date();
@@ -53,7 +56,6 @@ export default function JournalEntry() {
   );
   const [sound, setSound] = useState();
   const videoRef = useRef(null);
-  const [status, setStatus] = useState({});
 
   useEffect(() => {
     const loadUsername = async () => {
@@ -107,7 +109,6 @@ export default function JournalEntry() {
       const base64Content = await FileSystem.readAsStringAsync(uri, {
         encoding: FileSystem.EncodingType.Base64,
       });
-      console.log("Base64 content:", base64Content);
       return base64Content;
     } catch (error) {
       console.error("Failed to read file as base64", error);
@@ -115,9 +116,9 @@ export default function JournalEntry() {
     }
   }
 
-    const textToBase64 = (text) => {
-      return Buffer.from(text, "utf8").toString("base64");
-    };
+  const textToBase64 = (text) => {
+    return Buffer.from(text, "utf8").toString("base64");
+  };
 
   const getCsrfToken = async () => {
     try {
@@ -126,17 +127,16 @@ export default function JournalEntry() {
     } catch (error) {
       console.error("Error retrieving CSRF token:", error);
       throw new Error("CSRF token retrieval failed");
-      return "csrfToken retrieval failure";
     }
   };
 
   const submitJournal = async () => {
+    let base64JournalText = "";
     if (mediaType === "text") {
-      const base64JournalText = textToBase64(journalText);
+      base64JournalText = textToBase64(journalText);
       setBase64Data(base64JournalText);
-      console.log("media is text", base64JournalText);
     }
-    console.log("got past", mediaType);
+    console.log("check in type: ", mediaType);
     try {
       const csrfToken = await getCsrfToken();
       const response = await axios.post(
@@ -144,7 +144,7 @@ export default function JournalEntry() {
         {
           username: username,
           moment_number: momentType,
-          content: base64Data,
+          content: mediaType === "text" ? base64JournalText : base64Data,
           content_type: mediaType,
           date: formattedDateTime,
         },
@@ -157,6 +157,10 @@ export default function JournalEntry() {
         }
       );
       console.log("check in response:", response.data);
+      //on successful submit close the page
+      if (handleSubmitClose) {
+        handleSubmitClose(true);
+      }
     } catch (error) {
       console.log(error);
       console.error("Journal Error:", error.response.data);
@@ -166,17 +170,20 @@ export default function JournalEntry() {
   const deleteMedia = () => {
     setMediaUri(null);
     setMediaBox(false);
-    setMediaType("");
+    setMediaType("text");
+    setDisableSubmit(journalText.trim().length === 0);
   };
 
   const handleRecordingComplete = async (uri) => {
     console.log("Received saved from recording bar:", uri);
     setShowMediaBar(true);
-    setMediaBox(true);
     setMediaUri(uri);
     setMediaType("recording");
+    setDisableSubmit(true);
     const base64String = await readFileAsBase64(uri);
     setBase64Data(base64String);
+    setMediaBox(true);
+    setDisableSubmit(false);
   };
 
   const handleMediaComplete = async (mediaProp) => {
@@ -185,9 +192,17 @@ export default function JournalEntry() {
     setMediaType(mediaProp.assets[0].type);
     //sometimes mediaUri state doesn't update before next line
     //pass mediaProp.assets[0].uri directly to fix this
+    setDisableSubmit(true);
     const base64String = await readFileAsBase64(mediaProp.assets[0].uri);
     setBase64Data(base64String);
     setMediaBox(true);
+    setDisableSubmit(false);
+  };
+
+  const handleTextComplete = (text) => {
+    setJournalText(text);
+    console.log(text);
+    setDisableSubmit(text.trim().length === 0);
   };
 
   const handleToggle = (toggle) => {
@@ -195,20 +210,71 @@ export default function JournalEntry() {
     setShowMediaBar(!toggle);
   };
 
+  const handleOptionChange = (itemValue) => {
+    setSelectedOption(itemValue);
+    if (itemValue === "Modeh Ani") {
+      setMomentType(1);
+    } else if (itemValue === "Ashrei") {
+      setMomentType(2);
+    } else if (itemValue === "Shema") {
+      setMomentType(3);
+    }
+  };
+
+
   return (
     <SafeAreaView style={[styles.container, theme["background"]]}>
-      <TextInput
+      {/* View for cancel and submit buttons */}
+      <View style={styles.topBar}>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity onPress={handleCancel}>
+            <View style={styles.buttonContent}>
+              <Ionicons name="caret-back" size={25} color="#4A90E2" />
+              <Text style={styles.cancelText}>Cancel</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        <Text style={styles.title}>Check In</Text>
+
+        <TouchableOpacity
+          disabled={disableSubmit}
+          style={styles.submitButton}
+          onPress={submitJournal}
+        >
+          <Text style={disableSubmit ? styles.submitTextDisabled : styles.submitText}>
+            Submit
+          </Text>
+        </TouchableOpacity>
+      </View>
+      {/* <View style={styles.horizontalBar} /> */}
+      {/* end of cancel/submit section */}
+      {/* <TextInput
         style={[styles.title, theme["color"]]}
         placeholder="Header..."
         placeholderTextColor="grey"
         testID="headerInput"
-      ></TextInput>
+      ></TextInput> */}
       <View
         style={[
           styles.separator,
           { borderBottomColor: theme["color"]["color"] },
         ]}
       />
+      <View style={styles.dropdownContainer}>
+        {/* <Text style={styles.dropdownLabel}>Select a prayer:</Text> */}
+        <RNPickerSelect
+          style={pickerSelectStyles}
+          value={selectedOption}
+          placeholder={{ label: "Modeh Ani", value: "Modeh Ani" }}
+          onValueChange={handleOptionChange}
+          items={[
+            // { label: "Modeh Ani", value: "Modeh Ani" },
+            { label: "Ashrei", value: "Ashrei" },
+            { label: "Shema", value: "Shema" },
+          ]}
+        />
+      </View>
       <Text style={[styles.datetime, theme["color"]]}>
         {" "}
         {formattedDateTime}{" "}
@@ -249,14 +315,6 @@ export default function JournalEntry() {
                   }
                 }}
               />
-              {/* <Button
-                title={status.isPlaying ? "Pause" : "Play"}
-                onPress={() =>
-                  status.isPlaying
-                    ? videoRef.current.pauseAsync()
-                    : videoRef.current.playAsync()
-                }
-              /> */}
               <Text>Video</Text>
             </View>
           ) : (
@@ -264,8 +322,7 @@ export default function JournalEntry() {
               <Button title="Play Sound" onPress={playSound} />
             </View>
           )}
-          {/* )} */}
-          {/* <Image source={{ uri: media }} style={styles.image} /> */}
+
           <TouchableOpacity style={styles.deleteMedia} onPress={deleteMedia}>
             <Ionicons
               name="close-circle"
@@ -285,16 +342,11 @@ export default function JournalEntry() {
             placeholder={"Please type here…"}
             placeholderTextColor={"grey"}
             // value={journalText}
-            onChange={(text) => setJournalText(text)}
+            onChangeText={handleTextComplete}
             multiline
             numberOfLines={4}
             testID="journalInput"
           />
-          <Button 
-            onPress={submitJournal} 
-            title="Submit"
-            testID="submitButton"
-          ></Button>
         </View>
       </ScrollView>
 
@@ -318,28 +370,68 @@ export default function JournalEntry() {
   );
 }
 
+const pickerSelectStyles = StyleSheet.create({
+  inputIOS: {
+    fontSize: 15,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    // borderColor: 'grey',
+    borderRadius: 8,
+    color: 'black',
+    paddingRight: 30,
+    backgroundColor: 'white',
+    width: "1000"
+    // paddingTop: 20, // Adjust padding to move the text down
+  },
+  inputAndroid: {
+    fontSize: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderWidth: 0.5,
+    borderColor: 'grey',
+    borderRadius: 8,
+    color: 'black',
+    paddingRight: 30,
+    backgroundColor: 'white',
+    paddingTop: 20, // Adjust padding to move the text down
+  },
+});
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
   },
+  dropdownContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    // marginBottom: 10,
+    marginTop: 5,
+    // backgroundColor: "green",
+    justifyContent: "space-around",
+    marginBottom: 10,
+  },
+  dropdownLabel: {
+    marginRight: 10,
+    fontSize: 15,
+    paddingLeft: 14,
+    // paddingTop: 10,
+    textAlign: "left",
+  },
+  RPNpicker: {
+    paddingTop: 10,
+  },
   journalInput: {
-    marginTop: 20,
+    marginTop: 10,
     borderRadius: 5,
     padding: 10,
-    color: "white",
+    color: "black",
     height: "100%",
     marginHorizontal: 5,
   },
   scrollingInput: {
     flexGrow: 1,
-  },
-  submitButton: {
-    color: "black",
-    fontSize: "14",
-    backgroundColor: "white",
-    margin: 10,
-    padding: 15,
   },
   mediaContainer: {
     flexDirection: "row",
@@ -377,11 +469,40 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   title: {
-    paddingRight: 10,
-    paddingLeft: 10,
-    paddingTop: 10,
-    fontSize: 40,
+    fontSize: 25,
     fontWeight: "bold",
-    textAlign: "left",
+  },
+  topBar: {
+    flexDirection: "row",
+    marginTop: 10,
+    marginRight: 15,
+    justifyContent: "space-between",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    fontSize: 19,
+  },
+  cancelText: {
+    fontSize: 19,
+    color: "#4A90E2",
+  },
+  submitButton: {},
+  submitText: {
+    color: "#4A90E2",
+    fontSize: 19,
+  },
+  submitTextDisabled: {
+    color: "grey",
+    fontSize: 19,
+  },
+  horizontalBar: {
+    height: 1,
+    backgroundColor: "#ccc",
+    marginTop: 15,
   },
 });

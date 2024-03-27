@@ -4,7 +4,7 @@
     "slug": "React_Native",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/logo.png",
+    "icon": "./assets/images/appTileFinal.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/images/splash.png",
