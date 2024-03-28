@@ -68,7 +68,7 @@ const JournalModal = ({ onClose, onSubmit, visible }) => {
           <TouchableOpacity style={styles.dragIndicator}>
             <View style={styles.dragIndicatorInner} />
           </TouchableOpacity>
-          <View style={[styles.contentContainer, { height: windowHeight * 0.8 }]}>
+          <View style={[styles.contentContainer, { height: windowHeight * 0.9 }]}>
             <CheckIn handleCancel={onClose} handleSubmitClose={onSubmit} />
           </View>
         </Animated.View>
