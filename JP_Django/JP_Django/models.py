@@ -52,11 +52,11 @@ class Checkin(models.Model): #to store checkin moments data
         unique_together = [('moment_number', 'user_id', 'date')]
     
 
-#class Friendship(models.Model): #to store friendship
-    #friendship_id = models.AutoField(primary_key=True) #the autoincremented ID field for friendship
-    #user1 = models.ForeignKey(User,on_delete=models.CASCADE,db_column='id')
-    #user2 = models.ForeignKey(User,on_delete=models.CASCADE,db_column='id')
-    #complete = models.BooleanField(default=False)  # False for pending, True for accepted
-    #class Meta:
+class Friends(models.Model): #to store friendships
+    friendship_id = models.AutoField(primary_key=True) #the autoincremented ID field for friendship
+    user1 = models.ForeignKey(User,on_delete=models.CASCADE,related_name='user1')
+    user2 = models.ForeignKey(User,on_delete=models.CASCADE,related_name='user2')
+    complete = models.BooleanField(default=False)  # False for pending, True for accepted
+    class Meta:
         # Define unique constraint for composite key
-        #unique_together = [('user1', 'user2')]
+        unique_together = [('user1', 'user2')]
