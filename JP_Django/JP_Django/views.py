@@ -498,6 +498,7 @@ def get_checkin_info_view(request): #To be filled out soon
                         "moment_number": checkin.moment_number,
                         "content": base64.b64encode(checkin.content).decode('utf-8'),  #content converted from binary to base64 then to a base 64 string
                         "user_id": checkin.user_id.id,
+                        "date": checkin.date.strftime('%Y-%m-%d'), # Convert date to string to be JSON serializable
                     }
                     response_data.append(current_checkin) #add checkin to the list to be returned
   
