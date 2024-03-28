@@ -31,6 +31,7 @@ LOG_CHECKIN_ID = 'Check-In ID'
 LOG_DATE = 'Date'
 LOG_CONTENT_TYPE = 'Content Type'
 LOG_CONTENT = 'Content'
+LOG_TEXT_ENTRY= 'Text Entry'
 LOG_MOMENT_NUMBER = 'Moment Number'
 LOG_USER_ID = 'User ID'
 
@@ -768,11 +769,11 @@ class GetUserInformationViewTestCase(TestCase):
 class CheckinViewTestCase(TestCase): #to test handling of checkin post for text, photo, video and audio
 
     # Stored as base64 encoded strings
-    text_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64text.txt'))
-    textFile = open(text_file_path, 'r')
-    text = textFile.read()
-    logging.info("TEXT: %s", text)
-    textFile.close()
+    # text_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64text.txt'))
+    # textFile = open(text_file_path, 'r')
+    # text = textFile.read()
+    # logging.info("TEXT: %s", text)
+    # textFile.close()
 
     photo_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64photo.txt'))
     photoFile = open(photo_file_path, 'r')
@@ -848,71 +849,84 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'username': 'testuser1',
         'moment_number': 1,
         'content_type': 'text',
-        'content': text, #fill in with example entry
+        'content': None,
+        #'text_entry': "This is a sample checkin text",
     }
 
     PHOTO_DATA_SUCCESS = {
         'username': 'testuser1',
         'moment_number': 2,
         'content_type': 'photo',
-        'content': photo, #How to pass in photo?
+        'content': photo, 
+        #'text_entry': None,
     }
 
     AUDIO_DATA_SUCCESS = {
         'username': 'testuser1',
         'moment_number': 3,
         'content_type': 'audio',
-        'content': audio, #How to pass in audio?
+        'content': audio, 
+        #'text_entry': None,
+
     }
 
     VIDEO_DATA_SUCCESS = {
         'username': 'testuser2',
         'moment_number': 1,
         'content_type': 'video',
-        'content': video, #How to pass in video?
+        'content': video, 
+        #'text_entry': None,
     }
 
     MISSING_USERNAME = {
         'username': '',
         'moment_number': 2,
         'content_type': 'text',
-        'content': text,
+        'content': None,
+        #'text_entry': 'This is a sample checkin text',
     }
 
     MISSING_MOMENT_NUMBER = {
         'username': 'testuser2',
         'moment_number': None,
         'content_type': 'text',
-        'content': text, 
+        'content': None, 
+        #'text_entry': "This is a sample checkin text",
     }
 
     MISSING_CONTENT_TYPE = { 
         'username': 'testuser3',
         'moment_number': 1,
         'content_type': '',
-        'content': text, 
+        'content': photo, 
+        #'text_entry': "This is a sample checkin text",
     }
         
-    MISSING_CONTENT = {
+    MISSING_CONTENT_AND_TEXT = {
         'username': 'testuser3',
         'moment_number': 2,
         'content_type': 'text',
-        'content': '',
+        'content': None,
+        #'text_entry': None,
     }
 
     INVALID_USERID = { 
         'username': 'admin45678901',
         'moment_number': 1,
         'content_type': 'text',
-        'content': text,
+        'content': None,
+        #'text_entry': "This is a sample checkin text",
     }
 
     DUPLICATE_MOMENT = {
         'username': 'testuser5',
         'moment_number': 1,
-        'content_type': 'text',
-        'content': text,
+        'content_type': 'photo',
+        'content': photo,
+        #'text_entry': "This is a sample checkin text",
     }
+
+    
 
 
     # Set up method to create a test user
@@ -944,6 +958,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         for obj in queryset:
             logging.info(LOG_MSG_FORMAT, LOG_CHECKIN_ID, obj.checkin_id)
             #logging.info(LOG_MSG_FORMAT, LOG_CONTENT, obj.content)
+            #logging.info(LOG_MSG_FORMAT, LOG_TEXT_ENTRY, obj.text_entry)
             logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
             logging.info(LOG_MSG_FORMAT, LOG_MOMENT_NUMBER, obj.moment_number)
             logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
@@ -1016,13 +1031,13 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         # Check if the response status code is 400
         self.assertEqual(response.status_code, 400)
 
-    def test_checkin_failure_missing_content(self): #test of failure due to missing content
+    def test_checkin_failure_missing_content_and_text(self): #test of failure due to missing content
         # logging the test we are in
-        logging.info(("TESTING CHECKIN_failure_missing_content....").upper())
+        logging.info(("TESTING CHECKIN_failure_missing_content_and_text....").upper())
         client = Client()
 
         # Make a POST request to the checkin_view
-        response = client.post(reverse('checkin_view'), data=json.dumps(self.MISSING_CONTENT), content_type=CONTENT_TYPE_JSON)
+        response = client.post(reverse('checkin_view'), data=json.dumps(self.MISSING_CONTENT_AND_TEXT), content_type=CONTENT_TYPE_JSON)
 
         # Check if the response status code is 400
         self.assertEqual(response.status_code, 400)
@@ -1056,11 +1071,11 @@ class GetCheckinsViewTestCase(TestCase): # to test retreving all checkin moments
     
     #MEDIA
     # Stored as base64 encoded strings
-    text_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64text.txt'))
-    textFile = open(text_file_path, 'r')
-    text = textFile.read()
-    logging.info("TEXT: %s", text)
-    textFile.close()
+    # text_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64text.txt'))
+    # textFile = open(text_file_path, 'r')
+    # text = textFile.read()
+    # logging.info("TEXT: %s", text)
+    # textFile.close()
 
     photo_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64photo.txt'))
     photoFile = open(photo_file_path, 'r')
@@ -1106,29 +1121,41 @@ class GetCheckinsViewTestCase(TestCase): # to test retreving all checkin moments
         'username': 'testuser1',
         'moment_number': 1,
         'content_type': 'text',
-        'content': text, #fill in with example entry
+        'content': None, #fill in with example entry
+        #'text_entry': "This is a sample checkin text",
     }
 
     PHOTO_DATA_SUCCESS = {
         'username': 'testuser1',
         'moment_number': 2,
         'content_type': 'photo',
-        'content': photo, #How to pass in photo?
+        'content': photo, 
+        #'text_entry': None,
     }
 
     AUDIO_DATA_SUCCESS = {
         'username': 'testuser1',
         'moment_number': 3,
         'content_type': 'audio',
-        'content': audio, #How to pass in audio?
+        'content': audio, 
+        #'text_entry': None,
     }
 
     VIDEO_DATA_SUCCESS = {
         'username': 'testuser2',
         'moment_number': 1,
         'content_type': 'video',
-        'content': video, #How to pass in video?
+        'content': video, 
+        #'text_entry': None,
     }
+
+    #BOTH_TEXT_AND_MEDIA_SUCCESS = {
+    #     'username': 'testuser2',
+    #     'moment_number': 1,
+    #     'content_type': 'video',
+    #     'content': photo, 
+    #     #'text_entry': "text sample to get",
+    # }
 
     def setUp(self):
         # Initialize the Django test client
@@ -1141,6 +1168,7 @@ class GetCheckinsViewTestCase(TestCase): # to test retreving all checkin moments
         client.post(reverse('checkin_view'), data=json.dumps(self.AUDIO_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON) # one for each moment type
         client.post(reverse('checkin_view'), data=json.dumps(self.TEXT_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
         client.post(reverse('checkin_view'), data=json.dumps(self.VIDEO_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
+        #client.post(reverse('checkin_view'), data=json.dumps(self.BOTH_TEXT_AND_MEDIA_SUCCESS), content_type=CONTENT_TYPE_JSON)
 
 
     def test_get_checkins_success(self):# Successfully retrieves a valid user's checkins from the database
@@ -1163,6 +1191,7 @@ class GetCheckinsViewTestCase(TestCase): # to test retreving all checkin moments
         for obj in queryset:
             logging.info(LOG_MSG_FORMAT, LOG_CHECKIN_ID, obj.checkin_id)
             #logging.info(LOG_MSG_FORMAT, LOG_CONTENT, obj.content)
+            #logging.info(LOG_MSG_FORMAT, LOG_TEXT_ENTRY, obj.text_entry)
             logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
             logging.info(LOG_MSG_FORMAT, LOG_MOMENT_NUMBER, obj.moment_number)
             logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
@@ -1187,6 +1216,7 @@ class GetCheckinsViewTestCase(TestCase): # to test retreving all checkin moments
         for obj in queryset:
             logging.info(LOG_MSG_FORMAT, LOG_CHECKIN_ID, obj.checkin_id)
             #logging.info(LOG_MSG_FORMAT, LOG_CONTENT, obj.content)
+            #logging.info(LOG_MSG_FORMAT, LOG_TEXT_ENTRY, obj.text_entry)
             logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
             logging.info(LOG_MSG_FORMAT, LOG_MOMENT_NUMBER, obj.moment_number)
             logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)

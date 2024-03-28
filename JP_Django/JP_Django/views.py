@@ -55,11 +55,11 @@ def validate_email_format(email):  # To validate email format
 
 def validate_data(data):
     # Identify keys in the data that do not have integer values or are None
-    non_integer_keys = [key for key, value in data.items() if not isinstance(value, (int, type(None)))]
-    logging.info("NON-INTEGER KEYS: %s", non_integer_keys)
+    non_integer_keys = [key for key, value in data.items() if not isinstance(value, int)] 
+    logging.info("NON-INTEGER KEYS: %s", non_integer_keys) # includes nonetypes
 
     # Check for missing or empty required fields in the POST data
-    missing_keys = [key for key in non_integer_keys if not data.get(key)]
+    missing_keys = [key for key in non_integer_keys if key not in ("content") and not data.get(key)] #***add: , "text_entry" into parenthesis to exclude also****
     logging.info("Missing keys: %s", missing_keys)
 
     # Return an error response if there are missing keys
@@ -429,12 +429,18 @@ def create_checkin(user, data):
     # Create a check-in record in the database
     try:
         # Decode the base64 encoded content
-        content_binary_encoded = base64.b64decode(data["content"])
-        # Create the checkin object and save it to the database
+        content_binary_encoded=None #default No Media
+        if data["content"] is not None: # if there is media decode it and save it
+            content_binary_encoded = base64.b64decode(data["content"])
+        # else: 
+        #     if data["text_entry"] is None: #Content is None, so is text, this is an error
+        #         return HttpResponse('No Text or Media submitted', status=400)
+            # Create the checkin object and save it to the database
         checkin = Checkin.objects.create(
             user_id=user,
             moment_number=data["moment_number"],
-            content=content_binary_encoded,
+            content=content_binary_encoded, #can be text or none
+            #text_entry=data["text_entry"], #can be text or none
             content_type=data["content_type"],
             date=date.today()
         )
@@ -456,7 +462,7 @@ def checkin_view(request):
     data = json.loads(request.body)
     
     # Validate the POST data
-    error_response = validate_data(data)
+    error_response = validate_data(data) #allows content and text entry to be none type and pass through without error
     if error_response:
         return error_response
 
@@ -464,6 +470,7 @@ def checkin_view(request):
     user, error_response = get_user(data["username"])
     if error_response:
         return error_response
+    logging.info("Retrieved user in checkin view")
 
     # Create the check-in record
     return create_checkin(user, data)

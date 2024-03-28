@@ -43,8 +43,9 @@ class Checkin(models.Model): #to store checkin moments data
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_column='id')  #referencing id of user model 
     date = models.DateField() 
     moment_number = models.IntegerField() #should be 1,2, or 3
-    content_type = models.CharField(max_length=100) #either of following option: photo, text, audio, video
-    content = models.BinaryField() #actual content
+    content_type = models.CharField(max_length=100) #either of following option: photo, audio, video
+    #text_entry= models.CharField(null=True) 
+    #content = models.BinaryField(null=True) #actual content
 
     class Meta:
         # Define unique constraint for composite key
