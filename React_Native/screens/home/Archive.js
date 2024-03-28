@@ -66,78 +66,217 @@ export default function Archive({ navigaton }) {
   };
 
   const renderContent = (data) => {
-  switch (data.content_type) {
-    case "image":
-      return (
-        <View style={styles.contentContainer}>
-          <View style={styles.imageContainer}>
-            <Image
-              style={styles.image}
-              source={{ uri: `data:image/jpeg;base64,${data.content}` }}
-            />
-          </View>
-          <Text style={styles.text}>Moment number: {data.moment_number}</Text>
-        </View>
-      );
-
-    case "video":
-      return (
-        <View style={styles.contentContainer}>
-          <View style={styles.videoContainer}>
-            <Video
-              style={styles.video}
-              source={{ uri: `data:video/mp4;base64,${data.content}` }}
-              useNativeControls
-              resizeMode="contain"
-            />
-          </View>
-          <Text style={styles.text}>Video</Text>
-        </View>
-      );
-
-    case "text":
-      return (
-        <View style={styles.contentContainer}>
-          <View style={styles.textContainer}>
-            <Text style={styles.text}>{decodeBase64ToText(data.content)}</Text>
-          </View>
-        </View>
-      );
-
-    case "recording":
-    // For audio, setup is more complex and requires loading the sound
-    // This is a placeholder - see expo-av documentation for playing audio
-      return (
+    let checkInText = "";
+    switch (data.moment_number) {
+      case 1:
+        checkInText = "Modeh Ani";
+        break;
+      case 2:
+        checkInText = "Ashrei";
+        break;
+      case 3:
+        checkInText = "Shema";
+        break;
+      default:
+        checkInText = "Unknown Check-in";
+        break;
+    }
+    
+    switch (data.content_type) {
+      case "image":
+        return (
           <View style={styles.contentContainer}>
-              <View style={styles.recordingContainer}>
-                  <Text style={styles.text}>Recording</Text>
+            <View style={{flexDirection: 'row'}}>
+              {/* Datetime section */}
+              <View style={styles.datetimeContainer}>
+                <Text style={[styles.text, styles.dayOfWeekText]}>
+                  Tue
+                  {/* {moment(data.date).format('dddd')} */}
+                  </Text>
+                <Text style={[styles.text, styles.dayNumberText]}>
+                  28
+                  {/* {moment(data.date).format('D')} */}
+                  </Text>
+                <Text style={styles.text}>
+                  10:30 PM
+                  {/* {moment(data.date).format('h:mm A')} */}
+                  </Text>
               </View>
+              <View style={styles.divider} />
+              {/* Content section */}
+              <View style={styles.contentSection}>
+                <View style={styles.middleContent}>
+                <Text style={styles.middleContentHeader} numberOfLines={1} ellipsizeMode="tail">Header would go here {/* data.header */}</Text>
+                  <Text style={styles.middleContentMoment_Number}>{checkInText}</Text>
+                  <Text style={styles.middleContentText} numberOfLines={3} ellipsizeMode="tail">{/* data.content */}This is some long content text that will be truncated if it takes up too much space in the container.</Text>
+                </View>
+              </View>
+              {/* Image content */}
+              <View style={styles.imageContainer}>
+                <Image
+                  style={styles.image}
+                  source={{ uri: `data:image/jpeg;base64,${data.content}` }}
+                />
+              </View>
+            </View>
           </View>
-      );
-
-    default:
-      return (
-        <View style={styles.contentContainer}>
-          <View style={styles.unsupportedContainer}>
-            <Text style={styles.text}>Unsupported content type</Text>
+        );
+  
+      case "video":
+        return (
+          <View style={styles.contentContainer}>
+            <View style={{flexDirection: 'row'}}>
+              {/* Datetime section */}
+              <View style={styles.datetimeContainer}>
+                <Text style={[styles.text, styles.dayOfWeekText]}>
+                  Tue
+                  {/* {moment(data.date).format('dddd')} */}
+                  </Text>
+                <Text style={[styles.text, styles.dayNumberText]}>
+                  28
+                  {/* {moment(data.date).format('D')} */}
+                  </Text>
+                <Text style={styles.text}>
+                  10:30 PM
+                  {/* {moment(data.date).format('h:mm A')} */}
+                  </Text>
+              </View>
+              <View style={styles.divider} />
+              {/* Content section */}
+              <View style={[styles.contentSection, { flex: 3.05 }]}>
+                <View style={styles.middleContent}>
+                <Text style={styles.middleContentHeader} numberOfLines={1} ellipsizeMode="tail">Header would go here {/* data.header */}</Text>
+                  <Text style={styles.middleContentMoment_Number}>{checkInText}</Text>
+                  <Text style={styles.middleContentText} numberOfLines={3} ellipsizeMode="tail">{decodeBase64ToText(data.content)}</Text>
+                </View>
+              </View>
+              {/* Video Section */}
+              <View style={styles.videoContainer}>
+                <Video
+                  style={styles.video}
+                  source={{ uri: `data:video/mp4;base64,${data.content}` }}
+                  useNativeControls
+                  resizeMode="contain"
+                />
+              </View>
+            </View>
           </View>
-        </View>
-      );
-  }
-};
-
+        );
+  
+      case "text":
+        return (
+          <View style={styles.contentContainer}>
+            <View style={{flexDirection: 'row'}}>
+              {/* Datetime section */}
+              <View style={styles.datetimeContainer}>
+                <Text style={[styles.text, styles.dayOfWeekText]}>
+                  Tue
+                  {/* {moment(data.date).format('dddd')} */}
+                  </Text>
+                <Text style={[styles.text, styles.dayNumberText]}>
+                  28
+                  {/* {moment(data.date).format('D')} */}
+                  </Text>
+                <Text style={styles.text}>
+                  10:30 PM
+                  {/* {moment(data.date).format('h:mm A')} */}
+                  </Text>
+              </View>
+              <View style={styles.divider} />
+              {/* Content section */}
+              <View style={[styles.contentSection, { flex: 3.05 }]}>
+                <View style={styles.middleContent}>
+                <Text style={styles.middleContentHeader} numberOfLines={1} ellipsizeMode="tail">Header would go here {/* data.header */}</Text>
+                  <Text style={styles.middleContentMoment_Number}>{checkInText}</Text>
+                  <Text style={styles.middleContentText} numberOfLines={3} ellipsizeMode="tail">{decodeBase64ToText(data.content)}</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        );
+  
+      case "recording":
+        // For audio, setup is more complex and requires loading the sound
+        // This is a placeholder - see expo-av documentation for playing audio
+        return (
+          <View style={styles.contentContainer}>
+            <View style={{flexDirection: 'row'}}>
+              {/* Datetime section */}
+              <View style={styles.datetimeContainer}>
+                <Text style={[styles.text, styles.dayOfWeekText]}>
+                  Tue
+                  {/* {moment(data.date).format('dddd')} */}
+                  </Text>
+                <Text style={[styles.text, styles.dayNumberText]}>
+                  28
+                  {/* {moment(data.date).format('D')} */}
+                  </Text>
+                <Text style={styles.text}>
+                  10:30 PM
+                  {/* {moment(data.date).format('h:mm A')} */}
+                  </Text>
+              </View>
+              <View style={styles.divider} />
+              {/* Content section */}
+              <View style={[styles.contentSection, { flex: 3.05 }]}>
+                <View style={styles.middleContent}>
+                <Text style={styles.middleContentHeader} numberOfLines={1} ellipsizeMode="tail">Header would go here {/* data.header */}</Text>
+                  <Text style={styles.middleContentMoment_Number}>{checkInText}</Text>
+                  <Text style={styles.middleContentText} numberOfLines={3} ellipsizeMode="tail">{decodeBase64ToText(data.content)}</Text>
+                </View>
+              </View>
+              {/* Audio Section */}
+              <View style={styles.contentSection}>
+                <View style={styles.recordingContainer}>
+                  <Text style={styles.text}>Recording</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        );
+  
+      default:
+        return (
+          <View style={styles.contentContainer}>
+            <View style={{flexDirection: 'row'}}>
+              <View style={styles.datetimeContainer}>
+                <Text style={[styles.text, styles.dayOfWeekText]}>
+                  Tue
+                  {/* {moment(data.date).format('dddd')} */}
+                  </Text>
+                <Text style={[styles.text, styles.dayNumberText]}>
+                  28
+                  {/* {moment(data.date).format('D')} */}
+                  </Text>
+                <Text style={styles.text}>
+                  10:30 PM
+                  {/* {moment(data.date).format('h:mm A')} */}
+                  </Text>
+              </View>
+              <View style={styles.divider} />
+              <View style={styles.contentSection}>
+                <View style={styles.unsupportedContainer}>
+                  <Text style={styles.text}>Unsupported content type</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        );
+    }
+  };
+  
   useEffect(() => {
     if (entries.length == 0) {
       setMessage(<Text style={[styles.title, theme['color']]}>No entries yet!</Text>);
     }
   }, []);
-
+  
   return (
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <View style={[{ alignItems: "center", justifyContent: "center" }, theme["background"]]}>
           {entries.map((item, index) => (
-            <View key={index} style={{ margin: 10 }}>
+            <View key={index}>
               {renderContent(item)}
             </View>
           ))}
@@ -148,44 +287,96 @@ export default function Archive({ navigaton }) {
       </ScrollView>
     </View>
   );
-}
-
-function getWidth() {
+  }
+  
+  function getWidth() {
   let width = Dimensions.get("window").width;
-
-  return width = width - 50;;
-}
-
+  
+  return width = width - 25;;
+  }
+  
 const styles = StyleSheet.create({
   scrollViewContent: {
-    flexGrow: 1,
+  flexGrow: 1,
   },
   contentContainer: {
-    marginBottom: 20,
+    minHeight: 100,
+    maxHeight: 100,
+    marginTop: 10,
+    padding: 5,
     alignItems: 'center',
     width: getWidth(), // Adjust the width as desired
     alignSelf: 'center', // Center the content horizontally
-    borderWidth: 1,
+    borderWidth: .17,
     borderColor: 'black',
-    borderRadius: 10,
-    padding: 10,
-    minHeight: 150, // Adjust the height as desired
+    borderRadius: 5, 
+    backgroundColor: '#f2f2f2',
+    shadowColor: '#4A90E2', // Updated shadow color
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  datetimeContainer: {
+    flex: 1,
+    height: 90, //height = maxheight(100) - padding(5)
+    justifyContent: 'center', 
+    alignItems: 'center', 
+  },
+  divider: {
+    width: 2,
+    backgroundColor: 'grey', 
+  },
+  contentSection: {
+    flex: 2,
+    paddingLeft: 10,
   },
   image: {
-    width: '100%', // Take up the entire width of the container
-    aspectRatio: 1, // Maintain aspect ratio
+    height: '100%', 
+    aspectRatio: 1, 
+    borderRadius: 5,
   },
   video: {
-    width: '100%', // Take up the entire width of the container
-    aspectRatio: 1, // Maintain aspect ratio
+    height: '100%',
+    aspectRatio: 1,
+    borderRadius: 5,
   },
   text: {
     fontSize: 16,
+  },
+  dayOfWeekText: {
+    fontSize: 18,
+    textTransform: 'uppercase',
+    letterSpacing: 1.25,
+  },
+  dayNumberText: {
+    fontSize: 24,
+    fontWeight: 500,
+    paddingBottom: 5,
   },
   title: {
     fontSize: 30,
     fontWeight: "bold",
     marginBottom: 20,
     color: "white",
+  },
+  middleContent: {
+    flex: 1,
+    paddingBottom: 10,
+  },
+  middleContentHeader: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  middleContentMoment_Number: {
+    fontSize: 10,
+    fontStyle: 'italic',
+    marginBottom: 5,
+  },
+  middleContentText: {
+    fontSize: 13,
   },
 });
