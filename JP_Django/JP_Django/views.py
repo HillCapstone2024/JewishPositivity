@@ -59,7 +59,7 @@ def validate_data(data):
     logging.info("NON-INTEGER KEYS: %s", non_integer_keys) # includes nonetypes
 
     # Check for missing or empty required fields in the POST data
-    missing_keys = [key for key in non_integer_keys if key not in ("content") and not data.get(key)] #***add: , "text_entry" into parenthesis to exclude also****
+    missing_keys = [key for key in non_integer_keys if key not in ("content","text_entry") and not data.get(key)] #allow content and text to be missing
     logging.info("Missing keys: %s", missing_keys)
 
     # Return an error response if there are missing keys
@@ -432,15 +432,15 @@ def create_checkin(user, data):
         content_binary_encoded=None #default No Media
         if data["content"] is not None: # if there is media decode it and save it
             content_binary_encoded = base64.b64decode(data["content"])
-        # else: 
-        #     if data["text_entry"] is None: #Content is None, so is text, this is an error
-        #         return HttpResponse('No Text or Media submitted', status=400)
+        else: 
+            if data["text_entry"] is None: #Content is None, so is text, this is an error
+                return HttpResponse('No Text or Media submitted', status=400)
             # Create the checkin object and save it to the database
         checkin = Checkin.objects.create(
             user_id=user,
             moment_number=data["moment_number"],
             content=content_binary_encoded, #can be text or none
-            #text_entry=data["text_entry"], #can be text or none
+            text_entry=data["text_entry"], #can be text or none
             content_type=data["content_type"],
             date=date.today()
         )
@@ -492,11 +492,20 @@ def get_checkin_info_view(request): #To be filled out soon
                 response_data=[] #List of dictionaries holding all checkin moments of the user
 
                 for checkin in all_checkins: # looping through checkins for user specified
+                    obj_content= None #default if empty
+                    obj_text= None
+
+                    if checkin.content is not None: #get content if not None
+                        obj_content= base64.b64encode(checkin.content).decode('utf-8')
+                    if checkin.text_entry is not None:#get text if not None
+                        obj_text= checkin.text_entry
+                    
                     current_checkin = { # dictionary to append to list
                         "checkin_id": checkin.checkin_id,
                         "content_type": checkin.content_type,
                         "moment_number": checkin.moment_number,
-                        "content": base64.b64encode(checkin.content).decode('utf-8'),  #content converted from binary to base64 then to a base 64 string
+                        "content": obj_content,  #content converted from binary to base64 then to a base 64 string, or None
+                        "text_entry": obj_text,
                         "user_id": checkin.user_id.id,
                         "date": checkin.date.strftime('%Y-%m-%d'), # Convert date to string to be JSON serializable
                     }
