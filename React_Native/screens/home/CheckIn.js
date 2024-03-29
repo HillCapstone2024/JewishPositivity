@@ -312,10 +312,9 @@ export default function JournalEntry({handleCancel, handleSubmitClose}) {
       {/* Media Box Below */}
       {mediaBox ? (
         <View style={styles.mediaContainer}>
-          <View style={styles.mediaContainerUpper}>
             {mediaType === "image" ? (
-              <ImageViewer source={mediaUri} />
-            ) : mediaType === "video" ? (
+              <ImageViewer source={mediaUri} onDelete={deleteMedia} />
+            ) : (mediaType === "video" ? (
               <Video
                 source={{ uri: mediaUri }}
                 playsInSilentModeIOS={true}
@@ -348,16 +347,15 @@ export default function JournalEntry({handleCancel, handleSubmitClose}) {
               <View style={styles.container}>
                 <Button title="Play Sound" onPress={playSound} />
               </View>
-            )}
+            ))}
 
-            <TouchableOpacity style={styles.deleteMedia} onPress={deleteMedia}>
+            {/* <TouchableOpacity style={styles.deleteMedia} onPress={deleteMedia}>
               <Ionicons
                 name="close-circle"
                 size={25}
                 color={theme["color"]["color"]}
               />
-            </TouchableOpacity>
-          </View>
+            </TouchableOpacity> */}
 
           <ProgressBar />
         </View>
@@ -439,7 +437,7 @@ const ProgressBar = () => {
 
 const stylesProgressBar = StyleSheet.create({
   container: {
-    height: 10, // Set a fixed height for the container
+    height: 5, // Set a fixed height for the container
     backgroundColor: "white", // Background color for the progress bar container
     width: "100%", // Make sure the container takes up 100% of its parent's width
     borderRadius: 5,
@@ -447,6 +445,8 @@ const stylesProgressBar = StyleSheet.create({
   progressBar: {
     height: "100%", // The progress bar should fill the container height
     backgroundColor: "blue", // Background color for the progress bar itself
+    borderBottomEndRadius: 5,
+    borderBottomStartRadius: 5,
   },
 });
 
@@ -520,26 +520,26 @@ const styles = StyleSheet.create({
     // backgroundColor: 'red'
   },
   mediaContainer: {
-    backgroundColor: "white",
+    // backgroundColor: "pink",
     // alignItems: "center",
     // paddingHorizontal: 10,
-    paddingTop: 5,
+    // paddingTop: 5,
     marginTop: 10,
     // borderRadius: 5,
-    marginHorizontal: 0,
     marginHorizontal: 10,
+    width: 60,
   },
   mediaContainerUpper: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    // flexDirection: "row",
+    // justifyContent: "space-between",
+    // alignItems: "center",
     // backgroundColor: "red",
-    marginBottom: 5,
-    paddingHorizontal: 10,
+    // marginBottom: 5,
+    // paddingHorizontal: 10,
   },
   image: {
-    width: 45,
-    height: 45,
+    width: 50,
+    height: 50,
     marginTop: 20,
     backgroundColor: "black",
     // flex: 1,

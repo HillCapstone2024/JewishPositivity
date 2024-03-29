@@ -36,17 +36,13 @@ export default function MediaAccessoryBar({ mediaProp, toggleRecording }) {
         const keyboardDidShowListener = Keyboard.addListener(
         "keyboardDidShow",
         (e) => {
-            console.log("keyboard activated");
             setKeyboardHeight(e.endCoordinates.height);
-            console.log(e.endCoordinates.height);
             }
         );
         const keyboardDidHideListener = Keyboard.addListener(
             "keyboardDidHide",
             () => {
-            console.log("keyboard hidden");
             setKeyboardHeight(0);
-            console.log(keyboardHeight);
             }
         );
 
