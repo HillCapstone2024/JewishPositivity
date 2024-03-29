@@ -146,8 +146,9 @@ export default function JournalEntry({handleCancel, handleSubmitClose}) {
         {
           username: username,
           moment_number: momentType,
-          content: mediaType === "text" ? base64JournalText : base64Data,
+          content: base64Data,
           content_type: mediaType,
+          text_entry: journalText,
           date: formattedDateTime,
         },
         {
