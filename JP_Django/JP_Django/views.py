@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
 from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
-from JP_Django.models import Checkin
+from JP_Django.models import Checkin, Friends
 from django.middleware.csrf import get_token
 from django.http import JsonResponse
 from django.core.validators import validate_email
@@ -558,3 +558,74 @@ def send_report_email_view(request):
     except Exception as e:
         logging.error("Error sending email: %s", e)
         return JsonResponse({"status": 400})
+
+
+# ########## Friends Management ##########
+
+
+
+# ########## Friends Management ##########
+    
+def add_friend_view(request):
+    logging.info("IN ADD FRIEND VIEW")
+    if request.method == "POST":
+        # Retrieving username to access correct user in database
+        data = json.loads(request.body)
+        username1 = data.get("user1")
+        username2 = data.get("user2")
+        logging.info("USERNAME1: %s, USERNAME2: %s", username1, username2)
+
+        try:
+            # Check if both users exist
+            user1 = User.objects.get(username=username1)  # Retrieving user from the database
+            user2 = User.objects.get(username=username2)
+            logging.info("Users found")
+
+            # Get the user IDs
+            logging.info("Getting user ids")
+            user1_id = user1.pk
+            user2_id = user2.pk
+            logging.info("User1_id: %s, User2_id: %s", user1_id, user2_id)
+
+            # Check if a connection already exists
+            logging.info("Checking for existing connection")
+            outgoing = Friends.objects.filter(user1=user1_id, user2=user2_id) # outgoing friend request
+            incoming = Friends.objects.filter(user1=user2_id, user2=user1_id) # incoming friend request
+            if outgoing.exists():
+                # Already friends
+                if outgoing[0].complete:
+                    logging.info("Friendship already exists")
+                    return HttpResponse("Friendship already exists", status=400)
+                # Already sent a friend request
+                else:
+                    logging.info("Friend request already sent")
+                    return HttpResponse("Friend request already sent", status=400)
+            if incoming.exists():
+                # Already friends
+                if incoming[0].complete:
+                    logging.info("Friendship already exists")
+                    return HttpResponse("Friendship already exists", status=400)
+                # Accept the friend request
+                else:
+                    logging.info("Accepting friend request")
+                    # Make new object to update Friends successfully
+                    friend_request = incoming[0]
+                    friend_request.complete = True
+                    friend_request.save()
+                    response_data = {"message": "Success! Friend request accepted!"}
+                    return HttpResponse(json.dumps(response_data), content_type="application/json")
+            logging.info("No existing connection found")
+            # If no previous history with user2, create brand new friendship
+            friends = Friends.objects.create(
+                user1=user1,
+                user2=user2,
+                complete=False,
+            )
+            logging.info("Friends object created")
+            response_data = {"message": "Success! Friend request sent!"}
+            return HttpResponse(json.dumps(response_data), content_type="application/json")
+        except User.DoesNotExist:
+            return HttpResponse("User not found", status=400)
+        except Exception as e:
+            return HttpResponse("Adding friend failed: " + str(e), status=400)
+    return HttpResponse(constNotPost)

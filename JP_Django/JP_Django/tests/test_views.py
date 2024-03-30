@@ -1,9 +1,8 @@
 from django.test import TestCase, Client  #Client class to simulate HTTP requests
 from django.urls import reverse #reverse allows you to generate URLs for Django views by providing the view name
-from JP_Django.views import create_user_view
 import datetime
 import json
-from JP_Django.models import User, Checkin #import model to access printing users in the test DB
+from JP_Django.models import User, Checkin, Friends #import model to access printing users in the test DB
 import logging
 import os
 
@@ -1208,7 +1207,123 @@ class GetCheckinsViewTestCase(TestCase): # to test retreving all checkin moments
             logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.user_id)
             logging.info('')   
 
+class AddFriendViewTestCase(TestCase): #to test adding friends to user's friend list
 
+    # Define constant user data
+    USER1_DATA = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
 
+    USER2_DATA = {
+        'username': 'testuser2',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test2@example.com',
+        'timezone': 'EST',
+    }
 
-    
+    ADD_FRIEND_DATA = {
+        'user1': 'testuser1',
+        'user2': 'testuser2',
+    }
+
+    ACCEPT_FRIEND_DATA = {
+        'user1': 'testuser2',
+        'user2': 'testuser1',
+    }
+
+    ADD_FRIEND_DATA_FAIL = {
+        'user1': 'testuser1',
+        'user2': 'doesnotexist',
+    }
+
+    def setUp(self):
+        logging.info("---------------SETTING UP ADDFRIENDVIEWTESTCASE--------------".upper())
+        # Initialize the Django test client
+        client = Client()
+
+        # Make a POST request to create test users and checkins
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)# make three users
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER2_DATA), content_type=CONTENT_TYPE_JSON)
+
+    def test_add_friend_request_success(self): # Successfully sends a friend request
+        logging.info("***************test_add_friend_request_success**************".upper())
+        client = Client()
+
+        # Send POST request to add_friend_view
+        response = client.post(reverse('add_friend_view'), data=json.dumps(self.ADD_FRIEND_DATA), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 200 -- success
+        self.assertEqual(response.status_code, 200)
+
+    def test_add_friend_request_failure_DNE(self): # Fails to make a friend request, user2 does not exist
+        logging.info("***************test_add_friend_request_failure_DNE**************".upper())
+        client = Client()
+
+        # Send POST request to add_friend_view
+        response = client.post(reverse('add_friend_view'), data=json.dumps(self.ADD_FRIEND_DATA_FAIL), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 400 -- failure
+        self.assertEqual(response.status_code, 400)
+
+    def test_accept_friend_request_success(self): # Successfully accepts a friend request
+        logging.info("***************test_accept_friend_request_success**************".upper())
+        client = Client()
+
+        # Send POST request to add_friend_view to send initial friend request
+        friend_request = client.post(reverse('add_friend_view'), data=json.dumps(self.ADD_FRIEND_DATA), content_type=CONTENT_TYPE_JSON)
+
+        # Check if friend_request status code is 200 -- sent successfully
+        self.assertEqual(friend_request.status_code, 200)
+
+        # Send POST request to add_friend_view to accept the friend request
+        response = client.post(reverse('add_friend_view'), data=json.dumps(self.ACCEPT_FRIEND_DATA), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 200 -- accepted successfully
+        self.assertEqual(response.status_code, 200)
+
+    def test_add_friend_request_failure_exists(self): # Fails to make a friend request, friendship already exists
+        logging.info("***************test_add_friend_request_failure_exists**************".upper())
+        client = Client()
+
+        # Send POST request to add_friend_view to send initial friend request
+        friend_request = client.post(reverse('add_friend_view'), data=json.dumps(self.ADD_FRIEND_DATA), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 200 -- request sent successfully
+        self.assertEqual(friend_request.status_code, 200)
+
+        # Send POST request to add_friend_view to accept the friend request
+        accept_request = client.post(reverse('add_friend_view'), data=json.dumps(self.ACCEPT_FRIEND_DATA), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 200 -- accepted successfully
+        self.assertEqual(accept_request.status_code, 200)
+
+        # Send POST request to add_friend_view to send the same friend request again
+        response = client.post(reverse('add_friend_view'), data=json.dumps(self.ADD_FRIEND_DATA), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 400 -- failure due to relationship already existing
+        self.assertEqual(response.status_code, 400)
+
+    def test_add_friend_request_failure_duplicate(self): # Fails to make a friend request, already sent the friend request
+        logging.info("***************test_add_friend_request_failure_duplicate**************".upper())
+        client = Client()
+
+        # Send POST request to add_friend_view to send initial friend request
+        response1 = client.post(reverse('add_friend_view'), data=json.dumps(self.ADD_FRIEND_DATA), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 200 -- sends friend request successfully
+        self.assertEqual(response1.status_code, 200)
+        
+        # Send POST request to add_friend_view to send the same friend request again
+        response2 = client.post(reverse('add_friend_view'), data=json.dumps(self.ADD_FRIEND_DATA), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 400 -- failure due to sending friend request twice
+        self.assertEqual(response2.status_code, 400)
