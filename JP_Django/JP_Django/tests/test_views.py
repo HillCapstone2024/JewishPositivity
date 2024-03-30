@@ -1327,3 +1327,70 @@ class AddFriendViewTestCase(TestCase): #to test adding friends to user's friend 
 
         # Check if response status code is 400 -- failure due to sending friend request twice
         self.assertEqual(response2.status_code, 400)
+class DeleteFriendViewTestCase(TestCase):  # To test deleting friends from the user's friend list
+
+    # Define constant user data
+    USER1_DATA = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+    USER2_DATA = {
+        'username': 'testuser2',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test2@example.com',
+        'timezone': 'EST',
+    }
+
+
+    DELETE_FRIEND_DATA_SUCCESS = {
+    'username': 'testuser1',
+    'unfriendusername': 'testuser2',  
+    }
+
+    DELETE_FRIEND_DATA_FAILURE = {
+    'username': 'testuser1',
+    'unfriendusername': 'nonexistinguser'  
+    }
+
+    def setUp(self):
+        logging.info("Setting up DeleteFriendViewTestCase")
+        self.client = Client()
+
+        # Create test users
+        self.client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)
+        self.client.post(reverse('create_user_view'), data=json.dumps(self.USER2_DATA), content_type=CONTENT_TYPE_JSON)
+
+        # Send a friend request
+        self.client.post(reverse('add_friend_view'), data=json.dumps({
+            'user1': 'testuser1',
+            'user2': 'testuser2'
+        }), content_type=CONTENT_TYPE_JSON)
+
+        # Update the database in  to accept the friend request
+        Friends.objects.filter(user1__username='testuser1', user2__username='testuser2').update(complete=True)
+
+
+    def test_delete_friend_success(self):
+        logging.info("***************test_delete_friend_success**************".upper())
+        # Delete the friend relationship
+        response = self.client.post(reverse('delete_friend_view'), data=json.dumps(self.DELETE_FRIEND_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 200 -- success
+        self.assertEqual(response.status_code, 200)
+
+    def test_delete_friend_failure(self):
+        logging.info("***************test_delete_friend_failure**************".upper())
+        # Attempt to delete a non-existing friend relationship
+        response = self.client.post(reverse('delete_friend_view'), data=json.dumps(self.DELETE_FRIEND_DATA_FAILURE), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 400 -- failure
+        self.assertEqual(response.status_code, 400)

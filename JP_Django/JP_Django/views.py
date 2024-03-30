@@ -20,6 +20,7 @@ from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.db import models
 import base64
+from django.db.models import Q
 
 # ########## Configuration & Constants ##########
 
@@ -631,7 +632,38 @@ def add_friend_view(request):
     return HttpResponse(constNotPost)
 
 
+def delete_friend_view(request):
+    if request.method == "POST":
+        # Retrieve usernames from POST request
+        data = json.loads(request.body)
+        username1 = data.get("username")
+        unfriend_username = data.get("unfriendusername")
 
+        try:
+            # Getting users from the user objects from the user table
+            user1 = User.objects.get(username=username1)
+            unfriend_user = User.objects.get(username=unfriend_username)
+
+            # Query an "or" since both columns since either column can have the usernames
+            friendship = Friends.objects.filter(
+                (Q(user1=user1) & Q(user2=unfriend_user)) |
+                (Q(user1=unfriend_user) & Q(user2=user1)),
+                complete=True  # Ensure they are actually friends
+            )
+
+            # Delete the friendship if it exists
+            if friendship.exists():
+                friendship.delete()
+                return HttpResponse("Friendship deleted successfully", status=200)
+            else:
+                return HttpResponse("Friendship does not exist", status=400)
+
+        except User.DoesNotExist:
+            return HttpResponse("User not found", status=400)
+        except Exception as e:
+            return HttpResponse("Error deleting friend: " + str(e), status=400)
+
+    return HttpResponse("Invalid request method", status=400)
 
 
 def get_friend_userid_view(request):
