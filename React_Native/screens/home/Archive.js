@@ -17,6 +17,10 @@ export default function Archive({ navigaton }) {
   const [message, setMessage] = useState(<ActivityIndicator />);
   const [groupedEntries, setGroupedEntries] = useState({});
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
+  const [selectedEntry, setSelectedEntry] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [sortByTime, setSortByTime] = useState(true); // Default to sort by time
+  const [momentTypeSortOrder, setMomentTypeSortOrder] = useState("Most Recent"); // Default to sort by most recent moment type
 
   theme = makeThemeStyle();
 
@@ -48,7 +52,7 @@ export default function Archive({ navigaton }) {
       return text;
     } catch (error) {
       console.error("Error decoding base64 string:", error);
-      return "Error decoding content"; // Provide a default value or handle the error gracefully
+      return "Error decoding content"; 
     }
   };
 
@@ -57,8 +61,59 @@ export default function Archive({ navigaton }) {
   };
 
   const applyFilter = (filterOption) => {
-    console.log("Selected filter option:", filterOption);
+    if (filterOption === "Sort by Newest to Oldest") {
+      setSortByTime(true);
+    } else if (filterOption === "Sort by Oldest to Newest") {
+      setSortByTime(false);
+    } else if (filterOption === "Sort by Most Recent Moment Type") {
+      setMomentTypeSortOrder("Most Recent");
+    } else if (filterOption === "Sort by Least Recent Moment Type") {
+      setMomentTypeSortOrder("Least Recent");
+    }
     setIsFilterModalVisible(false);
+  };
+
+  const sortByUploadTime = (a, b) => {
+    if (sortByTime) {
+      return moment(b.date).valueOf() - moment(a.date).valueOf(); // Most recent to oldest
+    } else {
+      return moment(a.date).valueOf() - moment(b.date).valueOf(); // Oldest to most recent
+    }
+  };
+  
+  const sortByMomentType = (a, b) => {
+    if (momentTypeSortOrder === "Most Recent") {
+      return b.moment_number - a.moment_number; // Most recent moment type first
+    } else {
+      return a.moment_number - b.moment_number; // Least recent moment type first
+    }
+  };
+
+  const handleEntryPress = (entry) => {
+    setSelectedEntry(entry);
+    setModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setSelectedEntry(null);
+    setModalVisible(false);
+  };
+
+  const onEdit = () => {
+
+  }
+
+  const getDividerColor = (moment_number) => {
+    switch (moment_number) {
+      case 1: //Modeh Ani
+        return '#F9E79F'; // Gentle Sunbeam Yellow: #F9E79F | Soft Morning Blue: #AED6F1 | Fresh Meadow Green: #ABEBC6
+      case 2: //Ashrei
+        return '#4169E1'; // Royal Psalm Blue: #4169E1 | Golden Hallelujah: #FFD700 | Sacred Scroll Brown: #8B4513
+      case 3: //Shema
+        return '#DC143C'; // Pure White: #FFFFFF | Deep Crimson: #DC143C | Heavenly Violet: #6A5ACD
+      default: //Default
+        return 'grey';
+    }
   };
 
   handleGetEntries = async () => {
@@ -115,6 +170,8 @@ export default function Archive({ navigaton }) {
         checkInText = "Unknown Check-in";
         break;
     }
+
+    const dividerColor = getDividerColor(data.moment_number); // Get divider color based on moment_number
     
     switch (data.content_type) {
       case "image":
@@ -133,7 +190,7 @@ export default function Archive({ navigaton }) {
                   {moment(data.date, 'YYYY-MM-DD').format('h:mm A')}
                   </Text>
               </View>
-              <View style={styles.divider} />
+              <View style={[styles.divider, { backgroundColor: dividerColor }]} />
               {/* Content section */}
               <View style={styles.contentSection}>
                 <View style={styles.middleContent}>
@@ -158,7 +215,6 @@ export default function Archive({ navigaton }) {
           <View style={styles.contentContainer}>
             <View style={{flexDirection: 'row'}}>
               {/* Datetime section */}
-              {/* Datetime section */}
               <View style={styles.datetimeContainer}>
                 <Text style={[styles.text, styles.dayOfWeekText]}>
                   {moment(data.date, 'YYYY-MM-DD').format('ddd')}
@@ -170,7 +226,7 @@ export default function Archive({ navigaton }) {
                   {moment(data.date, 'YYYY-MM-DD').format('h:mm A')}
                   </Text>
               </View>
-              <View style={styles.divider} />
+              <View style={[styles.divider, { backgroundColor: dividerColor }]} />
               {/* Content section */}
               <View style={[styles.contentSection, { flex: 3.05 }]}>
                 <View style={styles.middleContent}>
@@ -209,7 +265,7 @@ export default function Archive({ navigaton }) {
                   {moment(data.date, 'YYYY-MM-DD').format('h:mm A')}
                   </Text>
               </View>
-              <View style={styles.divider} />
+              <View style={[styles.divider, { backgroundColor: dividerColor }]} />
               {/* Content section */}
               <View style={[styles.contentSection, { flex: 3.05 }]}>
                 <View style={styles.middleContent}>
@@ -241,7 +297,7 @@ export default function Archive({ navigaton }) {
                   {moment(data.date, 'YYYY-MM-DD').format('h:mm A')}
                   </Text>
               </View>
-              <View style={styles.divider} />
+              <View style={[styles.divider, { backgroundColor: dividerColor }]} />
               {/* Content section */}
               <View style={[styles.contentSection, { flex: 3.05 }]}>
                 <View style={styles.middleContent}>
@@ -276,7 +332,7 @@ export default function Archive({ navigaton }) {
                   {moment(data.date, 'YYYY-MM-DD').format('h:mm A')}
                   </Text>
               </View>
-              <View style={styles.divider} />
+              <View style={[styles.divider, { backgroundColor: dividerColor }]} />
               <View style={styles.contentSection}>
                 <View style={styles.unsupportedContainer}>
                   <Text style={styles.text}>Unsupported content type</Text>
@@ -295,7 +351,8 @@ export default function Archive({ navigaton }) {
   }, []);
   
   return (
-    <View style={[{ flex: 1 }, theme["background"], styles.container]}>
+    <View style={[{ flex: 1 }, theme["background"]]}>
+      
       <View style={styles.searchBarContainer}>
         <SearchBar
           placeholder="Search..."
@@ -304,48 +361,84 @@ export default function Archive({ navigaton }) {
           containerStyle={styles.searchBarContainer}
         />
       </View>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isFilterModalVisible}
-        onRequestClose={() => {
-          setIsFilterModalVisible(!isFilterModalVisible);
-        }}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Pressable onPress={() => applyFilter("Default")} style={styles.filterOption}>
-              <Text>Sort by Newest to Oldest</Text>
-            </Pressable>
-            <Pressable onPress={() => applyFilter("Option 2")} style={styles.filterOption}>
-              <Text>Sort by Oldest to Newest</Text>
-            </Pressable>
+      <View style={styles.buttonContainer}>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={isFilterModalVisible}
+          onRequestClose={() => {
+            setIsFilterModalVisible(!isFilterModalVisible);
+          }}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Pressable onPress={() => applyFilter("Sort by Newest to Oldest")} style={styles.filterOption}>
+                <Text>Sort by Newest to Oldest</Text>
+              </Pressable>
+              <Pressable onPress={() => applyFilter("Sort by Oldest to Newest")} style={styles.filterOption}>
+                <Text>Sort by Oldest to Newest</Text>
+              </Pressable>
+              {/* <Pressable onPress={() => applyFilter("Sort by Most Recent Moment Type")} style={styles.filterOption}>
+                <Text>Sort by Most Recent Moment Type</Text>
+              </Pressable>
+              <Pressable onPress={() => applyFilter("Sort by Least Recent Moment Type")} style={styles.filterOption}>
+                <Text>Sort by Least Recent Moment Type</Text>
+              </Pressable> */}
+            </View>
           </View>
-        </View>
-      </Modal>
-      <TouchableOpacity onPress={toggleFilterModal} style={styles.filterButton}>
-        <Ionicons name="filter" size={24} color="grey" />
-      </TouchableOpacity>
-      <TouchableOpacity onPress={handleGetEntries} style={styles.refreshButton}>
-        <Ionicons name="refresh" size={24} color={theme['color'].backgroundColor} style={styles.refreshIcon} />
-      </TouchableOpacity>
-
+        </Modal>
+        <TouchableOpacity onPress={toggleFilterModal} style={styles.filterButton}>
+          <Ionicons name="filter" size={24} color="#4A90E2" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleGetEntries} style={styles.refreshButton}>
+          <Ionicons name="refresh" size={24} color={theme['color'].backgroundColor} style={styles.refreshIcon} />
+        </TouchableOpacity>
+      </View>
+  
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <View style={[{ alignItems: "center", justifyContent: "center" }, theme["background"]]}>
-          {Object.keys(groupedEntries).map(yearMonth => (
-            <View key={yearMonth} style={styles.yearMonthContainer}>
-              <Text style={styles.yearMonthHeader}>{moment(yearMonth, 'YYYY-MM').format('MMMM YYYY')}</Text>
-              {groupedEntries[yearMonth].map((item, index) => (
-                <View key={index}>
+        {Object.keys(groupedEntries).map(yearMonth => (
+          <View key={yearMonth} style={styles.yearMonthContainer}>
+            <Text style={styles.yearMonthHeader}>{moment(yearMonth, 'YYYY-MM').format('MMMM YYYY')}</Text>
+            {groupedEntries[yearMonth]
+              .sort(sortByUploadTime) // Apply sorting by upload time
+              // .sort(sortByMomentType) // Apply sorting by moment type
+              .map((item, index) => (
+                <TouchableOpacity key={index} onPress={() => handleEntryPress(item)}>
                   {renderContent(item)}
-                </View>
+                </TouchableOpacity>
               ))}
+              {/* Modal to display journal entry details */}
+              <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={closeModal}
+              >
+                <View style={styles.modalContainer}>
+                  <View style={styles.JournalEntryModalContent}>
+                  <View style={styles.buttonRow}>
+                    <Ionicons name="close-circle" style={styles.JournalEntryModalIcons} onPress={closeModal} />
+                    <Ionicons name="create" style={styles.JournalEntryModalIcons} onPress={onEdit} />
+                  </View>
+                    <Text>Header: Header Would Go Here </Text>
+                    <Text>Date: {selectedEntry?.date}</Text>
+                    <Text>Moment: {selectedEntry?.moment_number}</Text>
+                    {/* <Text>Content: {selectedEntry?.content}</Text> */}
+                    {/* Add more details as needed */}
+                    <Image
+                      style={styles.JournalEntryModalImage}
+                      source={{ uri: `data:image/jpeg;base64,${selectedEntry?.content}` }}
+                    />
+                  </View>
+                </View>
+              </Modal>
             </View>
           ))}
         </View>
       </ScrollView>
     </View>
-  );
+  );  
 }
   
 function getWidth() {
@@ -364,13 +457,11 @@ const styles = StyleSheet.create({
     marginTop: 10,
     padding: 5,
     alignItems: 'center',
-    width: getWidth(), // Adjust the width as desired
-    alignSelf: 'center', // Center the content horizontally
-    borderWidth: .17,
-    borderColor: 'black',
+    width: getWidth(),
+    alignSelf: 'center',
     borderRadius: 5, 
     backgroundColor: '#f2f2f2',
-    shadowColor: '#4A90E2', // Updated shadow color
+    shadowColor: '#4A90E2',
     shadowOffset: {
       width: 0,
       height: 2,
@@ -438,28 +529,6 @@ const styles = StyleSheet.create({
   middleContentText: {
     fontSize: 13,
   },
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  searchBarContainer: {
-    backgroundColor: 'transparent',
-    borderBottomColor: 'transparent',
-    borderTopColor: 'transparent',
-    width: "85%",
-  },
-  refreshButton: {
-    position: 'absolute',
-    top: 9,
-    right: 2,
-    zIndex: 1,
-    // backgroundColor: 'blue',
-    padding: 12,
-    // borderRadius: 20,
-  },
-  refreshIcon: {
-    color: '#4A90E2',
-  },
   yearMonthContainer: {
     marginBottom: 20,
   },
@@ -472,14 +541,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
     width: getWidth() + 25,
   },
+
+  // SearchBar + Filter Button + Refresh Button
+  
   filterButton: {
     position: 'absolute',
-    top: 9,
-    right: 50,
+    top: -57,
+    right: 62.5,
     zIndex: 1,
     backgroundColor: '#ffffff',
     padding: 12,
-    borderRadius: 2,
+    borderRadius: 4,
+  },
+  filterOption: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#cccccc',
   },
   modalContainer: {
     flex: 1,
@@ -497,9 +574,47 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  filterOption: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#cccccc',
+  searchBarContainer: {
+    backgroundColor: 'transparent',
+    borderBottomColor: 'transparent',
+    borderTopColor: 'transparent',
+    width: "85%",
   },
+  refreshButton: {
+    position: 'absolute',
+    top: -57,
+    right: 8,
+    backgroundColor: '#ffffff',
+    padding: 12,
+    borderRadius: 4,
+  },
+  refreshIcon: {
+    color: '#4A90E2',
+  },
+
+  // JournalEntryModal
+  JournalEntryModalContent: {
+    backgroundColor: 'white',
+    width: Dimensions.get('window').width ,
+    height: '80%',
+    borderRadius: 10,
+    elevation: 5,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    // marginTop: 10,
+    padding: 5,
+    borderBottomColor: 'grey',
+    borderBottomWidth: 2,
+  },
+  JournalEntryModalIcons: {
+    fontSize: 40, 
+    color: "#4A90E2",
+  },
+  JournalEntryModalImage: {
+    width: '100%', 
+    aspectRatio: 1, 
+    borderRadius: 5,
+  }
 });
