@@ -15,7 +15,7 @@ import {
 import axios from "axios";
 import IP_ADDRESS from "../../ip.js";
 import * as Storage from "../../AsyncStorage.js";
-import makeThemeStyle from '../../Theme.js';
+import makeThemeStyle from '../../tools/Theme.js';
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 

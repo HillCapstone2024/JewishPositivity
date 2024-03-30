@@ -1,12 +1,22 @@
-import React, { useRef } from 'react';
-import { View, Text, Modal, StyleSheet, Dimensions, Animated, PanResponder, TouchableOpacity } from 'react-native';
-
+import React, { useRef } from "react";
+import {
+  View,
+  Text,
+  Modal,
+  StyleSheet,
+  Dimensions,
+  Animated,
+  PanResponder,
+  TouchableOpacity,
+} from "react-native";
+import makeThemeStyle from "../../tools/Theme.js";
 import CheckIn from "./CheckIn";
 
-const windowHeight = Dimensions.get('window').height;
+const windowHeight = Dimensions.get("window").height;
 
 const JournalModal = ({ onClose, onSubmit, visible }) => {
   const translateY = useRef(new Animated.Value(windowHeight)).current;
+  theme = makeThemeStyle();
 
   const panResponder = useRef(
     PanResponder.create({
@@ -62,13 +72,16 @@ const JournalModal = ({ onClose, onSubmit, visible }) => {
           style={[
             styles.bottomSheetContainer,
             { transform: [{ translateY: translateY }] },
+            theme["background"],
           ]}
           //{...panResponder.panHandlers} // Pass panHandlers only to the Animated.View
         >
-          <TouchableOpacity style={styles.dragIndicator}>
+          <TouchableOpacity style={(theme["background"], styles.dragIndicator)}>
             <View style={styles.dragIndicatorInner} />
           </TouchableOpacity>
-          <View style={[styles.contentContainer, { height: windowHeight * 0.9 }]}>
+          <View
+            style={[styles.contentContainer, { height: windowHeight * 0.9 }]}
+          >
             <CheckIn handleCancel={onClose} handleSubmitClose={onSubmit} />
           </View>
         </Animated.View>
@@ -80,26 +93,26 @@ const JournalModal = ({ onClose, onSubmit, visible }) => {
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
   },
   bottomSheetContainer: {
-    backgroundColor: 'white',
+    // backgroundColor: 'white',
     borderTopRightRadius: 20,
     borderTopLeftRadius: 20,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   dragIndicator: {
     height: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     borderTopWidth: 1,
-    borderTopColor: '#ccc',
+    borderTopColor: "#ccc",
   },
   dragIndicatorInner: {
     width: 50,
     height: 5,
-    backgroundColor: '#ccc',
+    backgroundColor: "#ccc",
     borderRadius: 5,
   },
   contentContainer: {

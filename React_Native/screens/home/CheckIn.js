@@ -1,4 +1,3 @@
-import * as ImagePicker from "expo-image-picker";
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
@@ -12,26 +11,26 @@ import {
   ScrollView,
   Image,
   SafeAreaView,
-  Animated
+  Animated,
 } from "react-native";
 import axios from "axios";
-import RecordingAccessoryBar from "./RecordingBar.js";
-import MediaAccessoryBar from "./MediaBar.js";
+import RecordingAccessoryBar from "../../tools/RecordingBar.js";
+import MediaAccessoryBar from "../../tools/MediaBar.js";
 import ImageViewer from "../../tools/ImageViewer.js";
+import VideoViewer from "../../tools/VideoViewer.js";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import * as FileSystem from "expo-file-system";
 import { Buffer } from "buffer";
-import RNPickerSelect from 'react-native-picker-select';
-
+import RNPickerSelect from "react-native-picker-select";
 
 import { Video, ResizeMode, Audio } from "expo-av";
-import makeThemeStyle from "../../Theme.js";
+import makeThemeStyle from "../../tools/Theme.js";
 import * as Storage from "../../AsyncStorage.js";
 import IP_ADDRESS from "../../ip.js";
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
-export default function JournalEntry({handleCancel, handleSubmitClose}) {
+export default function JournalEntry({ handleCancel, handleSubmitClose }) {
   const [username, setUsername] = useState("");
   const [momentType, setMomentType] = useState(3);
   const [mediaUri, setMediaUri] = useState(null);
@@ -40,6 +39,7 @@ export default function JournalEntry({handleCancel, handleSubmitClose}) {
   const [base64Data, setBase64Data] = useState("");
   const [journalText, setJournalText] = useState("");
   const [showMediaBar, setShowMediaBar] = useState(true);
+  const [mediaChanged, setMediaChanged] = useState(false);
   const [selectedOption, setSelectedOption] = useState("");
   const [disableSubmit, setDisableSubmit] = useState(true);
   const mediaAccessoryViewID = "MediaBar";
@@ -187,6 +187,7 @@ export default function JournalEntry({handleCancel, handleSubmitClose}) {
     setBase64Data(base64String);
     setJournalText("");
     setMediaBox(true);
+    setMediaChanged(!mediaChanged);
     setDisableSubmit(false);
   };
 
@@ -201,6 +202,7 @@ export default function JournalEntry({handleCancel, handleSubmitClose}) {
     const base64String = await readFileAsBase64(mediaProp.assets[0].uri);
     setBase64Data(base64String);
     setMediaBox(true);
+    setMediaChanged(!mediaChanged);
     setDisableSubmit(false);
   };
 
@@ -226,15 +228,17 @@ export default function JournalEntry({handleCancel, handleSubmitClose}) {
     }
   };
 
-  const loaderValue = useRef(new Animated.Value(0)).current;
-  const loadMediaContainer = () => {
-        Animated.timing(loaderValue, {
-          toValue: count, //final value
-          duration: 500, //update value in 500 milliseconds
-          useNativeDriver: true,
-        }).start();
-  };
-
+  const mediaBoxAnim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const loadMediaContainer = () => {
+      Animated.timing(mediaBoxAnim, {
+        toValue: count, //final value
+        duration: 1500, //update value in 500 milliseconds
+        useNativeDriver: true,
+      }).start();
+    };
+    loadMediaContainer;
+  }, [showMediaBar]);
 
   return (
     <SafeAreaView style={[styles.container, theme["background"]]}>
@@ -254,7 +258,7 @@ export default function JournalEntry({handleCancel, handleSubmitClose}) {
             style={pickerSelectStyles}
             value={selectedOption}
             placeholder={{
-              label: "Prayer"
+              label: "Prayer",
             }}
             placeholderTextColor="black"
             onValueChange={handleOptionChange}
@@ -271,7 +275,8 @@ export default function JournalEntry({handleCancel, handleSubmitClose}) {
           <Ionicons
             name="chevron-down"
             size={25}
-            color={theme["color"]["color"]}
+            color={"#4A90E2"}
+            style={{ paddingTop: 5 }}
           />
         </View>
 
@@ -313,52 +318,16 @@ export default function JournalEntry({handleCancel, handleSubmitClose}) {
       {/* Media Box Below */}
       {mediaBox ? (
         <View style={styles.mediaContainer}>
-            {mediaType === "image" ? (
-              <ImageViewer source={mediaUri} onDelete={deleteMedia} />
-            ) : (mediaType === "video" ? (
-              <Video
-                source={{ uri: mediaUri }}
-                playsInSilentModeIOS={true}
-                useNativeControls
-                ref={videoRef}
-                style={styles.video}
-                controls={true}
-                resizeMode={ResizeMode.CONTAIN}
-                onError={(e) => console.log("video error", e)}
-                onTouchEnd={() => {
-                  videoRef.current?.presentFullscreenPlayer();
-                }}
-                onFullscreenUpdate={({ fullscreenUpdate }) => {
-                  switch (fullscreenUpdate) {
-                    case Video.FULLSCREEN_UPDATE_PLAYER_WILL_PRESENT:
-                      console.log("The fullscreen player is about to present.");
-                      break;
-                    case Video.FULLSCREEN_UPDATE_PLAYER_DID_PRESENT:
-                      console.log("The fullscreen player just presented.");
-                      break;
-                    case Video.FULLSCREEN_UPDATE_PLAYER_WILL_DISMISS:
-                      console.log("The fullscreen player is about to dismiss.");
-                      break;
-                    case Video.FULLSCREEN_UPDATE_PLAYER_DID_DISMISS:
-                      console.log("The fullscreen player just dismissed.");
-                  }
-                }}
-              />
-            ) : (
-              <View style={styles.container}>
-                <Button title="Play Sound" onPress={playSound} />
-              </View>
-            ))}
-
-            {/* <TouchableOpacity style={styles.deleteMedia} onPress={deleteMedia}>
-              <Ionicons
-                name="close-circle"
-                size={25}
-                color={theme["color"]["color"]}
-              />
-            </TouchableOpacity> */}
-
-          <ProgressBar />
+          {mediaType === "image" ? (
+            <ImageViewer source={mediaUri} onDelete={deleteMedia} />
+          ) : mediaType === "video" ? (
+            <VideoViewer mediaUri={mediaUri} onDelete={deleteMedia} />
+          ) : (
+            <View style={styles.container}>
+              <Button title="Play Sound" onPress={playSound} />
+            </View>
+          )}
+          <ProgressBar onMediaChange={mediaChanged} />
         </View>
       ) : null}
 
@@ -398,14 +367,15 @@ export default function JournalEntry({handleCancel, handleSubmitClose}) {
       )}
     </SafeAreaView>
   );
-};
+}
 
-
-const ProgressBar = () => {
-  const [progress, setProgress] = useState(new Animated.Value(0));
+const ProgressBar = ({ onMediaChange }) => {
+  const [progress, setProgress] = useState(() => new Animated.Value(0));
   const [parentWidth, setParentWidth] = useState(0);
 
   useEffect(() => {
+    // Initialize or reset progress when `onMediaChange` changes
+    progress.setValue(0); // Reset progress to 0 without needing to re-create the Animated.Value
     console.log(parentWidth);
     if (parentWidth > 0) {
       Animated.timing(progress, {
@@ -414,16 +384,16 @@ const ProgressBar = () => {
         useNativeDriver: false,
       }).start();
     }
-  }, [parentWidth]);
+  }, [parentWidth, onMediaChange]); // Add `onMediaChange` to the dependency array
 
   const progressBarWidth = progress.interpolate({
     inputRange: [0, parentWidth],
-    outputRange: ['0%', '100%'],
+    outputRange: ["0%", "100%"],
   });
 
   return (
     <View
-      style={stylesProgressBar.container}
+      style={[stylesProgressBar.container, theme["background"]]}
       onLayout={(event) => {
         const { width } = event.nativeEvent.layout;
         setParentWidth(width);
@@ -445,24 +415,22 @@ const stylesProgressBar = StyleSheet.create({
   },
   progressBar: {
     height: "100%", // The progress bar should fill the container height
-    backgroundColor: "blue", // Background color for the progress bar itself
+    backgroundColor: "#4A90E2", // Background color for the progress bar itself
     borderBottomEndRadius: 5,
     borderBottomStartRadius: 5,
   },
 });
 
-
-
-
 const pickerSelectStyles = StyleSheet.create({
   inputIOS: {
     fontSize: 15,
     // paddingVertical: 12,
-    paddingHorizontal: 10,
+    // paddingHorizontal: 10,
+    fontWeight: "bold",
     // borderWidth: 1,
     // borderColor: 'grey',
     // borderRadius: 8,
-    color: "black",
+    color: "#4A90E2",
     fontSize: 30,
     // paddingRight: 30,
     // backgroundColor: "white",
@@ -487,7 +455,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
-    backgroundColor: "white",
+    // backgroundColor: "white",
   },
   dropdownContainer: {
     flexDirection: "row",
@@ -509,7 +477,7 @@ const styles = StyleSheet.create({
     // paddingTop: 10,
   },
   journalInput: {
-    marginTop: 10,
+    // marginTop: 10,
     borderRadius: 5,
     padding: 10,
     color: "black",
@@ -518,17 +486,17 @@ const styles = StyleSheet.create({
   },
   scrollingInput: {
     flexGrow: 1,
-    // backgroundColor: 'red'
   },
   mediaContainer: {
     // backgroundColor: "pink",
     // alignItems: "center",
     // paddingHorizontal: 10,
     // paddingTop: 5,
-    marginTop: 10,
+    marginVertical: 20,
     // borderRadius: 5,
-    marginHorizontal: 10,
+    marginHorizontal: 15,
     width: 60,
+    height: 60,
   },
   mediaContainerUpper: {
     // flexDirection: "row",
@@ -548,7 +516,9 @@ const styles = StyleSheet.create({
   video: {
     alignSelf: "center",
     width: "100%",
-    height: 80,
+    height: 60,
+    borderTopRightRadius: 5,
+    borderTopLeftRadius: 5,
   },
   deleteMedia: {
     justifyContent: "center",
@@ -557,7 +527,7 @@ const styles = StyleSheet.create({
   },
   datetime: {
     fontSize: 15,
-    paddingLeft: 10,
+    paddingLeft: 12,
     textAlign: "left",
   },
   separator: {
@@ -567,6 +537,8 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 25,
     fontWeight: "bold",
+    marginHorizontal: 15,
+    marginTop: 10,
   },
   topBar: {
     flexDirection: "row",

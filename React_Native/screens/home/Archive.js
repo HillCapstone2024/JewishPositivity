@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, ActivityIndicator, TouchableOpacity, StyleSheet, ScrollView, Button, Image, Dimensions, Modal, Pressable } from 'react-native';
-import makeThemeStyle from '../../Theme.js';
+import makeThemeStyle from '../../tools/Theme.js';
 import * as Storage from "../../AsyncStorage.js";
 import IP_ADDRESS from "../../ip.js";
 const API_URL = "http://" + IP_ADDRESS + ":8000";

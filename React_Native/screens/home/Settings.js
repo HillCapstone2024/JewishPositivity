@@ -8,7 +8,7 @@ import * as Storage from "../../AsyncStorage.js";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from 'expo-haptics';
 
-import makeThemeStyle from '../../Theme.js';
+import makeThemeStyle from '../../tools/Theme.js';
 import Times from "./Times.js";
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";

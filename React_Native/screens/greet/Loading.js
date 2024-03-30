@@ -6,7 +6,7 @@ import {
     Animated,
     Easing,
 } from "react-native";
-import makeThemeStyle from '../../Theme.js';
+import makeThemeStyle from '../../tools/Theme.js';
 
 const LoadingScreen = () => {
     const floatAnim = useRef(new Animated.Value(0)).current;

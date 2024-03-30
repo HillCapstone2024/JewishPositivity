@@ -20,7 +20,7 @@ import { createAvatar } from "@dicebear/core";
 import { micah } from "@dicebear/collection";
 import { SvgXml } from "react-native-svg";
 import BottomTabNavigator from "./BottomTabNavigator.js";
-import makeThemeStyle from '../Theme.js';
+import makeThemeStyle from '../tools/Theme.js';
 import UserProfile from "../screens/home/Profile.js";
 import SettingsPage from "../screens/home/Settings.js";
 import Communities from "../screens/home/Communities.js";

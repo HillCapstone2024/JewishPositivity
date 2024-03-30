@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Dimensions, useColorScheme } from 'react-native';
 import { Video, ResizeMode } from 'expo-av';
 import LoadingScreen from './Loading';
-import makeThemeStyle from '../../Theme.js';
+import makeThemeStyle from '../../tools/Theme.js';
 
 const Landing = ({ navigation }) => {
     const [videoName, setVideoName] = useState(null);

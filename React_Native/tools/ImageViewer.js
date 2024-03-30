@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Modal,
   StyleSheet,
@@ -8,18 +8,35 @@ import {
   Dimensions,
   Image,
   Text,
-  Button
+  Button,
 } from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import * as Haptics from "expo-haptics";
+import makeThemeStyle from "./Theme.js";
 
-const { height } = Dimensions.get("window"); // Get the screen height
+const { height } = Dimensions.get("window");
 
 const ImageViewer = ({ source, onDelete }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
-  const slideAnim = useRef(new Animated.Value(height)).current; // Start off-screen
+  const slideAnim = useRef(new Animated.Value(height)).current;
+  const theme = makeThemeStyle();
+
+  // const mediaBoxAnim = useRef(new Animated.Value(0)).current;
+  // useEffect(() => {
+  //   const loadMediaContainer = () => {
+  //     Animated.timing(mediaBoxAnim, {
+  //       toValue: count, //final value
+  //       duration: 1500, //update value in 500 milliseconds
+  //       useNativeDriver: true,
+  //     }).start();
+  //   };
+  //   loadMediaContainer;
+  // }, [showMediaBar]);
 
   const showDeleteModal = () => {
     setIsDeleteModalVisible(true);
+    theme["hapticFeedback"] ? null : Haptics.selectionAsync();
     Animated.timing(slideAnim, {
       toValue: 0,
       duration: 150,
@@ -35,22 +52,23 @@ const ImageViewer = ({ source, onDelete }) => {
     }).start(() => setIsDeleteModalVisible(false));
   };
 
-    const showModal = () => {
-      setIsModalVisible(true);
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 150,
-        useNativeDriver: true,
-      }).start();
-    };
+  const showModal = () => {
+    theme["hapticFeedback"] ? null : Haptics.selectionAsync();
+    setIsModalVisible(true);
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 150,
+      useNativeDriver: true,
+    }).start();
+  };
 
-    const hideModal = () => {
-      Animated.timing(slideAnim, {
-        toValue: height,
-        duration: 150,
-        useNativeDriver: true,
-      }).start(() => setIsModalVisible(false));
-    };
+  const hideModal = () => {
+    Animated.timing(slideAnim, {
+      toValue: height,
+      duration: 150,
+      useNativeDriver: true,
+    }).start(() => setIsModalVisible(false));
+  };
 
   return (
     <View style={styles.container}>
@@ -67,7 +85,7 @@ const ImageViewer = ({ source, onDelete }) => {
         visible={isDeleteModalVisible}
         onRequestClose={() => setIsDeleteModalVisible(false)}
       >
-        <View style={styles.centeredView}>
+        {/* <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>
               Do you want to delete this image?
@@ -87,7 +105,31 @@ const ImageViewer = ({ source, onDelete }) => {
               onPress={() => setIsDeleteModalVisible(false)}
             />
           </View>
-        </View>
+        </View> */}
+        <TouchableWithoutFeedback
+          onPress={() => setIsDeleteModalVisible(false)}
+        >
+          <View style={styles.centeredView}>
+            {/* Prevents the modal content from closing when pressing on it */}
+            <TouchableWithoutFeedback>
+              <View style={styles.modalView}>
+                <Text style={styles.modalText}>
+                  Do you want to delete this image?
+                </Text>
+                <View style={styles.horizontalBar} />
+                <TouchableOpacity
+                  onPress={() => {
+                    onDelete();
+                    setIsDeleteModalVisible(false);
+                  }}
+                >
+                  <Text style={styles.deleteText}>Delete</Text>
+                </TouchableOpacity>
+                {/* Removed the Cancel button since pressing off the modal now also acts as cancel */}
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
       </Modal>
       <Modal
         visible={isModalVisible}
@@ -135,7 +177,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
+    // backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
   },
   fullScreenImage: {
     width: "100%",
@@ -146,7 +188,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-end",
     // alignItems: "center",
-    marginTop: 22,
+    marginBottom: 20,
   },
   modalView: {
     margin: 20,
@@ -167,13 +209,16 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     textAlign: "center",
     fontSize: 16,
+    fontWeight: "500",
   },
   deleteText: {
     color: "red",
+    fontSize: 16,
+    marginVertical: 10,
   },
   horizontalBar: {
     height: 1,
-    width: "100%",
+    width: "90%",
     backgroundColor: "#ccc",
     // marginTop: 15,
     // borderWidth: 2,
