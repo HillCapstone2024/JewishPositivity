@@ -629,3 +629,44 @@ def add_friend_view(request):
         except Exception as e:
             return HttpResponse("Adding friend failed: " + str(e), status=400)
     return HttpResponse(constNotPost)
+
+
+
+
+
+def get_friend_userid_view(request):
+    if request.method == "GET":
+        user_id = request.GET.get("user_id")
+
+        # Make sure the user_id is not empty
+        if user_id is not None:
+            try:
+                # get friendships where the given user is either user1 or user2
+                friendships = Friends.objects.filter(user1_id=user_id) | Friends.objects.filter(user2_id=user_id)
+
+                # List to store friend user IDs and the friendship status
+                friendship_data = []
+
+                # Populate the list with dictionaries containing user IDs and friendship status
+                for friendship in friendships:
+                    if friendship.user1_id == user_id:
+                        friend_id = friendship.user2_id
+                    else:
+                        friend_id = friendship.user1_id
+
+                    friendship_data.append({
+                        'user_id': friend_id,
+                        'status': friendship.complete
+                    })
+
+                # Log data and return as JSON response
+                logging.info("Friendship status data:")
+                logging.info(friendship_data)
+                return JsonResponse(friendship_data, safe=False)
+
+            except Exception as e:
+                            logging.info(e)
+                            return HttpResponse(constUserDNE, status=400)
+                    else:  # username was empty
+                        return HttpResponse(constUNnotProvided, status=400)
+                return HttpResponse("Not a GET request")
