@@ -665,8 +665,8 @@ def get_friend_userid_view(request):
                 return JsonResponse(friendship_data, safe=False)
 
             except Exception as e:
-                            logging.info(e)
-                            return HttpResponse(constUserDNE, status=400)
-                    else:  # username was empty
-                        return HttpResponse(constUNnotProvided, status=400)
-                return HttpResponse("Not a GET request")
+                logging.info(e)
+                return HttpResponse(constUserDNE, status=400)
+        else:  # user_id was empty
+            return HttpResponse(constUNnotProvided, status=400)
+    return HttpResponse("Not a GET request")
