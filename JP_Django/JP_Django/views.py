@@ -37,8 +37,8 @@ constMissingKey = "Missing keys: %s"
 constNotPost = "Not a POST request!"
 constUserDNE = "User does not exist"
 constUNnotProvided= "Username not provided"
-
-
+constFriendExists = "Friendship already exists"
+constAppJson = "application/json"
 
 
 # ########## Helper Functions ##########
@@ -334,7 +334,7 @@ def get_user_information_view(request):
                 }
                 logging.info("get data:")
                 logging.info(response_data)
-                return HttpResponse(json.dumps(response_data), content_type="application/json")
+                return HttpResponse(json.dumps(response_data), content_type=constAppJson)
             except Exception as e:
                 logging.info(e)
                 return HttpResponse(constUserDNE, status=400)
@@ -376,11 +376,11 @@ def update_times_view(request):
                 user.save()  # Saving
 
                 response_data = {"message": "Success! Times have been updated"}
-                return HttpResponse(json.dumps(response_data), content_type="application/json")
+                return HttpResponse(json.dumps(response_data), content_type=constAppJson)
             else: 
                 return HttpResponse("Invalid ordering", status=400)
         except User.DoesNotExist:
-            return HttpResponse("User not found", status=400)
+            return HttpResponse(constUserDNE, status=400)
         except ValueError:
             return HttpResponse("Invalid time format", status=400)
         except Exception as e:
@@ -410,7 +410,7 @@ def get_times_view(request):
                 }
 
                 logging.info(response_data)
-                return HttpResponse(json.dumps(response_data), content_type="application/json")  # returning a DICTIONARY - do not change
+                return HttpResponse(json.dumps(response_data), content_type= constAppJson)  # returning a DICTIONARY - do not change
             except Exception as e:
                 logging.info(e)
                 return HttpResponse(e, status=400)
@@ -513,7 +513,7 @@ def get_checkin_info_view(request): #To be filled out soon
                     response_data.append(current_checkin) #add checkin to the list to be returned
   
                 logging.info(response_data)
-                return HttpResponse(json.dumps(response_data), content_type="application/json")  # returning a LIST of DICTIONARIES where each dictionary is a checkin moment of the user specified - do not change
+                return HttpResponse(json.dumps(response_data), content_type= constAppJson)  # returning a LIST of DICTIONARIES where each dictionary is a checkin moment of the user specified - do not change
             except Exception as e:
                 logging.info(e)
                 return HttpResponse(constUserDNE, status=400)
@@ -595,8 +595,8 @@ def add_friend_view(request):
             if outgoing.exists():
                 # Already friends
                 if outgoing[0].complete:
-                    logging.info("Friendship already exists")
-                    return HttpResponse("Friendship already exists", status=400)
+                    logging.info(constFriendExists)
+                    return HttpResponse(constFriendExists, status=400)
                 # Already sent a friend request
                 else:
                     logging.info("Friend request already sent")
@@ -604,8 +604,8 @@ def add_friend_view(request):
             if incoming.exists():
                 # Already friends
                 if incoming[0].complete:
-                    logging.info("Friendship already exists")
-                    return HttpResponse("Friendship already exists", status=400)
+                    logging.info(constFriendExists)
+                    return HttpResponse(constFriendExists, status=400)
                 # Accept the friend request
                 else:
                     logging.info("Accepting friend request")
@@ -614,7 +614,7 @@ def add_friend_view(request):
                     friend_request.complete = True
                     friend_request.save()
                     response_data = {"message": "Success! Friend request accepted!"}
-                    return HttpResponse(json.dumps(response_data), content_type="application/json")
+                    return HttpResponse(json.dumps(response_data), content_type= constAppJson)
             logging.info("No existing connection found")
             # If no previous history with user2, create brand new friendship
             friends = Friends.objects.create(
@@ -622,9 +622,10 @@ def add_friend_view(request):
                 user2=user2,
                 complete=False,
             )
+            friends.save() 
             logging.info("Friends object created")
             response_data = {"message": "Success! Friend request sent!"}
-            return HttpResponse(json.dumps(response_data), content_type="application/json")
+            return HttpResponse(json.dumps(response_data), content_type= constAppJson)
         except User.DoesNotExist:
             return HttpResponse("User not found", status=400)
         except Exception as e:
