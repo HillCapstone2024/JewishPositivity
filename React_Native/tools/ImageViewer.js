@@ -16,7 +16,7 @@ import makeThemeStyle from "./Theme.js";
 
 const { height } = Dimensions.get("window");
 
-const ImageViewer = ({ source, onDelete }) => {
+const ImageViewer = ({ source, onDelete, dimensions }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(height)).current;
@@ -76,7 +76,7 @@ const ImageViewer = ({ source, onDelete }) => {
         onPress={showModal}
         onLongPress={showDeleteModal}
       >
-        <Image source={{ uri: source }} style={styles.triggerImage} />
+        <Image source={{ uri: source }} style={[styles.triggerImage, {height: dimensions.height, width: dimensions.width }]} />
       </TouchableWithoutFeedback>
 
       <Modal
@@ -85,27 +85,6 @@ const ImageViewer = ({ source, onDelete }) => {
         visible={isDeleteModalVisible}
         onRequestClose={() => setIsDeleteModalVisible(false)}
       >
-        {/* <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>
-              Do you want to delete this image?
-            </Text>
-            <View style={styles.horizontalBar} />
-            <Button
-              title="Delete"
-              style={styles.deleteText}
-              onPress={() => {
-                onDelete();
-                setIsDeleteModalVisible(false);
-              }}
-            />
-            <View style={styles.horizontalBar} />
-            <Button
-              title="Cancel"
-              onPress={() => setIsDeleteModalVisible(false)}
-            />
-          </View>
-        </View> */}
         <TouchableWithoutFeedback
           onPress={() => setIsDeleteModalVisible(false)}
         >
@@ -161,17 +140,17 @@ const styles = StyleSheet.create({
   },
   trigger: {
     borderRadius: 5,
-    elevation: 3, // for Android shadow
-    shadowColor: "#000", // for iOS shadow
+    elevation: 3,
+    shadowColor: "#000",
     shadowOffset: { width: 1, height: 1 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
   },
   triggerImage: {
-    width: 60,
-    height: 60,
-    borderTopEndRadius: 5,
-    borderTopStartRadius: 5,
+    // width: 60,
+    // height: 60,
+    borderTopLeftRadius: 5,
+    borderTopRightRadius: 5,
   },
   fullScreenContainer: {
     flex: 1,

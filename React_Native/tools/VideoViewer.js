@@ -9,17 +9,23 @@ import {
   TouchableWithoutFeedback,
   Text,
 } from "react-native";
+import * as Haptics from "expo-haptics";
 import { Video, ResizeMode } from "expo-av";
+import makeThemeStyle from "./Theme.js";
 
-const VideoViewer = ({ mediaUri, onDelete }) => {
+const VideoViewer = ({ mediaUri, onDelete, dimensions }) => {
   const videoRef = useRef(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const theme = makeThemeStyle();
 
   return (
     <View style={styles.container}>
       <TouchableOpacity
         style={styles.fullSize}
-        onLongPress={() => setModalVisible(true)}
+        onLongPress={() => {
+          setModalVisible(true);
+          theme["hapticFeedback"] ? null : Haptics.selectionAsync();
+        }}
         activeOpacity={1} // Keep the video appearance normal on press
       >
         <Video
@@ -27,7 +33,7 @@ const VideoViewer = ({ mediaUri, onDelete }) => {
           playsInSilentModeIOS={true}
           useNativeControls
           ref={videoRef}
-          style={styles.video}
+          style={[styles.video, {height: dimensions.height, width: dimensions.width}]}
           controls={true}
           resizeMode={ResizeMode.COVER}
           onError={(e) => console.log("video error", e)}
@@ -43,11 +49,14 @@ const VideoViewer = ({ mediaUri, onDelete }) => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.centeredView}>
-          <TouchableWithoutFeedback>
+        <TouchableWithoutFeedback
+          onPress={() => setModalVisible(false)}
+        >
+          <View style={styles.centeredView}>
+            <TouchableWithoutFeedback>
               <View style={styles.modalView}>
                 <Text style={styles.modalText}>
-                  Do you want to delete this image?
+                  Do you want to delete this video?
                 </Text>
                 <View style={styles.horizontalBar} />
                 <TouchableOpacity
@@ -58,10 +67,10 @@ const VideoViewer = ({ mediaUri, onDelete }) => {
                 >
                   <Text style={styles.deleteText}>Delete</Text>
                 </TouchableOpacity>
-                {/* Removed the Cancel button since pressing off the modal now also acts as cancel */}
               </View>
             </TouchableWithoutFeedback>
-        </View>
+          </View>
+        </TouchableWithoutFeedback>
       </Modal>
     </View>
   );
@@ -70,16 +79,18 @@ const VideoViewer = ({ mediaUri, onDelete }) => {
 const styles = StyleSheet.create({
   container: {
     // flex: 1,
-    borderTopLeftRadius:5,
-    borderTopRightRadius: 5
+    borderTopLeftRadius: 5,
+    borderTopRightRadius: 5,
   },
   fullSize: {
     width: "100%",
     // height: "100%",
   },
   video: {
-    width: "100%",
-    height: 60, // Set a fixed height or make it dynamic as needed
+    // width: "100%",
+    // height: 60, // Set a fixed height or make it dynamic as needed
+    borderTopLeftRadius: 5,
+    borderTopRightRadius: 5,
   },
   centeredView: {
     flex: 1,

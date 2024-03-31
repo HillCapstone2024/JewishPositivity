@@ -18,13 +18,14 @@ import RecordingAccessoryBar from "../../tools/RecordingBar.js";
 import MediaAccessoryBar from "../../tools/MediaBar.js";
 import ImageViewer from "../../tools/ImageViewer.js";
 import VideoViewer from "../../tools/VideoViewer.js";
+import RecordingViewer from "../../tools/RecordingViewer.js";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import * as FileSystem from "expo-file-system";
 import { Buffer } from "buffer";
 import RNPickerSelect from "react-native-picker-select";
 
-import { Video, ResizeMode, Audio } from "expo-av";
+// import { Video, ResizeMode, Audio } from "expo-av";
 import makeThemeStyle from "../../tools/Theme.js";
 import * as Storage from "../../AsyncStorage.js";
 import IP_ADDRESS from "../../ip.js";
@@ -56,7 +57,7 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
   const formattedDateTime = new Intl.DateTimeFormat("en-US", options).format(
     now
   );
-  const [sound, setSound] = useState();
+  // const [sound, setSound] = useState();
   const videoRef = useRef(null);
 
   useEffect(() => {
@@ -69,42 +70,42 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
       }
     };
     loadUsername();
-    configureAudioMode();
+    // configureAudioMode();
   }, []);
 
-  async function configureAudioMode() {
-    try {
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        interruptionModeIOS: 1,
-        playsInSilentModeIOS: true,
-        interruptionModeAndroid: 1,
-        shouldDuckAndroid: true,
-        staysActiveInBackground: true,
-        playThroughEarpieceAndroid: false,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  // async function configureAudioMode() {
+  //   try {
+  //     await Audio.setAudioModeAsync({
+  //       allowsRecordingIOS: false,
+  //       interruptionModeIOS: 1,
+  //       playsInSilentModeIOS: true,
+  //       interruptionModeAndroid: 1,
+  //       shouldDuckAndroid: true,
+  //       staysActiveInBackground: true,
+  //       playThroughEarpieceAndroid: false,
+  //     });
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }
 
-  async function playSound() {
-    console.log("Loading Sound");
-    const { sound } = await Audio.Sound.createAsync({ uri: mediaUri });
-    setSound(sound);
+  // async function playSound() {
+  //   console.log("Loading Sound");
+  //   const { sound } = await Audio.Sound.createAsync({ uri: mediaUri });
+  //   setSound(sound);
 
-    console.log("Playing Sound");
-    await sound.playAsync();
-  }
+  //   console.log("Playing Sound");
+  //   await sound.playAsync();
+  // }
 
-  useEffect(() => {
-    return sound
-      ? () => {
-          console.log("Unloading Sound");
-          sound.unloadAsync();
-        }
-      : undefined;
-  }, [sound]);
+  // useEffect(() => {
+  //   return sound
+  //     ? () => {
+  //         console.log("Unloading Sound");
+  //         sound.unloadAsync();
+  //       }
+  //     : undefined;
+  // }, [sound]);
 
   async function readFileAsBase64(uri) {
     try {
@@ -182,7 +183,7 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
     setShowMediaBar(true);
     setMediaUri(uri);
     setMediaType("recording");
-    setDisableSubmit(true);
+    // setDisableSubmit(true);
     const base64String = await readFileAsBase64(uri);
     setBase64Data(base64String);
     setJournalText("");
@@ -319,13 +320,26 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
       {mediaBox ? (
         <View style={styles.mediaContainer}>
           {mediaType === "image" ? (
-            <ImageViewer source={mediaUri} onDelete={deleteMedia} />
+            <ImageViewer
+              source={mediaUri}
+              onDelete={deleteMedia}
+              dimensions={{ height: 60, width: 60 }}
+            />
           ) : mediaType === "video" ? (
-            <VideoViewer mediaUri={mediaUri} onDelete={deleteMedia} />
+            <VideoViewer
+              mediaUri={mediaUri}
+              onDelete={deleteMedia}
+              dimensions={{ height: 60, width: 60 }}
+            />
           ) : (
-            <View style={styles.container}>
-              <Button title="Play Sound" onPress={playSound} />
-            </View>
+            // <View style={styles.container}>
+            //   <Button title="Play Sound" onPress={playSound} />
+            // </View>
+            <RecordingViewer
+              uri={mediaUri}
+              onDelete={deleteMedia}
+              dimensions={{ height: 60, width: 60 }}
+            />
           )}
           <ProgressBar onMediaChange={mediaChanged} />
         </View>
@@ -374,7 +388,6 @@ const ProgressBar = ({ onMediaChange }) => {
   const [parentWidth, setParentWidth] = useState(0);
 
   useEffect(() => {
-    // Initialize or reset progress when `onMediaChange` changes
     progress.setValue(0); // Reset progress to 0 without needing to re-create the Animated.Value
     console.log(parentWidth);
     if (parentWidth > 0) {
@@ -384,7 +397,7 @@ const ProgressBar = ({ onMediaChange }) => {
         useNativeDriver: false,
       }).start();
     }
-  }, [parentWidth, onMediaChange]); // Add `onMediaChange` to the dependency array
+  }, [parentWidth, onMediaChange]);
 
   const progressBarWidth = progress.interpolate({
     inputRange: [0, parentWidth],
@@ -408,14 +421,14 @@ const ProgressBar = ({ onMediaChange }) => {
 
 const stylesProgressBar = StyleSheet.create({
   container: {
-    height: 5, // Set a fixed height for the container
-    backgroundColor: "white", // Background color for the progress bar container
-    width: "100%", // Make sure the container takes up 100% of its parent's width
+    height: 5,
+    backgroundColor: "white",
+    width: "100%",
     borderRadius: 5,
   },
   progressBar: {
-    height: "100%", // The progress bar should fill the container height
-    backgroundColor: "#4A90E2", // Background color for the progress bar itself
+    height: "100%",
+    backgroundColor: "#4A90E2",
     borderBottomEndRadius: 5,
     borderBottomStartRadius: 5,
   },

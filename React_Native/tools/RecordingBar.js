@@ -148,6 +148,7 @@ export default function RecordingAccessoryBar({
   };
 
   async function requestAudioPermissions() {
+    console.log('requesting permission');
     const response = await Audio.requestPermissionsAsync();
     setAudioPermission(response.status === "granted");
   }
@@ -174,9 +175,7 @@ export default function RecordingAccessoryBar({
   };
 
   async function startRecording() {
-    if (!audioPermission) {
-      await requestAudioPermissions();
-    }
+    await requestAudioPermissions();
     if (audioPermission) {
       try {
         console.log("beginning recording...");
@@ -217,6 +216,7 @@ export default function RecordingAccessoryBar({
       setStartedRecording(false);
       setTimerRunning(false);
     } else {
+      console.log('this point should never be reached');
     }
   }
 
