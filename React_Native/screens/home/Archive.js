@@ -45,16 +45,20 @@ export default function Archive({ navigaton }) {
 
   const decodeBase64ToText = (base64String) => {
     try {
-      // Decode the Base64 string to a Buffer
-      const buffer = Buffer.from(base64String, "base64");
+      if (!base64String) {
+        // throw new Error('Base64 string is null or undefined');
+      }
+  
+      // Convert the Base64 string to a Buffer
+      const buffer = Buffer.from(base64String, 'base64');
       // Convert the Buffer to a UTF-8 string
-      const text = buffer.toString("utf8");
+      const text = buffer.toString('utf-8');
       return text;
     } catch (error) {
-      console.error("Error decoding base64 string:", error);
-      return "Error decoding content"; 
+      // console.error('Error decoding base64 string:', error);
+      return 'Error decoding content';
     }
-  };
+  };  
 
   const toggleFilterModal = () => {
     setIsFilterModalVisible(!isFilterModalVisible);
@@ -154,194 +158,79 @@ export default function Archive({ navigaton }) {
     }
   };
 
-  const renderContent = (data) => {
-    let checkInText = "";
-    switch (data.moment_number) {
-      case 1:
-        checkInText = "Modeh Ani";
-        break;
-      case 2:
-        checkInText = "Ashrei";
-        break;
-      case 3:
-        checkInText = "Shema";
-        break;
-      default:
-        checkInText = "Unknown Check-in";
-        break;
-    }
+  const renderDateTimeSection = (date) => (
+    <View style={styles.datetimeContainer}>
+      <Text style={[styles.text, styles.dayOfWeekText]}>
+        {moment(date, 'YYYY-MM-DD').format('ddd')}
+      </Text>
+      <Text style={[styles.text, styles.dayNumberText]}>
+        {moment(date, 'YYYY-MM-DD').format('D')}
+      </Text>
+      <Text style={styles.text}>
+        {moment(date, 'YYYY-MM-DD').format('h:mm A')}
+      </Text>
+    </View>
+  );
 
-    const dividerColor = getDividerColor(data.moment_number); // Get divider color based on moment_number
-    
-    switch (data.content_type) {
-      case "image":
-        return (
-          <View style={styles.contentContainer}>
-            <View style={{flexDirection: 'row'}}>
-              {/* Datetime section */}
-              <View style={styles.datetimeContainer}>
-                <Text style={[styles.text, styles.dayOfWeekText]}>
-                  {moment(data.date, 'YYYY-MM-DD').format('ddd')}
-                  </Text>
-                <Text style={[styles.text, styles.dayNumberText]}>
-                  {moment(data.date, 'YYYY-MM-DD').format('D')}
-                  </Text>
-                <Text style={styles.text}>
-                  {moment(data.date, 'YYYY-MM-DD').format('h:mm A')}
-                  </Text>
-              </View>
-              <View style={[styles.divider, { backgroundColor: dividerColor }]} />
-              {/* Content section */}
-              <View style={styles.contentSection}>
-                <View style={styles.middleContent}>
-                <Text style={styles.middleContentHeader} numberOfLines={1} ellipsizeMode="tail">Header would go here {/* data.header */}</Text>
-                  <Text style={styles.middleContentMoment_Number}>{checkInText}</Text>
-                  <Text style={styles.middleContentText} numberOfLines={3} ellipsizeMode="tail">{/* data.content */}This is some long content text that will be truncated if it takes up too much space in the container.</Text>
-                </View>
-              </View>
-              {/* Image content */}
-              <View style={styles.imageContainer}>
-                <Image
-                  style={styles.image}
-                  source={{ uri: `data:image/jpeg;base64,${data.content}` }}
-                />
-              </View>
-            </View>
-          </View>
-        );
-  
-      case "video":
-        return (
-          <View style={styles.contentContainer}>
-            <View style={{flexDirection: 'row'}}>
-              {/* Datetime section */}
-              <View style={styles.datetimeContainer}>
-                <Text style={[styles.text, styles.dayOfWeekText]}>
-                  {moment(data.date, 'YYYY-MM-DD').format('ddd')}
-                  </Text>
-                <Text style={[styles.text, styles.dayNumberText]}>
-                  {moment(data.date, 'YYYY-MM-DD').format('D')}
-                  </Text>
-                <Text style={styles.text}>
-                  {moment(data.date, 'YYYY-MM-DD').format('h:mm A')}
-                  </Text>
-              </View>
-              <View style={[styles.divider, { backgroundColor: dividerColor }]} />
-              {/* Content section */}
-              <View style={[styles.contentSection, { flex: 3.05 }]}>
-                <View style={styles.middleContent}>
-                <Text style={styles.middleContentHeader} numberOfLines={1} ellipsizeMode="tail">Header would go here {/* data.header */}</Text>
-                  <Text style={styles.middleContentMoment_Number}>{checkInText}</Text>
-                  <Text style={styles.middleContentText} numberOfLines={3} ellipsizeMode="tail">{decodeBase64ToText(data.content)}</Text>
-                </View>
-              </View>
-              {/* Video Section */}
-              <View style={styles.videoContainer}>
-                <Video
-                  style={styles.video}
-                  source={{ uri: `data:video/mp4;base64,${data.content}` }}
-                  useNativeControls
-                  resizeMode="contain"
-                />
-              </View>
-            </View>
-          </View>
-        );
-  
-      case "text":
-        return (
-          <View style={styles.contentContainer}>
-            <View style={{flexDirection: 'row'}}>
-              {/* Datetime section */}
-              {/* Datetime section */}
-              <View style={styles.datetimeContainer}>
-                <Text style={[styles.text, styles.dayOfWeekText]}>
-                  {moment(data.date, 'YYYY-MM-DD').format('ddd')}
-                  </Text>
-                <Text style={[styles.text, styles.dayNumberText]}>
-                  {moment(data.date, 'YYYY-MM-DD').format('D')}
-                  </Text>
-                <Text style={styles.text}>
-                  {moment(data.date, 'YYYY-MM-DD').format('h:mm A')}
-                  </Text>
-              </View>
-              <View style={[styles.divider, { backgroundColor: dividerColor }]} />
-              {/* Content section */}
-              <View style={[styles.contentSection, { flex: 3.05 }]}>
-                <View style={styles.middleContent}>
-                <Text style={styles.middleContentHeader} numberOfLines={1} ellipsizeMode="tail">Header would go here {/* data.header */}</Text>
-                  <Text style={styles.middleContentMoment_Number}>{checkInText}</Text>
-                  <Text style={styles.middleContentText} numberOfLines={3} ellipsizeMode="tail">{decodeBase64ToText(data.content)}</Text>
-                </View>
-              </View>
-            </View>
-          </View>
-        );
-  
-      case "recording":
-        // For audio, setup is more complex and requires loading the sound
-        // This is a placeholder - see expo-av documentation for playing audio
-        return (
-          <View style={styles.contentContainer}>
-            <View style={{flexDirection: 'row'}}>
-              {/* Datetime section */}
-              {/* Datetime section */}
-              <View style={styles.datetimeContainer}>
-                <Text style={[styles.text, styles.dayOfWeekText]}>
-                  {moment(data.date, 'YYYY-MM-DD').format('ddd')}
-                  </Text>
-                <Text style={[styles.text, styles.dayNumberText]}>
-                  {moment(data.date, 'YYYY-MM-DD').format('D')}
-                  </Text>
-                <Text style={styles.text}>
-                  {moment(data.date, 'YYYY-MM-DD').format('h:mm A')}
-                  </Text>
-              </View>
-              <View style={[styles.divider, { backgroundColor: dividerColor }]} />
-              {/* Content section */}
-              <View style={[styles.contentSection, { flex: 3.05 }]}>
-                <View style={styles.middleContent}>
-                <Text style={styles.middleContentHeader} numberOfLines={1} ellipsizeMode="tail">Header would go here {/* data.header */}</Text>
-                  <Text style={styles.middleContentMoment_Number}>{checkInText}</Text>
-                  <Text style={styles.middleContentText} numberOfLines={3} ellipsizeMode="tail">{decodeBase64ToText(data.content)}</Text>
-                </View>
-              </View>
-              {/* Audio Section */}
-              <View style={styles.contentSection}>
-                <View style={styles.recordingContainer}>
-                  <Text style={styles.text}>Recording</Text>
-                </View>
-              </View>
-            </View>
-          </View>
-        );
-  
+  const getMomentText = (momentNumber) => {
+    switch (momentNumber) {
+      case 1:
+        return "Modeh Ani";
+      case 2:
+        return "Ashrei";
+      case 3:
+        return "Shema";
       default:
-        return (
-          <View style={styles.contentContainer}>
-            <View style={{flexDirection: 'row'}}>
-              {/* Datetime section */}
-              <View style={styles.datetimeContainer}>
-                <Text style={[styles.text, styles.dayOfWeekText]}>
-                  {moment(data.date, 'YYYY-MM-DD').format('ddd')}
-                  </Text>
-                <Text style={[styles.text, styles.dayNumberText]}>
-                  {moment(data.date, 'YYYY-MM-DD').format('D')}
-                  </Text>
-                <Text style={styles.text}>
-                  {moment(data.date, 'YYYY-MM-DD').format('h:mm A')}
-                  </Text>
-              </View>
-              <View style={[styles.divider, { backgroundColor: dividerColor }]} />
-              <View style={styles.contentSection}>
-                <View style={styles.unsupportedContainer}>
-                  <Text style={styles.text}>Unsupported content type</Text>
-                </View>
-              </View>
+        return "Unknown Check-in Type";
+    }
+  };
+
+  const renderContent = (data) => {
+    const dividerColor = getDividerColor(data.moment_number);
+  
+    return (
+      <View style={styles.contentContainer}>
+        <View style={{ flexDirection: 'row' }}>
+          {renderDateTimeSection(data.date)}
+          <View style={[styles.divider, { backgroundColor: dividerColor }]} />
+          <View style={[styles.contentSection, data.content_type !== "image" && { flex: 3.05 }]}>
+            <View style={styles.middleContent}>
+              <Text style={styles.middleContentHeader} numberOfLines={1} ellipsizeMode="tail">Header would go here</Text>
+              <Text style={styles.middleContentMoment_Number}>{getMomentText(data.moment_number)}</Text>
+              <Text style={styles.middleContentText} numberOfLines={3} ellipsizeMode="tail">{data.content_type === "text" ? decodeBase64ToText(data.content) : "This is some long content text that will be truncated if it takes up too much space in the container."}</Text>
             </View>
           </View>
-        );
-    }
+          {data.content_type === "image" && (
+            <View style={styles.imageContainer}>
+              <Image
+                style={styles.image}
+                source={{ uri: `data:image/jpeg;base64,${data.content}` }}
+              />
+            </View>
+          )}
+          {data.content_type === "video" && (
+            <View style={styles.videoContainer}>
+              <Video
+                style={styles.video}
+                source={{ uri: `data:video/mp4;base64,${data.content}` }}
+                useNativeControls
+                resizeMode="contain"
+              />
+            </View>
+          )}
+          {data.content_type === "recording" && (
+            <View style={styles.audioContainer}>
+              <Text style={styles.text}>Recording</Text>
+            </View>
+          )}
+          {/* {!["image", "video", "recording"].includes(data.content_type) && (
+            <View style={styles.unsupportedContainer}>
+              <Text style={styles.text}>Unsupported content type</Text>
+            </View>
+          )} */}
+        </View>
+      </View>
+    );
   };
   
   useEffect(() => {
@@ -417,19 +306,36 @@ export default function Archive({ navigaton }) {
               >
                 <View style={styles.modalContainer}>
                   <View style={styles.JournalEntryModalContent}>
-                  <View style={styles.buttonRow}>
-                    <Ionicons name="close-circle" style={styles.JournalEntryModalIcons} onPress={closeModal} />
-                    <Ionicons name="create" style={styles.JournalEntryModalIcons} onPress={onEdit} />
-                  </View>
-                    <Text>Header: Header Would Go Here </Text>
-                    <Text>Date: {selectedEntry?.date}</Text>
-                    <Text>Moment: {selectedEntry?.moment_number}</Text>
-                    {/* <Text>Content: {selectedEntry?.content}</Text> */}
-                    {/* Add more details as needed */}
-                    <Image
-                      style={styles.JournalEntryModalImage}
-                      source={{ uri: `data:image/jpeg;base64,${selectedEntry?.content}` }}
-                    />
+                    <View style={styles.buttonRow}>
+                      <Ionicons name="close-outline" style={styles.JournalEntryModalIcons} onPress={closeModal} />
+                      <Ionicons name="ellipsis-horizontal-outline" style={styles.JournalEntryModalIcons} onPress={onEdit} />
+                    </View>
+                    <ScrollView padding={10} >
+                      <Text style={[styles.headerText]}>Header Would Go Here </Text>
+                      <Text style={[styles.detailText]}>{moment(selectedEntry?.date, 'YYYY-MM-DD').format('dddd, D MMMM YYYY')} </Text>
+                      <Text style={[styles.detailText,  {marginBottom:20}]}>{getMomentText(selectedEntry?.moment_number)}</Text>
+
+                      {selectedEntry?.content_type === "image" && (
+                        <Image
+                        style={[styles.JournalEntryModalImage, {marginBottom:20}]}
+                        source={{ uri: `data:image/jpeg;base64,${selectedEntry?.content}` }}
+                      />
+                      )}
+                      {selectedEntry?.content_type === "video" && (
+                          <Video
+                            style={styles.video}
+                            source={{ uri: `data:video/mp4;base64,${selectedEntry?.content}` }}
+                            useNativeControls
+                            resizeMode="contain"
+                          />
+                      )}
+                      {selectedEntry?.content_type === "recording" && (
+                          <Text style={styles.text}>Recording</Text>
+                      )}
+
+                      <Text style={[styles.detailText, {marginBottom: 20}]}>{selectedEntry?.content_type === "text" ? decodeBase64ToText(selectedEntry?.content) : "  This is some long content text that will be truncated if it takes up too much space in the container."}</Text>
+                    
+                    </ScrollView>
                   </View>
                 </View>
               </Modal>
@@ -616,5 +522,16 @@ const styles = StyleSheet.create({
     width: '100%', 
     aspectRatio: 1, 
     borderRadius: 5,
-  }
+  },
+  headerText: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  detailText: {
+    fontSize: 14,
+    color: 'grey',
+    fontWeight: 500,
+    lineHeight: 20,
+  },
 });

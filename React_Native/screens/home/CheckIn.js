@@ -254,33 +254,6 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.dropdownContainer}>
-          <RNPickerSelect
-            style={pickerSelectStyles}
-            value={selectedOption}
-            placeholder={{
-              label: "Prayer",
-            }}
-            placeholderTextColor="black"
-            onValueChange={handleOptionChange}
-            items={[
-              // { label: "Modeh Ani", value: "Modeh Ani" },
-              { label: "Ashrei", value: "Ashrei" },
-              { label: "Shema", value: "Shema" },
-              {
-                label: "Modeh Ani",
-                value: "Modeh Ani",
-              },
-            ]}
-          />
-          <Ionicons
-            name="chevron-down"
-            size={25}
-            color={"#4A90E2"}
-            style={{ paddingTop: 5 }}
-          />
-        </View>
-
         <TouchableOpacity
           disabled={disableSubmit}
           style={styles.submitButton}
@@ -295,73 +268,99 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
             Submit
           </Text>
         </TouchableOpacity>
+        {/* <View
+          style={[
+            styles.separator,
+            { borderBottomColor: theme["color"]["color"] },
+          ]}
+        /> */}
       </View>
-      {/* <View style={styles.horizontalBar} /> */}
+      <View style={styles.horizontalBar} />
       {/* end of cancel/submit section */}
-      <TextInput
-        style={[styles.title, theme["color"]]}
-        placeholder="Header..."
-        placeholderTextColor="grey"
-        testID="headerInput"
-      ></TextInput>
-      <View
-        style={[
-          styles.separator,
-          { borderBottomColor: theme["color"]["color"] },
-        ]}
-      />
-      <Text style={[styles.datetime, theme["color"]]}>
-        {" "}
-        {formattedDateTime}{" "}
-      </Text>
-      {/* <ScrollView keyboardDismissMode="interactive"> */}
 
-      {/* Media Box Below */}
-      {mediaBox ? (
-        <View style={styles.mediaContainer}>
-          {mediaType === "image" ? (
-            <ImageViewer
-              source={mediaUri}
-              onDelete={deleteMedia}
-              dimensions={{ height: 60, width: 60 }}
-            />
-          ) : mediaType === "video" ? (
-            <VideoViewer
-              mediaUri={mediaUri}
-              onDelete={deleteMedia}
-              dimensions={{ height: 60, width: 60 }}
-            />
-          ) : (
-            // <View style={styles.container}>
-            //   <Button title="Play Sound" onPress={playSound} />
-            // </View>
-            <RecordingViewer
-              uri={mediaUri}
-              onDelete={deleteMedia}
-              dimensions={{ height: 60, width: 60 }}
-            />
-          )}
-          <ProgressBar onMediaChange={mediaChanged} />
-        </View>
-      ) : null}
+      {/* Main Container Section */}
+      <ScrollView style={styles.contentContainer}>
+        <Text style={styles.header}>Whacha checking in for?</Text>
+        <Text style={[styles.datetime, theme["color"]]}>{formattedDateTime} </Text>
 
-      <ScrollView style={styles.scrollingInput}>
-        {/* Journal Text box View */}
-        <View>
+        {/* Media Box Below */}
+        {mediaBox ? (
+          <View style={styles.mediaContainer}>
+            {mediaType === "image" ? (
+              <ImageViewer
+                source={mediaUri}
+                onDelete={deleteMedia}
+                dimensions={{ height: 60, width: 60 }}
+              />
+            ) : mediaType === "video" ? (
+              <VideoViewer
+                mediaUri={mediaUri}
+                onDelete={deleteMedia}
+                dimensions={{ height: 60, width: 60 }}
+              />
+            ) : (
+              // <View style={styles.container}>
+              //   <Button title="Play Sound" onPress={playSound} />
+              // </View>
+              <RecordingViewer
+                uri={mediaUri}
+                onDelete={deleteMedia}
+                dimensions={{ height: 60, width: 60 }}
+              />
+            )}
+            <ProgressBar onMediaChange={mediaChanged} />
+          </View>
+        ) : null}
+
+        <View style={styles.boxContainer}>
+          <Text style={[styles.boxDescriptor]}>Add a Title</Text>
           <TextInput
-            style={styles.journalInput}
-            inputAccessoryViewID={mediaAccessoryViewID}
-            placeholder={"Enter reflection here…"}
-            placeholderTextColor={"grey"}
-            maxLength={10000}
-            value={journalText}
-            onChangeText={handleTextComplete}
-            multiline
-            numberOfLines={4}
-            testID="journalInput"
-          />
+            style={[styles.title, theme["color"]]}
+            placeholder="Write something..."
+            placeholderTextColor="grey"
+            testID="headerInput"
+          ></TextInput>
         </View>
+        
+        <View style={styles.boxContainer}>
+          <Text style={[styles.boxDescriptor]}>Check-in Type</Text>
+          <View style={styles.dropdownContainer}>
+            <RNPickerSelect
+              style={pickerSelectStyles}
+              value={selectedOption}
+              placeholder={{ label: "Select Type Here..." }}
+              placeholderTextColor="black"
+              onValueChange={handleOptionChange}
+              items={[
+                { label: "Modeh Ani", value: "Modeh Ani" },
+                { label: "Ashrei", value: "Ashrei" },
+                { label: "Shema", value: "Shema" },
+              ]}
+            />
+            {/* <Ionicons name="chevron-down" size={25} color={"#4A90E2"} style={{ paddingTop: 5 }}/> */}
+          </View>
+        </View>
+        
+        <View style={styles.boxContainer}>
+          <Text style={[styles.boxDescriptor]}>Description</Text>
+          <ScrollView style={[styles.dropdownContainer, {height: 350}]}>
+              <TextInput
+                style={styles.journalInput}
+                inputAccessoryViewID={mediaAccessoryViewID}
+                placeholder={"Enter reflection here…"}
+                placeholderTextColor={"grey"}
+                maxLength={10000}
+                value={journalText}
+                onChangeText={handleTextComplete}
+                multiline
+                numberOfLines={4}
+                testID="journalInput"
+              />
+          </ScrollView> 
+        </View>  
       </ScrollView>
+
+      {/* <ScrollView keyboardDismissMode="interactive"> */} 
 
       {/* Keyboard bar view below */}
       {showMediaBar ? (
@@ -436,15 +435,16 @@ const stylesProgressBar = StyleSheet.create({
 
 const pickerSelectStyles = StyleSheet.create({
   inputIOS: {
-    fontSize: 15,
+    fontSize: 16,
     // paddingVertical: 12,
+    // padding: 16,
     // paddingHorizontal: 10,
-    fontWeight: "bold",
+    // fontWeight: "bold",
     // borderWidth: 1,
     // borderColor: 'grey',
     // borderRadius: 8,
-    color: "#4A90E2",
-    fontSize: 30,
+    color: "grey",
+    // fontSize: 30,
     // paddingRight: 30,
     // backgroundColor: "white",
     // width: "1000",
@@ -452,15 +452,15 @@ const pickerSelectStyles = StyleSheet.create({
   },
   inputAndroid: {
     fontSize: 16,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderWidth: 0.5,
+    // paddingHorizontal: 10,
+    // paddingVertical: 8,
+    // borderWidth: 0.5,
     borderColor: "grey",
-    borderRadius: 8,
-    color: "black",
-    paddingRight: 30,
-    backgroundColor: "white",
-    paddingTop: 20, // Adjust padding to move the text down
+    // borderRadius: 8,
+    // color: "black",
+    // paddingRight: 30,
+    // backgroundColor: "white",
+    // paddingTop: 20, // Adjust padding to move the text down
   },
 });
 
@@ -468,16 +468,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
-    // backgroundColor: "white",
+  },
+  contentContainer: {
+    marginHorizontal: 15,
   },
   dropdownContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    // marginBottom: 10,
-    marginTop: 5,
+    borderColor: '#4A90E2',
+    borderWidth: 2,
+    borderRadius: 10,
+    padding: 16,
+    fontSize: 16,
+    color: 'grey',
+    // flexDirection: "row",
+    // alignItems: "center",
     // backgroundColor: "green",
-    justifyContent: "space-around",
-    marginBottom: 10,
+    // justifyContent: "space-around",
   },
   dropdownLabel: {
     marginRight: 10,
@@ -486,16 +491,34 @@ const styles = StyleSheet.create({
     // paddingTop: 10,
     textAlign: "left",
   },
-  RPNpicker: {
-    // paddingTop: 10,
+  boxContainer: {
+    paddingBottom: 20,
+  },
+  header: {
+    marginTop: 15,
+    fontSize: 28,
+    fontWeight: 'bold',
+  },
+  datetime: {
+    marginBottom: 15,
+    fontSize: 16,
+  },
+  boxDescriptor: {
+    fontSize: 16,
+    fontWeight: 500,
+    marginBottom: 10,
+
+  },
+  title: {
+    borderColor: '#4A90E2',
+    borderWidth: 2,
+    borderRadius: 10,
+    padding: 16,
+    fontSize: 16,
+    // fontWeight: "bold",
   },
   journalInput: {
-    // marginTop: 10,
-    borderRadius: 5,
-    padding: 10,
-    color: "black",
-    height: "100%",
-    marginHorizontal: 5,
+    fontSize: 16,
   },
   scrollingInput: {
     flexGrow: 1,
@@ -505,9 +528,9 @@ const styles = StyleSheet.create({
     // alignItems: "center",
     // paddingHorizontal: 10,
     // paddingTop: 5,
-    marginVertical: 20,
+    marginBottom: 10,
     // borderRadius: 5,
-    marginHorizontal: 15,
+    // marginHorizontal: Dimensions.get("window").width / 2.55,
     width: 60,
     height: 60,
   },
@@ -538,20 +561,9 @@ const styles = StyleSheet.create({
     marginTop: 10,
     // flex: 1,
   },
-  datetime: {
-    fontSize: 15,
-    paddingLeft: 12,
-    textAlign: "left",
-  },
   separator: {
     borderBottomWidth: StyleSheet.hairlineWidth,
     marginVertical: 10,
-  },
-  title: {
-    fontSize: 25,
-    fontWeight: "bold",
-    marginHorizontal: 15,
-    marginTop: 10,
   },
   topBar: {
     flexDirection: "row",
