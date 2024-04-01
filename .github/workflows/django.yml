@@ -39,3 +39,4 @@ jobs:
           python manage.py test JP_Django.tests.test_views.CheckinViewTestCase
           python manage.py test JP_Django.tests.test_views.GetCheckinsViewTestCase
           python manage.py test JP_Django.tests.test_views.AddFriendViewTestCase
+          python manage.py test JP_Django.tests.test_views.GetFriendsViewTestCase
