@@ -1190,7 +1190,7 @@ class GetCheckinsViewTestCase(TestCase): # to test retreving all checkin moments
         get_data = {'username': 'doesnotexist'} 
 
         # Send GET request to get_times_view
-        response = client.get(reverse('get_times_view'), data=get_data)
+        response = client.get(reverse('get_checkin_info_view'), data=get_data)
 
         # Check if response status code is 400 -- failure
         self.assertEqual(response.status_code, 400)
@@ -1394,3 +1394,108 @@ class DeleteFriendViewTestCase(TestCase):  # To test deleting friends from the u
 
         # Check if response status code is 400 -- failure
         self.assertEqual(response.status_code, 400)
+
+
+
+class GetFriendsViewTestCase(TestCase): # to test retreving all checkin moments from backend to frontend
+    
+      # Define constant user data
+    USER1_DATA = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+    USER2_DATA = {
+        'username': 'testuser2',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test2@example.com',
+        'timezone': 'EST',
+    }
+
+    USER3_DATA = {
+        'username': 'testuser3',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test3@example.com',
+        'timezone': 'EST',
+    }
+
+
+    def setUp(self):
+        # Initialize the Django test client
+        client = Client()
+
+        # Make a POST request to create test users and checkins
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)# make two users
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER2_DATA), content_type=CONTENT_TYPE_JSON)
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER3_DATA), content_type=CONTENT_TYPE_JSON)
+
+        # Send a friend request
+        client.post(reverse('add_friend_view'), data=json.dumps({
+            'user1': 'testuser1',
+            'user2': 'testuser2' #user 1 adds user2
+        }), content_type=CONTENT_TYPE_JSON)
+        client.post(reverse('add_friend_view'), data=json.dumps({
+            'user1': 'testuser1',
+            'user2': 'testuser3' #user 1 adds user3
+        }), content_type=CONTENT_TYPE_JSON)
+
+        #accept requests
+        client.post(reverse('add_friend_view'), data=json.dumps({
+            'user1': 'testuser2',
+            'user2': 'testuser1' #user 2 adds user 1
+        }), content_type=CONTENT_TYPE_JSON)
+        client.post(reverse('add_friend_view'), data=json.dumps({
+            'user1': 'testuser3',
+            'user2': 'testuser1' #user 3 adds user 1
+        }), content_type=CONTENT_TYPE_JSON)
+
+    def test_get_friends_success(self):# Successfully retrieves a valid user's checkins from the database
+        logging.info("************TEST_get_friends_success**************..........")
+        client = Client()
+
+        # Create test data
+        get_data = {'username': 'testuser1'} # to retrieve all (or if one add in moment#) checkins for this user
+
+        # Send GET request to get_checkin_info_view
+        response = client.get(reverse('get_friend_userid_view'), data=get_data)
+
+        # Check if response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+        # Printing DB after attempted getting of checkins
+        logging.info('Response: %s', response)
+        logging.info('')
+        queryset = Checkin.objects.all()
+        for obj in queryset:
+            logging.info(obj)
+            logging.info('') 
+
+    def test_get_friends_fail_User_DNE(self):# Fails to get checkins in database due to user not existing
+        logging.info("***************TEST_get_friends_fail_User_DNE**************")
+        client = Client()
+
+        # Create test data
+        get_data = {'username': 'doesnotexist'} 
+
+        # Send GET request
+        response = client.get(reverse('get_friend_userid_view'), data=get_data)
+
+        # Check if response status code is 400 -- failure
+        self.assertEqual(response.status_code, 400)
+
+        # Printing DB after attempted getting of checkins
+        queryset = Checkin.objects.all()
+        for obj in queryset:
+            logging.info(obj)
+            logging.info('')   
