@@ -667,28 +667,34 @@ def delete_friend_view(request):
     return HttpResponse("Invalid request method", status=400)
 
 
-def get_friend_userid_view(request):
+def get_friend_username_view(request):
     if request.method == "GET":
-        user_id = request.GET.get("user_id")
+        username = request.GET.get("username")
 
-        # Make sure the user_id is not empty
-        if user_id is not None:
+        # Make sure the username is not empty
+        if username is not None:
             try:
-                # get friendships where the given user is either user1 or user2
-                friendships = Friends.objects.filter(user1_id=user_id) | Friends.objects.filter(user2_id=user_id)
+                # Retrieve the user from the database by username
+                user = User.objects.get(username=username)
 
-                # List to store friend user IDs and the friendship status
+                # Get friendships where the given user is either user1 or user2
+                friendships = Friends.objects.filter(user1_id=user.id) | Friends.objects.filter(user2_id=user.id)
+
+                # List to store friend usernames and the friendship status
                 friendship_data = []
 
-                # Populate the list with dictionaries containing user IDs and friendship status
+                # Populate the list with dictionaries containing usernames and friendship status
                 for friendship in friendships:
-                    if friendship.user1_id == user_id:
+                    if friendship.user1_id == user.id:
                         friend_id = friendship.user2_id
                     else:
                         friend_id = friendship.user1_id
 
+                    # Get the username of the friend
+                    friend_username = User.objects.get(id=friend_id).username
+
                     friendship_data.append({
-                        'user_id': friend_id,
+                        'username': friend_username,
                         'status': friendship.complete
                     })
 
@@ -697,9 +703,11 @@ def get_friend_userid_view(request):
                 logging.info(friendship_data)
                 return JsonResponse(friendship_data, safe=False)
 
+            except User.DoesNotExist:
+                return HttpResponse("User does not exist", status=400)
             except Exception as e:
-                logging.info(e)
-                return HttpResponse(constUserDNE, status=400)
-        else:  # user_id was empty
-            return HttpResponse(constUNnotProvided, status=400)
+                logging.error(e)
+                return HttpResponse("An error occurred", status=400)
+        else:  # username was empty
+            return HttpResponse("Username not provided", status=400)
     return HttpResponse("Not a GET request")
