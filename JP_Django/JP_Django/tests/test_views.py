@@ -1450,7 +1450,7 @@ class GetFriendsViewTestCase(TestCase): # to test retreving all checkin moments 
             'user2': 'testuser3' #user 1 adds user3
         }), content_type=CONTENT_TYPE_JSON)
 
-        #accept requests
+        #accept requests of friend testuser1
         client.post(reverse('add_friend_view'), data=json.dumps({
             'user1': 'testuser2',
             'user2': 'testuser1' #user 2 adds user 1
@@ -1468,7 +1468,7 @@ class GetFriendsViewTestCase(TestCase): # to test retreving all checkin moments 
         get_data = {'username': 'testuser1'} # to retrieve all (or if one add in moment#) checkins for this user
 
         # Send GET request to get_checkin_info_view
-        response = client.get(reverse('get_friend_userid_view'), data=get_data)
+        response = client.get(reverse('get_friends_view'), data=get_data)
 
         # Check if response status code is 200
         self.assertEqual(response.status_code, 200)
@@ -1489,7 +1489,7 @@ class GetFriendsViewTestCase(TestCase): # to test retreving all checkin moments 
         get_data = {'username': 'doesnotexist'} 
 
         # Send GET request
-        response = client.get(reverse('get_friend_userid_view'), data=get_data)
+        response = client.get(reverse('get_friends_view'), data=get_data)
 
         # Check if response status code is 400 -- failure
         self.assertEqual(response.status_code, 400)

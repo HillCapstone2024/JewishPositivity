@@ -667,7 +667,7 @@ def delete_friend_view(request):
     return HttpResponse("Invalid request method", status=400)
 
 
-def get_friend_username_view(request):
+def get_friends_view(request):
     if request.method == "GET":
         username = request.GET.get("username")
 
