@@ -39,6 +39,7 @@ constUserDNE = "User does not exist"
 constUNnotProvided= "Username not provided"
 constFriendExists = "Friendship already exists"
 constAppJson = "application/json"
+constInvalidReq = "Invalid request method"
 
 
 # ########## Helper Functions ##########
@@ -438,14 +439,14 @@ def delete_user_view(request):
                 user.delete()
                 return HttpResponse("User deleted successfully", status=200)
             else:
-                return HttpResponse("User does not exist", status=400)
+                return HttpResponse(constUserDNE, status=400)
           
         except User.DoesNotExist:
             return HttpResponse(constUserDNE, status=400)
         except Exception as e:
             return HttpResponse("Error deleting user: " + str(e), status=400)
 
-    return HttpResponse("Invalid request method", status=400)
+    return HttpResponse(constInvalidReq, status=400)
 
 # ########## Check-in Management ##########
 
@@ -484,7 +485,7 @@ def checkin_view(request):
     # Handle the check-in POST request
     if request.method != 'POST':
         # Return an error response if the request method is not POST
-        return HttpResponse("Invalid request method", status=405)
+        return HttpResponse(constInvalidReq, status=405)
 
     # Parse the JSON data from the request body
     data = json.loads(request.body)
@@ -687,11 +688,11 @@ def delete_friend_view(request):
                 return HttpResponse("Friendship does not exist", status=400)
 
         except User.DoesNotExist:
-            return HttpResponse("User not found", status=400)
+            return HttpResponse(constUserDNE, status=400)
         except Exception as e:
             return HttpResponse("Error deleting friend: " + str(e), status=400)
 
-    return HttpResponse("Invalid request method", status=400)
+    return HttpResponse(constInvalidReq, status=400)
 
 
 def get_friends_view(request):
@@ -731,7 +732,7 @@ def get_friends_view(request):
                 return JsonResponse(friendship_data, safe=False)
 
             except User.DoesNotExist:
-                return HttpResponse("User does not exist", status=400)
+                return HttpResponse(constUserDNE, status=400)
             except Exception as e:
                 logging.error(e)
                 return HttpResponse("An error occurred", status=400)
