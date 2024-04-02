@@ -89,7 +89,7 @@ def get_user(username):
         return user, None
     except User.DoesNotExist:
         # Log and return an error response if the user does not exist
-        logging.info("Username does not exist")
+        logging.info(constUserDNE)
         return None, HttpResponse("Username does not exist", status=400)
 
 
@@ -419,6 +419,33 @@ def get_times_view(request):
     return HttpResponse("Not a GET request!")
 
 
+def delete_user_view(request):
+    if request.method == "POST":
+        # Retrieve usernames from POST request
+        data = json.loads(request.body)
+        username = data.get("username")
+        logging.info('retrieved username %s', username)
+
+        try:
+            # Getting users from the user objects from the user table
+            userobj = User.objects.get(username=username)
+            logging.info('retrieved user %s', userobj)
+
+            user = User.objects.filter(username= username)
+        
+            # Delete the User if it exists
+            if user.exists():
+                user.delete()
+                return HttpResponse("User deleted successfully", status=200)
+            else:
+                return HttpResponse("User does not exist", status=400)
+          
+        except User.DoesNotExist:
+            return HttpResponse(constUserDNE, status=400)
+        except Exception as e:
+            return HttpResponse("Error deleting user: " + str(e), status=400)
+
+    return HttpResponse("Invalid request method", status=400)
 
 # ########## Check-in Management ##########
 

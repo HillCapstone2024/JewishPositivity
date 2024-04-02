@@ -1395,8 +1395,6 @@ class DeleteFriendViewTestCase(TestCase):  # To test deleting friends from the u
         # Check if response status code is 400 -- failure
         self.assertEqual(response.status_code, 400)
 
-
-
 class GetFriendsViewTestCase(TestCase): # to test retreving all checkin moments from backend to frontend
     
       # Define constant user data
@@ -1499,3 +1497,71 @@ class GetFriendsViewTestCase(TestCase): # to test retreving all checkin moments 
         for obj in queryset:
             logging.info(obj)
             logging.info('')   
+
+class DeleteUserViewTestCase(TestCase):  # To test deleting users account from the User table
+
+    # Define constant user data
+    USER1_DATA = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+    USER2_DATA = {
+        'username': 'testuser2',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test2@example.com',
+        'timezone': 'EST',
+    }
+
+    DELETE_USER_DATA_SUCCESS = {
+        'username': 'testuser1',
+    }
+
+    DELETE_USER_DATA_FAILURE = {
+        'username': 'UserDNE',
+    }
+
+
+    def setUp(self):
+        logging.info("Setting up DeleteUserViewTestCase")
+        self.client = Client()
+
+        # Create test user to test delete
+        self.client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)
+        self.client.post(reverse('create_user_view'), data=json.dumps(self.USER2_DATA), content_type=CONTENT_TYPE_JSON)
+
+
+    def test_delete_user_success(self):
+        logging.info("***************test_delete_user_success**************".upper())
+        # Delete the friend relationship
+        response = self.client.post(reverse('delete_user_view'), data=json.dumps(self.DELETE_USER_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 200 -- success
+        self.assertEqual(response.status_code, 200)
+
+        queryset = User.objects.all() 
+        for obj in queryset:
+            # Log user information
+            logging.info(LOG_MSG_FORMAT, LOG_USER, obj.username)
+            logging.info(LOG_MSG_FORMAT, LOG_FIRST_NAME, obj.first_name)
+            logging.info(LOG_MSG_FORMAT, LOG_LAST_NAME, obj.last_name)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME1, obj.time1)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME2, obj.time2)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME3, obj.time3)
+            logging.info('')  
+
+    def test_delete_friend_failure(self):
+        logging.info("***************test_delete_user_failure**************".upper())
+        # Attempt to delete a non-existing friend relationship
+        response = self.client.post(reverse('delete_user_view'), data=json.dumps(self.DELETE_USER_DATA_FAILURE), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 400 -- failure
+        self.assertEqual(response.status_code, 400)
