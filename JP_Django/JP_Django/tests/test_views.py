@@ -34,6 +34,13 @@ LOG_TEXT_ENTRY= 'Text Entry'
 LOG_MOMENT_NUMBER = 'Moment Number'
 LOG_USER_ID = 'User ID'
 
+# Define constant strings for logging FRIENDS
+LOG_FRIENDSHIP_ID = 'Friendship ID'
+LOG_FRIENDSHIP_STATUS = 'Friendship Status'
+LOG_USER1_ID = 'User1 ID'
+LOG_USER2_ID = 'User1 ID'
+
+
 class CreateUserViewTestCase(TestCase):
     
     # Define constant post data
@@ -1375,14 +1382,36 @@ class DeleteFriendViewTestCase(TestCase):  # To test deleting friends from the u
             'user2': 'testuser2'
         }), content_type=CONTENT_TYPE_JSON)
 
-        # Update the database in  to accept the friend request
+        # Update the database to accept the friend request
         Friends.objects.filter(user1__username='testuser1', user2__username='testuser2').update(complete=True)
 
 
     def test_delete_friend_success(self):
         logging.info("***************test_delete_friend_success**************".upper())
+
+
+        logging.info('BEFORE DELETE')
+        queryset = Friends.objects.all() 
+        for obj in queryset:
+            # Log user information
+            logging.info(LOG_MSG_FORMAT, LOG_FRIENDSHIP_ID, obj.friendship_id)
+            logging.info(LOG_MSG_FORMAT, LOG_FRIENDSHIP_STATUS, obj.complete)
+            logging.info(LOG_MSG_FORMAT, LOG_USER1_ID, obj.user1)
+            logging.info(LOG_MSG_FORMAT, LOG_USER2_ID, obj.user2)
+            logging.info('')  
+         
         # Delete the friend relationship
         response = self.client.post(reverse('delete_friend_view'), data=json.dumps(self.DELETE_FRIEND_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        logging.info('AFTER DELETE')
+        queryset = Friends.objects.all() 
+        for obj in queryset:
+            # Log user information
+            logging.info(LOG_MSG_FORMAT, LOG_FRIENDSHIP_ID, obj.friendship_id)
+            logging.info(LOG_MSG_FORMAT, LOG_FRIENDSHIP_STATUS, obj.complete)
+            logging.info(LOG_MSG_FORMAT, LOG_USER1_ID, obj.user1)
+            logging.info(LOG_MSG_FORMAT, LOG_USER2_ID, obj.user2)
+            logging.info('')  
 
         # Check if response status code is 200 -- success
         self.assertEqual(response.status_code, 200)
