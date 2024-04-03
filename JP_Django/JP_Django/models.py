@@ -41,11 +41,12 @@ class User(AbstractUser):
 class Checkin(models.Model): #to store checkin moments data
     checkin_id= models.AutoField(primary_key= True) #the autoincremented ID field for checkins
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_column='id')  #referencing id of user model 
-    date = models.DateField() #header, datetime, separate video
+    date = models.DateTimeField() 
     moment_number = models.IntegerField() #should be 1,2, or 3
     content_type = models.CharField(max_length=100) #either of following option: photo, audio, video
     text_entry= models.CharField(null=True, max_length=255) 
     content = models.BinaryField(null=True) #actual content
+    header = models.CharField(null=True, max_length=100) #header for the content
 
     class Meta:
         # Define unique constraint for composite key
