@@ -459,7 +459,6 @@ def create_checkin(user, data):
     try:
         # Decode the base64 encoded content
         content_binary_encoded=None #default No Media
-
         if data["content"] is not None: # if there is media decode it and save it
             content_binary_encoded = base64.b64decode(data["content"])
         else: 
@@ -476,18 +475,18 @@ def create_checkin(user, data):
         all_checkins = Checkin.objects.filter(user_id=user_id)
         for checkin in all_checkins:
             logging.info("datetime_current.date(): %s", datetime_current.date())
-            logging.info("checkin.date.date()", checkin.date.date())
+            logging.info("checkin.date.date(): %s", checkin.date.date())
             if data['moment_number']==checkin.moment_number and datetime_current.date() == checkin.date.date():
                 logging.info("DUPLICATE!!!")
                 return HttpResponse("Error: Duplicate Moment Today", status=400)
         
 
-            # Create the checkin object and save it to the database
+        # Create the checkin object and save it to the database
         checkin = Checkin.objects.create(
             user_id=user,
             moment_number=data["moment_number"],
             header=data["header"], #could be None or text chars
-            content=content_binary_encoded, #can be text or none
+            content=content_binary_encoded, #can be media or none
             text_entry=data["text_entry"], #can be text or none
             content_type=data["content_type"],
             date=datetime_current #will get you a datetime 
@@ -523,7 +522,7 @@ def checkin_view(request):
     # Create the check-in record
     return create_checkin(user, data)
 
-def get_checkin_info_view(request): #To be filled out soon 
+def get_checkin_info_view(request):
     if request.method == "GET":
         username = request.GET.get("username")  # JSON is not typically used for GET requests here
 
@@ -544,7 +543,6 @@ def get_checkin_info_view(request): #To be filled out soon
                     
                     if checkin.content is not None and checkin.content_type != "video": #get content if not None and if not video
                         obj_content= base64.b64encode(checkin.content).decode('utf-8')
-                    
                     
                     current_checkin = { # dictionary to append to list
                         "checkin_id": checkin.checkin_id,
@@ -568,6 +566,27 @@ def get_checkin_info_view(request): #To be filled out soon
     return HttpResponse("Not a GET request!")
 
 
+def get_video_info_view(request): 
+    
+    if request.method == "GET":
+        logging.info("In the get_video_info_view*****************")
+        checkin_id = request.GET.get("checkin_id")  # JSON is not typically used for GET requests here
+        logging.info("checkin_id: %s", checkin_id)
+        # Make sure the get data is not empty
+        if checkin_id is not None:
+            try:
+                # Retrieve the user from the database by username
+                video_checkin = Checkin.objects.get(checkin_id=checkin_id)
+                logging.info("video_checkin: %s", video_checkin)
+                obj_content= base64.b64encode(video_checkin.content).decode('utf-8')
+                logging.info("passed the odj content encoding 64*****************")
+                return HttpResponse(json.dumps(obj_content), content_type= constAppJson) #this is the base64 string being passed
+            except Exception as e:
+                logging.info(e)
+                return HttpResponse(constUserDNE, status=400)
+        else:  # username was empty
+            return HttpResponse(constUNnotProvided, status=400)
+    return HttpResponse("Not a GET request!")
 
 
 # ########## Utility Views ##########

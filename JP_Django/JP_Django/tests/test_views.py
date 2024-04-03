@@ -1230,6 +1230,87 @@ class GetCheckinsViewTestCase(TestCase): # to test retreving all checkin moments
             logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.user_id)
             logging.info('')   
 
+
+class GetCheckinVideoViewTestCase(TestCase): # to test retreving a video checkin moment
+    
+    video_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64video.txt'))
+    videoFile = open(video_file_path, 'r')
+    video = videoFile.read()
+    #logging.info("VIDEO: %s", video)
+    videoFile.close()
+
+    # Define constant user data
+    USER1_DATA = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+    VIDEO_DATA_SUCCESS = {
+        'username': 'testuser1',
+        'header': 'Sample Header',
+        'moment_number': 1,
+        'content_type': 'video',
+        'content': video, 
+        'text_entry': None,
+    }
+
+    video_check_id= -1 #makes this global to access in test methods
+    def setUp(self):
+        # Initialize the Django test client
+        client = Client()
+
+        # Make a POST request to create test users and checkins
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)# make two users
+        client.post(reverse('checkin_view'), data=json.dumps(self.VIDEO_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
+        response = client.get(reverse('get_checkin_info_view'), data={'username': 'testuser1'})
+        
+        # Parse the response content as JSON
+        response_data = json.loads(response.content)
+        logging.info("response_data: %s",response_data)
+        # Now you can access the dictionary returned by the view
+        self.video_check_id = response_data[0]['checkin_id']
+        logging.info("video_check_id: %s",self.video_check_id)
+
+
+
+    def test_get_video_success(self):# Successfully retrieves a video checkin from the database
+        logging.info("************TEST_get_video_success**************..........")
+        client = Client()
+
+        # Create test data
+        get_data = {'checkin_id': self.video_check_id} 
+
+        # Send GET request to get_checkin_info_view
+        response = client.get(reverse('get_video_info_view'), data=get_data)
+        response_data = json.loads(response.content)
+        logging.info("success response_data: %s",response_data)
+
+        # Check if response status code is 200
+        self.assertEqual(response.status_code, 200)
+         
+
+    def test_get_video_fail_checkin_id_DNE(self):# Fails to get checkins in database due to user not existing
+        logging.info("***************TEST_get_video_fail_checkin_id_DNE**************")
+        client = Client()
+
+        # get test data
+        get_data = {'checkin_id': 4}
+
+        # Send GET request 
+        response = client.get(reverse('get_video_info_view'), data=get_data)
+
+        # Check if response status code is 400 -- failure
+        self.assertEqual(response.status_code, 400)
+        
+
+
+       
+
 class AddFriendViewTestCase(TestCase): #to test adding friends to user's friend list
 
     # Define constant user data
