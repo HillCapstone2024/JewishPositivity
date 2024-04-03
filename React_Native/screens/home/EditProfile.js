@@ -10,11 +10,12 @@ import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import IP_ADDRESS from "../../ip.js";
+import { Alert } from "react-native";
  
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
 
-const UserProfile = ({ navigation }) => {
+const EditProfile = ({navigation}) => {
   const [userInfo, setUserInfo] = useState({
     fname: "",
     lname: "",
@@ -23,12 +24,9 @@ const UserProfile = ({ navigation }) => {
     email: "",
     //dateJoined: "January 1, 2021",
     //journalEntries: 120,
-    profilePicture: "../../assets/images/logo.png",
+    profilePicture: "",
   });
 
-  const navigateEdit = () => {
-    navigation.navigate("EditProfile");
-  };
 
   const avatar = createAvatar(micah, {
     seed: userInfo.username,
@@ -40,6 +38,57 @@ const UserProfile = ({ navigation }) => {
   const [newPassword, setNewPassword] = useState("");
   const [newProfilePic, setNewProfilepPic] = useState("");
 
+  const handleChangePassword = () => {
+    // Implement password change logic here
+    console.log("Password changed to:", newPassword);
+    // Reset password field
+    setNewPassword("");
+  };
+
+  const handleEditProfilePicture = () => {
+    Alert.alert("Media Type", "", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Camera Roll", onPress: () => pickMedia() },
+      { text: "Take Photo", onPress: () => takeMedia() },
+    ]);    
+  };
+
+  const pickMedia = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.All, // Allows both videos and images
+    allowsEditing: true, // Only applies to images
+    aspect: [4, 3],
+    quality: 1,
+    });
+
+    if (!result.cancelled) {
+    setMediaType(result.assets[0].type);
+    setMedia(result);
+    console.log("result: ", result.assets[0]);
+    }
+};
+
+const takeMedia = async () => {
+    // Request camera and microphone permissions if not already granted
+    const cameraPermission = await ImagePicker.requestCameraPermissionsAsync();
+    if (!cameraPermission.granted) {
+        alert("Permissions to access camera and microphone are required!");
+        return;
+    }
+
+    let result = await ImagePicker.launchCameraAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.All, // This will still default to capturing images
+    allowsEditing: true, // Only applies to images
+    aspect: [4, 3],
+    quality: 1,
+    });
+
+    if (result && !result.cancelled) {
+        setMediaType(result.assets[0].type);
+        setMedia(result);
+        console.log("result: ", result);
+    }
+};
 
   useEffect(() => {
     const loadUserInfo = async () => {
@@ -112,24 +161,22 @@ const UserProfile = ({ navigation }) => {
   
 
   return (
-    <View style={[
-      // themeStyle['background'], 
-      styles.container]}>
-      <TouchableOpacity  >
+    <View style={styles.container}>
+      <TouchableOpacity onPress={handleEditProfilePicture} >
           <View style={styles.profilePicContainer}>
             <SvgXml xml={avatar} style={styles.profilePic} />
+            <View style={styles.cameraIcon}>
+              <Ionicons name="camera" size={24} color="black" />
+            </View>
           </View>
         </TouchableOpacity>
       {/* <SvgXml xml={avatar} style={styles.profilePic} /> */}
         {/* { <Button>Change Avatar</Button> } */}
         {<TextInput style={styles.info}>First Name: {userInfo.fname} </TextInput>}
-        {<Text style={styles.info}>Last Name: {userInfo.lname} </Text>}
-        <Text style={styles.info}>Username: {userInfo.username}</Text>
-        {<Text style={styles.info}>Email: {userInfo.email} </Text>}
-        {/* {<Button title="Edit Profile Temp" onPress={navigateLogin}></Button>} */}
-        <TouchableOpacity style={styles.button} onPress={navigateEdit}>
-              <Text style={styles.buttonText}> Temp to Edit</Text>
-        </TouchableOpacity>
+        {<TextInput style={styles.info}>Last Name: {userInfo.lname} </TextInput>}
+        <TextInput style={styles.info}>Username: {userInfo.username}</TextInput>
+        {<TextInput style={styles.info}>Email: {userInfo.email} </TextInput>}
+        {<Button title="Return to profile"></Button>}
     </View>
   );
 };
@@ -156,12 +203,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.7)",
     padding: 4,
   },
-  attributes: {
-    margin: 10,
-    textAlign: "left",
-    fontSize: 16,
-    alignItems: 'flex-start', 
-  },
   info: {
     //fontSize: 16,
     //marginBottom: 10,
@@ -182,4 +223,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default UserProfile;
+export default EditProfile;

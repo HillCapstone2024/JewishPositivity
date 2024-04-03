@@ -25,6 +25,7 @@ import UserProfile from "../screens/home/Profile.js";
 import SettingsPage from "../screens/home/Settings.js";
 import Communities from "../screens/home/Communities.js";
 import Badges from "../screens/home/Badges.js";
+import EditProfile from "../screens/home/EditProfile.js";
 import Friends from "../screens/home/Friends.js";
 import * as Haptics from 'expo-haptics';
 
@@ -126,6 +127,7 @@ const MyDrawer = ({ navigation }) => {
     >
       <Drawer.Screen name="Home" component={BottomTabNavigator} options={{ drawerIcon: () => (<Ionicons name="home" size={22} color={theme['color']['color']} />), }} />
       <Drawer.Screen name="Profile" component={UserProfile} testID="profileButton" options={{ drawerIcon: () => (<Ionicons name="person" size={22} color={theme['color']['color']} />), }} />
+      <Drawer.Screen name="EditProfile" component={EditProfile} testID="editProfileButton" options={{ drawerIcon: () => (<Ionicons name="person" size={22} color={theme['color']['color']} />), }} />
       <Drawer.Screen name="Badges" component={Badges} options={{ drawerIcon: () => (<Ionicons name="trophy" size={22} color={theme['color']['color']} />), }} />
       <Drawer.Screen name="Friends" component={Friends} options={{ drawerIcon: () => (<Ionicons name="person-add" size={22} color={theme['color']['color']} />), }} />
       <Drawer.Screen name="Communities" component={Communities} options={{drawerIcon: () => (<Ionicons name="people" size={22} color={theme['color']['color']} />),}}/>
