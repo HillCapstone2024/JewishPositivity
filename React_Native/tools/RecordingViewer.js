@@ -6,9 +6,15 @@ import {
   Text,
   StyleSheet,
   Modal,
+  Animated,
+  Dimensions,
 } from "react-native";
 import { Audio } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
+import makeThemeStyle from "./Theme.js";
+
+const { height } = Dimensions.get("window");
 
 const RecordingViewer = ({ uri, onDelete, dimensions }) => {
     const [modalVisible, setModalVisible] = useState(false);
@@ -16,6 +22,8 @@ const RecordingViewer = ({ uri, onDelete, dimensions }) => {
     const [playbackInstance, setPlaybackInstance] = useState(null);
     const [duration, setDuration] = useState(0);
     const [position, setPosition] = useState(0);
+    const slideAnim = useRef(new Animated.Value(height)).current;
+    const theme = makeThemeStyle();
 //   const [sound, setSound] = useState();
 
   const playbackInstanceRef = useRef(null);
@@ -61,6 +69,16 @@ const RecordingViewer = ({ uri, onDelete, dimensions }) => {
     }
   };
 
+    const showDeleteModal = () => {
+      setModalVisible(true);
+      theme["hapticFeedback"] ? null : Haptics.selectionAsync();
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 150,
+        useNativeDriver: true,
+      }).start();
+    };
+
   // Convert milliseconds to mm:ss format
   const formatTime = (millis) => {
     const minutes = Math.floor(millis / 60000);
@@ -74,13 +92,12 @@ const RecordingViewer = ({ uri, onDelete, dimensions }) => {
           styles.container,
           { height: dimensions.height, width: dimensions.width },
         ]}
-        // onLongPress={setModalVisible(true)}
       >
-        {/* <TouchableWithoutFeedback onPress={handlePlayPausePress}> */}
           <View style={styles.timerContainer}>
             {isPlaying ? (
               <Text style={styles.timer}>
-                {formatTime(duration - position)}
+                {" "}
+                {formatTime(duration - position)}{" "}
               </Text>
             ) : (
               <Text style={[styles.timer, { color: "white" }]}>Audio</Text>
@@ -88,7 +105,7 @@ const RecordingViewer = ({ uri, onDelete, dimensions }) => {
           </View>
           <TouchableOpacity
             onPress={handlePlayPausePress}
-            // onLongPress={setModalVisible(true)}
+            onLongPress={showDeleteModal}
           >
             {isPlaying ? (
               <Ionicons
@@ -104,9 +121,6 @@ const RecordingViewer = ({ uri, onDelete, dimensions }) => {
               />
             )}
           </TouchableOpacity>
-        {/* </TouchableWithoutFeedback> */}
-
-
 
         {/* Delete Media Modal */}
         <Modal
@@ -117,20 +131,22 @@ const RecordingViewer = ({ uri, onDelete, dimensions }) => {
         >
           <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
             <View style={styles.centeredView}>
+              {/* Prevents the modal content from closing when pressing on it */}
               <TouchableWithoutFeedback>
                 <View style={styles.modalView}>
                   <Text style={styles.modalText}>
-                    Do You Want to DELETE This Recording?
+                    Do you want to delete this recording?
                   </Text>
                   <View style={styles.horizontalBar} />
                   <TouchableOpacity
                     onPress={() => {
-                      // onDelete();
+                      onDelete();
                       setModalVisible(false);
                     }}
                   >
                     <Text style={styles.deleteText}>Delete</Text>
                   </TouchableOpacity>
+                  {/* Removed the Cancel button since pressing off the modal now also acts as cancel */}
                 </View>
               </TouchableWithoutFeedback>
             </View>
@@ -180,6 +196,39 @@ const styles = StyleSheet.create({
     backgroundColor: "#ccc",
     // marginTop: 15,
     // borderWidth: 2,
+  },
+
+  centeredView: {
+    flex: 1,
+    justifyContent: "flex-end",
+    // alignItems: "center",
+    marginBottom: 20,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    paddingTop: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  deleteText: {
+    color: "red",
+    fontSize: 16,
+    marginVertical: 10,
   },
 });
 
