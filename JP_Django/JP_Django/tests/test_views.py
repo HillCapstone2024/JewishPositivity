@@ -928,7 +928,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
     }
 
     DUPLICATE_MOMENT = {
-        'username': 'testuser5',
+        'username': 'testuser1',
         'header': None,
         'moment_number': 1,
         'content_type': 'photo',

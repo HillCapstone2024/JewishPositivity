@@ -50,7 +50,7 @@ class Checkin(models.Model): #to store checkin moments data
 
     class Meta:
         # Define unique constraint for composite key
-        unique_together = [('moment_number', 'user_id', 'date')]
+        unique_together = [('moment_number', 'user_id', 'date')] #does not enforce unqueness since this includes time
     
 
 class Friends(models.Model): #to store friendships

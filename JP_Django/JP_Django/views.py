@@ -13,7 +13,7 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 import time
 import datetime
-from datetime import date, time
+from datetime import datetime, time
 import pytz
 import logging
 from django.core.mail import send_mail
@@ -61,7 +61,7 @@ def validate_data(data):
     logging.info("NON-INTEGER KEYS: %s", non_integer_keys) # includes nonetypes
 
     # Check for missing or empty required fields in the POST data
-    missing_keys = [key for key in non_integer_keys if key not in ("content","text_entry") and not data.get(key)] #allow content and text to be missing
+    missing_keys = [key for key in non_integer_keys if key not in ("content","text_entry","header") and not data.get(key)] #allow content and text to be missing
     logging.info("Missing keys: %s", missing_keys)
 
     # Return an error response if there are missing keys
@@ -466,6 +466,22 @@ def create_checkin(user, data):
             if data["text_entry"] is None: #Content is None, so is text, this is an error
                 return HttpResponse('No Text or Media submitted', status=400)
         
+        #check for a duplicate entry by checking for unique user_id, moment_num, and date of the datetime obj
+        user = User.objects.get(username=data['username'])
+        user_id = user.pk # get foreign key reference field to look up in checkin userid column
+                
+        datetime_current= datetime.today() #get the current datetime
+        logging.info("current datetime: %s", datetime_current)
+        #Retrieve all checkins associated with this user
+        all_checkins = Checkin.objects.filter(user_id=user_id)
+        for checkin in all_checkins:
+            logging.info("datetime_current.date(): %s", datetime_current.date())
+            logging.info("checkin.date.date()", checkin.date.date())
+            if data['moment_number']==checkin.moment_number and datetime_current.date() == checkin.date.date():
+                logging.info("DUPLICATE!!!")
+                return HttpResponse("Error: Duplicate Moment Today", status=400)
+        
+
             # Create the checkin object and save it to the database
         checkin = Checkin.objects.create(
             user_id=user,
@@ -474,7 +490,7 @@ def create_checkin(user, data):
             content=content_binary_encoded, #can be text or none
             text_entry=data["text_entry"], #can be text or none
             content_type=data["content_type"],
-            date=datetime.today() #will get you a datetime 
+            date=datetime_current #will get you a datetime 
         )
         logging.info("Checkin object created")
         checkin.save()
