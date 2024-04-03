@@ -199,7 +199,7 @@ export default function Archive({ navigaton }) {
             <View style={styles.middleContent}>
               <Text style={styles.middleContentHeader} numberOfLines={1} ellipsizeMode="tail">Header would go here</Text>
               <Text style={styles.middleContentMoment_Number}>{getMomentText(data.moment_number)}</Text>
-              <Text style={styles.middleContentText} numberOfLines={3} ellipsizeMode="tail">{data.content_type === "text" ? decodeBase64ToText(data.content) : "This is some long content text that will be truncated if it takes up too much space in the container."}</Text>
+              <Text style={styles.middleContentText} numberOfLines={3} ellipsizeMode="tail">{data.text_entry !== null ? data.text_entry : "This is some long content text that will be truncated if it takes up too much space in the container."}</Text>
             </View>
           </View>
           {data.content_type === "image" && (
@@ -242,7 +242,7 @@ export default function Archive({ navigaton }) {
   }, []);
   
   return (
-    <View style={[{ flex: 1 }, theme["background"]]}>
+    <View style={[{ flex: 1, paddingBottom: 100 }, theme["background"]]}>
       
       <View style={styles.searchBarContainer}>
         <SearchBar
@@ -343,7 +343,7 @@ export default function Archive({ navigaton }) {
                           <Text style={styles.text}>Recording</Text>
                       )}
 
-                      <Text style={[styles.detailText, {marginBottom: 20}]}>{selectedEntry?.content_type === "text" ? decodeBase64ToText(selectedEntry?.content) : "  This is some long content text that will be truncated if it takes up too much space in the container."}</Text>
+                      <Text style={[styles.detailText, {marginBottom: 20}]}>{selectedEntry?.text_entry !== null ? selectedEntry?.text_entry : "  This is some long content text that will be truncated if it takes up too much space in the container."}</Text>
                     
                     </ScrollView>
                   </View>
@@ -366,6 +366,7 @@ return width = width - 25;
 const styles = StyleSheet.create({
   scrollViewContent: {
   flexGrow: 1,
+  // height: 500,
   },
   contentContainer: {
     minHeight: 100,
@@ -512,14 +513,14 @@ const styles = StyleSheet.create({
   JournalEntryModalContent: {
     backgroundColor: 'white',
     width: Dimensions.get('window').width ,
-    height: '80%',
+    height: '100%',
     borderRadius: 10,
     elevation: 5,
   },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    // marginTop: 10,
+    marginTop: 40,
     padding: 5,
     borderBottomColor: 'grey',
     borderBottomWidth: 2,
@@ -544,4 +545,7 @@ const styles = StyleSheet.create({
     fontWeight: 500,
     lineHeight: 20,
   },
+
+  // Edit/Delete Modal
+
 });

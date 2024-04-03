@@ -21,6 +21,7 @@ import { micah } from "@dicebear/collection";
 import { SvgXml } from "react-native-svg";
 import BottomTabNavigator from "./BottomTabNavigator.js";
 import makeThemeStyle from '../tools/Theme.js';
+import ParentProfile from "../screens/home/ProfileParent.js";
 import UserProfile from "../screens/home/Profile.js";
 import SettingsPage from "../screens/home/Settings.js";
 import Communities from "../screens/home/Communities.js";
@@ -126,8 +127,7 @@ const MyDrawer = ({ navigation }) => {
       drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
       <Drawer.Screen name="Home" component={BottomTabNavigator} options={{ drawerIcon: () => (<Ionicons name="home" size={22} color={theme['color']['color']} />), }} />
-      <Drawer.Screen name="Profile" component={UserProfile} testID="profileButton" options={{ drawerIcon: () => (<Ionicons name="person" size={22} color={theme['color']['color']} />), }} />
-      <Drawer.Screen name="EditProfile" component={EditProfile} testID="editProfileButton" options={{ drawerIcon: () => (<Ionicons name="person" size={22} color={theme['color']['color']} />), }} />
+      <Drawer.Screen name="Profile" component={ParentProfile} testID="profileButton" options={{ drawerIcon: () => (<Ionicons name="person" size={22} color={theme['color']['color']} />), }} />
       <Drawer.Screen name="Badges" component={Badges} options={{ drawerIcon: () => (<Ionicons name="trophy" size={22} color={theme['color']['color']} />), }} />
       <Drawer.Screen name="Friends" component={Friends} options={{ drawerIcon: () => (<Ionicons name="person-add" size={22} color={theme['color']['color']} />), }} />
       <Drawer.Screen name="Communities" component={Communities} options={{drawerIcon: () => (<Ionicons name="people" size={22} color={theme['color']['color']} />),}}/>

@@ -14,7 +14,7 @@ import IP_ADDRESS from "../../ip.js";
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
 
-const UserProfile = ({ navigation }) => {
+const UserProfile = ({ navigation, onSwitch }) => {
   const [userInfo, setUserInfo] = useState({
     fname: "",
     lname: "",
@@ -27,7 +27,10 @@ const UserProfile = ({ navigation }) => {
   });
 
   const navigateEdit = () => {
-    navigation.navigate("EditProfile");
+    // navigation.navigate("EditProfile");
+    if (onSwitch) {
+      onSwitch();
+    }
   };
 
   const avatar = createAvatar(micah, {

@@ -15,7 +15,7 @@ import { Alert } from "react-native";
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
 
-const EditProfile = ({navigation}) => {
+const EditProfile = ({navigation, onSwitch}) => {
   const [userInfo, setUserInfo] = useState({
     fname: "",
     lname: "",
@@ -26,6 +26,12 @@ const EditProfile = ({navigation}) => {
     //journalEntries: 120,
     profilePicture: "",
   });
+
+  const navigateProfileView = () => {
+    if (onSwitch) {
+      onSwitch();
+    }
+  }
 
 
   const avatar = createAvatar(micah, {
@@ -176,7 +182,8 @@ const takeMedia = async () => {
         {<TextInput style={styles.info}>Last Name: {userInfo.lname} </TextInput>}
         <TextInput style={styles.info}>Username: {userInfo.username}</TextInput>
         {<TextInput style={styles.info}>Email: {userInfo.email} </TextInput>}
-        {<Button title="Return to profile"></Button>}
+        {<Button title="Return to profile" onPress={navigateProfileView}
+        ></Button>}
     </View>
   );
 };
