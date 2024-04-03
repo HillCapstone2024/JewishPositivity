@@ -459,19 +459,22 @@ def create_checkin(user, data):
     try:
         # Decode the base64 encoded content
         content_binary_encoded=None #default No Media
+
         if data["content"] is not None: # if there is media decode it and save it
             content_binary_encoded = base64.b64decode(data["content"])
         else: 
             if data["text_entry"] is None: #Content is None, so is text, this is an error
                 return HttpResponse('No Text or Media submitted', status=400)
+        
             # Create the checkin object and save it to the database
         checkin = Checkin.objects.create(
             user_id=user,
             moment_number=data["moment_number"],
+            header=data["header"], #could be None or text chars
             content=content_binary_encoded, #can be text or none
             text_entry=data["text_entry"], #can be text or none
             content_type=data["content_type"],
-            date=date.today()
+            date=datetime.today() #will get you a datetime 
         )
         logging.info("Checkin object created")
         checkin.save()
@@ -522,19 +525,18 @@ def get_checkin_info_view(request): #To be filled out soon
 
                 for checkin in all_checkins: # looping through checkins for user specified
                     obj_content= None #default if empty
-                    obj_text= None
-
-                    if checkin.content is not None: #get content if not None
+                    
+                    if checkin.content is not None and checkin.content_type != "video": #get content if not None and if not video
                         obj_content= base64.b64encode(checkin.content).decode('utf-8')
-                    if checkin.text_entry is not None:#get text if not None
-                        obj_text= checkin.text_entry
+                    
                     
                     current_checkin = { # dictionary to append to list
                         "checkin_id": checkin.checkin_id,
+                        "header": checkin.header,
                         "content_type": checkin.content_type,
                         "moment_number": checkin.moment_number,
                         "content": obj_content,  #content converted from binary to base64 then to a base 64 string, or None
-                        "text_entry": obj_text,
+                        "text_entry": checkin.text_entry,
                         "user_id": checkin.user_id.id,
                         "date": checkin.date.strftime('%Y-%m-%d'), # Convert date to string to be JSON serializable
                     }

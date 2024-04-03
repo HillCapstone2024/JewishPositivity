@@ -33,6 +33,7 @@ LOG_CONTENT = 'Content'
 LOG_TEXT_ENTRY= 'Text Entry'
 LOG_MOMENT_NUMBER = 'Moment Number'
 LOG_USER_ID = 'User ID'
+LOG_HEADER = 'Header'
 
 # Define constant strings for logging FRIENDS
 LOG_FRIENDSHIP_ID = 'Friendship ID'
@@ -846,6 +847,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
     # Define post data
     TEXT_DATA_SUCCESS = {
         'username': 'testuser1',
+        'header': 'Sample Header',
         'moment_number': 1,
         'content_type': 'text',
         'content': None,
@@ -854,6 +856,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
 
     PHOTO_DATA_SUCCESS = {
         'username': 'testuser1',
+        'header': 'Sample Header',
         'moment_number': 2,
         'content_type': 'photo',
         'content': photo, 
@@ -862,6 +865,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
 
     AUDIO_DATA_SUCCESS = {
         'username': 'testuser1',
+        'header': 'Sample Header',
         'moment_number': 3,
         'content_type': 'audio',
         'content': audio, 
@@ -871,6 +875,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
 
     VIDEO_DATA_SUCCESS = {
         'username': 'testuser2',
+        'header': 'Sample Header',
         'moment_number': 1,
         'content_type': 'video',
         'content': video, 
@@ -879,6 +884,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
 
     MISSING_USERNAME = {
         'username': '',
+        'header': 'Sample Header',
         'moment_number': 2,
         'content_type': 'text',
         'content': None,
@@ -887,6 +893,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
 
     MISSING_MOMENT_NUMBER = {
         'username': 'testuser2',
+        'header': 'Sample Header',
         'moment_number': None,
         'content_type': 'text',
         'content': None, 
@@ -895,6 +902,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
 
     MISSING_CONTENT_TYPE = { 
         'username': 'testuser3',
+        'header': 'Sample Header',
         'moment_number': 1,
         'content_type': '',
         'content': photo, 
@@ -903,6 +911,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         
     MISSING_CONTENT_AND_TEXT = {
         'username': 'testuser3',
+        'header': 'Sample Header',
         'moment_number': 2,
         'content_type': 'text',
         'content': None,
@@ -911,6 +920,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
 
     INVALID_USERID = { 
         'username': 'admin45678901',
+        'header': 'Sample Header',
         'moment_number': 1,
         'content_type': 'text',
         'content': None,
@@ -919,14 +929,12 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
 
     DUPLICATE_MOMENT = {
         'username': 'testuser5',
+        'header': None,
         'moment_number': 1,
         'content_type': 'photo',
         'content': photo,
         'text_entry': "This is a sample checkin text",
     }
-
-    
-
 
     # Set up method to create a test user
     def setUp(self):
@@ -956,6 +964,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         queryset = Checkin.objects.all()
         for obj in queryset:
             logging.info(LOG_MSG_FORMAT, LOG_CHECKIN_ID, obj.checkin_id)
+            logging.info(LOG_MSG_FORMAT, LOG_HEADER, obj.header)
             #logging.info(LOG_MSG_FORMAT, LOG_CONTENT, obj.content)
             logging.info(LOG_MSG_FORMAT, LOG_TEXT_ENTRY, obj.text_entry)
             logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
@@ -1110,6 +1119,7 @@ class GetCheckinsViewTestCase(TestCase): # to test retreving all checkin moments
     # Define post data
     TEXT_DATA_SUCCESS = {
         'username': 'testuser1',
+        'header': 'Sample Header',
         'moment_number': 1,
         'content_type': 'text',
         'content': None, #fill in with example entry
@@ -1118,6 +1128,7 @@ class GetCheckinsViewTestCase(TestCase): # to test retreving all checkin moments
 
     PHOTO_DATA_SUCCESS = {
         'username': 'testuser1',
+        'header': 'Sample Header',
         'moment_number': 2,
         'content_type': 'photo',
         'content': photo, 
@@ -1126,6 +1137,7 @@ class GetCheckinsViewTestCase(TestCase): # to test retreving all checkin moments
 
     AUDIO_DATA_SUCCESS = {
         'username': 'testuser1',
+        'header': 'Sample Header',
         'moment_number': 3,
         'content_type': 'audio',
         'content': audio, 
@@ -1134,6 +1146,7 @@ class GetCheckinsViewTestCase(TestCase): # to test retreving all checkin moments
 
     VIDEO_DATA_SUCCESS = {
         'username': 'testuser2',
+        'header': 'Sample Header',
         'moment_number': 1,
         'content_type': 'video',
         'content': video, 
@@ -1142,6 +1155,7 @@ class GetCheckinsViewTestCase(TestCase): # to test retreving all checkin moments
 
     BOTH_TEXT_AND_MEDIA_SUCCESS = {
         'username': 'testuser2',
+        'header': 'Sample Header',
         'moment_number': 2,
         'content_type': 'video',
         'content': photo, 
@@ -1181,6 +1195,7 @@ class GetCheckinsViewTestCase(TestCase): # to test retreving all checkin moments
         queryset = Checkin.objects.all()
         for obj in queryset:
             logging.info(LOG_MSG_FORMAT, LOG_CHECKIN_ID, obj.checkin_id)
+            logging.info(LOG_MSG_FORMAT, LOG_HEADER, obj.header)
             #logging.info(LOG_MSG_FORMAT, LOG_CONTENT, obj.content)
             logging.info(LOG_MSG_FORMAT, LOG_TEXT_ENTRY, obj.text_entry)
             logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
@@ -1206,6 +1221,7 @@ class GetCheckinsViewTestCase(TestCase): # to test retreving all checkin moments
         queryset = Checkin.objects.all()
         for obj in queryset:
             logging.info(LOG_MSG_FORMAT, LOG_CHECKIN_ID, obj.checkin_id)
+            logging.info(LOG_MSG_FORMAT, LOG_HEADER, obj.header)
             #logging.info(LOG_MSG_FORMAT, LOG_CONTENT, obj.content)
             logging.info(LOG_MSG_FORMAT, LOG_TEXT_ENTRY, obj.text_entry)
             logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
