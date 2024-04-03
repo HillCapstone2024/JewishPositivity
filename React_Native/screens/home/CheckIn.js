@@ -39,6 +39,7 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
   const [mediaType, setMediaType] = useState("text");
   const [base64Data, setBase64Data] = useState("");
   const [journalText, setJournalText] = useState("");
+  const [headerText, setHeaderText] = useState("");
   const [showMediaBar, setShowMediaBar] = useState(true);
   const [mediaChanged, setMediaChanged] = useState(false);
   const [selectedOption, setSelectedOption] = useState("");
@@ -148,6 +149,7 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
           username: username,
           moment_number: momentType,
           content: base64Data,
+          header: headerText,
           content_type: mediaType,
           text_entry: journalText,
           date: formattedDateTime,
@@ -205,6 +207,11 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
     setMediaBox(true);
     setMediaChanged(!mediaChanged);
     setDisableSubmit(false);
+  };
+
+  const handleHeaderComplete = (text) => {
+    setHeaderText(text);
+    console.log(text);
   };
 
   const handleTextComplete = (text) => {
@@ -281,7 +288,9 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
       {/* Main Container Section */}
       <ScrollView style={styles.contentContainer}>
         <Text style={styles.header}>Whacha checking in for?</Text>
-        <Text style={[styles.datetime, theme["color"]]}>{formattedDateTime} </Text>
+        <Text style={[styles.datetime, theme["color"]]}>
+          {formattedDateTime}{" "}
+        </Text>
 
         {/* Media Box Below */}
         {mediaBox ? (
@@ -319,9 +328,12 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
             placeholder="Write something..."
             placeholderTextColor="grey"
             testID="headerInput"
+            value={headerText}
+            maxLength={100}
+            onChangeText={handleHeaderComplete}
           ></TextInput>
         </View>
-        
+
         <View style={styles.boxContainer}>
           <Text style={[styles.boxDescriptor]}>Check-in Type</Text>
           <View style={styles.dropdownContainer}>
@@ -340,27 +352,27 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
             {/* <Ionicons name="chevron-down" size={25} color={"#4A90E2"} style={{ paddingTop: 5 }}/> */}
           </View>
         </View>
-        
+
         <View style={styles.boxContainer}>
           <Text style={[styles.boxDescriptor]}>Description</Text>
-          <ScrollView style={[styles.dropdownContainer, {height: 350}]}>
-              <TextInput
-                style={styles.journalInput}
-                inputAccessoryViewID={mediaAccessoryViewID}
-                placeholder={"Enter reflection here…"}
-                placeholderTextColor={"grey"}
-                maxLength={10000}
-                value={journalText}
-                onChangeText={handleTextComplete}
-                multiline
-                numberOfLines={4}
-                testID="journalInput"
-              />
-          </ScrollView> 
-        </View>  
+          <ScrollView style={[styles.dropdownContainer, { height: 350 }]}>
+            <TextInput
+              style={styles.journalInput}
+              inputAccessoryViewID={mediaAccessoryViewID}
+              placeholder={"Enter reflection here…"}
+              placeholderTextColor={"grey"}
+              maxLength={10000}
+              value={journalText}
+              onChangeText={handleTextComplete}
+              multiline
+              numberOfLines={4}
+              testID="journalInput"
+            />
+          </ScrollView>
+        </View>
       </ScrollView>
 
-      {/* <ScrollView keyboardDismissMode="interactive"> */} 
+      {/* <ScrollView keyboardDismissMode="interactive"> */}
 
       {/* Keyboard bar view below */}
       {showMediaBar ? (

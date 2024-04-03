@@ -85,9 +85,10 @@ const SettingsScreen = ({ navigation }) => {
     };
     try {
       const csrfToken = await getCsrfToken();
-      const response = await axios.post(`${API_URL}/deleteUser/`,
+      const response = await axios.post(
+        `${API_URL}/delete_user/`,
         {
-          username: username
+          username: username,
         },
         {
           headers: {
@@ -98,8 +99,16 @@ const SettingsScreen = ({ navigation }) => {
         }
       );
       console.log("Delete response:", response.data);
+      await Storage.removeItem("@username");
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Landing" }],
+      });
+      navigation.navigate("Landing");
     } catch (error) {
-      console.error("error:", error.response.data);
+      if (error.response.data) {
+        console.error("error deleting account:", error.response.data);
+      }
     }
   };
 

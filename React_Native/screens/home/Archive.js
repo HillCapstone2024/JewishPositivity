@@ -197,7 +197,7 @@ export default function Archive({ navigaton }) {
           <View style={[styles.divider, { backgroundColor: dividerColor }]} />
           <View style={[styles.contentSection, data.content_type !== "image" && { flex: 3.05 }]}>
             <View style={styles.middleContent}>
-              <Text style={styles.middleContentHeader} numberOfLines={1} ellipsizeMode="tail">Header would go here</Text>
+              <Text style={styles.middleContentHeader} numberOfLines={1} ellipsizeMode="tail">{data.header}</Text>
               <Text style={styles.middleContentMoment_Number}>{getMomentText(data.moment_number)}</Text>
               <Text style={styles.middleContentText} numberOfLines={3} ellipsizeMode="tail">{data.text_entry !== null ? data.text_entry : "This is some long content text that will be truncated if it takes up too much space in the container."}</Text>
             </View>
