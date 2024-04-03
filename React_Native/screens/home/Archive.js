@@ -21,6 +21,7 @@ export default function Archive({ navigaton }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [sortByTime, setSortByTime] = useState(true); // Default to sort by time
   const [momentTypeSortOrder, setMomentTypeSortOrder] = useState("Most Recent"); // Default to sort by most recent moment type
+  const [sortBy, setSortBy] = useState("Sort by Newest to Oldest");
 
   theme = makeThemeStyle();
 
@@ -74,6 +75,7 @@ export default function Archive({ navigaton }) {
     } else if (filterOption === "Sort by Least Recent Moment Type") {
       setMomentTypeSortOrder("Least Recent");
     }
+    setSortBy(filterOption);
     setIsFilterModalVisible(false);
   };
 
@@ -286,7 +288,15 @@ export default function Archive({ navigaton }) {
   
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <View style={[{ alignItems: "center", justifyContent: "center" }, theme["background"]]}>
-        {Object.keys(groupedEntries).map(yearMonth => (
+        {Object.keys(groupedEntries)
+          .sort((a, b) => {
+            if (sortBy === "Sort by Newest to Oldest") {
+              return moment(b, 'YYYY-MM').valueOf() - moment(a, 'YYYY-MM').valueOf();
+            } else if (sortBy === "Sort by Oldest to Newest") {
+              return moment(a, 'YYYY-MM').valueOf() - moment(b, 'YYYY-MM').valueOf();
+            }
+          })
+          .map(yearMonth => (
           <View key={yearMonth} style={styles.yearMonthContainer}>
             <Text style={styles.yearMonthHeader}>{moment(yearMonth, 'YYYY-MM').format('MMMM YYYY')}</Text>
             {groupedEntries[yearMonth]
