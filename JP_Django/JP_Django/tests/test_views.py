@@ -513,6 +513,12 @@ class UpdateUserInfoViewTestCase(TestCase):
         'lastname' : '',
     }
 
+    UPDATE_COMBO_SUCCESS = {
+        'username': 'testuser',
+        'lastname' : 'NewLast',
+        'firstname' : 'NewFirst',
+    }
+
     photo_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64photo.txt'))
     photoFile = open(photo_file_path, 'r')
     photo = photoFile.read()
@@ -544,7 +550,7 @@ class UpdateUserInfoViewTestCase(TestCase):
 
         # Check if the response status code is 200 indicating success
         self.assertEqual(response.status_code, 200)
-    
+
     def test_update_user_username_fail(self):
         logging.info("test_update_user_username_fail ....")
 
@@ -554,6 +560,24 @@ class UpdateUserInfoViewTestCase(TestCase):
         # Check if the response status code is 400 for failure
         self.assertEqual(response.status_code, 400)
     
+    def test_update_combo_username_success(self):
+        logging.info("test_update_user_combo_success ....")
+
+        # Make a POST request to the update_user_information_view
+        response = self.client.post(reverse('update_user_information_view'), data=json.dumps(self.UPDATE_COMBO_SUCCESS), content_type=CONTENT_TYPE_JSON)
+        queryset = User.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_USER, obj.username)
+            logging.info(LOG_MSG_FORMAT, LOG_FIRST_NAME, obj.first_name)
+            logging.info(LOG_MSG_FORMAT, LOG_LAST_NAME, obj.last_name)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME1, obj.time1)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME2, obj.time2)
+            logging.info(LOG_MSG_FORMAT, LOG_TIME3, obj.time3)
+            logging.info('')   
+        # Check if the response status code is 200 indicating success
+        self.assertEqual(response.status_code, 200)
+    
+
     def test_update_user_passwords_success(self):
         logging.info("test_update_user_passwords_success ....")
 
