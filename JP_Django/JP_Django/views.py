@@ -21,6 +21,9 @@ from django.http import JsonResponse
 from django.db import models
 import base64
 from django.db.models import Q
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # ########## Configuration & Constants ##########
 
@@ -619,7 +622,8 @@ def send_report_email_view(request):
     email_from = "jewishpositivity2024@gmail.com"
     recipient_list = ["jewishpositivity2024@gmail.com"]
     try:
-        response =  send_mail(subject, message, email_from, recipient_list)
+        response =  send_mail(subject, message, from_email = email_from, recipient_list = recipient_list, auth_user = email_from, auth_password = os.getenv("MAIL_PASSWORD"), fail_silently=False)
+        print(response)
         return JsonResponse({"response": response})
     except Exception as e:
         logging.error("Error sending email: %s", e)
