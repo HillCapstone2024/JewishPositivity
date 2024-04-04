@@ -197,7 +197,7 @@ export default function Archive({ navigaton }) {
           <View style={[styles.divider, { backgroundColor: dividerColor }]} />
           <View style={[styles.contentSection, data.content_type !== "image" && { flex: 3.05 }]}>
             <View style={styles.middleContent}>
-              <Text style={styles.middleContentHeader} numberOfLines={1} ellipsizeMode="tail">{data.header}</Text>
+              <Text style={styles.middleContentHeader} numberOfLines={1} ellipsizeMode="tail">{data.header !== null ? data.header : "Header Would Go Here"}</Text>
               <Text style={styles.middleContentMoment_Number}>{getMomentText(data.moment_number)}</Text>
               <Text style={styles.middleContentText} numberOfLines={3} ellipsizeMode="tail">{data.text_entry !== null ? data.text_entry : "This is some long content text that will be truncated if it takes up too much space in the container."}</Text>
             </View>
@@ -321,7 +321,7 @@ export default function Archive({ navigaton }) {
                       <Ionicons name="ellipsis-horizontal-outline" style={styles.JournalEntryModalIcons} onPress={onEdit} />
                     </View>
                     <ScrollView padding={10} >
-                      <Text style={[styles.headerText]}>Header Would Go Here </Text>
+                      <Text style={[styles.headerText]}>{selectedEntry?.header !== null ? selectedEntry?.header : "Header Would Go Here" }</Text>
                       <Text style={[styles.detailText]}>{moment(selectedEntry?.date, 'YYYY-MM-DD').format('dddd, D MMMM YYYY')} </Text>
                       <Text style={[styles.detailText,  {marginBottom:20}]}>{getMomentText(selectedEntry?.moment_number)}</Text>
 
@@ -520,7 +520,7 @@ const styles = StyleSheet.create({
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 40,
+    marginTop: 50,
     padding: 5,
     borderBottomColor: 'grey',
     borderBottomWidth: 2,
