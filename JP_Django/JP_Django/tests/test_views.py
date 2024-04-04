@@ -353,9 +353,11 @@ class SetTimesViewTestCase(TestCase):
         client.post(reverse('create_user_view'), data=json.dumps(self.POST_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
 
     def test_set_times_success(self):
+        logging.info("***********test_set_times_success*******")
         # Test if user was successfully made
         client = Client()
         
+        logging.info("Before: ")
         # Query the database and print its contents BEFORE updating the times
         queryset = User.objects.all()
         for obj in queryset: 
@@ -379,6 +381,7 @@ class SetTimesViewTestCase(TestCase):
         # Make a POST request to update the times
         response = client.post(reverse('update_times_view'), data=json.dumps(post_data), content_type=CONTENT_TYPE_JSON) 
         
+        logging.info("After: ")
         # Query the database and print its contents AFTER updating the times
         queryset = User.objects.all() 
         for obj in queryset:
@@ -395,6 +398,7 @@ class SetTimesViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200) 
 
     def test_set_times_invalid_order_fail(self):
+        logging.info("***********test_set_times_invalid_order_fail*******")
         # Test for time1 < time2 < time3
         client = Client()
 
@@ -406,7 +410,7 @@ class SetTimesViewTestCase(TestCase):
             'time3': datetime.time(19, 00).strftime('%H:%M:%S'),
         }
         
-        # Printing DB after attempted updating times
+        logging.info("Before: ")
         queryset = User.objects.all()
         for obj in queryset:
             logging.info(LOG_MSG_FORMAT, LOG_USER, obj.username)

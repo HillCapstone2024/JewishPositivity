@@ -344,6 +344,7 @@ def get_user_information_view(request):
     return HttpResponse("Not a GET request")
        
 def update_times_view(request):
+    logging.info("************** In update times view ******************** ")
     if request.method == "POST":
         # Retrieving username to access correct user in database
         # retrieving times for updating to non-default
@@ -359,21 +360,26 @@ def update_times_view(request):
             time1 = time.fromisoformat(time1_str)  # fromisoformat() expects format ("HH:MM:SS")
             time2 = time.fromisoformat(time2_str)
             time3 = time.fromisoformat(time3_str)
+            logging.info("TIMES as objects: TIME1: %s,TIME2: %s,TIME3: %s", time1, time2, time3)
+
             if time1 < time2 < time3:
+                logging.info("correct ordering")
                 user = User.objects.get(username=username)  # Retrieving user from the database
-                
+                logging.info("got user: %s", user)
+
                 # Get the user's current date
-                current_date = datetime.datetime.now().date() # Get current date
+                current_date = datetime.today().date() # Get current date
+                logging.info("Current Date: %s", current_date)
 
                 # Set the times to RAW date time user enters
-                datetime1_current = datetime.datetime.combine(current_date, time1) # Combine date and time to get local datetime
-                datetime2_current = datetime.datetime.combine(current_date, time2) # Combine date and time to get local datetime
-                datetime3_current = datetime.datetime.combine(current_date, time3) # Combine date and time to get local datetime
-                
+                datetime1_current = datetime.combine(current_date, time1) # Combine date and time to get local datetime
+                datetime2_current = datetime.combine(current_date, time2) # Combine date and time to get local datetime
+                datetime3_current = datetime.combine(current_date, time3) # Combine date and time to get local datetime
+                logging.info("DATETIMES to be set to in DB (combo of above): TIME1: %s,TIME2: %s,TIME3: %s", datetime1_current, datetime2_current, datetime3_current)
                 # Set the updated times to the user
-                user.time1 = datetime1_current.strftime("%Y-%m-%d %H:%M:%S")  # Convert datetime objects to strings
-                user.time2 = datetime2_current.strftime("%Y-%m-%d %H:%M:%S")
-                user.time3 = datetime3_current.strftime("%Y-%m-%d %H:%M:%S")
+                user.time1 = datetime1_current
+                user.time2 = datetime2_current
+                user.time3 = datetime3_current
                 user.save()  # Saving
 
                 response_data = {"message": "Success! Times have been updated"}
