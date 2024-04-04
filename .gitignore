@@ -13,3 +13,4 @@ db_key
 .env
 .log
 views.log
+nohup.out
