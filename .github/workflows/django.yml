@@ -29,7 +29,6 @@ jobs:
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
           DJ_KEY: ${{ secrets.DJ_KEY }}
-          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
         run: |
           cd JP_Django
           python manage.py test JP_Django.tests.test_views.CreateUserViewTestCase

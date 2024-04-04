@@ -23,6 +23,7 @@ import base64
 from django.db.models import Q
 import os
 from dotenv import load_dotenv
+from django.conf import settings
 load_dotenv()
 
 # ########## Configuration & Constants ##########
@@ -669,10 +670,8 @@ def send_report_email_view(request):
     
     subject = f"APP REPORT {message[:20]}... - {username}"
     message = f"Report from user: {username}. \n\n{message}"
-    email_from = "jewishpositivity2024@gmail.com"
-    recipient_list = ["jewishpositivity2024@gmail.com"]
     try:
-        response =  send_mail(subject, message, from_email = email_from, recipient_list = recipient_list, auth_user = email_from, auth_password = os.getenv("MAIL_PASSWORD"), fail_silently=False)
+        response =  send_mail(subject, message, from_email = settings.EMAIL_HOST_USER, recipient_list = [settings.RECIPIENT_ADDRESS], fail_silently=False)
         print(response)
         return JsonResponse({"response": response})
     except Exception as e:
