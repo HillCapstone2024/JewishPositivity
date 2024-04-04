@@ -13,7 +13,7 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 import time
 import datetime
-from datetime import datetime, time
+from datetime import datetime, time, date
 import pytz
 import logging
 from django.core.mail import send_mail
@@ -581,6 +581,56 @@ def get_video_info_view(request):
                 obj_content= base64.b64encode(video_checkin.content).decode('utf-8')
                 logging.info("passed the odj content encoding 64*****************")
                 return HttpResponse(json.dumps(obj_content), content_type= constAppJson) #this is the base64 string being passed
+            except Exception as e:
+                logging.info(e)
+                return HttpResponse(constUserDNE, status=400)
+        else:  # username was empty
+            return HttpResponse(constUNnotProvided, status=400)
+    return HttpResponse("Not a GET request!")
+
+def get_todays_checkin_info_view(request):
+    logging.info("In the get_todays_checkin_info_view*****************")
+    if request.method == "GET":
+        # Retrieve the list of usernames from the query parameters
+        usernames = request.GET.getlist('username', [])
+        logging.info("Usernames: %s", usernames)
+
+        # Make sure the get data is not empty
+        if len(usernames)>=1: #username(s) were passed
+            try:
+                response_data=[] #List of dictionaries holding all checkin moments of the users to return
+                # Retrieve the users from the database by username
+                for username in usernames: # for each name passed
+                    user = User.objects.get(username=username)
+                    user_id = user.pk # get foreign key reference field to look up in checkin userid column
+                    
+                    #Retrieve all checkins associated with this user from TODAY
+                    today = date.today()
+
+                    # Assuming 'user_id' is already defined
+                    all_checkins = Checkin.objects.filter(user_id=user_id, date__date=today)
+
+                    for checkin in all_checkins: # looping through checkins for user specified
+                        obj_content= None #default if empty
+                        
+                        if checkin.content is not None and checkin.content_type != "video": #get content if not None and if not video
+                            obj_content= base64.b64encode(checkin.content).decode('utf-8')
+                        
+                        current_checkin = { # dictionary to append to list
+                            "username": username,
+                            "checkin_id": checkin.checkin_id,
+                            "header": checkin.header,
+                            "content_type": checkin.content_type,
+                            "moment_number": checkin.moment_number,
+                            "content": obj_content,  #content converted from binary to base64 then to a base 64 string, or None
+                            "text_entry": checkin.text_entry,
+                            "user_id": checkin.user_id.id,
+                            "date": checkin.date.strftime('%Y-%m-%d'), # Convert date to string to be JSON serializable
+                        }
+                        response_data.append(current_checkin) #add checkin to the list to be returned
+    
+                logging.info(response_data)
+                return HttpResponse(json.dumps(response_data), content_type= constAppJson)  # returning a LIST of DICTIONARIES where each dictionary is a checkin moment of the user specified - do not change
             except Exception as e:
                 logging.info(e)
                 return HttpResponse(constUserDNE, status=400)
