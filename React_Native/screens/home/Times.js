@@ -155,11 +155,7 @@ const Times = ({ navigation }) => {
       );
       console.log("Time change response:", response.data);
       console.log("username is: ", username);
-      // setErrorMessage(
-      //   <View style={styles.successMessageBox}>
-      //     <Text style={styles.successMessageText}>{"Times Changed Successfully"}</Text>
-      //   </View>
-      // );
+      setErrorMessage(null);
     } catch (error) {
       console.log(error)
       setErrorMessage(
