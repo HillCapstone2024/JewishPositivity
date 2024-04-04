@@ -32,7 +32,7 @@ logging.basicConfig(
     level=logging.INFO,  # Set the logging level to INFO
     format="%(asctime)s - %(levelname)s - %(message)s",  # Define log message format
     filename="views.log",  # Specify the log file
-    filemode="w",
+    filemode="a",
 )  # Choose file mode (overwrite in this case)
 
 User = get_user_model()
@@ -128,6 +128,7 @@ def login_view(request):
         logging.info("password: %s", password)
         if user is not None:
             login(request, user)
+            logging.info("Login successful!")
 
             return HttpResponse("Login successful!", status=200)
         else:
