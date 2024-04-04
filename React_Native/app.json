@@ -49,27 +49,7 @@
       ]
     ],
     "extra": {
-      "oneSignalAppId": "ec16a462-d3d0-4fa3-85cd-d4bdaa8e98a8",
-      "eas": {
-        "build": {
-          "experimental": {
-            "ios": {
-              "appExtensions": [
-                {
-                  "targetName": "OneSignalNotificationServiceExtension",
-                  "bundleIdentifier": "com.jewishpositivity.jewishpositivity.OneSignalNotificationServiceExtension",
-                  "entitlements": {
-                    "com.apple.security.application-groups": [
-                      "group.com.jewishpositivity.jewishpositivity.onesignal"
-                    ]
-                  }
-                }
-              ]
-            }
+      "oneSignalAppId": "ec16a462-d3d0-4fa3-85cd-d4bdaa8e98a8"
           }
-        },
-        "projectId": "15447cfe-f93f-4ff7-abc6-d6053409d9b8"
-      }
-    }
   }
 }
