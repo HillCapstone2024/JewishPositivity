@@ -18,7 +18,16 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.jewishpositivity.jewishpositivity",
       "infoPlist": {
-        "NSPhotoLibraryUsageDescription": "This app requires access to the photo library."
+        "NSPhotoLibraryUsageDescription": "This app requires access to the photo library.",
+        "NSAppTransportSecurity": {
+          "NSExceptionDomains": {
+            "134.122.5.28": {
+              "NSIncludesSubdomains": true,
+              "NSTemporaryExceptionAllowsInsecureHTTPLoads": true,
+              "NSTemporaryExceptionMinimumTLSVersion": "TLSv1.1"
+            }
+          }
+        }
       }
     },
     "android": {
@@ -31,17 +40,16 @@
     "web": {
       "favicon": "./assets/images/favicon.png"
     },
-
-  "plugins": [
-    [
-    "onesignal-expo-plugin",
-    {
-      "mode": "development"
-    }
-  ]
-],
-"extra": {
-  "oneSignalAppId": "ec16a462-d3d0-4fa3-85cd-d4bdaa8e98a8"
-}
+    "plugins": [
+      [
+        "onesignal-expo-plugin",
+        {
+          "mode": "development"
+        }
+      ]
+    ],
+    "extra": {
+      "oneSignalAppId": "ec16a462-d3d0-4fa3-85cd-d4bdaa8e98a8"
+          }
   }
 }
