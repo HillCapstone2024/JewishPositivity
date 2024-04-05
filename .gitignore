@@ -9,7 +9,6 @@ notificationsTest.json
 tempCodeRunnerFile.js
 # Django
 __pycache__/
-db_key
 .env
 .log
 views.log
