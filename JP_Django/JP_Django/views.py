@@ -603,7 +603,7 @@ def get_todays_checkin_info_view(request):
     logging.info("In the get_todays_checkin_info_view*****************")
     if request.method == "GET":
         # Retrieve the list of usernames from the query parameters
-        usernames = request.GET.getlist('username', [])
+        usernames = request.GET.getlist('username[]')
         logging.info("Usernames: %s", usernames)
 
         # Make sure the get data is not empty
