@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ActivityIndicator, TouchableOpacity, StyleSheet, ScrollView, Button, Image, Dimensions, Modal, Pressable } from 'react-native';
+import { View, Text, ActivityIndicator, TouchableOpacity, StyleSheet, ScrollView, Button, Image, Dimensions, Modal, Pressable, TouchableWithoutFeedback } from 'react-native';
 import makeThemeStyle from '../../tools/Theme.js';
 import * as Storage from "../../AsyncStorage.js";
 import IP_ADDRESS from "../../ip.js";
@@ -22,6 +22,7 @@ export default function Archive({ navigaton }) {
   const [sortByTime, setSortByTime] = useState(true); // Default to sort by time
   const [momentTypeSortOrder, setMomentTypeSortOrder] = useState("Most Recent"); // Default to sort by most recent moment type
   const [sortBy, setSortBy] = useState("Sort by Newest to Oldest");
+  const [deleteModalVisible, setDeleteModalVisible] = useState(true);
 
   theme = makeThemeStyle();
 
@@ -243,12 +244,11 @@ export default function Archive({ navigaton }) {
   
   return (
     <View style={[{ flex: 1, paddingBottom: 100 }, theme["background"]]}>
-      
       <View style={styles.searchBarContainer}>
         <SearchBar
           placeholder="Search..."
-          inputStyle={{ backgroundColor: '#ffffff', color: 'black' }}
-          inputContainerStyle={{ backgroundColor: '#ffffff' }}
+          inputStyle={{ backgroundColor: "#ffffff", color: "black" }}
+          inputContainerStyle={{ backgroundColor: "#ffffff" }}
           containerStyle={styles.searchBarContainer}
         />
       </View>
@@ -263,10 +263,16 @@ export default function Archive({ navigaton }) {
         >
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
-              <Pressable onPress={() => applyFilter("Sort by Newest to Oldest")} style={styles.filterOption}>
+              <Pressable
+                onPress={() => applyFilter("Sort by Newest to Oldest")}
+                style={styles.filterOption}
+              >
                 <Text>Sort by Newest to Oldest</Text>
               </Pressable>
-              <Pressable onPress={() => applyFilter("Sort by Oldest to Newest")} style={styles.filterOption}>
+              <Pressable
+                onPress={() => applyFilter("Sort by Oldest to Newest")}
+                style={styles.filterOption}
+              >
                 <Text>Sort by Oldest to Newest</Text>
               </Pressable>
               {/* <Pressable onPress={() => applyFilter("Sort by Most Recent Moment Type")} style={styles.filterOption}>
@@ -278,79 +284,167 @@ export default function Archive({ navigaton }) {
             </View>
           </View>
         </Modal>
-        <TouchableOpacity onPress={toggleFilterModal} style={styles.filterButton}>
+        <TouchableOpacity
+          onPress={toggleFilterModal}
+          style={styles.filterButton}
+        >
           <Ionicons name="filter" size={24} color="#4A90E2" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleGetEntries} style={styles.refreshButton}>
-          <Ionicons name="refresh" size={24} color={theme['color'].backgroundColor} style={styles.refreshIcon} />
+        <TouchableOpacity
+          onPress={handleGetEntries}
+          style={styles.refreshButton}
+        >
+          <Ionicons
+            name="refresh"
+            size={24}
+            color={theme["color"].backgroundColor}
+            style={styles.refreshIcon}
+          />
         </TouchableOpacity>
       </View>
-  
-      <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        <View style={[{ alignItems: "center", justifyContent: "center" }, theme["background"]]}>
-        {Object.keys(groupedEntries)
-          .sort((a, b) => {
-            if (sortBy === "Sort by Newest to Oldest") {
-              return moment(b, 'YYYY-MM').valueOf() - moment(a, 'YYYY-MM').valueOf();
-            } else if (sortBy === "Sort by Oldest to Newest") {
-              return moment(a, 'YYYY-MM').valueOf() - moment(b, 'YYYY-MM').valueOf();
-            }
-          })
-          .map(yearMonth => (
-          <View key={yearMonth} style={styles.yearMonthContainer}>
-            <Text style={styles.yearMonthHeader}>{moment(yearMonth, 'YYYY-MM').format('MMMM YYYY')}</Text>
-            {groupedEntries[yearMonth]
-              .sort(sortByUploadTime) // Apply sorting by upload time
-              // .sort(sortByMomentType) // Apply sorting by moment type
-              .map((item, index) => (
-                <TouchableOpacity key={index} onPress={() => handleEntryPress(item)}>
-                  {renderContent(item)}
-                </TouchableOpacity>
-              ))}
-              {/* Modal to display journal entry details */}
-              <Modal
-                animationType="fade"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={closeModal}
-              >
-                <View style={styles.modalContainer}>
-                  <View style={styles.JournalEntryModalContent}>
-                    <View style={styles.buttonRow}>
-                      <Ionicons name="close-outline" style={styles.JournalEntryModalIcons} onPress={closeModal} />
-                      <Ionicons name="ellipsis-horizontal-outline" style={styles.JournalEntryModalIcons} onPress={onEdit} />
-                    </View>
-                    <ScrollView padding={10} >
-                      <Text style={[styles.headerText]}>{selectedEntry?.header !== null ? selectedEntry?.header : "Header Would Go Here" }</Text>
-                      <Text style={[styles.detailText]}>{moment(selectedEntry?.date, 'YYYY-MM-DD').format('dddd, D MMMM YYYY')} </Text>
-                      <Text style={[styles.detailText,  {marginBottom:20}]}>{getMomentText(selectedEntry?.moment_number)}</Text>
 
-                      {selectedEntry?.content_type === "image" && (
-                        <Image
-                        style={[styles.JournalEntryModalImage, {marginBottom:20}]}
-                        source={{ uri: `data:image/jpeg;base64,${selectedEntry?.content}` }}
-                      />
-                      )}
-                      {selectedEntry?.content_type === "video" && (
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <View
+          style={[
+            { alignItems: "center", justifyContent: "center" },
+            theme["background"],
+          ]}
+        >
+          {Object.keys(groupedEntries)
+            .sort((a, b) => {
+              if (sortBy === "Sort by Newest to Oldest") {
+                return (
+                  moment(b, "YYYY-MM").valueOf() -
+                  moment(a, "YYYY-MM").valueOf()
+                );
+              } else if (sortBy === "Sort by Oldest to Newest") {
+                return (
+                  moment(a, "YYYY-MM").valueOf() -
+                  moment(b, "YYYY-MM").valueOf()
+                );
+              }
+            })
+            .map((yearMonth) => (
+              <View key={yearMonth} style={styles.yearMonthContainer}>
+                <Text style={styles.yearMonthHeader}>
+                  {moment(yearMonth, "YYYY-MM").format("MMMM YYYY")}
+                </Text>
+                {groupedEntries[yearMonth]
+                  .sort(sortByUploadTime) // Apply sorting by upload time
+                  // .sort(sortByMomentType) // Apply sorting by moment type
+                  .map((item, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      onPress={() => handleEntryPress(item)}
+                    >
+                      {renderContent(item)}
+                    </TouchableOpacity>
+                  ))}
+                {/* Modal to display journal entry details */}
+                <Modal
+                  animationType="fade"
+                  transparent={true}
+                  visible={modalVisible}
+                  onRequestClose={closeModal}
+                >
+                  <View style={styles.modalContainer}>
+                    <Modal
+                      animationType="slide"
+                      transparent={true}
+                      visible={deleteModalVisible}
+                      onRequestClose={() => setDeleteModalVisible(false)}
+                    >
+                      <TouchableWithoutFeedback
+                        onPress={() => setDeleteModalVisible(false)}
+                      >
+                        <View style={styles.centeredView}>
+                          {/* Prevents the modal content from closing when pressing on it */}
+                          <TouchableWithoutFeedback>
+                            <View style={styles.modalView}>
+                              <Text style={styles.modalText}>
+                                Do you want to delete this image?
+                              </Text>
+                              <View style={styles.horizontalBar} />
+                              <TouchableOpacity
+                                onPress={() => {
+                                  // onDelete();
+                                  setDeleteModalVisible(false);
+                                }}
+                              >
+                                <Text style={styles.deleteText}>Delete</Text>
+                              </TouchableOpacity>
+                              {/* Removed the Cancel button since pressing off the modal now also acts as cancel */}
+                            </View>
+                          </TouchableWithoutFeedback>
+                        </View>
+                      </TouchableWithoutFeedback>
+                    </Modal>
+                    <View style={styles.JournalEntryModalContent}>
+                      <View style={styles.buttonRow}>
+                        <Ionicons
+                          name="close-outline"
+                          style={styles.JournalEntryModalIcons}
+                          onPress={closeModal}
+                        />
+                        <Ionicons
+                          name="ellipsis-horizontal-outline"
+                          style={styles.JournalEntryModalIcons}
+                          onPress={() => {
+                            setDeleteModalVisible(true);
+                          }}
+                        />
+                      </View>
+                      <ScrollView padding={10}>
+                        <Text style={[styles.headerText]}>
+                          {selectedEntry?.header !== null
+                            ? selectedEntry?.header
+                            : "Header Would Go Here"}
+                        </Text>
+                        <Text style={[styles.detailText]}>
+                          {moment(selectedEntry?.date, "YYYY-MM-DD").format(
+                            "dddd, D MMMM YYYY"
+                          )}{" "}
+                        </Text>
+                        <Text style={[styles.detailText, { marginBottom: 20 }]}>
+                          {getMomentText(selectedEntry?.moment_number)}
+                        </Text>
+
+                        {selectedEntry?.content_type === "image" && (
+                          <Image
+                            style={[
+                              styles.JournalEntryModalImage,
+                              { marginBottom: 20 },
+                            ]}
+                            source={{
+                              uri: `data:image/jpeg;base64,${selectedEntry?.content}`,
+                            }}
+                          />
+                        )}
+                        {selectedEntry?.content_type === "video" && (
                           <Video
                             style={styles.video}
-                            source={{ uri: `data:video/mp4;base64,${selectedEntry?.content}` }}
+                            source={{
+                              uri: `data:video/mp4;base64,${selectedEntry?.content}`,
+                            }}
                             useNativeControls
                             resizeMode="contain"
                           />
-                      )}
-                      {selectedEntry?.content_type === "recording" && (
+                        )}
+                        {selectedEntry?.content_type === "recording" && (
                           <Text style={styles.text}>Recording</Text>
-                      )}
+                        )}
 
-                      <Text style={[styles.detailText, {marginBottom: 20}]}>{selectedEntry?.text_entry !== null ? selectedEntry?.text_entry : "  This is some long content text that will be truncated if it takes up too much space in the container."}</Text>
-                    
-                    </ScrollView>
+                        <Text style={[styles.detailText, { marginBottom: 20 }]}>
+                          {selectedEntry?.text_entry !== null
+                            ? selectedEntry?.text_entry
+                            : "  This is some long content text that will be truncated if it takes up too much space in the container."}
+                        </Text>
+                      </ScrollView>
+                    </View>
                   </View>
-                </View>
-              </Modal>
-            </View>
-          ))}
+                </Modal>
+              </View>
+            ))}
         </View>
       </ScrollView>
     </View>
@@ -365,20 +459,20 @@ return width = width - 25;
   
 const styles = StyleSheet.create({
   scrollViewContent: {
-  flexGrow: 1,
-  // height: 500,
+    flexGrow: 1,
+    // height: 500,
   },
   contentContainer: {
     minHeight: 100,
     maxHeight: 100,
     marginTop: 10,
     padding: 5,
-    alignItems: 'center',
+    alignItems: "center",
     width: getWidth(),
-    alignSelf: 'center',
-    borderRadius: 5, 
-    backgroundColor: '#f2f2f2',
-    shadowColor: '#4A90E2',
+    alignSelf: "center",
+    borderRadius: 5,
+    backgroundColor: "#f2f2f2",
+    shadowColor: "#4A90E2",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -390,24 +484,24 @@ const styles = StyleSheet.create({
   datetimeContainer: {
     flex: 1,
     height: 90, //height = maxheight(100) - padding(5)
-    justifyContent: 'center', 
-    alignItems: 'center', 
+    justifyContent: "center",
+    alignItems: "center",
   },
   divider: {
     width: 2,
-    backgroundColor: 'grey', 
+    backgroundColor: "grey",
   },
   contentSection: {
     flex: 2,
     paddingLeft: 10,
   },
   image: {
-    height: '100%', 
-    aspectRatio: 1, 
+    height: "100%",
+    aspectRatio: 1,
     borderRadius: 5,
   },
   video: {
-    height: '100%',
+    height: "100%",
     aspectRatio: 1,
     borderRadius: 5,
   },
@@ -416,7 +510,7 @@ const styles = StyleSheet.create({
   },
   dayOfWeekText: {
     fontSize: 18,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     letterSpacing: 1.25,
   },
   dayNumberText: {
@@ -436,11 +530,11 @@ const styles = StyleSheet.create({
   },
   middleContentHeader: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   middleContentMoment_Number: {
     fontSize: 10,
-    fontStyle: 'italic',
+    fontStyle: "italic",
     marginBottom: 5,
   },
   middleContentText: {
@@ -451,101 +545,140 @@ const styles = StyleSheet.create({
   },
   yearMonthHeader: {
     fontSize: 14,
-    textTransform: 'uppercase',
-    fontWeight: 'bold',
-    backgroundColor: '#4A90E2',
+    textTransform: "uppercase",
+    fontWeight: "bold",
+    backgroundColor: "#4A90E2",
     paddingVertical: 5,
     paddingHorizontal: 5,
     width: getWidth() + 25,
   },
 
   // SearchBar + Filter Button + Refresh Button
-  
+
   filterButton: {
-    position: 'absolute',
+    position: "absolute",
     top: -57,
     right: 62.5,
     zIndex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     padding: 12,
     borderRadius: 4,
   },
   filterOption: {
     padding: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#cccccc',
+    borderBottomColor: "#cccccc",
   },
   modalContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 10,
     padding: 20,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
   },
   searchBarContainer: {
-    backgroundColor: 'transparent',
-    borderBottomColor: 'transparent',
-    borderTopColor: 'transparent',
+    backgroundColor: "transparent",
+    borderBottomColor: "transparent",
+    borderTopColor: "transparent",
     width: "85%",
   },
   refreshButton: {
-    position: 'absolute',
+    position: "absolute",
     top: -57,
     right: 8,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
     padding: 12,
     borderRadius: 4,
   },
   refreshIcon: {
-    color: '#4A90E2',
+    color: "#4A90E2",
   },
 
   // JournalEntryModal
   JournalEntryModalContent: {
-    backgroundColor: 'white',
-    width: Dimensions.get('window').width ,
-    height: '100%',
+    backgroundColor: "white",
+    width: Dimensions.get("window").width,
+    height: "100%",
     borderRadius: 10,
     elevation: 5,
   },
   buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginTop: 50,
     padding: 5,
-    borderBottomColor: 'grey',
+    borderBottomColor: "grey",
     borderBottomWidth: 2,
   },
   JournalEntryModalIcons: {
-    fontSize: 40, 
+    fontSize: 40,
     color: "#4A90E2",
   },
   JournalEntryModalImage: {
-    width: '100%', 
-    aspectRatio: 1, 
+    width: "100%",
+    aspectRatio: 1,
     borderRadius: 5,
   },
   headerText: {
     fontSize: 22,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 5,
   },
   detailText: {
     fontSize: 14,
-    color: 'grey',
+    color: "grey",
     fontWeight: 500,
     lineHeight: 20,
   },
 
-  // Edit/Delete Modal
+  centeredView: {
+    flex: 1,
+    justifyContent: "flex-end",
+    // alignItems: "center",
+    marginBottom: 20,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    paddingTop: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  deleteText: {
+    color: "red",
+    fontSize: 16,
+    marginVertical: 10,
+  },
+  horizontalBar: {
+    height: 1,
+    width: "90%",
+    backgroundColor: "#ccc",
+    // marginTop: 15,
+    // borderWidth: 2,
+  },
 
+  // Edit/Delete Modal
 });

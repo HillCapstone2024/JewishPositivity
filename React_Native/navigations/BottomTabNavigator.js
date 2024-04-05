@@ -9,6 +9,7 @@ import HomeScreen from "../screens/home/HomeScreen";
 import JournalEntry from "../screens/home/CheckIn";
 import Archive from "../screens/home/Archive";
 import JournalModal from "../screens/home/JournalModal";
+import FriendFeed from "../screens/home/FriendFeed";
 
 const Tab = createBottomTabNavigator();
 
@@ -56,7 +57,7 @@ const BottomTabNavigator = () => {
       >
         <Tab.Screen
           name="Feed"
-          component={HomeScreen}
+          component={FriendFeed}
           options={{
             tabBarIcon: ({ focused }) => (
               <View style={{ position: "absolute", top: 15 }}>
