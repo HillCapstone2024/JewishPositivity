@@ -5,12 +5,14 @@ import {
   Keyboard,
   Button,
   Dimensions,
+  KeyboardAvoidingView,
   TextInput,
   Text,
   InputAccessoryView,
   ScrollView,
   Image,
   SafeAreaView,
+  Platform,
   Animated,
 } from "react-native";
 import axios from "axios";
@@ -248,8 +250,8 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
     loadMediaContainer;
   }, [showMediaBar]);
 
-  return (
-    <SafeAreaView style={[styles.container, theme["background"]]}>
+  return (      
+    <SafeAreaView style={[styles.container]}>
       {/* View for cancel and submit buttons */}
       <View style={styles.topBar}>
         <View style={styles.buttonContainer}>
@@ -286,6 +288,10 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
       {/* end of cancel/submit section */}
 
       {/* Main Container Section */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={[styles.container]}
+      >
       <ScrollView style={styles.contentContainer}>
         <Text style={styles.header}>Whacha checking in for?</Text>
         <Text style={[styles.datetime, theme["color"]]}>
@@ -371,7 +377,7 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
           </ScrollView>
         </View>
       </ScrollView>
-
+      </KeyboardAvoidingView>
       {/* <ScrollView keyboardDismissMode="interactive"> */}
 
       {/* Keyboard bar view below */}
@@ -391,6 +397,7 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
         </InputAccessoryView>
       )}
     </SafeAreaView>
+    
   );
 }
 
@@ -480,6 +487,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
+    backgroundColor: "white",
   },
   contentContainer: {
     marginHorizontal: 15,

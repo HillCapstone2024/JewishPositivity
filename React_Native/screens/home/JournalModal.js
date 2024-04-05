@@ -72,9 +72,9 @@ const JournalModal = ({ onClose, onSubmit, visible }) => {
           style={[
             styles.bottomSheetContainer,
             { transform: [{ translateY: translateY }] },
-            theme["background"],
+            // theme["background"],
           ]}
-          //{...panResponder.panHandlers} // Pass panHandlers only to the Animated.View
+          // {...panResponder.panHandlers} // Pass panHandlers only to the Animated.View
         >
           <TouchableOpacity style={(theme["background"], styles.dragIndicator)}>
             <View style={styles.dragIndicatorInner} />
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   bottomSheetContainer: {
-    // backgroundColor: 'white',
+    backgroundColor: 'white',
     borderTopRightRadius: 20,
     borderTopLeftRadius: 20,
     overflow: "hidden",
