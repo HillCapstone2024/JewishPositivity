@@ -1441,7 +1441,7 @@ class GetTodaysCheckinsViewTestCase(TestCase): # to test retreving todays checki
         client = Client()
 
         # Create test data
-        get_data = {'username': ['testuser1', 'testuser2']} # to retrieve todayscheckins for these user
+        get_data = {'username[]': ['testuser1', 'testuser2']} # to retrieve todayscheckins for these user
 
         # Send GET request to get_todays_checkin_info_view
         response = client.get(reverse('get_todays_checkin_info_view'), data=get_data)
@@ -1469,7 +1469,7 @@ class GetTodaysCheckinsViewTestCase(TestCase): # to test retreving todays checki
         client = Client()
 
         # Create test data
-        get_data = {'username': ['testuser1', 'doesnotexist']} #second user DNE
+        get_data = {'username[]': ['testuser1', 'doesnotexist']} #second user DNE
 
         # Send GET request to get_times_view
         response = client.get(reverse('get_todays_checkin_info_view'), data=get_data)
