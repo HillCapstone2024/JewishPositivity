@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Jewish_Positivity",
+    "name": "Jewish Positivity",
     "slug": "React_Native",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,7 +8,7 @@
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/images/splash.png",
-      "resizeMode": "contain",
+      "resizeMode": "center",
       "backgroundColor": "#ffffff"
     },
     "assetBundlePatterns": [

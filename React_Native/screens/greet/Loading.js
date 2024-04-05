@@ -50,7 +50,7 @@ const LoadingScreen = () => {
                     useNativeDriver: true,
                 }),
                 Animated.timing(floatAnim, {
-                    toValue: -20,
+                    toValue: 0,
                     duration: 500,
                     useNativeDriver: true,
                 }),
@@ -60,7 +60,7 @@ const LoadingScreen = () => {
                     useNativeDriver: true,
                 }),
                 Animated.timing(floatAnim, {
-                    toValue: -20,
+                    toValue: 0,
                     duration: 500,
                     useNativeDriver: true,
                 }),
@@ -99,17 +99,17 @@ const styles = StyleSheet.create({
     },
     pen: {
         position: 'absolute',
-        top: '35%',
-        left: '45%',
-        width: 22,
-        height: 160,
+        top: '37%',
+        left: '41%',
+        width: 17,
+        height: 120,
     },
     book: {
         position: 'absolute',
-        top: '30%',
-        left: '20%',
-        height: 273,
-        width: 240,
+        top: '33%',
+        left: '26%',
+        height: 204,
+        width: 180,
     }
 });
 
