@@ -234,9 +234,9 @@ const FriendFeed = () => {
         onTouchEnd={handleTouchEnd} // Clear the timeout when touch ends
         scrollEventThrottle={16}
       />
-      <Button onPress={getFriends} title={"get friends"}>
+      {/* <Button onPress={getFriends} title={"get friends"}>
         Get friends
-      </Button>
+      </Button> */}
     </View>
   );
 };
