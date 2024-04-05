@@ -13,7 +13,7 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 import time
 import datetime
-from datetime import datetime, time, date
+from datetime import datetime, time, date, timezone
 import pytz
 import logging
 from django.core.mail import send_mail
@@ -377,9 +377,9 @@ def update_times_view(request):
                 logging.info("Current Date: %s", current_date)
 
                 # Set the times to RAW date time user enters
-                datetime1_current = datetime.combine(current_date, time1) # Combine date and time to get local datetime
-                datetime2_current = datetime.combine(current_date, time2) # Combine date and time to get local datetime
-                datetime3_current = datetime.combine(current_date, time3) # Combine date and time to get local datetime
+                datetime1_current = datetime.combine(current_date, time1).astimezone(timezone.utc) # Combine date and time to get local datetime
+                datetime2_current = datetime.combine(current_date, time2).astimezone(timezone.utc) # Combine date and time to get local datetime
+                datetime3_current = datetime.combine(current_date, time3).astimezone(timezone.utc) # Combine date and time to get local datetime
                 logging.info("DATETIMES to be set to in DB (combo of above): TIME1: %s,TIME2: %s,TIME3: %s", datetime1_current, datetime2_current, datetime3_current)
                 # Set the updated times to the user
                 user.time1 = datetime1_current
