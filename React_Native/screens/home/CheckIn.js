@@ -198,7 +198,6 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
 
   const handleMediaComplete = async (mediaProp) => {
     console.log("received data from mediabar", mediaProp);
-    setJournalText("");
     setMediaUri(mediaProp.assets[0].uri);
     setMediaType(mediaProp.assets[0].type);
     //sometimes mediaUri state doesn't update before next line
