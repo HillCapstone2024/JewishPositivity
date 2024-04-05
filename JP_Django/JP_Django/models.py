@@ -15,7 +15,9 @@ class User(AbstractUser):
     email = models.CharField(unique=True, max_length=254)
     password = models.CharField(max_length=100)
     username = models.CharField(unique=True, max_length=100)
-    profile_picture = models.BinaryField(blank=True, null=True) #profile picture in binary format
+    profile_picture = models.BinaryField(blank=True, null=True) # Profile picture in binary format
+    current_streak = models.IntegerField(default=0) # Current streak of user
+    longest_streak = models.IntegerField(default=0) # Longest streak of user
 
     # Consider default times to be UTC
     current_date = datetime.datetime.now().date() # Get current date
@@ -61,3 +63,10 @@ class Friends(models.Model): #to store friendships
     class Meta:
         # Define unique constraint for composite key
         unique_together = [('user1', 'user2')]
+
+class Badges(models.Model):
+    user_id = models.OneToOneField(User, on_delete=models.CASCADE, db_column='id', primary_key=True)  #referencing id of user model
+    one_day = models.BooleanField(default=False)
+    one_week = models.BooleanField(default=False)
+    one_month = models.BooleanField(default=False)
+    one_year = models.BooleanField(default=False)
