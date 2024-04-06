@@ -19,11 +19,13 @@ import IP_ADDRESS from "../../ip.js";
 import * as Storage from "../../AsyncStorage.js";
 import * as FileSystem from "expo-file-system";
 import { Buffer } from "buffer";
+import RecordingViewer from "../../tools/RecordingViewer.js";
 
 const FriendFeed = () => {
   const [username, setUsername] = useState();
   const [posts, setPosts] = useState([]);
   const [friends, setFriends] = useState([]);
+  const [video, setVideo] = useState(null);
   const [lastScrollPosition, setLastScrollPosition] = useState(0);
   const [timeoutId, setTimeoutId] = useState(null);
   const [scrollLoading, setScrollLoading] = useState(true);
@@ -102,9 +104,6 @@ const FriendFeed = () => {
           username: friends,
         },
       });
-      // console.log("friends check in success");
-      // base64ToImage(response.data[1].content, "image.png");
-      // console.log("friends check in success", response.data[0].content);
       setPosts(response.data);
       setScrollLoading(false);
       return response.data;
@@ -112,6 +111,23 @@ const FriendFeed = () => {
       // console.log("Error retrieving check in entries:", error);
       setScrollLoading(false);
       throw new Error("Check in entries failed");
+    }
+  };
+
+  const handleGetVideo = async (checkin_id) => {
+    try {
+      const csrfToken = await getCsrfToken();
+      const response = await axios.get(`${API_URL}/get_video_info/`, {
+        params: {
+          checkin_id: checkin_id,
+        },
+      });
+      setVideo(response.data);
+      console.log('got video success!');
+      return response.data;
+    } catch (error) {
+      console.log("Error retrieving video:", error);
+      throw new Error("video retreival failed");
     }
   };
 
@@ -134,13 +150,13 @@ const FriendFeed = () => {
         setScrollLoading(true);
         console.log("Held at the top!");
         handleGetEntries();
-      }, 2000); // Adjust the hold time as needed
+      }, 200000); // Adjust the hold time as needed
       setTimeoutId(id);
     }
   };
 
   const handleTouchEnd = () => {
-    console.log('ended touch');
+    console.log("ended touch");
     if (timeoutId) {
       clearTimeout(timeoutId);
       setTimeoutId(null);
@@ -165,7 +181,7 @@ const FriendFeed = () => {
 
   const PostCard = ({ post }) => (
     <View style={styles.postCard}>
-      <View style={styles.postHeader}>
+      <View style={styles.postHeaderBar}>
         {/* note profile picture would replace logo image below */}
         <Image
           source={require("../../assets/images/notebookPen.png")}
@@ -174,41 +190,44 @@ const FriendFeed = () => {
         <Text style={styles.postUsername}>{post.username}</Text>
         <Text style={styles.postDate}>{post.date}</Text>
       </View>
-      <Text style={styles.postDescription}>{post.header}</Text>
       <Moment moment_number={post.moment_number} />
-      {post.text_entry && (
-        // <Image source={{ uri: post.imageUrl }} style={styles.postImage} />
-        <Text>{post.text_entry}</Text>
-      )}
+      <Text style={styles.postHeader}>{post.header}</Text>
       {post.content_type === "image" && (
-        
-        <View style={styles.postImage}>
-          <Image
-            source={{uri: `data:Image/mp4;base64,${post?.content}`,}}
+        <View style={[styles.JournalEntryModalImage, { marginBottom: 20 }]}>
+          <ImageViewer
+            source={`data:Image/mp4;base64,${post?.content}`}
             // dimensions={{ height: 100, width: 100 }}
-            style={[styles.JournalEntryModalImage,{ marginBottom: 20 },]}
+            style={styles.JournalEntryModalImage}
           />
-          {/* <Text>{post.content.slice(1)}</Text> */}
-          <Image
-            style={styles.image}
-            source={{ uri: `data:image/jpg;base64,${post.content}` }}
-          />
-          <Text>image content type</Text>
         </View>
       )}
       {post.content_type === "video" && (
         <View style={styles.videoContainer}>
-          <VideoViewer
-            mediaUri={`data:video/mp4;base64,${post.content}`}
-            dimensions={{ height: 100, width: 60 }}
-          />
+          {/* <VideoViewer
+            source={`data:video/mp4;base64,${post.content}`}
+            style={{ height: 100, width: 60 }}
+          /> */}
+          <TouchableOpacity
+            onPress={() => {
+              handleGetVideo(post?.checkin_id);
+            }}
+          >
+            {/* later instead of text video this would be the video thumbnail */}
+            <Text>get video</Text>
+          </TouchableOpacity>
+          {video ? <VideoViewer source={video} /> : null}
+          {video !== null ? <Text>showing video</Text> : null}
         </View>
       )}
       {post.content_type === "recording" && (
         <View style={styles.audioContainer}>
-          <Text style={styles.text}>Recording</Text>
+          <RecordingViewer
+            source={`data:audio/mp3;base64,${post.content}`}
+            style={{ height: 60, width: 60, borderRadius: 5 }}
+          />
         </View>
       )}
+      {post.text_entry && <Text>{post.text_entry}</Text>}
     </View>
   );
 
@@ -231,9 +250,9 @@ const FriendFeed = () => {
         contentContainerStyle={styles.postListContainer}
         keyExtractor={(post) => post.checkin_id}
         renderItem={({ item }) => <PostCard post={item} />}
-        onScroll={handleScroll}
-        onTouchEnd={handleTouchEnd} // Clear the timeout when touch ends
-        scrollEventThrottle={16}
+        // onScroll={handleScroll}
+        // onTouchEnd={handleTouchEnd} // Clear the timeout when touch ends
+        // scrollEventThrottle={16}
       />
       {/* <Button onPress={getFriends} title={"get friends"}>
         Get friends
@@ -245,19 +264,19 @@ const FriendFeed = () => {
 const styles = StyleSheet.create({
   container: {
     // paddingTop: 60,
-    paddingBottom: 220,
+    paddingBottom: 100,
     height: "100%",
     // backgroundColor: "red",
   },
   userContainer: {
     flexDirection: "row",
     padding: 10,
-    height: 100,
+    height: 80,
     width: "100%",
   },
   userList: {
     width: "100%",
-    backgroundColor: "white",
+    backgroundColor: "#4A90E2",
   },
   userItem: {
     marginRight: 10,
@@ -270,20 +289,21 @@ const styles = StyleSheet.create({
   },
   statusUserName: {
     marginTop: 5,
-    fontSize: 12,
-    color: "#483D8B",
+    fontSize: 10,
+    color: "white",
     width: 60,
     textAlign: "center",
   },
   avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
   },
   postListContainer: {
     paddingTop: 20,
-    marginTop: 30,
+    // marginTop: 30,
     paddingHorizontal: 15,
+    // height: "100%"
   },
   postCard: {
     marginBottom: 10,
@@ -291,7 +311,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 5,
   },
-  postHeader: {
+  postHeaderBar: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 5,
@@ -304,14 +324,16 @@ const styles = StyleSheet.create({
   },
   postUsername: {
     flex: 1,
+    color: "#4A90E2",
   },
   postDate: {
     fontSize: 12,
-    color: "#A9A9A9",
+    color: "#4A90E2",
   },
-  postDescription: {
+  postHeader: {
     fontSize: 16,
-    color: "#00008B",
+    // color: "#00008B",
+    fontWeight: "bold",
   },
   postImage: {
     marginTop: 10,
@@ -329,7 +351,8 @@ const styles = StyleSheet.create({
     color: "#808080",
   },
   JournalEntryModalImage: {
-    width: "100%",
+    // width: "100%",
+    width: 100,
     aspectRatio: 1,
     borderRadius: 5,
   },

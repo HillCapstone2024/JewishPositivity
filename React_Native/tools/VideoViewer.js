@@ -13,7 +13,7 @@ import * as Haptics from "expo-haptics";
 import { Video, ResizeMode } from "expo-av";
 import makeThemeStyle from "./Theme.js";
 
-const VideoViewer = ({ mediaUri, onDelete, dimensions }) => {
+const VideoViewer = ({ source, onDelete, style }) => {
   const videoRef = useRef(null);
   const [modalVisible, setModalVisible] = useState(false);
   const theme = makeThemeStyle();
@@ -23,17 +23,19 @@ const VideoViewer = ({ mediaUri, onDelete, dimensions }) => {
       <TouchableOpacity
         style={styles.fullSize}
         onLongPress={() => {
+          if (onDelete) {
           setModalVisible(true);
           theme["hapticFeedback"] ? null : Haptics.selectionAsync();
+          }
         }}
         activeOpacity={1} // Keep the video appearance normal on press
       >
         <Video
-          source={{ uri: mediaUri }}
+          source={{ uri: source }}
           playsInSilentModeIOS={true}
           useNativeControls
           ref={videoRef}
-          style={[styles.video, {height: dimensions.height, width: dimensions.width}]}
+          style={[styles.video, style]}
           controls={true}
           resizeMode={ResizeMode.COVER}
           onError={(e) => console.log("video error", e)}

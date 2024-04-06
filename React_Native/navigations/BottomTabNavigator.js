@@ -57,7 +57,7 @@ const BottomTabNavigator = () => {
       >
         <Tab.Screen
           name="Feed"
-          component={HomeScreen}
+          component={FriendFeed}
           options={{
             tabBarIcon: ({ focused }) => (
               <View style={{ position: "absolute", top: 15 }}>

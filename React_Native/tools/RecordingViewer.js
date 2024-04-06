@@ -16,7 +16,7 @@ import makeThemeStyle from "./Theme.js";
 
 const { height } = Dimensions.get("window");
 
-const RecordingViewer = ({ uri, onDelete, dimensions }) => {
+const RecordingViewer = ({ source, onDelete, style }) => {
     const [modalVisible, setModalVisible] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [playbackInstance, setPlaybackInstance] = useState(null);
@@ -39,7 +39,7 @@ const RecordingViewer = ({ uri, onDelete, dimensions }) => {
 
   const setupAudio = async () => {
     const { sound } = await Audio.Sound.createAsync(
-      { uri },
+      { uri: source },
       { shouldPlay: false },
       updatePlaybackStatus
     );
@@ -90,7 +90,7 @@ const RecordingViewer = ({ uri, onDelete, dimensions }) => {
       <View
         style={[
           styles.container,
-          { height: dimensions.height, width: dimensions.width },
+          style
         ]}
       >
           <View style={styles.timerContainer}>
@@ -105,19 +105,23 @@ const RecordingViewer = ({ uri, onDelete, dimensions }) => {
           </View>
           <TouchableOpacity
             onPress={handlePlayPausePress}
-            onLongPress={showDeleteModal}
+            onLongPress={() => {
+              if (onDelete) {
+              showDeleteModal();
+              }
+            }}
           >
             {isPlaying ? (
               <Ionicons
                 name="stop-circle"
                 color={"white"}
-                size={dimensions.width / 2}
+                size={style.width / 2}
               />
             ) : (
               <Ionicons
                 name="play-circle"
                 color={"white"}
-                size={dimensions.width / 2}
+                size={style.width / 2}
               />
             )}
           </TouchableOpacity>
@@ -165,8 +169,8 @@ const styles = StyleSheet.create({
     // width: 60,
     // height: 60,
     paddingBottom: 6,
-    borderTopLeftRadius: 5,
-    borderTopRightRadius: 5,
+    // borderTopLeftRadius: 5,
+    // borderTopRightRadius: 5,
     // borderColor: "#4A90E2",
     // borderWidth: 2,
   },

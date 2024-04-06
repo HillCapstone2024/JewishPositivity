@@ -16,7 +16,7 @@ import makeThemeStyle from "./Theme.js";
 
 const { height } = Dimensions.get("window");
 
-const ImageViewer = ({ source, onDelete, dimensions }) => {
+const ImageViewer = ({ source, onDelete, style }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(height)).current;
@@ -74,9 +74,14 @@ const ImageViewer = ({ source, onDelete, dimensions }) => {
     <View style={styles.container}>
       <TouchableWithoutFeedback
         onPress={showModal}
-        onLongPress={showDeleteModal}
+        onLongPress={() => {
+          if (onDelete) {
+            showDeleteModal();
+          }
+        }}
       >
-        <Image source={{ uri: source }} style={[styles.triggerImage, {height: dimensions.height, width: dimensions.width }]} />
+        <Image source={{ uri: source }} style={style} />
+        {/* <Text>{styleProp}</Text> */}
       </TouchableWithoutFeedback>
 
       <Modal
@@ -137,6 +142,8 @@ const styles = StyleSheet.create({
     // flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    width: "100%",
+    aspectRatio: 1,
   },
   trigger: {
     borderRadius: 5,

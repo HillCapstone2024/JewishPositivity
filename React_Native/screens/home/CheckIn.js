@@ -194,7 +194,7 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
     // setDisableSubmit(true);
     const base64String = await readFileAsBase64(uri);
     setBase64Data(base64String);
-    setJournalText("");
+    // setJournalText("");
     setMediaBox(true);
     setMediaChanged(!mediaChanged);
     setDisableSubmit(false);
@@ -216,13 +216,15 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
 
   const handleHeaderComplete = (text) => {
     setHeaderText(text);
-    console.log(text);
+    // console.log(text);
   };
 
   const handleTextComplete = (text) => {
     setJournalText(text);
     console.log(text);
-    setDisableSubmit(text.trim().length === 0);
+    if (mediaUri === null) {
+      setDisableSubmit(text.trim().length === 0);
+    }
   };
 
   const handleToggle = (toggle) => {
@@ -314,22 +316,27 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
                 <ImageViewer
                   source={mediaUri}
                   onDelete={deleteMedia}
-                  dimensions={{ height: 60, width: 60 }}
+                  style={{
+                    height: 60,
+                    width: 60,
+                    borderTopLeftRadius: 5,
+                    borderTopRightRadius: 5,
+                  }}
                 />
               ) : mediaType === "video" ? (
                 <VideoViewer
-                  mediaUri={mediaUri}
+                  source={mediaUri}
                   onDelete={deleteMedia}
-                  dimensions={{ height: 60, width: 60 }}
+                  style={{ height: 60, width: 60 }}
                 />
               ) : (
                 // <View style={styles.container}>
                 //   <Button title="Play Sound" onPress={playSound} />
                 // </View>
                 <RecordingViewer
-                  uri={mediaUri}
+                  source={mediaUri}
                   onDelete={deleteMedia}
-                  dimensions={{ height: 60, width: 60 }}
+                  style={{ height: 60, width: 60 }}
                 />
               )}
               <ProgressBar onMediaChange={mediaChanged} />
