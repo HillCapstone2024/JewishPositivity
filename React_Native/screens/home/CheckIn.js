@@ -14,6 +14,7 @@ import {
   SafeAreaView,
   Platform,
   Animated,
+  ActivityIndicator,
 } from "react-native";
 import axios from "axios";
 import RecordingAccessoryBar from "../../tools/RecordingBar.js";
@@ -46,6 +47,7 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
   const [mediaChanged, setMediaChanged] = useState(false);
   const [selectedOption, setSelectedOption] = useState("");
   const [disableSubmit, setDisableSubmit] = useState(true);
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
   const mediaAccessoryViewID = "MediaBar";
   const theme = makeThemeStyle();
   const now = new Date();
@@ -137,6 +139,7 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
   };
 
   const submitJournal = async () => {
+    setLoadingSubmit(true);
     let base64JournalText = "";
     if (mediaType === "text") {
       base64JournalText = textToBase64(journalText);
@@ -173,6 +176,7 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
       console.log(error);
       console.error("Journal Error:", error.response.data);
     }
+    setLoadingSubmit(false);
   };
 
   const deleteMedia = () => {
@@ -249,7 +253,7 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
     loadMediaContainer;
   }, [showMediaBar]);
 
-  return (      
+  return (
     <SafeAreaView style={[styles.container]}>
       {/* View for cancel and submit buttons */}
       <View style={styles.topBar}>
@@ -262,20 +266,26 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity
-          disabled={disableSubmit}
-          style={styles.submitButton}
-          onPress={submitJournal}
-          testID="submitButton"
-        >
-          <Text
-            style={
-              disableSubmit ? styles.submitTextDisabled : styles.submitText
-            }
+        {loadingSubmit ? (
+          <View style={styles.ActivityIndicator}>
+            <ActivityIndicator />
+          </View>
+        ) : (
+          <TouchableOpacity
+            disabled={disableSubmit}
+            style={styles.submitButton}
+            onPress={submitJournal}
+            testID="submitButton"
           >
-            Submit
-          </Text>
-        </TouchableOpacity>
+            <Text
+              style={
+                disableSubmit ? styles.submitTextDisabled : styles.submitText
+              }
+            >
+              Submit
+            </Text>
+          </TouchableOpacity>
+        )}
         {/* <View
           style={[
             styles.separator,
@@ -288,94 +298,94 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
 
       {/* Main Container Section */}
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={[styles.container]}
       >
-      <ScrollView style={styles.contentContainer}>
-        <Text style={styles.header}>Whacha checking in for?</Text>
-        <Text style={[styles.datetime, theme["color"]]}>
-          {formattedDateTime}{" "}
-        </Text>
+        <ScrollView style={styles.contentContainer}>
+          <Text style={styles.header}>Whacha checking in for?</Text>
+          <Text style={[styles.datetime, theme["color"]]}>
+            {formattedDateTime}{" "}
+          </Text>
 
-        {/* Media Box Below */}
-        {mediaBox ? (
-          <View style={styles.mediaContainer}>
-            {mediaType === "image" ? (
-              <ImageViewer
-                source={mediaUri}
-                onDelete={deleteMedia}
-                dimensions={{ height: 60, width: 60 }}
-              />
-            ) : mediaType === "video" ? (
-              <VideoViewer
-                mediaUri={mediaUri}
-                onDelete={deleteMedia}
-                dimensions={{ height: 60, width: 60 }}
-              />
-            ) : (
-              // <View style={styles.container}>
-              //   <Button title="Play Sound" onPress={playSound} />
-              // </View>
-              <RecordingViewer
-                uri={mediaUri}
-                onDelete={deleteMedia}
-                dimensions={{ height: 60, width: 60 }}
-              />
-            )}
-            <ProgressBar onMediaChange={mediaChanged} />
-          </View>
-        ) : null}
+          {/* Media Box Below */}
+          {mediaBox ? (
+            <View style={styles.mediaContainer}>
+              {mediaType === "image" ? (
+                <ImageViewer
+                  source={mediaUri}
+                  onDelete={deleteMedia}
+                  dimensions={{ height: 60, width: 60 }}
+                />
+              ) : mediaType === "video" ? (
+                <VideoViewer
+                  mediaUri={mediaUri}
+                  onDelete={deleteMedia}
+                  dimensions={{ height: 60, width: 60 }}
+                />
+              ) : (
+                // <View style={styles.container}>
+                //   <Button title="Play Sound" onPress={playSound} />
+                // </View>
+                <RecordingViewer
+                  uri={mediaUri}
+                  onDelete={deleteMedia}
+                  dimensions={{ height: 60, width: 60 }}
+                />
+              )}
+              <ProgressBar onMediaChange={mediaChanged} />
+            </View>
+          ) : null}
 
-        <View style={styles.boxContainer}>
-          <Text style={[styles.boxDescriptor]}>Add a Title</Text>
-          <TextInput
-            style={[styles.title, theme["color"]]}
-            placeholder="Write something..."
-            placeholderTextColor="grey"
-            testID="headerInput"
-            value={headerText}
-            maxLength={100}
-            onChangeText={handleHeaderComplete}
-          ></TextInput>
-        </View>
-
-        <View style={styles.boxContainer}>
-          <Text style={[styles.boxDescriptor]}>Check-in Type</Text>
-          <View style={styles.dropdownContainer}>
-            <RNPickerSelect
-              style={pickerSelectStyles}
-              value={selectedOption}
-              placeholder={{ label: "Select Type Here..." }}
-              placeholderTextColor="black"
-              onValueChange={handleOptionChange}
-              items={[
-                { label: "Modeh Ani", value: "Modeh Ani" },
-                { label: "Ashrei", value: "Ashrei" },
-                { label: "Shema", value: "Shema" },
-              ]}
-            />
-            {/* <Ionicons name="chevron-down" size={25} color={"#4A90E2"} style={{ paddingTop: 5 }}/> */}
-          </View>
-        </View>
-
-        <View style={styles.boxContainer}>
-          <Text style={[styles.boxDescriptor]}>Description</Text>
-          <ScrollView style={[styles.dropdownContainer, { height: 350 }]}>
+          <View style={styles.boxContainer}>
+            <Text style={[styles.boxDescriptor]}>Add a Title</Text>
             <TextInput
-              style={styles.journalInput}
-              inputAccessoryViewID={mediaAccessoryViewID}
-              placeholder={"Enter reflection here…"}
-              placeholderTextColor={"grey"}
-              maxLength={10000}
-              value={journalText}
-              onChangeText={handleTextComplete}
-              multiline
-              numberOfLines={4}
-              testID="journalInput"
-            />
-          </ScrollView>
-        </View>
-      </ScrollView>
+              style={[styles.title, theme["color"]]}
+              placeholder="Write something..."
+              placeholderTextColor="grey"
+              testID="headerInput"
+              value={headerText}
+              maxLength={100}
+              onChangeText={handleHeaderComplete}
+            ></TextInput>
+          </View>
+
+          <View style={styles.boxContainer}>
+            <Text style={[styles.boxDescriptor]}>Check-in Type</Text>
+            <View style={styles.dropdownContainer}>
+              <RNPickerSelect
+                style={pickerSelectStyles}
+                value={selectedOption}
+                placeholder={{ label: "Select Type Here..." }}
+                placeholderTextColor="black"
+                onValueChange={handleOptionChange}
+                items={[
+                  { label: "Modeh Ani", value: "Modeh Ani" },
+                  { label: "Ashrei", value: "Ashrei" },
+                  { label: "Shema", value: "Shema" },
+                ]}
+              />
+              {/* <Ionicons name="chevron-down" size={25} color={"#4A90E2"} style={{ paddingTop: 5 }}/> */}
+            </View>
+          </View>
+
+          <View style={styles.boxContainer}>
+            <Text style={[styles.boxDescriptor]}>Description</Text>
+            <ScrollView style={[styles.dropdownContainer, { height: 350 }]}>
+              <TextInput
+                style={styles.journalInput}
+                inputAccessoryViewID={mediaAccessoryViewID}
+                placeholder={"Enter reflection here…"}
+                placeholderTextColor={"grey"}
+                maxLength={10000}
+                value={journalText}
+                onChangeText={handleTextComplete}
+                multiline
+                numberOfLines={4}
+                testID="journalInput"
+              />
+            </ScrollView>
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
       {/* <ScrollView keyboardDismissMode="interactive"> */}
 
@@ -396,7 +406,6 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
         </InputAccessoryView>
       )}
     </SafeAreaView>
-    
   );
 }
 
@@ -605,6 +614,9 @@ const styles = StyleSheet.create({
     color: "#4A90E2",
   },
   submitButton: {},
+  ActivityIndicator: {
+    marginRight: 20
+  },
   submitText: {
     color: "#4A90E2",
     fontSize: 19,
