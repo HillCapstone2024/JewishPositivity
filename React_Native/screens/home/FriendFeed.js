@@ -183,10 +183,11 @@ const FriendFeed = () => {
       {post.content_type === "image" && (
         
         <View style={styles.postImage}>
-          {/* <ImageViewer
-            mediaUri={`data:image/jpeg;base64,${post.content}`}
-            dimensions={{ height: 100, width: 100 }}
-          /> */}
+          <Image
+            source={{uri: `data:Image/mp4;base64,${post?.content}`,}}
+            // dimensions={{ height: 100, width: 100 }}
+            style={[styles.JournalEntryModalImage,{ marginBottom: 20 },]}
+          />
           {/* <Text>{post.content.slice(1)}</Text> */}
           <Image
             style={styles.image}
@@ -326,6 +327,11 @@ const styles = StyleSheet.create({
   },
   postButtonText: {
     color: "#808080",
+  },
+  JournalEntryModalImage: {
+    width: "100%",
+    aspectRatio: 1,
+    borderRadius: 5,
   },
 });
 

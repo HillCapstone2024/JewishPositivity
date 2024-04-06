@@ -11,6 +11,8 @@ import { SearchBar } from 'react-native-elements';
 import { Ionicons } from "@expo/vector-icons";
 import moment from 'moment';
 
+import EditCheckIn from "./EditCheckIn.js";
+
 export default function Archive({ navigaton }) {
   const [username, setUsername] = useState("");
   const [entries, setEntries] = useState([]);
@@ -22,7 +24,8 @@ export default function Archive({ navigaton }) {
   const [sortByTime, setSortByTime] = useState(true); // Default to sort by time
   const [momentTypeSortOrder, setMomentTypeSortOrder] = useState("Most Recent"); // Default to sort by most recent moment type
   const [sortBy, setSortBy] = useState("Sort by Newest to Oldest");
-  const [deleteModalVisible, setDeleteModalVisible] = useState(true);
+  const [deleteModalVisible, setEditDeleteModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
 
   theme = makeThemeStyle();
 
@@ -99,6 +102,7 @@ export default function Archive({ navigaton }) {
   const handleEntryPress = (entry) => {
     setSelectedEntry(entry);
     setModalVisible(true);
+    setEditModalVisible(false);
   };
 
   const closeModal = () => {
@@ -106,8 +110,10 @@ export default function Archive({ navigaton }) {
     setModalVisible(false);
   };
 
-  const onEdit = () => {
-
+  const onEditPress = () => {
+    // console.log("Pressed Edit Button");
+    setEditDeleteModalVisible(false);
+    setEditModalVisible(true);
   }
 
   const getDividerColor = (moment_number) => {
@@ -348,37 +354,52 @@ export default function Archive({ navigaton }) {
                   onRequestClose={closeModal}
                 >
                   <View style={styles.modalContainer}>
+                    {/* modal to show EditDeleteModal */}
                     <Modal
                       animationType="slide"
                       transparent={true}
                       visible={deleteModalVisible}
-                      onRequestClose={() => setDeleteModalVisible(false)}
+                      onRequestClose={() => setEditDeleteModalVisible(false)}
                     >
                       <TouchableWithoutFeedback
-                        onPress={() => setDeleteModalVisible(false)}
+                        onPress={() => setEditDeleteModalVisible(false)}
                       >
                         <View style={styles.centeredView}>
                           {/* Prevents the modal content from closing when pressing on it */}
                           <TouchableWithoutFeedback>
                             <View style={styles.modalView}>
-                              <Text style={styles.modalText}>
-                                Do you want to delete this image?
-                              </Text>
-                              <View style={styles.horizontalBar} />
-                              <TouchableOpacity
-                                onPress={() => {
+                              <View style={styles.editDeleteContainer}>
+                                {/* Edit button */}
+                                <TouchableOpacity onPress={onEditPress}>
+                                  <Text style={styles.editText}>Edit</Text>
+                                </TouchableOpacity>
+                                <View style={styles.horizontalBar} />
+                                {/* Delete button */}
+                                <TouchableOpacity onPress={() => {
                                   // onDelete();
-                                  setDeleteModalVisible(false);
-                                }}
-                              >
-                                <Text style={styles.deleteText}>Delete</Text>
-                              </TouchableOpacity>
-                              {/* Removed the Cancel button since pressing off the modal now also acts as cancel */}
+                                  // setEditDeleteModalVisible(false);
+                                }}>
+                                  <Text style={styles.deleteText}>Delete</Text>
+                                </TouchableOpacity>
+                              </View>
+                              {/* Cancel button */}
+                              <View style={styles.cancelContainer}>
+                                <TouchableOpacity onPress={() => 
+                                  setEditDeleteModalVisible(false)}>
+                                  <Text style={styles.cancelText}>Cancel</Text>
+                                </TouchableOpacity>
+                              </View>
                             </View>
                           </TouchableWithoutFeedback>
                         </View>
                       </TouchableWithoutFeedback>
                     </Modal>
+                    <EditCheckIn 
+                      editModalVisible={editModalVisible} 
+                      setEditModalVisible={setEditModalVisible} 
+                      selectedEntry={selectedEntry}
+                    />
+
                     <View style={styles.JournalEntryModalContent}>
                       <View style={styles.buttonRow}>
                         <Ionicons
@@ -390,20 +411,16 @@ export default function Archive({ navigaton }) {
                           name="ellipsis-horizontal-outline"
                           style={styles.JournalEntryModalIcons}
                           onPress={() => {
-                            setDeleteModalVisible(true);
+                            setEditDeleteModalVisible(true);
                           }}
                         />
                       </View>
                       <ScrollView padding={10}>
                         <Text style={[styles.headerText]}>
-                          {selectedEntry?.header !== null
-                            ? selectedEntry?.header
-                            : "Header Would Go Here"}
+                          {selectedEntry?.header !== null ? selectedEntry?.header : "Header Would Go Here"}
                         </Text>
                         <Text style={[styles.detailText]}>
-                          {moment(selectedEntry?.date, "YYYY-MM-DD").format(
-                            "dddd, D MMMM YYYY"
-                          )}{" "}
+                          {moment(selectedEntry?.date, "YYYY-MM-DD").format("dddd, D MMMM YYYY")}{" "}
                         </Text>
                         <Text style={[styles.detailText, { marginBottom: 20 }]}>
                           {getMomentText(selectedEntry?.moment_number)}
@@ -411,21 +428,14 @@ export default function Archive({ navigaton }) {
 
                         {selectedEntry?.content_type === "image" && (
                           <Image
-                            style={[
-                              styles.JournalEntryModalImage,
-                              { marginBottom: 20 },
-                            ]}
-                            source={{
-                              uri: `data:image/jpeg;base64,${selectedEntry?.content}`,
-                            }}
+                            style={[styles.JournalEntryModalImage,{ marginBottom: 20 },]}
+                            source={{uri: `data:image/jpeg;base64,${selectedEntry?.content}`,}}
                           />
                         )}
                         {selectedEntry?.content_type === "video" && (
                           <Video
                             style={styles.video}
-                            source={{
-                              uri: `data:video/mp4;base64,${selectedEntry?.content}`,
-                            }}
+                            source={{uri: `data:video/mp4;base64,${selectedEntry?.content}`,}}
                             useNativeControls
                             resizeMode="contain"
                           />
@@ -433,12 +443,10 @@ export default function Archive({ navigaton }) {
                         {selectedEntry?.content_type === "recording" && (
                           <Text style={styles.text}>Recording</Text>
                         )}
-
                         <Text style={[styles.detailText, { marginBottom: 20 }]}>
-                          {selectedEntry?.text_entry !== null
-                            ? selectedEntry?.text_entry
-                            : "  This is some long content text that will be truncated if it takes up too much space in the container."}
+                          {selectedEntry?.text_entry !== null ? selectedEntry?.text_entry: "  This is some long content text that will be truncated if it takes up too much space in the container."}
                         </Text>
+
                       </ScrollView>
                     </View>
                   </View>
@@ -638,19 +646,27 @@ const styles = StyleSheet.create({
     color: "grey",
     fontWeight: 500,
     lineHeight: 20,
-  },
+  }, 
 
+  // Edit/Delete Modal
   centeredView: {
     flex: 1,
     justifyContent: "flex-end",
     // alignItems: "center",
     marginBottom: 20,
   },
-  modalView: {
-    margin: 20,
+  horizontalBar: {
+    height: 1,
+    width: "100%",
+    backgroundColor: "#ccc",
+    margin: 15,
+  },
+  editDeleteContainer: {
+    marginBottom: 20,
+    marginHorizontal: 20,
     backgroundColor: "white",
-    borderRadius: 20,
-    paddingTop: 35,
+    borderRadius: 10,
+    padding: 15,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
@@ -661,24 +677,34 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  modalText: {
-    marginBottom: 15,
+  cancelContainer: {
+    marginBottom: 20,
+    marginHorizontal: 20,
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 15,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  cancelText: {
     textAlign: "center",
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: "500",
+    color: "#4A90E2",
   },
   deleteText: {
     color: "red",
-    fontSize: 16,
-    marginVertical: 10,
+    fontSize: 18,
   },
-  horizontalBar: {
-    height: 1,
-    width: "90%",
-    backgroundColor: "#ccc",
-    // marginTop: 15,
-    // borderWidth: 2,
+  editText: {
+    fontSize: 18,
+    color: "#4A90E2",
   },
-
-  // Edit/Delete Modal
 });
