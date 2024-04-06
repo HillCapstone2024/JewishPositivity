@@ -676,14 +676,74 @@ def send_report_email_view(request):
         return HttpResponse("No data received", status=400)
     
     subject = f"APP REPORT {message[:20]}... - {username}"
-    message = f"Report from user: {username}. \n\n{message}"
+    message = f"Report from user: {username} on {datetime.today()}. \n\n{message}"
     try:
-        response =  send_mail(subject, message, from_email = settings.EMAIL_HOST_USER, recipient_list = [settings.RECIPIENT_ADDRESS], fail_silently=False)
+        response = send_mail(subject, message, from_email = settings.EMAIL_HOST_USER, recipient_list = [settings.RECIPIENT_ADDRESS], fail_silently=False)
         print(response)
         return JsonResponse({"response": response})
     except Exception as e:
         logging.error("Error sending email: %s", e)
         return JsonResponse({"status": 400})
+
+def send_password_reset_email_view(request):
+    if request.method != "POST":
+        return HttpResponse(constNotPost, status=400)
+    
+    data = json.loads(request.body)
+    username = data["username"]
+    code = data["code"]
+    
+    if username is None:
+        return HttpResponse("No username received", status=400)
+    if code is None:
+        return HttpResponse("No code received", status=400)
+    try:
+        user = User.objects.get(username=username)
+    except Exception as e:
+        logging.info(e)
+        return HttpResponse(constUserDNE, status=400)
+    email = user.email
+
+    if email is None:
+        return HttpResponse("No email received", status=400)
+    
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return HttpResponse("User with that email does not exist", status=400)
+    
+    subject = "Password Reset Request"
+    message = f"Hello {user.username},\n\nYour Code:\n{code}\n\nIf you did not request a password reset, please ignore this email.\n Sent at: {datetime.today()}"
+    try:
+        response = send_mail(subject, message, from_email = settings.EMAIL_HOST_USER, recipient_list = [email], fail_silently=False)
+        print(response)
+        return JsonResponse({"response": response})
+    except Exception as e:
+        logging.error("Error sending email: %s", e)
+        return JsonResponse({"status": 400})
+    
+def change_password_view(request):
+    if request.method != "POST":
+        return HttpResponse(constNotPost, status=400)
+    
+    data = json.loads(request.body)
+    username = data["username"]
+    new_password = data["new_password"]
+    
+    if username is None:
+        return HttpResponse("No username received", status=400)
+    if new_password is None:
+        return HttpResponse("No new password received", status=400)
+    
+    try:
+        user = User.objects.get(username=username)
+    except Exception as e:
+        logging.info(e)
+        return HttpResponse(constUserDNE, status=400)
+    
+    user.set_password(new_password)
+    user.save()
+    return HttpResponse("Password changed successfully", status=200)
 
 
 # ########## Friends Management ##########
@@ -836,3 +896,4 @@ def get_friends_view(request):
         else:  # username was empty
             return HttpResponse("Username not provided", status=400)
     return HttpResponse("Not a GET request")
+
