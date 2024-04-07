@@ -11,8 +11,6 @@ WORKDIR /JewishPositivity
 
 COPY . .
 
-RUN 
-
 RUN pip3 install -r requirements_prod.txt
 
 WORKDIR /JewishPositivity/JP_Django
