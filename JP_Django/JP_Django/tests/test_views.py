@@ -1491,7 +1491,6 @@ class GetTodaysCheckinsViewTestCase(TestCase): # to test retreving todays checki
             logging.info('')   
 
 
-
 class AddFriendViewTestCase(TestCase): #to test adding friends to user's friend list
 
     # Define constant user data
@@ -1807,6 +1806,7 @@ class GetFriendsViewTestCase(TestCase): # to test retreving all checkin moments 
 
 class DeleteUserViewTestCase(TestCase):  # To test deleting users account from the User table
 
+
     # Define constant user data
     USER1_DATA = {
         'username': 'testuser1',
@@ -1872,3 +1872,63 @@ class DeleteUserViewTestCase(TestCase):  # To test deleting users account from t
 
         # Check if response status code is 400 -- failure
         self.assertEqual(response.status_code, 400)
+
+class GetUserBadgesViewTestCase(TestCase):
+
+    # Define constant user data
+    USER1_DATA = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+    BADGES_DATA_SUCESS = {
+            'one_day': True,
+            'one_week': False,
+            'one_month': True,
+            'one_year': False
+        }
+    def setUp(self):
+        # Initialize the Django test client
+        self.client = Client()
+
+        # Create test user
+        self.client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)
+        
+        # Get user information to retrieve the user ID for badge info
+        response = self.client.get(reverse('get_user_information'), {'username': 'testuser1'})
+        user_info = json.loads(response.content)
+        logging.info("get data: %s", user_info)
+        self.user_id = user_info['id']
+
+        # Updating the badges to the data I put
+        self.client.post(reverse('update_badges_view'), {'user_id': self.user_id, **self.BADGES_DATA_SUCESS}, content_type=CONTENT_TYPE_JSON)
+
+    def test_get_user_badges_success(self):
+        logging.info("************TEST_get_user_badges_success**************")
+        
+        # Send GET request to get_badges_view with user ID
+        response = self.client.get(reverse('get_badges_view'), {'user_id': self.user_id})
+        response_data = json.loads(response.content)
+        logging.info("response_data: %s", response_data)
+
+        # Check if response status code is 200 and if the correct badges are returned
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response_data['one_day'])
+        self.assertFalse(response_data['one_week'])
+        self.assertTrue(response_data['one_month'])
+        self.assertFalse(response_data['one_year'])
+
+    def test_get_user_badges_fail_User_DNE(self):
+        logging.info("************TEST_get_user_badges_fail_User_DNE**************")
+        
+        # Send GET request to get_badges_view with a non-existing user ID
+        response = self.client.get(reverse('get_badges_view'), {'user_id': 9999})  # Assuming 9999 is a non-existing user ID
+        logging.info("failure response_data: %s", response.content.decode('utf-8'))
+
+        # Check if response status code is 404 -- User Does Not Exist
+        self.assertEqual(response.status_code, 404)

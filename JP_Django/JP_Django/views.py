@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
 from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
-from JP_Django.models import Checkin, Friends
+from JP_Django.models import Checkin, Friends, Badges
 from django.middleware.csrf import get_token
 from django.http import JsonResponse
 from django.core.validators import validate_email
@@ -332,6 +332,7 @@ def get_user_information_view(request):
 
                 # get all of the information for the user
                 response_data = {
+                    "id": user.pk,
                     "username":user.username,
                     "password":user.password,
                     "email":user.email,
@@ -897,3 +898,42 @@ def get_friends_view(request):
             return HttpResponse("Username not provided", status=400)
     return HttpResponse("Not a GET request")
 
+
+# ########## Badges Management ##########
+
+
+
+# ########## Badges Management ##########
+
+def get_badges_view(request):
+    logging.info("In the get_badges_view")
+    if request.method == "GET":
+        # Retrieve the user ID from the query parameters
+        user_id = request.GET.get('user_id')
+        if not user_id:
+            return HttpResponse("User ID not provided", status=400)
+        
+        try:
+            # Retrieve the badges for the specified user
+            badges = Badges.objects.get(user_id=user_id)
+            response_data = {
+                "user_id": user_id,
+                "one_day": badges.one_day,
+                "one_week": badges.one_week,
+                "one_month": badges.one_month,
+                "one_year": badges.one_year
+            }
+
+            # Filter to include only the badges that are True
+            true_badges = {k: v for k, v in response_data.items() if v is True}
+
+            logging.info(true_badges)
+            return HttpResponse(json.dumps(true_badges), content_type="application/json")
+        except Badges.DoesNotExist:
+            logging.info(f"No badges found for user {user_id}")
+            return HttpResponse(f"No badges found for user {user_id}", status=404)
+        except Exception as e:
+            logging.error(f"Error retrieving badges: {e}")
+            return HttpResponse("Error retrieving badges", status=500)
+    else:
+        return HttpResponse("Not a GET request!", status=405)
