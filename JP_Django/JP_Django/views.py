@@ -930,12 +930,15 @@ def get_badges_view(request):
     logging.info("In the get_badges_view")
     if request.method == "GET":
         # Retrieve the user ID from the query parameters
-        user_id = request.GET.get('user_id')
-        if not user_id:
+        username = request.GET.get('username')
+        if not username:
             return HttpResponse("User ID not provided", status=400)
         
         try:
             # Retrieve the badges for the specified user
+            user = User.objects.get(username=username)
+            user_id = user.pk # get foreign key reference field to look up in checkin userid column
+            
             badges = Badges.objects.get(user_id=user_id)
             response_data = {
                 "user_id": user_id,

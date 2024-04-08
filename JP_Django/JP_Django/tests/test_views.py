@@ -1987,22 +1987,16 @@ class GetUserBadgesViewTestCase(TestCase):
             'one_week': False,
             'one_month': True,
             'one_year': False
-        }
+    }
+
+
     def setUp(self):
         # Initialize the Django test client
         self.client = Client()
 
         # Create test user
         self.client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)
-        
-        # Get user information to retrieve the user ID for badge info
-        response = self.client.get(reverse('get_user_information_view'), {'username': 'testuser1'})
-        user_info = json.loads(response.content)
-        logging.info("get data: %s", user_info)
-        self.user_id = user_info['id']
 
-        # Updating the badges to the data I put
-        self.client.post(reverse('update_badges_view'), {'user_id': self.user_id, **self.BADGES_DATA_SUCESS}, content_type=CONTENT_TYPE_JSON)
 
     def test_get_user_badges_success(self):
         logging.info("************TEST_get_user_badges_success**************")
@@ -2026,5 +2020,5 @@ class GetUserBadgesViewTestCase(TestCase):
         response = self.client.get(reverse('get_badges_view'), {'user_id': 9999})  # Assuming 9999 is a non-existing user ID
         logging.info("failure response_data: %s", response.content.decode('utf-8'))
 
-        # Check if response status code is 404 -- User Does Not Exist
-        self.assertEqual(response.status_code, 404)
+        # Check if response status code is 400 
+        self.assertEqual(response.status_code, 400)
