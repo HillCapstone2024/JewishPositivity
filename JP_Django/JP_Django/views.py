@@ -513,6 +513,11 @@ def create_checkin(user, data):
                 logging.info("DUPLICATE!!!")
                 return HttpResponse("Error: Duplicate Moment Today", status=400)
         
+        # Check if this is the first checkin of the day for updating the streak
+        today_midnight = datetime_current.replace(hour=0, minute=0, second=0, microsecond=0)
+        if not Checkin.objects.filter(date__gte = today_midnight, user_id=user.pk).exists(): # Checks if there are any checkins from the user today
+            logging.info("First checkin today")
+            update_streak(user) # Update the streak if it is the first checkin of the day
 
         # Create the checkin object and save it to the database
         checkin = Checkin.objects.create(
@@ -598,9 +603,39 @@ def get_checkin_info_view(request):
             return HttpResponse(constUNnotProvided, status=400)
     return HttpResponse("Not a GET request!")
 
+def update_streak(user): # called in create checkin to update the streak each day
+    logging.info("Updating streak")
+    # Update user's streak
+    user.current_streak += 1
+    if user.current_streak > user.longest_streak: #update the longest streak if needed 
+        user.longest_streak = user.current_streak
+    user.save()
+    logging.info("Streak updated")
+    # Update user's badges
+    badges = Badges.objects.get(user_id=user)
+    if badges != None:
+        logging.info("User badges object found")
+        if user.current_streak == 1 and badges.one_day == False:
+            badges.one_day = True
+            badges.save()
+            logging.info("1 day badge added")
+        elif user.current_streak == 7 and badges.one_week == False:
+            badges.one_week = True
+            badges.save()
+            logging.info("1 week badge added")
+        elif user.current_streak == 30 and badges.one_month == False:
+            badges.one_month = True
+            badges.save()
+            logging.info("1 month badge added")
+        elif user.current_streak == 365 and badges.one_year == False:
+            badges.one_year = True
+            badges.save()
+            logging.info("1 year badge added")
+        logging.info("Badges updated")
+    else:
+        logging.info(f"No badge object found for {user.username}")
 
 def get_video_info_view(request): 
-    
     if request.method == "GET":
         logging.info("In the get_video_info_view*****************")
         checkin_id = request.GET.get("checkin_id")  # JSON is not typically used for GET requests here

@@ -1507,7 +1507,7 @@ class GetTodaysCheckinsViewTestCase(TestCase): # to test retreving todays checki
             logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.user_id)
             logging.info('')   
 
-class StreakChangeTestCase(TestCase): #to test the streak change functionality
+class UpdateStreakTestCase(TestCase): #to test the streak change functionality
      
     #Post Data
     CREATE_USER_1 = {
@@ -1529,6 +1529,15 @@ class StreakChangeTestCase(TestCase): #to test the streak change functionality
         'text_entry': "This is a sample checkin text",
     }
 
+    TEXT_DATA_SUCCESS_2 = {
+        'username': 'testuser1',
+        'header': 'Sample Header',
+        'moment_number': 2,
+        'content_type': 'text',
+        'content': None,
+        'text_entry': "This is a sample checkin text",
+    }
+
     
     def setUp(self):
         logging.info("SETTING UP STREAK TESTING....")
@@ -1539,8 +1548,8 @@ class StreakChangeTestCase(TestCase): #to test the streak change functionality
         # Make a POST request to create a test user
         client.post(reverse('create_user_view'), data=json.dumps(self.CREATE_USER_1), content_type=CONTENT_TYPE_JSON)
     
-    def test_streak_change_success(self):
-        logging.info("Testing streak_change_success....")
+    def test_update_streak_success(self):
+        logging.info("Testing update_streak_success....")
         client = Client()
         
         # Check current and longest streak (should be 0)
@@ -1586,6 +1595,65 @@ class StreakChangeTestCase(TestCase): #to test the streak change functionality
             logging.info(LOG_MSG_FORMAT, LOG_CURRENT_STREAK, obj.current_streak)
             logging.info(LOG_MSG_FORMAT, LOG_LONGEST_STREAK, obj.longest_streak)
             logging.info('')  
+
+    def test_no_update_streak(self): # test to ensure no update after first checkin of the day
+        logging.info("Testing no_update_streak....")
+        client = Client()
+
+        # Check current and longest streak (should be 0)
+        user = User.objects.get(username='testuser1')
+        self.assertEqual(user.current_streak, 0)
+        self.assertEqual(user.longest_streak, 0)
+
+        # Check one day badge is false
+        badges = Badges.objects.get(user_id=user.pk)
+        self.assertFalse(badges.one_day)
+
+        # Check-in first moment
+        response = client.post(reverse('checkin_view'), data=json.dumps(self.TEXT_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON) #updates streak to 1 and sets the oneday badge
+        self.assertEqual(response.status_code, 200)
+        
+        # Check current and longest streak (should be 1)
+        user = User.objects.get(username='testuser1')
+        self.assertEqual(user.current_streak, 1)
+        self.assertEqual(user.longest_streak, 1)
+
+        # Check that one day badge is true
+        badges = Badges.objects.get(user_id=user.pk)
+        self.assertTrue(badges.one_day)
+
+        # Log user data
+        logging.info('')
+        queryset = User.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_USER, obj.username)
+            logging.info(LOG_MSG_FORMAT, LOG_CURRENT_STREAK, obj.current_streak)
+            logging.info(LOG_MSG_FORMAT, LOG_LONGEST_STREAK, obj.longest_streak)
+            logging.info('') 
+
+        # Check-in new moment
+        response = client.post(reverse('checkin_view'), data=json.dumps(self.TEXT_DATA_SUCCESS_2), content_type=CONTENT_TYPE_JSON) # shouldn't update streak or badges
+        self.assertEqual(response.status_code, 200)
+
+        # Get updated user data
+        user = User.objects.get(username='testuser1')
+        badges = Badges.objects.get(user_id=user.pk)
+
+        # Confirm badge for 1 day streak is awarded
+        self.assertTrue(badges.one_day)
+
+        # Check new current and longest streak lengths (should still be 1)
+        self.assertEqual(user.current_streak, 1)
+        self.assertEqual(user.longest_streak, 1)
+
+        # Log user data after update
+        logging.info('')
+        queryset = User.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_USER, obj.username)
+            logging.info(LOG_MSG_FORMAT, LOG_CURRENT_STREAK, obj.current_streak)
+            logging.info(LOG_MSG_FORMAT, LOG_LONGEST_STREAK, obj.longest_streak)
+            logging.info('')
 
 class AddFriendViewTestCase(TestCase): #to test adding friends to user's friend list
 
