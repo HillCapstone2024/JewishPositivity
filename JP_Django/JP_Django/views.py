@@ -957,3 +957,55 @@ def get_badges_view(request):
             return HttpResponse("Error retrieving badges", status=500)
     else:
         return HttpResponse("Not a GET request!", status=405)
+
+
+def get_current_streak_view(request):
+    logging.info("In the get_current_streak_view*****************")
+    if request.method == "GET":
+        # Retrieve the username from the query parameter
+        username = request.GET.get('username')
+        logging.info("Username: %s", username)
+
+        # Make sure the username is provided
+        if username:
+            try:
+                # Retrieve the user from the database by username
+                user = User.objects.get(username=username)
+                
+                # Retrieve the current streak from the user object
+                current_streak = user.current_streak
+
+                logging.info(current_streak)
+                return HttpResponse(json.dumps(current_streak), content_type='application/json')
+            except User.DoesNotExist:
+                return HttpResponse("User not found", status=400)
+        else:
+            return HttpResponse("Username not provided", status=400)
+    else:
+        return HttpResponse("Not a GET request!", status=400)
+    
+
+def get_longest_streak_view(request):
+    logging.info("In the get_longest_streak_view*****************")
+    if request.method == "GET":
+        # Retrieve the username from the query parameter
+        username = request.GET.get('username')
+        logging.info("Username: %s", username)
+
+        # Make sure the username is provided
+        if username:
+            try:
+                # Retrieve the user from the database by username
+                user = User.objects.get(username=username)
+                
+                # Retrieve the current streak from the user object
+                longest_streak = user.longest_streak
+
+                logging.info(longest_streak)
+                return HttpResponse(json.dumps(longest_streak), content_type='application/json')
+            except User.DoesNotExist:
+                return HttpResponse("User not found", status=400)
+        else:
+            return HttpResponse("Username not provided", status=400)
+    else:
+        return HttpResponse("Not a GET request!", status=400)
