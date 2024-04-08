@@ -251,7 +251,8 @@ def update_user_information_view(request):
         'email': (update_email, data.get("email")),
         'lastname': (update_last_name, data.get("lastname")),
         'firstname': (update_first_name, data.get("firstname")),
-        'profilepicture': (update_profile_picture, data.get("profilepicture"))
+        'profilepicture': (update_profile_picture, data.get("profilepicture")),
+        'timezone' : (update_timezone, data.get("timezone"))
     }
 
     # Iterate over the update_actions dictionary, where each entry contains a field to update and its corresponding update function.
@@ -318,6 +319,15 @@ def update_profile_picture(user, profile_picture_data):
     except Exception as e:
         logging.info("ERROR IN CHANGING PROFILE PICTURE: %s", e)
         return HttpResponse("Error in updating profile picture", status=400)
+def update_timezone(user, timezone):
+    try:
+        user.timezone = timezone
+        user.save()
+        logging.info("SUCCESS! \"%s's\" timezone has been updated to \"%s\"", user.username, user.timezone)
+    except Exception as e:
+        logging.info("ERROR IN CHANGING TIMEZONE: %s", e)
+        return HttpResponse("Error in updating timezone", status=400)
+
     
 #send all user information to the front end
 def get_user_information_view(request):
@@ -346,7 +356,8 @@ def get_user_information_view(request):
                     "email":user.email,
                     "first_name":user.first_name,
                     "last_name":user.last_name,
-                    "profilepicture": profile_picture_encoded
+                    "profilepicture": profile_picture_encoded,
+                    "timezone" : user.timezone
                 }
                 logging.info("get data:")
                 logging.info(response_data)
