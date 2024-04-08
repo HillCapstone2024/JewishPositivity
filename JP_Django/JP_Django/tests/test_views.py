@@ -26,6 +26,7 @@ LOG_TIME2 = 'Time2'
 LOG_TIME3 = 'Time3'
 LOG_CURRENT_STREAK= "Current Streak"
 LOG_LONGEST_STREAK= "Longest Streak"
+LOG_PROFILE_PICTURE = 'Profile picture'
 
 # Define constant strings for logging CHECKIN
 LOG_CHECKIN_ID = 'Check-In ID'
@@ -2098,3 +2099,92 @@ class GetUserBadgesViewTestCase(TestCase):
         
         # View returns 400 for non-existing users 
         self.assertEqual(response.status_code, 400)
+
+
+class GetProfilePictureViewTestCase(TestCase): # to retrieve profile pictures from a given list of usernames
+    photo_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64photo.txt'))
+    photoFile = open(photo_file_path, 'r')
+    photo = photoFile.read()
+    #logging.info("PHOTO: %s", photo)
+    photoFile.close()
+
+    # Define constant user data
+    USER_DATA = {
+        'username': 'testuser',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+    USER2_DATA = {
+        'username': 'testuser1',
+        'password': 'testpassword2',
+        'reentered_password': 'testpassword2',
+        'firstname': 'Tes2',
+        'lastname': 'User2',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+
+    def setUp(self):
+        # Initialize the Django test client
+        client = Client()
+
+        # Make a POST request to create test users
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER_DATA), content_type=CONTENT_TYPE_JSON)# make two users
+        update_data = {
+            'username': 'testuser',
+            'profilepicture': self.photo
+        }
+        self.client.post(reverse('update_user_information_view'), data=json.dumps(update_data), content_type=CONTENT_TYPE_JSON)        
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER2_DATA), content_type=CONTENT_TYPE_JSON)
+
+
+    def test_get_profile_pictures_success(self):# Successfully retrieves a valid user's profile pictures
+        logging.info("************ TEST_get_profile_pictures_Success **************")
+        client = Client()
+
+        # Create test data
+        get_data = {'username_list[]': ['testuser', 'testuser1']} # to retrieve the profile pictures for the list of users
+
+        # Send GET request to get_profile_pictures_view
+        response = client.get(reverse('get_profile_pictures_view'), data=get_data)
+
+        # Check if response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+        # Printing DB after attempted getting of profile pictures
+        logging.info('Response: %s', response)
+        logging.info('')
+        queryset = User.objects.all()
+
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.id)
+            logging.info(LOG_MSG_FORMAT, LOG_PROFILE_PICTURE, obj.profile_picture)
+            logging.info('') 
+            logging.info("************TEST_get_profile_pictures_success_COMPLETED**************..........") 
+
+    def test_get_profile_pictures_fail(self):# Fails to get profile pictures in database due to user not existing
+        logging.info("***************TEST_get_profile_pictures_fail**************")
+        client = Client()
+
+        # Create test data
+        get_data = {'username_list[]': ['doesnotexist', 'doesnotexist2']} # to retrieve profile pictures for these users
+
+        # Send GET request to get_profile_pictures_view
+        response = client.get(reverse('get_profile_pictures_view'), data=get_data)
+
+        # Check if response status code is 400 -- failure
+        self.assertEqual(response.status_code, 400)
+
+        # Printing DB after attempted getting of profile pictures
+        queryset = User.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.id)
+            logging.info(LOG_MSG_FORMAT, LOG_PROFILE_PICTURE, obj.profile_picture)
+            logging.info('')   
+        logging.info("***************TEST_get_profile_pictures_fail_COMPLETED**************")

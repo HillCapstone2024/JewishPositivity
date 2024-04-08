@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
 from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
-from JP_Django.models import Checkin, Friends, Badges
+from JP_Django.models import Checkin, Friends, Badges, User
 from django.middleware.csrf import get_token
 from django.http import JsonResponse
 from django.core.validators import validate_email
@@ -1048,3 +1048,44 @@ def get_longest_streak_view(request):
             return HttpResponse("Username not provided", status=400)
     else:
         return HttpResponse("Not a GET request!", status=400)
+
+def get_profile_pictures_view(request):
+    if request.method == "GET":
+        username_list = request.GET.getlist("username_list[]")
+        # Make sure the username list is not empty
+        if username_list is not None:
+            try:
+                profile_pic_list = []
+                for username in username_list:
+
+                    user = User.objects.get(username=username)
+                    user_id = user.pk
+                    
+                    #Retrieve the profile picture associated with this user
+                    users_list = User.objects.filter(id=user_id) # filter returns all matching objects, GET returns only if one matching object
+                    
+                    for listed_user in users_list: # looping through checkins for user specified
+                        obj_content= None #default if empty
+
+
+                        if listed_user.profile_picture is not None: #get content if not None and if not video
+                            obj_content= base64.b64encode(listed_user.profile_picture).decode('utf-8')                    
+
+                        current_user = { # dictionary to append to list
+                            "username": username,
+                            "profile_picture": obj_content,  #content converted from binary to base64 then to a base 64 string, or None
+                        }
+                        profile_pic_list.append(current_user) #add checkin to the list to be returne
+
+                # Log data and return as JSON response
+                logging.info(profile_pic_list)
+                return JsonResponse(profile_pic_list, safe=False)
+
+            except User.DoesNotExist:
+                return HttpResponse(constUserDNE, status=400)
+            except Exception as e:
+                logging.error(e)
+                return HttpResponse("An error occurred", status=400)
+        else:  # username was empty
+            return HttpResponse("Username not provided", status=400)
+    return HttpResponse("Not a GET request")
