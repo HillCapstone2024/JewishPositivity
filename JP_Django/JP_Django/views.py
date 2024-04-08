@@ -181,7 +181,7 @@ def create_user_view(request):
 
     # Attempt to create a new user
     try:
-        User.objects.create_user(
+        user = User.objects.create_user(
             username=username,
             password=password,
             email=email,
@@ -189,6 +189,7 @@ def create_user_view(request):
             last_name=data["lastname"],
             timezone=timezone,
         )
+        Badges.objects.create(user_id=user)  # Create a new badge object for the user
         return HttpResponse("User has been created!")
     except Exception as e:  # Catch exceptions like IntegrityError
         logging.info(e)

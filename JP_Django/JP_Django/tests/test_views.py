@@ -2,7 +2,7 @@ from django.test import TestCase, Client  #Client class to simulate HTTP request
 from django.urls import reverse #reverse allows you to generate URLs for Django views by providing the view name
 import datetime
 import json
-from JP_Django.models import User, Checkin, Friends #import model to access printing users in the test DB
+from JP_Django.models import User, Checkin, Friends, Badges #import model to access printing users in the test DB
 import logging
 import os
 
@@ -24,6 +24,8 @@ LOG_LAST_NAME = 'Last Name'
 LOG_TIME1 = 'Time1'
 LOG_TIME2 = 'Time2'
 LOG_TIME3 = 'Time3'
+LOG_CURRENT_STREAK= "Current Streak"
+LOG_LONGEST_STREAK= "Longest Streak"
 
 # Define constant strings for logging CHECKIN
 LOG_CHECKIN_ID = 'Check-In ID'
@@ -1350,7 +1352,6 @@ class GetCheckinVideoViewTestCase(TestCase): # to test retreving a video checkin
         # Check if response status code is 400 -- failure
         self.assertEqual(response.status_code, 400)
         
-
 class GetTodaysCheckinsViewTestCase(TestCase): # to test retreving todays checkin moments from a list of users
     
     photo_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64photo.txt'))
@@ -1506,6 +1507,85 @@ class GetTodaysCheckinsViewTestCase(TestCase): # to test retreving todays checki
             logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.user_id)
             logging.info('')   
 
+class StreakChangeTestCase(TestCase): #to test the streak change functionality
+     
+    #Post Data
+    CREATE_USER_1 = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'success21@example.com',
+        'timezone': 'EST',
+    }
+    
+    TEXT_DATA_SUCCESS = {
+        'username': 'testuser1',
+        'header': 'Sample Header',
+        'moment_number': 1,
+        'content_type': 'text',
+        'content': None,
+        'text_entry': "This is a sample checkin text",
+    }
+
+    
+    def setUp(self):
+        logging.info("SETTING UP STREAK TESTING....")
+
+        # Initialize the Django test client
+        client = Client()
+
+        # Make a POST request to create a test user
+        client.post(reverse('create_user_view'), data=json.dumps(self.CREATE_USER_1), content_type=CONTENT_TYPE_JSON)
+    
+    def test_streak_change_success(self):
+        logging.info("Testing streak_change_success....")
+        client = Client()
+        
+        # Check current and longest streak (should be 0)
+        user = User.objects.get(username='testuser1')
+        self.assertEqual(user.current_streak, 0)
+        self.assertEqual(user.longest_streak, 0)
+
+        # Check that no badges are true
+        badges = Badges.objects.get(user_id=user.pk)
+        
+
+        self.assertFalse(badges.one_day)
+        logging.info("Badges: %s", badges)
+
+        # Log user data
+        logging.info('')
+        queryset = User.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_USER, obj.username)
+            logging.info(LOG_MSG_FORMAT, LOG_CURRENT_STREAK, obj.current_streak)
+            logging.info(LOG_MSG_FORMAT, LOG_LONGEST_STREAK, obj.longest_streak)
+            logging.info('') 
+
+        # Check-in new moment
+        response = client.post(reverse('checkin_view'), data=json.dumps(self.TEXT_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON) #updates streak to 1 and gets the oneday badge
+        self.assertEqual(response.status_code, 200)
+
+        # Get updated user data
+        user = User.objects.get(username='testuser1')
+        badges = Badges.objects.get(user_id=user.pk)
+        logging.info("Badges: %s", badges)
+        # Confirm badge for 1 day streak is awarded
+        self.assertTrue(badges.one_day)
+
+        # Check new current and longest streak lengths (should be 1)
+        self.assertEqual(user.current_streak, 1)
+        self.assertEqual(user.longest_streak, 1)
+        # Log user data after update
+        logging.info('')
+        queryset = User.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_USER, obj.username)
+            logging.info(LOG_MSG_FORMAT, LOG_CURRENT_STREAK, obj.current_streak)
+            logging.info(LOG_MSG_FORMAT, LOG_LONGEST_STREAK, obj.longest_streak)
+            logging.info('')  
 
 class AddFriendViewTestCase(TestCase): #to test adding friends to user's friend list
 
@@ -1916,7 +1996,7 @@ class GetUserBadgesViewTestCase(TestCase):
         self.client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)
         
         # Get user information to retrieve the user ID for badge info
-        response = self.client.get(reverse('get_user_information'), {'username': 'testuser1'})
+        response = self.client.get(reverse('get_user_information_view'), {'username': 'testuser1'})
         user_info = json.loads(response.content)
         logging.info("get data: %s", user_info)
         self.user_id = user_info['id']
