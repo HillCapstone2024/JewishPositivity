@@ -733,6 +733,12 @@ class GetTimesViewTestCase(TestCase):
 
 class GetUserInformationViewTestCase(TestCase):
 
+    photo_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64photo.txt'))
+    photoFile = open(photo_file_path, 'r')
+    photo = photoFile.read()
+    #logging.info("PHOTO: %s", photo)
+    photoFile.close()
+
     # Define constant user data
     USER_DATA = {
         'username': 'testuser',
@@ -744,12 +750,21 @@ class GetUserInformationViewTestCase(TestCase):
         'timezone': 'EST',
     }
 
+    
+
     def setUp(self):
         # Initialize the Django test client
         client = Client()
 
         # Make a POST request to create a test user to display information of
         client.post(reverse('create_user_view'), data=json.dumps(self.USER_DATA), content_type=CONTENT_TYPE_JSON)
+
+        # Update the profile picture of the created user
+        update_data = {
+            'username': 'testuser',
+            'profilepicture': self.photo
+        }
+        self.client.post(reverse('update_user_information_view'), data=json.dumps(update_data), content_type=CONTENT_TYPE_JSON)
 
     def test_get_user_information_success(self): # Successfully retrieves a valid user's information from the database
         client = Client()
@@ -774,9 +789,10 @@ class GetUserInformationViewTestCase(TestCase):
             logging.info(LOG_MSG_FORMAT, LOG_TIME1, obj.time1)
             logging.info(LOG_MSG_FORMAT, LOG_TIME2, obj.time2)
             logging.info(LOG_MSG_FORMAT, LOG_TIME3, obj.time3)
+            #logging.info(LOG_MSG_FORMAT, "photo: ", obj.profile_picture)
             logging.info('')   
 
-    def test_get_times_fail(self): # Fails to get times in database due to user not existing
+    def test_get_user_information_fail(self): # Fails to get user info in database due to user not existing
         client = Client()
 
         # Create test data

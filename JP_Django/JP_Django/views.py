@@ -330,6 +330,14 @@ def get_user_information_view(request):
                 # Retrieve the user from the database by username
                 user = User.objects.get(username=username)
 
+                # 
+                profile_picture_data = user.profile_picture
+                if profile_picture_data:
+                    profile_picture_encoded = base64.b64encode(profile_picture_data).decode('utf-8')
+                else:
+                    profile_picture_encoded = None  # a default image or keep it empty
+
+
                 # get all of the information for the user
                 response_data = {
                     "id": user.pk,
@@ -338,6 +346,7 @@ def get_user_information_view(request):
                     "email":user.email,
                     "first_name":user.first_name,
                     "last_name":user.last_name,
+                    "profilepicture": profile_picture_encoded
                 }
                 logging.info("get data:")
                 logging.info(response_data)
