@@ -993,9 +993,9 @@ def get_badges_view(request):
             return HttpResponse(f"No badges found for user {user_id}", status=404)
         except Exception as e:
             logging.error(f"Error retrieving badges: {e}")
-            return HttpResponse("Error retrieving badges", status=500)
+            return HttpResponse("Error retrieving badges", status=400)
     else:
-        return HttpResponse("Not a GET request!", status=405)
+        return HttpResponse("Not a GET request!", status=400)
 
 
 def get_current_streak_view(request):

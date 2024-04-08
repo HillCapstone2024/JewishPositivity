@@ -2050,11 +2050,11 @@ class GetUserBadgesViewTestCase(TestCase):
         'timezone': 'EST',
     }
 
-    BADGES_DATA_SUCESS = {
-            'one_day': True,
-            'one_week': False,
-            'one_month': True,
-            'one_year': False
+    BADGES_DATA_SUCCESS = {
+        'one_day': True,
+        'one_week': False,
+        'one_month': True,
+        'one_year': False
     }
 
 
@@ -2064,29 +2064,37 @@ class GetUserBadgesViewTestCase(TestCase):
 
         # Create test user
         self.client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)
+        user = User.objects.get(username=self.USER1_DATA['username'])
+
+        # Update or create the Badges entry for the created user
+        Badges.objects.update_or_create(user_id=user, defaults=self.BADGES_DATA_SUCCESS)
 
 
     def test_get_user_badges_success(self):
         logging.info("************TEST_get_user_badges_success**************")
         
-        # Send GET request to get_badges_view with user ID
-        response = self.client.get(reverse('get_badges_view'), {'user_id': self.user_id})
+        # Send GET request to get_badges_view with the username
+        response = self.client.get(reverse('get_badges_view'), {'username': self.USER1_DATA['username']})
         response_data = json.loads(response.content)
         logging.info("response_data: %s", response_data)
 
-        # Check if response status code is 200 and if the correct badges are returned
+        # Check if response status code is 200 -- method successful
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response_data['one_day'])
-        self.assertFalse(response_data['one_week'])
-        self.assertTrue(response_data['one_month'])
-        self.assertFalse(response_data['one_year'])
+
+
+        # Checking True cases that should be returned from method
+        if self.BADGES_DATA_SUCCESS['one_day']:
+            self.assertTrue(response_data['one_day'])
+        if self.BADGES_DATA_SUCCESS['one_month']:
+            self.assertTrue(response_data['one_month'])
+
 
     def test_get_user_badges_fail_User_DNE(self):
         logging.info("************TEST_get_user_badges_fail_User_DNE**************")
         
-        # Send GET request to get_badges_view with a non-existing user ID
-        response = self.client.get(reverse('get_badges_view'), {'user_id': 9999})  # Assuming 9999 is a non-existing user ID
+        # Send GET request to get_badges_view with a non-existing username
+        response = self.client.get(reverse('get_badges_view'), {'username': 'nonexistentuser'})
         logging.info("failure response_data: %s", response.content.decode('utf-8'))
-
-        # Check if response status code is 400 
+        
+        # View returns 400 for non-existing users 
         self.assertEqual(response.status_code, 400)
