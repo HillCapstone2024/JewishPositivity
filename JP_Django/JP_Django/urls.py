@@ -26,6 +26,6 @@ urlpatterns = [
     path('send_password_reset_email_view/', send_password_reset_email_view, name='send_password_reset_email_view'),
     path('change_password_view/', change_password_view, name='change_password_view'),
     path('get_badges/', get_badges_view, name='get_badges_view'),
-    path('get_current_streak_view/',get_current_streak_view, name='get_current_streak_view'),
-    path('get_longest_streak_view/',get_longest_streak_view, name='get_longest_streak_view')
+    #path('current_streak_view/',current_streak_view, name='current_streak_view'),
+    #path('longest_streak_view/',longest_streak_view, name='longest_streak_view')
 ]
