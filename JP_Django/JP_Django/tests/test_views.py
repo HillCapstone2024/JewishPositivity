@@ -2132,7 +2132,7 @@ class GetProfilePictureViewTestCase(TestCase): # to retrieve profile pictures fr
         'reentered_password': 'testpassword2',
         'firstname': 'Tes2',
         'lastname': 'User2',
-        'email': 'test@example.com',
+        'email': 'test1@example.com',
         'timezone': 'EST',
     }
 
@@ -2149,7 +2149,11 @@ class GetProfilePictureViewTestCase(TestCase): # to retrieve profile pictures fr
         }
         self.client.post(reverse('update_user_information_view'), data=json.dumps(update_data), content_type=CONTENT_TYPE_JSON)        
         client.post(reverse('create_user_view'), data=json.dumps(self.USER2_DATA), content_type=CONTENT_TYPE_JSON)
-
+        update_data1 = {
+            'username': 'testuser1',
+            'profilepicture': self.photo
+        }
+        self.client.post(reverse('update_user_information_view'), data=json.dumps(update_data1), content_type=CONTENT_TYPE_JSON)    
 
     def test_get_profile_pictures_success(self):# Successfully retrieves a valid user's profile pictures
         logging.info("************ TEST_get_profile_pictures_Success **************")
@@ -2173,7 +2177,7 @@ class GetProfilePictureViewTestCase(TestCase): # to retrieve profile pictures fr
             logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.id)
             logging.info(LOG_MSG_FORMAT, LOG_PROFILE_PICTURE, obj.profile_picture)
             logging.info('') 
-            logging.info("************TEST_get_profile_pictures_success_COMPLETED**************..........") 
+
 
     def test_get_profile_pictures_fail(self):# Fails to get profile pictures in database due to user not existing
         logging.info("***************TEST_get_profile_pictures_fail**************")
@@ -2194,4 +2198,5 @@ class GetProfilePictureViewTestCase(TestCase): # to retrieve profile pictures fr
             logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.id)
             logging.info(LOG_MSG_FORMAT, LOG_PROFILE_PICTURE, obj.profile_picture)
             logging.info('')   
-        logging.info("***************TEST_get_profile_pictures_fail_COMPLETED**************")
+        
+        
