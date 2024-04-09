@@ -190,6 +190,13 @@ class CreateUserViewTestCase(TestCase):
 
         # Check if the response status code is 200
         self.assertEqual(response.status_code, 200)
+        queryset = Badges.objects.all()
+        for obj in queryset:
+            logging.info("1 day: %s", obj.one_day)
+            logging.info("7 day: %s", obj.one_week)
+            logging.info("30 day: %s", obj.one_month)
+            logging.info("365 day: %s", obj.one_year)
+            logging.info('')  
 
         # Check if a user with the specified username was created
         self.assertTrue(User.objects.filter(username='testuser').exists())
