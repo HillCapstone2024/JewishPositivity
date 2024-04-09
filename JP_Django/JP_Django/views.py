@@ -39,6 +39,7 @@ logging.basicConfig(
 User = get_user_model()
 constMissingKey = "Missing keys: %s"
 constNotPost = "Not a POST request!"
+constNotGet = "Not a GET request"
 constUserDNE = "User does not exist"
 constUNnotProvided= "Username not provided"
 constFriendExists = "Friendship already exists"
@@ -98,7 +99,6 @@ def get_user(username):
         return None, HttpResponse("Username does not exist", status=400)
 
 
-
 # ########## Authentication Views ##########
     
 
@@ -136,7 +136,6 @@ def login_view(request):
             # Return an error message or handle unsuccessful login
             return HttpResponse("Login failed!", status=400)
     return HttpResponse(constNotPost)
-
 
 def create_user_view(request):
     # Ensure the request method is POST
@@ -195,7 +194,6 @@ def create_user_view(request):
         logging.info(e)
         return HttpResponse("User failed to be created.", status=400)
 
-
 def logout_view(request):
     try:
         username = request.POST.get("username")
@@ -210,8 +208,6 @@ def logout_view(request):
         return HttpResponseServerError(
             f"Error: {e}", status=500
         )  # Redirect to login page after logout
-
-
 
 # ########## User Information Management ##########
 
@@ -320,6 +316,7 @@ def update_profile_picture(user, profile_picture_data):
     except Exception as e:
         logging.info("ERROR IN CHANGING PROFILE PICTURE: %s", e)
         return HttpResponse("Error in updating profile picture", status=400)
+
 def update_timezone(user, timezone):
     try:
         user.timezone = timezone
@@ -328,8 +325,7 @@ def update_timezone(user, timezone):
     except Exception as e:
         logging.info("ERROR IN CHANGING TIMEZONE: %s", e)
         return HttpResponse("Error in updating timezone", status=400)
-
-    
+   
 #send all user information to the front end
 def get_user_information_view(request):
     if request.method == "GET":
@@ -368,7 +364,7 @@ def get_user_information_view(request):
                 return HttpResponse(constUserDNE, status=400)
         else:  # username was empty
             return HttpResponse(constUNnotProvided, status=400)
-    return HttpResponse("Not a GET request")
+    return HttpResponse(constNotGet)
        
 def update_times_view(request):
     logging.info("************** In update times view ******************** ")
@@ -421,7 +417,6 @@ def update_times_view(request):
             return HttpResponse("Updating user times failed: " + str(e), status=400)
     return HttpResponse(constNotPost)
 
-
 def get_times_view(request):
     if request.method == "GET":
         username = request.GET.get("username")  # JSON is not typically used for GET requests here
@@ -450,8 +445,7 @@ def get_times_view(request):
                 return HttpResponse(e, status=400)
         else:  # username was empty
             return HttpResponse(constUNnotProvided, status=400)
-    return HttpResponse("Not a GET request!")
-
+    return HttpResponse(constNotGet)
 
 def delete_user_view(request):
     if request.method == "POST":
@@ -601,7 +595,7 @@ def get_checkin_info_view(request):
                 return HttpResponse(constUserDNE, status=400)
         else:  # username was empty
             return HttpResponse(constUNnotProvided, status=400)
-    return HttpResponse("Not a GET request!")
+    return HttpResponse(constNotGet)
 
 def update_streak(user): # called in create checkin to update the streak each day
     logging.info("Updating streak")
@@ -654,7 +648,7 @@ def get_video_info_view(request):
                 return HttpResponse(constUserDNE, status=400)
         else:  # username was empty
             return HttpResponse(constUNnotProvided, status=400)
-    return HttpResponse("Not a GET request!")
+    return HttpResponse(constNotGet)
 
 def get_todays_checkin_info_view(request):
     logging.info("In the get_todays_checkin_info_view*****************")
@@ -704,7 +698,7 @@ def get_todays_checkin_info_view(request):
                 return HttpResponse(constUserDNE, status=400)
         else:  # username was empty
             return HttpResponse(constUNnotProvided, status=400)
-    return HttpResponse("Not a GET request!")
+    return HttpResponse(constNotGet)
 
 
 # ########## Utility Views ##########
@@ -869,11 +863,10 @@ def add_friend_view(request):
             response_data = {"message": "Success! Friend request sent!"}
             return HttpResponse(json.dumps(response_data), content_type= constAppJson)
         except User.DoesNotExist:
-            return HttpResponse("User not found", status=400)
+            return HttpResponse(constUserDNE, status=400)
         except Exception as e:
             return HttpResponse("Adding friend failed: " + str(e), status=400)
     return HttpResponse(constNotPost)
-
 
 def delete_friend_view(request):
     if request.method == "POST":
@@ -907,7 +900,6 @@ def delete_friend_view(request):
             return HttpResponse("Error deleting friend: " + str(e), status=400)
 
     return HttpResponse(constInvalidReq, status=400)
-
 
 def get_friends_view(request):
     if request.method == "GET":
@@ -951,8 +943,8 @@ def get_friends_view(request):
                 logging.error(e)
                 return HttpResponse("An error occurred", status=400)
         else:  # username was empty
-            return HttpResponse("Username not provided", status=400)
-    return HttpResponse("Not a GET request")
+            return HttpResponse(constUNnotProvided, status=400)
+    return HttpResponse(constNotGet)
 
 
 # ########## Badges Management ##########
@@ -995,8 +987,7 @@ def get_badges_view(request):
             logging.error(f"Error retrieving badges: {e}")
             return HttpResponse("Error retrieving badges", status=400)
     else:
-        return HttpResponse("Not a GET request!", status=400)
-
+        return HttpResponse(constNotGet, status=400)
 
 def get_current_streak_view(request):
     logging.info("In the get_current_streak_view*****************")
@@ -1017,13 +1008,12 @@ def get_current_streak_view(request):
                 logging.info(current_streak)
                 return HttpResponse(json.dumps(current_streak), content_type='application/json')
             except User.DoesNotExist:
-                return HttpResponse("User not found", status=400)
+                return HttpResponse(constUserDNE, status=400)
         else:
-            return HttpResponse("Username not provided", status=400)
+            return HttpResponse(constUNnotProvided, status=400)
     else:
-        return HttpResponse("Not a GET request!", status=400)
+        return HttpResponse(constNotGet, status=400)
     
-
 def get_longest_streak_view(request):
     logging.info("In the get_longest_streak_view*****************")
     if request.method == "GET":
@@ -1043,11 +1033,11 @@ def get_longest_streak_view(request):
                 logging.info(longest_streak)
                 return HttpResponse(json.dumps(longest_streak), content_type='application/json')
             except User.DoesNotExist:
-                return HttpResponse("User not found", status=400)
+                return HttpResponse(constUserDNE, status=400)
         else:
-            return HttpResponse("Username not provided", status=400)
+            return HttpResponse(constUNnotProvided, status=400)
     else:
-        return HttpResponse("Not a GET request!", status=400)
+        return HttpResponse(constNotGet, status=400)
 
 def get_profile_pictures_view(request):
     if request.method == "GET":
@@ -1087,5 +1077,5 @@ def get_profile_pictures_view(request):
                 logging.error(e)
                 return HttpResponse("An error occurred", status=400)
         else:  # username was empty
-            return HttpResponse("Username not provided", status=400)
-    return HttpResponse("Not a GET request")
+            return HttpResponse(constUNnotProvided, status=400)
+    return HttpResponse(constNotGet)
