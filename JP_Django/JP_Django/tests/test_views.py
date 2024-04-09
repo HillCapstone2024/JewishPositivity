@@ -903,7 +903,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'username': 'testuser1',
         'header': 'Sample Header',
         'moment_number': 1,
-        'content_type': 'text',
+        'content_type': None,
         'content': None,
         'text_entry': "This is a sample checkin text",
     }
@@ -940,7 +940,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'username': '',
         'header': 'Sample Header',
         'moment_number': 2,
-        'content_type': 'text',
+        'content_type': None,
         'content': None,
         'text_entry': 'This is a sample checkin text',
     }
@@ -949,7 +949,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'username': 'testuser2',
         'header': 'Sample Header',
         'moment_number': None,
-        'content_type': 'text',
+        'content_type': None,
         'content': None, 
         'text_entry': "This is a sample checkin text",
     }
@@ -967,7 +967,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'username': 'testuser3',
         'header': 'Sample Header',
         'moment_number': 2,
-        'content_type': 'text',
+        'content_type': None,
         'content': None,
         'text_entry': None,
     }
@@ -976,7 +976,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'username': 'admin45678901',
         'header': 'Sample Header',
         'moment_number': 1,
-        'content_type': 'text',
+        'content_type': None,
         'content': None,
         'text_entry': "This is a sample checkin text",
     }
@@ -1082,16 +1082,6 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         # Check if the response status code is 400
         self.assertEqual(response.status_code, 400)
 
-    def test_checkin_failure_missing_content_type(self): #test of failure due to missing content type
-        # logging the test we are in
-        logging.info(("TESTING CHECKIN_failure_missing_content_type....").upper())
-        client = Client()
-
-        # Make a POST request to the checkin_view
-        response = client.post(reverse('checkin_view'), data=json.dumps(self.MISSING_CONTENT_TYPE), content_type=CONTENT_TYPE_JSON)
-
-        # Check if the response status code is 400
-        self.assertEqual(response.status_code, 400)
 
     def test_checkin_failure_missing_content_and_text(self): #test of failure due to missing content
         # logging the test we are in
@@ -1283,6 +1273,225 @@ class GetCheckinsViewTestCase(TestCase): # to test retreving all checkin moments
             logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
             logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.user_id)
             logging.info('')   
+
+class UpdateCheckinsViewTestCase(TestCase): 
+    
+    photo_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64photo.txt'))
+    photoFile = open(photo_file_path, 'r')
+    photo = photoFile.read()
+    #logging.info("PHOTO: %s", photo)
+    photoFile.close()
+
+    check_id = -1
+
+    # Define constant user data
+    USER1_DATA = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+    # Define post data
+    TEXT_DATA_SUCCESS = {
+        'username': 'testuser1',
+        'header': 'Sample Header',
+        'moment_number': 1,
+        'content_type': None,
+        'content': None, #fill in with example entry
+        'text_entry': "This is a sample checkin text",
+    }
+
+    
+    UPDATE_TEXT_ENTRY_SUCCESS = {
+        'checkin_id' : check_id,
+        'text_entry': 'I am updating my text_entry'
+    }
+
+    UPDATE_CONTENT_AND_CONTENT_TYPE_SUCCESS = {
+        'checkin_id' : check_id,
+        'content_type': 'photo',
+        'content': photo, 
+    }
+
+    UPDATE_HEADER_SUCCESS = {
+        'checkin_id' : check_id,
+        'header': 'Updated header'
+    }
+
+    INVALID_CHECKIN_ID = {
+        'checkin_id' : 234,
+        'header': 'Updated header ...'
+    }
+
+    INVALID_EMPTY_CHECKIN = {
+        'checkin_id' : check_id,
+        'content_type': None, 
+        'content': None, 
+        'text_entry': None
+    }
+
+    
+    def setUp(self):
+        # Initialize the Django test client
+        client = Client()
+
+        # Make a POST request to create test users and checkins
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)# make two users
+        client.post(reverse('checkin_view'), data=json.dumps(self.TEXT_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON) #make checkins into DB
+        
+        response = client.get(reverse('get_checkin_info_view'), data={'username': 'testuser1'})
+        
+        # Parse the response content as JSON
+        response_data = json.loads(response.content)
+        logging.info("response_data: %s",response_data)
+        # Now you can access the dictionary returned by the view
+        self.check_id = response_data[0]['checkin_id']
+        logging.info("check_id: %s",self.check_id)
+        
+
+    def test_update_checkins_text_success(self):# Successfully retrieves a valid user's checkins from the database
+        logging.info("************TEST_update_checkins_text_success**************..........")
+        client = Client()
+
+        logging.info('Before update text:')
+        queryset = Checkin.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_CHECKIN_ID, obj.checkin_id)
+            logging.info(LOG_MSG_FORMAT, LOG_HEADER, obj.header)
+            #logging.info(LOG_MSG_FORMAT, LOG_CONTENT, obj.content)
+            logging.info(LOG_MSG_FORMAT, LOG_TEXT_ENTRY, obj.text_entry)
+            logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
+            logging.info(LOG_MSG_FORMAT, LOG_MOMENT_NUMBER, obj.moment_number)
+            logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
+            logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.user_id)
+            logging.info('')    
+
+        # Send GET request to get_checkin_info_view
+        self.UPDATE_TEXT_ENTRY_SUCCESS['checkin_id'] = self.check_id #updating post data with the correct checkin ID from the setup
+        response = client.post(reverse('update_checkin_info_view'), data=json.dumps(self.UPDATE_TEXT_ENTRY_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+        # Printing DB after attempted getting of checkins
+        logging.info('Response: %s', response)
+        logging.info('After update text:')
+        queryset = Checkin.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_CHECKIN_ID, obj.checkin_id)
+            logging.info(LOG_MSG_FORMAT, LOG_HEADER, obj.header)
+            #logging.info(LOG_MSG_FORMAT, LOG_CONTENT, obj.content)
+            logging.info(LOG_MSG_FORMAT, LOG_TEXT_ENTRY, obj.text_entry)
+            logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
+            logging.info(LOG_MSG_FORMAT, LOG_MOMENT_NUMBER, obj.moment_number)
+            logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
+            logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.user_id)
+            logging.info('')    
+    
+    def test_update_checkins_header_success(self):# Successfully retrieves a valid user's checkins from the database
+        logging.info("************TEST_update_checkins_header_success**************..........")
+        client = Client()
+
+        logging.info('Before Header Update')
+        queryset = Checkin.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_CHECKIN_ID, obj.checkin_id)
+            logging.info(LOG_MSG_FORMAT, LOG_HEADER, obj.header)
+            #logging.info(LOG_MSG_FORMAT, LOG_CONTENT, obj.content)
+            logging.info(LOG_MSG_FORMAT, LOG_TEXT_ENTRY, obj.text_entry)
+            logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
+            logging.info(LOG_MSG_FORMAT, LOG_MOMENT_NUMBER, obj.moment_number)
+            logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
+            logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.user_id)
+            logging.info('')  
+
+        # Send GET request to get_checkin_info_view
+        self.UPDATE_HEADER_SUCCESS['checkin_id'] = self.check_id #updating post data with the correct checkin ID from the setup
+        response = client.post(reverse('update_checkin_info_view'), data=json.dumps(self.UPDATE_HEADER_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+        # Printing DB after attempted getting of checkins
+        logging.info('Response: %s', response)
+        logging.info('After Header Update:')
+        queryset = Checkin.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_CHECKIN_ID, obj.checkin_id)
+            logging.info(LOG_MSG_FORMAT, LOG_HEADER, obj.header)
+            #logging.info(LOG_MSG_FORMAT, LOG_CONTENT, obj.content)
+            logging.info(LOG_MSG_FORMAT, LOG_TEXT_ENTRY, obj.text_entry)
+            logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
+            logging.info(LOG_MSG_FORMAT, LOG_MOMENT_NUMBER, obj.moment_number)
+            logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
+            logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.user_id)
+            logging.info('')  
+
+    def test_update_checkins_content_and_type_success(self):# Successfully retrieves a valid user's checkins from the database
+        logging.info("************TEST_update_checkins_content_and_type_success**************..........")
+        client = Client()
+
+        logging.info('Before Updated content and type:')
+        queryset = Checkin.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
+            logging.info('Checkin original content')   
+        logging.info('')  
+
+        # Send GET request to get_checkin_info_view
+        self.UPDATE_CONTENT_AND_CONTENT_TYPE_SUCCESS['checkin_id'] = self.check_id #updating post data with the correct checkin ID from the setup
+        response = client.post(reverse('update_checkin_info_view'), data=json.dumps(self.UPDATE_CONTENT_AND_CONTENT_TYPE_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+        # Printing DB after attempted getting of checkins
+        logging.info('Response: %s', response)
+        logging.info('After Updated content and type:')
+        queryset = Checkin.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
+            logging.info('Updated Checkin content')      
+        logging.info('')  
+
+
+    def test_update_checkins_fail_CheckinID_DNE(self):# Fails to get checkins in database due to user not existing
+        logging.info("***************TEST_update_checkins_fail_CheckinID_DNE**************")
+        client = Client()
+
+        response = client.post(reverse('update_checkin_info_view'), data=json.dumps(self.INVALID_CHECKIN_ID), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 400 -- failure
+        self.assertEqual(response.status_code, 400)
+
+
+    def test_update_checkins_fail_empty_checkin(self):# Fails to get checkins in database due to user not existing
+        logging.info("***************TEST_update_checkins_fail_empty_checkin**************")
+        client = Client()
+
+        self.INVALID_EMPTY_CHECKIN['checkin_id'] = self.check_id #updating post data with the correct checkin ID from the setup
+        response = client.post(reverse('update_checkin_info_view'), data=json.dumps(self.INVALID_EMPTY_CHECKIN), content_type=CONTENT_TYPE_JSON)
+
+        logging.info('After update attempt:')
+        queryset = Checkin.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_CHECKIN_ID, obj.checkin_id)
+            logging.info(LOG_MSG_FORMAT, LOG_HEADER, obj.header)
+            #logging.info(LOG_MSG_FORMAT, LOG_CONTENT, obj.content)
+            logging.info(LOG_MSG_FORMAT, LOG_TEXT_ENTRY, obj.text_entry)
+            logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
+            logging.info(LOG_MSG_FORMAT, LOG_MOMENT_NUMBER, obj.moment_number)
+            logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
+            logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.user_id)
+            logging.info('')  
+
+        # Check if response status code is 400 -- failure
+        self.assertEqual(response.status_code, 400)
+
 
 class GetCheckinVideoViewTestCase(TestCase): # to test retreving a video checkin moment
     
@@ -1783,6 +1992,7 @@ class AddFriendViewTestCase(TestCase): #to test adding friends to user's friend 
 
         # Check if response status code is 400 -- failure due to sending friend request twice
         self.assertEqual(response2.status_code, 400)
+
 class DeleteFriendViewTestCase(TestCase):  # To test deleting friends from the user's friend list
 
     # Define constant user data
@@ -2106,7 +2316,6 @@ class GetUserBadgesViewTestCase(TestCase):
         
         # View returns 400 for non-existing users 
         self.assertEqual(response.status_code, 400)
-
 
 class GetProfilePictureViewTestCase(TestCase): # to retrieve profile pictures from a given list of usernames
     photo_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64photo.txt'))

@@ -66,7 +66,7 @@ def validate_data(data):
     logging.info("NON-INTEGER KEYS: %s", non_integer_keys) # includes nonetypes
 
     # Check for missing or empty required fields in the POST data
-    missing_keys = [key for key in non_integer_keys if key not in ("content","text_entry","header") and not data.get(key)] #allow content and text to be missing
+    missing_keys = [key for key in non_integer_keys if key not in ("content","text_entry","header","content_type") and not data.get(key)] #allow content and text to be missing
     logging.info("Missing keys: %s", missing_keys)
 
     # Return an error response if there are missing keys
@@ -539,6 +539,8 @@ def checkin_view(request):
 
     # Parse the JSON data from the request body
     data = json.loads(request.body)
+
+    
     
     # Validate the POST data
     error_response = validate_data(data) #allows content and text entry to be none type and pass through without error
@@ -553,6 +555,114 @@ def checkin_view(request):
 
     # Create the check-in record
     return create_checkin(user, data)
+
+def update_checkin_info_view(request):
+    # Check if the request method is POST
+    if request.method != "POST":
+        # Return an HTTP 400 response if the method is not POST
+        return HttpResponse("Not a POST request", status=400)
+
+    # Parse the JSON data from the request body
+    data = json.loads(request.body)
+
+    # Attempt to retrieve the checkin object based on the checkin id provided in the POST data
+    try:
+        checkin_id = data["checkin_id"]  # Get the username from the POST data
+        checkin = Checkin.objects.get(checkin_id=checkin_id)  # Retrieve the checkin from the database
+    except Exception as e:
+        # Log the error and return an HTTP 400 response if the user cannot be retrieved
+        logging.info("ERROR RETRIEVING CHECKIN: %s", e)
+        logging.info("RECEIVED CHECKINID %s", checkin_id)
+        return HttpResponse("Checkin_id is in invalid format or does not exist", status=400)
+    
+
+    if 'content' in data:
+        logging.info("DATA CONTENT: %s", data['content'])
+    if 'content_type' in data:
+        logging.info("DATA TYPE: %s", data['content_type'])
+    if 'header' in data:
+        logging.info("DATA HEADER: %s", data['header'])
+    if 'text_entry' in data:
+        logging.info("DATA TEXT_ENTRY: %s", data['text_entry'])
+
+    
+    #verify content and text entry both are not None before updating
+    if 'text_entry' in data and 'content' in data: #content and text entry in post
+        logging.info('Text and content posted')
+        if data["text_entry"] is None and data["content"] is None:
+            logging.info('Both None')
+            return HttpResponse('No content in checkin!', status=400)
+    elif 'text_entry' in data: # just text entry in post, no content
+        logging.info('Text posted, no content')
+        if data["text_entry"] is None: 
+            if checkin.content is None:
+                logging.info('Both None')
+                return HttpResponse('No content in checkin!', status=400)
+    elif 'content' in data: # just content in post, no text
+        logging.info('content posted, no text')
+        if data["content"] is None: 
+            if checkin.text_entry is None:
+                logging.info('Both None')
+                return HttpResponse('No content in checkin!', status=400)
+    
+
+    error_response = validate_data(data) #allows content and text entry to be none type and pass through without error
+    if error_response:
+        return error_response
+
+    # Define a dictionary mapping POST data keys to their respective update functions and expected values
+    update_actions = {
+        'text_entry': (update_text_entry, data.get("text_entry")),
+        'content_type': (update_content_type, data.get("content_type")),
+        'content': (update_content, data.get("content")),
+        'header' : (update_header, data.get("header"))
+    }
+
+    # Iterate over the update_actions dictionary, where each entry contains a field to update and its corresponding update function.
+    for key, (update_func, value) in update_actions.items(): 
+        if key in data and value: # Check if the key is in the POST data and has a non-empty value
+            error_response = update_func(checkin, value) # Call the respective update function with the user object and the value from the POST data
+            if error_response: # If the update function returns an error response, return it immediately
+                return error_response
+
+    # Return an HTTP 200 response indicating that the updates were successful
+    return HttpResponse("Changes Successful!")
+
+def update_text_entry(checkin, new_text_entry):
+    try:
+        checkin.text_entry = new_text_entry
+        checkin.save()
+        logging.info("SUCCESS! Text entry has been updated to \"%s\"", checkin.text_entry)
+    except Exception as e:
+        logging.info("ERROR IN CHANGING TEXT ENTRY: %s", e)
+        return HttpResponse("Error in updating text entry", status=400)
+
+def update_content_type(checkin, new_content_type):
+    try:
+        checkin.content_type = new_content_type
+        checkin.save()
+        logging.info("SUCCESS! Content type has been updated to \"%s\"", checkin.content_type)
+    except Exception as e:
+        logging.info("ERROR IN CHANGING CONTENT TYPE: %s", e)
+        return HttpResponse("Error in updating content type", status=400)
+    
+def update_content(checkin, new_content):
+    try:
+        checkin.content = base64.b64decode(new_content)
+        checkin.save()
+        logging.info("SUCCESS! Content has been updated!")
+    except Exception as e:
+        logging.info("ERROR IN CHANGING CONTENT: %s", e)
+        return HttpResponse("Error in updating content", status=400)
+    
+def update_header(checkin, new_header):
+    try:
+        checkin.header = new_header
+        checkin.save()
+        logging.info("SUCCESS! Header has been updated to \"%s\"", checkin.header)
+    except Exception as e:
+        logging.info("ERROR IN CHANGING HEADER: %s", e)
+        return HttpResponse("Error in updating header", status=400)
 
 def get_checkin_info_view(request):
     if request.method == "GET":
