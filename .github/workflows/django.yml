@@ -42,3 +42,5 @@ jobs:
           python manage.py test JP_Django.tests.test_views.GetFriendsViewTestCase
           python manage.py test JP_Django.tests.test_views.DeleteFriendViewTestCase
           python manage.py test JP_Django.tests.test_views.DeleteUserViewTestCase
+          python manage.py test JP_Django.tests.test_views.UpdateStreakTestCase
+          python manage.py test JP_Django.tests.test_views.GetProfilePictureViewTestCase

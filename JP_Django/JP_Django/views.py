@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
 from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
-from JP_Django.models import Checkin, Friends, Badges
+from JP_Django.models import Checkin, Friends, Badges, User
 from django.middleware.csrf import get_token
 from django.http import JsonResponse
 from django.core.validators import validate_email
@@ -181,7 +181,7 @@ def create_user_view(request):
 
     # Attempt to create a new user
     try:
-        User.objects.create_user(
+        user = User.objects.create_user(
             username=username,
             password=password,
             email=email,
@@ -189,6 +189,7 @@ def create_user_view(request):
             last_name=data["lastname"],
             timezone=timezone,
         )
+        Badges.objects.create(user_id=user)  # Create a new badge object for the user
         return HttpResponse("User has been created!")
     except Exception as e:  # Catch exceptions like IntegrityError
         logging.info(e)
@@ -251,7 +252,8 @@ def update_user_information_view(request):
         'email': (update_email, data.get("email")),
         'lastname': (update_last_name, data.get("lastname")),
         'firstname': (update_first_name, data.get("firstname")),
-        'profilepicture': (update_profile_picture, data.get("profilepicture"))
+        'profilepicture': (update_profile_picture, data.get("profilepicture")),
+        'timezone' : (update_timezone, data.get("timezone"))
     }
 
     # Iterate over the update_actions dictionary, where each entry contains a field to update and its corresponding update function.
@@ -318,6 +320,15 @@ def update_profile_picture(user, profile_picture_data):
     except Exception as e:
         logging.info("ERROR IN CHANGING PROFILE PICTURE: %s", e)
         return HttpResponse("Error in updating profile picture", status=400)
+def update_timezone(user, timezone):
+    try:
+        user.timezone = timezone
+        user.save()
+        logging.info("SUCCESS! \"%s's\" timezone has been updated to \"%s\"", user.username, user.timezone)
+    except Exception as e:
+        logging.info("ERROR IN CHANGING TIMEZONE: %s", e)
+        return HttpResponse("Error in updating timezone", status=400)
+
     
 #send all user information to the front end
 def get_user_information_view(request):
@@ -346,7 +357,8 @@ def get_user_information_view(request):
                     "email":user.email,
                     "first_name":user.first_name,
                     "last_name":user.last_name,
-                    "profilepicture": profile_picture_encoded
+                    "profilepicture": profile_picture_encoded,
+                    "timezone" : user.timezone
                 }
                 logging.info("get data:")
                 logging.info(response_data)
@@ -501,6 +513,11 @@ def create_checkin(user, data):
                 logging.info("DUPLICATE!!!")
                 return HttpResponse("Error: Duplicate Moment Today", status=400)
         
+        # Check if this is the first checkin of the day for updating the streak
+        today_midnight = datetime_current.replace(hour=0, minute=0, second=0, microsecond=0)
+        if not Checkin.objects.filter(date__gte = today_midnight, user_id=user.pk).exists(): # Checks if there are any checkins from the user today
+            logging.info("First checkin today")
+            update_streak(user) # Update the streak if it is the first checkin of the day
 
         # Create the checkin object and save it to the database
         checkin = Checkin.objects.create(
@@ -586,9 +603,39 @@ def get_checkin_info_view(request):
             return HttpResponse(constUNnotProvided, status=400)
     return HttpResponse("Not a GET request!")
 
+def update_streak(user): # called in create checkin to update the streak each day
+    logging.info("Updating streak")
+    # Update user's streak
+    user.current_streak += 1
+    if user.current_streak > user.longest_streak: #update the longest streak if needed 
+        user.longest_streak = user.current_streak
+    user.save()
+    logging.info("Streak updated")
+    # Update user's badges
+    badges = Badges.objects.get(user_id=user)
+    if badges != None:
+        logging.info("User badges object found")
+        if user.current_streak == 1 and badges.one_day == False:
+            badges.one_day = True
+            badges.save()
+            logging.info("1 day badge added")
+        elif user.current_streak == 7 and badges.one_week == False:
+            badges.one_week = True
+            badges.save()
+            logging.info("1 week badge added")
+        elif user.current_streak == 30 and badges.one_month == False:
+            badges.one_month = True
+            badges.save()
+            logging.info("1 month badge added")
+        elif user.current_streak == 365 and badges.one_year == False:
+            badges.one_year = True
+            badges.save()
+            logging.info("1 year badge added")
+        logging.info("Badges updated")
+    else:
+        logging.info(f"No badge object found for {user.username}")
 
 def get_video_info_view(request): 
-    
     if request.method == "GET":
         logging.info("In the get_video_info_view*****************")
         checkin_id = request.GET.get("checkin_id")  # JSON is not typically used for GET requests here
@@ -918,12 +965,15 @@ def get_badges_view(request):
     logging.info("In the get_badges_view")
     if request.method == "GET":
         # Retrieve the user ID from the query parameters
-        user_id = request.GET.get('user_id')
-        if not user_id:
+        username = request.GET.get('username')
+        if not username:
             return HttpResponse("User ID not provided", status=400)
         
         try:
             # Retrieve the badges for the specified user
+            user = User.objects.get(username=username)
+            user_id = user.pk # get foreign key reference field to look up in checkin userid column
+            
             badges = Badges.objects.get(user_id=user_id)
             response_data = {
                 "user_id": user_id,
@@ -943,6 +993,99 @@ def get_badges_view(request):
             return HttpResponse(f"No badges found for user {user_id}", status=404)
         except Exception as e:
             logging.error(f"Error retrieving badges: {e}")
-            return HttpResponse("Error retrieving badges", status=500)
+            return HttpResponse("Error retrieving badges", status=400)
     else:
-        return HttpResponse("Not a GET request!", status=405)
+        return HttpResponse("Not a GET request!", status=400)
+
+
+def get_current_streak_view(request):
+    logging.info("In the get_current_streak_view*****************")
+    if request.method == "GET":
+        # Retrieve the username from the query parameter
+        username = request.GET.get('username')
+        logging.info("Username: %s", username)
+
+        # Make sure the username is provided
+        if username:
+            try:
+                # Retrieve the user from the database by username
+                user = User.objects.get(username=username)
+                
+                # Retrieve the current streak from the user object
+                current_streak = user.current_streak
+
+                logging.info(current_streak)
+                return HttpResponse(json.dumps(current_streak), content_type='application/json')
+            except User.DoesNotExist:
+                return HttpResponse("User not found", status=400)
+        else:
+            return HttpResponse("Username not provided", status=400)
+    else:
+        return HttpResponse("Not a GET request!", status=400)
+    
+
+def get_longest_streak_view(request):
+    logging.info("In the get_longest_streak_view*****************")
+    if request.method == "GET":
+        # Retrieve the username from the query parameter
+        username = request.GET.get('username')
+        logging.info("Username: %s", username)
+
+        # Make sure the username is provided
+        if username:
+            try:
+                # Retrieve the user from the database by username
+                user = User.objects.get(username=username)
+                
+                # Retrieve the current streak from the user object
+                longest_streak = user.longest_streak
+
+                logging.info(longest_streak)
+                return HttpResponse(json.dumps(longest_streak), content_type='application/json')
+            except User.DoesNotExist:
+                return HttpResponse("User not found", status=400)
+        else:
+            return HttpResponse("Username not provided", status=400)
+    else:
+        return HttpResponse("Not a GET request!", status=400)
+
+def get_profile_pictures_view(request):
+    if request.method == "GET":
+        username_list = request.GET.getlist("username_list[]")
+        # Make sure the username list is not empty
+        if username_list is not None:
+            try:
+                profile_pic_list = []
+                for username in username_list:
+
+                    user = User.objects.get(username=username)
+                    user_id = user.pk
+                    
+                    #Retrieve the profile picture associated with this user
+                    users_list = User.objects.filter(id=user_id) # filter returns all matching objects, GET returns only if one matching object
+                    
+                    for listed_user in users_list: # looping through checkins for user specified
+                        obj_content= None #default if empty
+
+
+                        if listed_user.profile_picture is not None: #get content if not None and if not video
+                            obj_content= base64.b64encode(listed_user.profile_picture).decode('utf-8')                    
+
+                        current_user = { # dictionary to append to list
+                            "username": username,
+                            "profile_picture": obj_content,  #content converted from binary to base64 then to a base 64 string, or None
+                        }
+                        profile_pic_list.append(current_user) #add checkin to the list to be returne
+
+                # Log data and return as JSON response
+                logging.info(profile_pic_list)
+                return JsonResponse(profile_pic_list, safe=False)
+
+            except User.DoesNotExist:
+                return HttpResponse(constUserDNE, status=400)
+            except Exception as e:
+                logging.error(e)
+                return HttpResponse("An error occurred", status=400)
+        else:  # username was empty
+            return HttpResponse("Username not provided", status=400)
+    return HttpResponse("Not a GET request")
