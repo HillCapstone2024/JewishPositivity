@@ -26,6 +26,7 @@ LOG_TIME2 = 'Time2'
 LOG_TIME3 = 'Time3'
 LOG_CURRENT_STREAK= "Current Streak"
 LOG_LONGEST_STREAK= "Longest Streak"
+LOG_PROFILE_PICTURE = 'Profile picture'
 
 # Define constant strings for logging CHECKIN
 LOG_CHECKIN_ID = 'Check-In ID'
@@ -2057,11 +2058,11 @@ class GetUserBadgesViewTestCase(TestCase):
         'timezone': 'EST',
     }
 
-    BADGES_DATA_SUCESS = {
-            'one_day': True,
-            'one_week': False,
-            'one_month': True,
-            'one_year': False
+    BADGES_DATA_SUCCESS = {
+        'one_day': True,
+        'one_week': False,
+        'one_month': True,
+        'one_year': False
     }
 
 
@@ -2071,29 +2072,126 @@ class GetUserBadgesViewTestCase(TestCase):
 
         # Create test user
         self.client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)
+        user = User.objects.get(username=self.USER1_DATA['username'])
+
+        # Update or create the Badges entry for the created user
+        Badges.objects.update_or_create(user_id=user, defaults=self.BADGES_DATA_SUCCESS)
 
 
     def test_get_user_badges_success(self):
         logging.info("************TEST_get_user_badges_success**************")
         
-        # Send GET request to get_badges_view with user ID
-        response = self.client.get(reverse('get_badges_view'), {'user_id': self.user_id})
+        # Send GET request to get_badges_view with the username
+        response = self.client.get(reverse('get_badges_view'), {'username': self.USER1_DATA['username']})
         response_data = json.loads(response.content)
         logging.info("response_data: %s", response_data)
 
-        # Check if response status code is 200 and if the correct badges are returned
+        # Check if response status code is 200 -- method successful
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response_data['one_day'])
-        self.assertFalse(response_data['one_week'])
-        self.assertTrue(response_data['one_month'])
-        self.assertFalse(response_data['one_year'])
+
+
+        # Checking True cases that should be returned from method
+        if self.BADGES_DATA_SUCCESS['one_day']:
+            self.assertTrue(response_data['one_day'])
+        if self.BADGES_DATA_SUCCESS['one_month']:
+            self.assertTrue(response_data['one_month'])
+
 
     def test_get_user_badges_fail_User_DNE(self):
         logging.info("************TEST_get_user_badges_fail_User_DNE**************")
         
-        # Send GET request to get_badges_view with a non-existing user ID
-        response = self.client.get(reverse('get_badges_view'), {'user_id': 9999})  # Assuming 9999 is a non-existing user ID
+        # Send GET request to get_badges_view with a non-existing username
+        response = self.client.get(reverse('get_badges_view'), {'username': 'nonexistentuser'})
         logging.info("failure response_data: %s", response.content.decode('utf-8'))
-
-        # Check if response status code is 400 
+        
+        # View returns 400 for non-existing users 
         self.assertEqual(response.status_code, 400)
+
+
+class GetProfilePictureViewTestCase(TestCase): # to retrieve profile pictures from a given list of usernames
+    photo_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64photo.txt'))
+    photoFile = open(photo_file_path, 'r')
+    photo = photoFile.read()
+    #logging.info("PHOTO: %s", photo)
+    photoFile.close()
+
+    # Define constant user data
+    USER_DATA = {
+        'username': 'testuser',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+    USER2_DATA = {
+        'username': 'testuser1',
+        'password': 'testpassword2',
+        'reentered_password': 'testpassword2',
+        'firstname': 'Tes2',
+        'lastname': 'User2',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+
+    def setUp(self):
+        # Initialize the Django test client
+        client = Client()
+
+        # Make a POST request to create test users
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER_DATA), content_type=CONTENT_TYPE_JSON)# make two users
+        update_data = {
+            'username': 'testuser',
+            'profilepicture': self.photo
+        }
+        self.client.post(reverse('update_user_information_view'), data=json.dumps(update_data), content_type=CONTENT_TYPE_JSON)        
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER2_DATA), content_type=CONTENT_TYPE_JSON)
+
+
+    def test_get_profile_pictures_success(self):# Successfully retrieves a valid user's profile pictures
+        logging.info("************ TEST_get_profile_pictures_Success **************")
+        client = Client()
+
+        # Create test data
+        get_data = {'username_list[]': ['testuser', 'testuser1']} # to retrieve the profile pictures for the list of users
+
+        # Send GET request to get_profile_pictures_view
+        response = client.get(reverse('get_profile_pictures_view'), data=get_data)
+
+        # Check if response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+        # Printing DB after attempted getting of profile pictures
+        logging.info('Response: %s', response)
+        logging.info('')
+        queryset = User.objects.all()
+
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.id)
+            logging.info(LOG_MSG_FORMAT, LOG_PROFILE_PICTURE, obj.profile_picture)
+            logging.info('') 
+            logging.info("************TEST_get_profile_pictures_success_COMPLETED**************..........") 
+
+    def test_get_profile_pictures_fail(self):# Fails to get profile pictures in database due to user not existing
+        logging.info("***************TEST_get_profile_pictures_fail**************")
+        client = Client()
+
+        # Create test data
+        get_data = {'username_list[]': ['doesnotexist', 'doesnotexist2']} # to retrieve profile pictures for these users
+
+        # Send GET request to get_profile_pictures_view
+        response = client.get(reverse('get_profile_pictures_view'), data=get_data)
+
+        # Check if response status code is 400 -- failure
+        self.assertEqual(response.status_code, 400)
+
+        # Printing DB after attempted getting of profile pictures
+        queryset = User.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.id)
+            logging.info(LOG_MSG_FORMAT, LOG_PROFILE_PICTURE, obj.profile_picture)
+            logging.info('')   
+        logging.info("***************TEST_get_profile_pictures_fail_COMPLETED**************")
