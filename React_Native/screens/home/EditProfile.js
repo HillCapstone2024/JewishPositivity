@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TextInput, Button, Image } from "react-native";
+import { View, Text, StyleSheet, TextInput, Button, Image,ImageViewer, Modal, Pressable } from "react-native";
 import * as Storage from "../../AsyncStorage.js";
 import { createAvatar } from "@dicebear/core";
 import axios from "axios";
@@ -13,7 +13,8 @@ import { Alert } from "react-native";
 import { KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform } from "react-native";
 import { ActivityIndicator } from "react-native";
 import { xml } from "@dicebear/core/lib/utils/license.js";
- 
+import * as FileSystem from "expo-file-system";
+
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
 const EditProfile = ({navigation, onSwitch}) => {
@@ -30,6 +31,8 @@ const EditProfile = ({navigation, onSwitch}) => {
   });
 
   const [errorMessage, setErrorMessage] = useState(null);
+  const [passwordModalVisible, setPasswordModalVisible] = useState(false);
+
 
   const navigateProfileView = () => {
     if (onSwitch) {
@@ -48,6 +51,17 @@ const EditProfile = ({navigation, onSwitch}) => {
     mouth: ["smile", "smirk", "laughing"],
   }).toString();
 
+  async function readFileAsBase64(uri) {
+    try {
+      const base64Content = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      return base64Content;
+    } catch (error) {
+      console.error("Failed to read file as base64", error);
+      return null;
+    }
+  }
 
   const [newPassword, setNewPassword] = useState("");
 
@@ -90,7 +104,7 @@ const EditProfile = ({navigation, onSwitch}) => {
           firstname: userInfo.fname,
           lastname: userInfo.lname,
           email: userInfo.email,
-          profilePicture: userInfo.profilePicture ? userInfo.profilePicture : undefined,
+          profilepicture: userInfo.profilePicture ? userInfo.profilePicture : undefined,
         },
         {
           headers: {
@@ -102,7 +116,7 @@ const EditProfile = ({navigation, onSwitch}) => {
       );
       console.log("update profile response:", response.data);
       saveUsername();
-      //navigateProfileView();
+      navigateProfileView();
     } catch (error) {
       console.log(error)
       setErrorMessage(
@@ -123,11 +137,11 @@ const EditProfile = ({navigation, onSwitch}) => {
     });
 
     if (!result.cancelled) {
-    console.log(result.assets[0].uri);
-    setUserInfo(prevUserInfo => ({
-      ...prevUserInfo,
-      profilePicture: result.assets[0].uri,
-    }));
+      const base64String = await readFileAsBase64(result.assets[0].uri);    
+      setUserInfo(prevUserInfo => ({
+        ...prevUserInfo,
+        profilePicture: base64String,
+      }));
     }
 };
 
@@ -147,9 +161,10 @@ const takeMedia = async () => {
     });
 
     if (result && !result.cancelled) {
+      const base64String = await readFileAsBase64(result.assets[0].uri);    
         setUserInfo(prevUserInfo => ({
           ...prevUserInfo,
-          profilePicture: result.assets[0].uri,
+          profilePicture: base64String,
         }));
     }
 };
@@ -183,7 +198,7 @@ const takeMedia = async () => {
           lname: response.data.last_name,
           email:  response.data.email,
           password: response.data.password,
-          //profilePicture: response.data.profilePicture,
+          profilePicture: response.data.profilepicture,
         }));
       } catch (error) {
         handleUserInfoError(error);
@@ -232,10 +247,31 @@ const takeMedia = async () => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={[styles.container, theme["background"]]}
     >
+  {/* <View style={styles.topBar}>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity onPress={navigateProfileView}>
+            <View style={styles.buttonContent}>
+              <Ionicons name="caret-back" size={25} color="#4A90E2" />
+              <Text style={styles.cancelText}>Cancel</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+          <TouchableOpacity
+            style={styles.submitButton}
+            onPress={handleUpdateUser}
+          >
+          <Text style={styles.submitText}>Submit</Text>
+          </TouchableOpacity>
+        
+  </View> */}
+      {/* <View style={styles.horizontalBar} /> */}
+
       <TouchableOpacity onPress={handleEditProfilePicture} >
         <View style={styles.profilePicContainer}>
-        {userInfo.profilePicture && userInfo.profilePicture.trim != "" ? (
-          <Image source={{ uri: userInfo.profilePicture }} style={styles.profilePic} />
+        {userInfo.profilePicture && userInfo.profilePicture.trim() != "" ? (
+          <Image //source={{ uri: userInfo.profilePicture }} />
+            style={styles.profilePic}
+            source={{uri: `data:image/jpeg;base64,${userInfo?.profilePicture}`,}}/>
         ) : (
           <SvgXml xml={avatar} style={styles.profilePic} /> 
         )}
@@ -292,6 +328,57 @@ const takeMedia = async () => {
         <TouchableOpacity style={styles.button} onPress={navigateProfileView}>
               <Text style={styles.buttonText}>Cancel</Text>
         </TouchableOpacity>
+
+        {/*Password Modal - (move to another file)*/}
+        <Modal
+        animationType="slide"
+        transparent={true}
+        visible={passwordModalVisible}
+        onRequestClose={() => {
+          setPasswordModalVisible(!passwordModalVisible);
+        }}>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.title}>Edit Password</Text>
+            <View style={{ flexDirection: "column", width:"80%" }}>
+            <TextInput
+              style={styles.info}
+              placeholder="Current Password"
+            ></TextInput>
+             <TextInput
+              style={styles.info}
+              placeholder="New Password"
+            ></TextInput>
+             <TextInput
+              style={styles.info}
+              placeholder="Confirm New Password"
+              onChangeText = {(text) =>   setUserInfo(prevUserInfo => ({
+                                          ...prevUserInfo,
+                                          password: (text), 
+                                        }))}
+            ></TextInput>
+            </View>
+            <View style={{ flexDirection: "row", width:"80%" }}>
+              <TouchableOpacity 
+                  style={styles.button} 
+                  onPress={() => setPasswordModalVisible(!passwordModalVisible)}>
+                  <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                  style={styles.button} 
+                  onPress={() => setPasswordModalVisible(!passwordModalVisible)}>
+                  {/*trigger password change here! */}
+                  <Text style={styles.buttonText}>Update</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+      {/* <Pressable
+        style={[styles.button, styles.buttonOpen]}
+        onPress={() => setPasswordModalVisible(true)}>
+        <Text style={styles.buttonText}>Change Password</Text>
+      </Pressable> */}
         </View>
     </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
@@ -312,6 +399,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderWidth: 2,
     borderColor: "#4A90E2", 
+  },
+  title: {
+    fontSize: 20,
+    //fontWeight: "bold",
   },
   cameraIcon: {
     position: "absolute",
@@ -356,6 +447,27 @@ const styles = StyleSheet.create({
     // elevation: 5,
     //borderColor: 'rbg(3, 138, 255)', 
   },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
   attribute: {
     fontSize: 16,
     width: '80%',
@@ -363,6 +475,34 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     backgroundColor: "#4A90E2", 
+  },
+  topBar: {
+    flexDirection: "row",
+    marginTop: 5,
+    marginRight: 15,
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    fontSize: 19,
+  },
+  cancelText: {
+    fontSize: 19,
+    color: "#4A90E2",
+  },
+  submitButton: {},
+  ActivityIndicator: {
+    marginRight: 20
+  },
+  submitText: {
+    color: "#4A90E2",
+    fontSize: 19,
   },
   errorMessageBox: {
     textAlign: "center",
@@ -382,6 +522,11 @@ const styles = StyleSheet.create({
   errorMessageText: {
     textAlign: "center",
     color: "#ff0000",
+  },
+  horizontalBar: {
+    height: 1,
+    backgroundColor: "#ccc",
+    marginTop: 15,
   },
 });
 

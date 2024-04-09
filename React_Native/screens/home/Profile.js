@@ -63,14 +63,13 @@ const UserProfile = ({ navigation, onSwitch }) => {
           withCredentials: true,
         });
   
-        //console.log("Response fname:", response.data);
         setUserInfo(prevUserInfo => ({
           ...prevUserInfo,
           fname: response.data.first_name, 
           lname: response.data.last_name,
           email:  response.data.email,
           password: response.data.password,
-          //profilePicture: response.data.profilePicture,
+          profilePicture: response.data.profilepicture,
         }));
       } catch (error) {
         handleUserInfoError(error);
@@ -120,7 +119,9 @@ const UserProfile = ({ navigation, onSwitch }) => {
     >
     <View style={styles.profilePicContainer}>
     {userInfo.profilePicture && userInfo.profilePicture.trim != "" ? (
-      <Image source={{ uri: userInfo.profilePicture }} style={styles.profilePic} />
+      <Image 
+        style={styles.profilePic}
+        source={{uri: `data:image/jpeg;base64,${userInfo?.profilePicture}`,}}/>
     ) : (
       <SvgXml xml={avatar} style={styles.profilePic} /> 
     )}
