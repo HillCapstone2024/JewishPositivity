@@ -1165,7 +1165,7 @@ class GetCheckinsViewTestCase(TestCase): # to test retreving all checkin moments
         'username': 'testuser1',
         'header': 'Sample Header',
         'moment_number': 1,
-        'content_type': 'text',
+        'content_type': None,
         'content': None, #fill in with example entry
         'text_entry': "This is a sample checkin text",
     }
@@ -1343,6 +1343,7 @@ class UpdateCheckinsViewTestCase(TestCase):
         client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)# make two users
         client.post(reverse('checkin_view'), data=json.dumps(self.TEXT_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON) #make checkins into DB
         
+        #get checkin_id of the checkin 
         response = client.get(reverse('get_checkin_info_view'), data={'username': 'testuser1'})
         
         # Parse the response content as JSON
@@ -1492,6 +1493,127 @@ class UpdateCheckinsViewTestCase(TestCase):
         # Check if response status code is 400 -- failure
         self.assertEqual(response.status_code, 400)
 
+
+class DeleteCheckinViewTestCase(TestCase):  # To test deleting checkins account from the User table
+    
+    photo_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64photo.txt'))
+    photoFile = open(photo_file_path, 'r')
+    photo = photoFile.read()
+    #logging.info("PHOTO: %s", photo)
+    photoFile.close()
+
+    # Define constant user data
+    USER1_DATA = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+    USER2_DATA = {
+        'username': 'testuser2',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test2@example.com',
+        'timezone': 'EST',
+    }
+
+    # Define post data
+    TEXT_DATA_SUCCESS = {
+        'username': 'testuser1',
+        'header': 'Sample Header',
+        'moment_number': 1,
+        'content_type': None,
+        'content': None, #fill in with example entry
+        'text_entry': "This is a sample checkin text",
+    }
+
+    PHOTO_DATA_SUCCESS = {
+        'username': 'testuser2',
+        'header': 'Sample Header',
+        'moment_number': 1,
+        'content_type': 'photo',
+        'content': photo, 
+        'text_entry': None,
+    }
+
+    check_id = -1 #default, will change in test
+    DELETE_CHECKIN_DATA_SUCCESS = {
+        'checkin_id': check_id,
+    }
+
+    DELETE_CHECKIN_DATA_FAILURE = {
+        'checkin_id': 213,
+    }
+
+    def setUp(self):
+        logging.info("Setting up DeleteCheckinViewTestCase")
+        self.client = Client()
+
+        # Create test user to test delete
+        self.client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)
+        self.client.post(reverse('create_user_view'), data=json.dumps(self.USER2_DATA), content_type=CONTENT_TYPE_JSON)
+        self.client.post(reverse('checkin_view'), data=json.dumps(self.PHOTO_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON) #make checkins into DB
+        self.client.post(reverse('checkin_view'), data=json.dumps(self.TEXT_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        #get checkin_id of the checkin 
+        response = self.client.get(reverse('get_checkin_info_view'), data={'username': 'testuser1'})
+        
+        # Parse the response content as JSON
+        response_data = json.loads(response.content)
+        logging.info("response_data of getting checkin ID: %s",response_data)
+        # Now you can access the dictionary returned by the view
+        self.check_id = response_data[0]['checkin_id']
+        logging.info("check_id: %s",self.check_id)
+
+    def test_delete_checkin_success(self):
+        logging.info("***************test_delete_checkin_success**************".upper())
+       
+        logging.info('Printing BEFORE delete........')  
+        queryset = Checkin.objects.all() #should only print the one checkin moment that remains
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_CHECKIN_ID, obj.checkin_id)
+            logging.info(LOG_MSG_FORMAT, LOG_HEADER, obj.header)
+            #logging.info(LOG_MSG_FORMAT, LOG_CONTENT, obj.content)
+            logging.info(LOG_MSG_FORMAT, LOG_TEXT_ENTRY, obj.text_entry)
+            logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
+            logging.info(LOG_MSG_FORMAT, LOG_MOMENT_NUMBER, obj.moment_number)
+            logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
+            logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.user_id)
+            logging.info('')   
+
+
+        self.DELETE_CHECKIN_DATA_SUCCESS['checkin_id'] = self.check_id #change the checkin id to the id got in the setup
+        response = self.client.post(reverse('delete_checkin_view'), data=json.dumps(self.DELETE_CHECKIN_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 200 -- success
+        self.assertEqual(response.status_code, 200)
+
+        logging.info('Printing AFTER delete........')  
+        queryset = Checkin.objects.all() #should only print the one checkin moment that remains
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_CHECKIN_ID, obj.checkin_id)
+            logging.info(LOG_MSG_FORMAT, LOG_HEADER, obj.header)
+            #logging.info(LOG_MSG_FORMAT, LOG_CONTENT, obj.content)
+            logging.info(LOG_MSG_FORMAT, LOG_TEXT_ENTRY, obj.text_entry)
+            logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
+            logging.info(LOG_MSG_FORMAT, LOG_MOMENT_NUMBER, obj.moment_number)
+            logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
+            logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.user_id)
+            logging.info('')   
+
+    def test_delete_checkin_failure(self):
+        logging.info("***************test_delete_checkin_failure**************".upper())
+        # Attempt to delete to nonexistent checkin
+        response = self.client.post(reverse('delete_checkin_view'), data=json.dumps(self.DELETE_CHECKIN_DATA_FAILURE), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 400 -- failure
+        self.assertEqual(response.status_code, 400)
 
 class GetCheckinVideoViewTestCase(TestCase): # to test retreving a video checkin moment
     
@@ -2187,8 +2309,6 @@ class GetFriendsViewTestCase(TestCase): # to test retreving all checkin moments 
             logging.info('')   
 
 class DeleteUserViewTestCase(TestCase):  # To test deleting users account from the User table
-
-
     # Define constant user data
     USER1_DATA = {
         'username': 'testuser1',

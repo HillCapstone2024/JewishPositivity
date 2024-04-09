@@ -575,17 +575,6 @@ def update_checkin_info_view(request):
         logging.info("RECEIVED CHECKINID %s", checkin_id)
         return HttpResponse("Checkin_id is in invalid format or does not exist", status=400)
     
-
-    if 'content' in data:
-        logging.info("DATA CONTENT: %s", data['content'])
-    if 'content_type' in data:
-        logging.info("DATA TYPE: %s", data['content_type'])
-    if 'header' in data:
-        logging.info("DATA HEADER: %s", data['header'])
-    if 'text_entry' in data:
-        logging.info("DATA TEXT_ENTRY: %s", data['text_entry'])
-
-    
     #verify content and text entry both are not None before updating
     if 'text_entry' in data and 'content' in data: #content and text entry in post
         logging.info('Text and content posted')
@@ -605,7 +594,6 @@ def update_checkin_info_view(request):
                 logging.info('Both None')
                 return HttpResponse('No content in checkin!', status=400)
     
-
     error_response = validate_data(data) #allows content and text entry to be none type and pass through without error
     if error_response:
         return error_response
@@ -663,6 +651,31 @@ def update_header(checkin, new_header):
     except Exception as e:
         logging.info("ERROR IN CHANGING HEADER: %s", e)
         return HttpResponse("Error in updating header", status=400)
+
+def delete_checkin_view(request): # to delete a specified checkin_id
+    if request.method == "POST":
+        # Retrieve usernames from POST request
+        data = json.loads(request.body)
+        checkin_id = data.get("checkin_id")
+        logging.info('retrieved checkin_id %s', checkin_id)
+
+        try:
+            # Getting users from the user objects from the user table
+            checkinobj = Checkin.objects.get(checkin_id=checkin_id)
+            logging.info('retrieved user %s', checkinobj)
+
+            checkin = Checkin.objects.filter(checkin_id= checkin_id)
+        
+            # Delete the User if it exists
+            if checkin.exists():
+                checkin.delete()
+                return HttpResponse("checkin deleted successfully", status=200)
+            else:
+                return HttpResponse("Checkin does not exist", status=400)
+        except Exception as e:
+            return HttpResponse("Error deleting checkin: " + str(e), status=400)
+
+    return HttpResponse(constInvalidReq, status=400)
 
 def get_checkin_info_view(request):
     if request.method == "GET":
