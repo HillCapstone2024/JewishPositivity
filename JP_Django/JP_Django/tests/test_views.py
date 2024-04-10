@@ -1201,7 +1201,7 @@ class GetCheckinsViewTestCase(TestCase): # to test retreving all checkin moments
         'username': 'testuser2',
         'header': 'Sample Header',
         'moment_number': 2,
-        'content_type': 'video',
+        'content_type': 'photo',
         'content': photo, 
         'text_entry': "text sample to get",
     }

@@ -677,6 +677,12 @@ def delete_checkin_view(request): # to delete a specified checkin_id
 
     return HttpResponse(constInvalidReq, status=400)
 
+#Retrieve thumbnail placeholder as global variable videothumb
+videothumb_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'tests/test_resources/b64videothumbnail.txt'))
+videoThumbFile = open(videothumb_file_path, 'r')
+videothumb = videoThumbFile.read()
+videoThumbFile.close()
+
 def get_checkin_info_view(request):
     if request.method == "GET":
         username = request.GET.get("username")  # JSON is not typically used for GET requests here
@@ -687,7 +693,7 @@ def get_checkin_info_view(request):
                 # Retrieve the user from the database by username
                 user = User.objects.get(username=username)
                 user_id = user.pk # get foreign key reference field to look up in checkin userid column
-                
+
                 #Retrieve all checkins associated with this user
                 all_checkins = Checkin.objects.filter(user_id=user_id) # filter returns all matching objects, GET returns only if one matching object
 
@@ -699,12 +705,15 @@ def get_checkin_info_view(request):
                     if checkin.content is not None and checkin.content_type != "video": #get content if not None and if not video
                         obj_content= base64.b64encode(checkin.content).decode('utf-8')
                     
+                    if checkin.content_type == "video": #get thumbnail if video to pass as content
+                        obj_content = videothumb #image of play video screen as base 64 from file- global var above view
+
                     current_checkin = { # dictionary to append to list
                         "checkin_id": checkin.checkin_id,
                         "header": checkin.header,
                         "content_type": checkin.content_type,
                         "moment_number": checkin.moment_number,
-                        "content": obj_content,  #content converted from binary to base64 then to a base 64 string, or None
+                        "content": obj_content,  #content converted from binary to base64 then to a base 64 string, or None, or thumbnail image
                         "text_entry": checkin.text_entry,
                         "user_id": checkin.user_id.id,
                         "date": checkin.date.strftime('%Y-%m-%d'), # Convert date to string to be JSON serializable
