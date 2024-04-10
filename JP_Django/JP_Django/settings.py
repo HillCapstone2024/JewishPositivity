@@ -13,6 +13,16 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import warnings
+
+# This ignores the datetime warning when running the test classes -- remove if you need to check the datetime warning
+# To remove the datetime warning, we need to use timezone aware fields in place of datetime in our model,views,and tests
+warnings.filterwarnings(
+    "ignore",
+    message="DateTimeField .* received a naive datetime",
+    category=RuntimeWarning
+)
+
 load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
