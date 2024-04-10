@@ -154,10 +154,10 @@ const Friends = ({navigation}) => {
 
     const UserListItem = ({ user }) => (
         <View style={styles.userItem}>
-          <Image
+          {/* <Image
             source={require("../../assets/images/notebookPen.png")}
             style={styles.avatar}
-          />
+          /> */}
           <Text
             style={styles.statusUserName}
             ellipsizeMode="tail"
@@ -169,34 +169,46 @@ const Friends = ({navigation}) => {
       );
 
     return(
-        <View style={styles.container}>
-            <View style={styles.userList}>
-          <ScrollView vertical>
-            <View style={styles.userContainer}>
-              {friends.map((user) => (
-                <UserListItem key={user.id} user={user} />
-              ))}
-            </View>
-          </ScrollView>
-        </View>
-    </View>
+    //   <View style={styles.container}>
+    //     <View style={styles.userList}>
+    //       <ScrollView vertical>
+    //         <View style={styles.userContainer}>
+    //           {friends.map((user) => (
+    //             <UserListItem key={user.id} user={user} />
+    //           ))}
+    //         </View>
+    //       </ScrollView>
+    //   </View>
+    // </View>
+    <View style={styles.container}>
+      <View style={styles.userButtonContainer}>
+        {friends.map((user, index) => (
+          <View key={index}  style={styles.userContainer}>
+            <TouchableOpacity style={styles.button}>
+              {/* <Text style={styles.buttonText}>Press me</Text> */}
+              <Text style={styles.friendText}>{user}</Text>
+            </TouchableOpacity>
+          </View>
         
+        ))}
+      </View>
+    </View>
     );
 }
 
 const styles = StyleSheet.create({
-    // container: {
-    //     flex: 1,
-    //     margin: 10,
-    //     //justifyContent: "center",
-    //     alignItems: "center",
-    // },
     container: {
-        // paddingTop: 60,
-        paddingBottom: 100,
-        height: "100%",
-        // backgroundColor: "red",
-      },
+        flex: 1,
+        margin: 10,
+        //justifyContent: "center",
+        // alignItems: "center",
+    },
+    // container: {
+    //     // paddingTop: 60,
+    //     paddingBottom: 100,
+    //     height: "100%",
+    //     // backgroundColor: "red",
+    //   },
     input: {
         width: "80%",
         height: 40,
@@ -261,15 +273,41 @@ const styles = StyleSheet.create({
         color: "#006400",
       },
 
-      userContainer: {
-        flexDirection: "column",
-        padding: 10,
-        height: 2000,
-        width: "100%",
+      userButtonContainer:{
+
+        flexDirection: 'column',
+        marginBottom: 10,
       },
-      userList: {
-        width: "20%",
+
+      userContainer: {
+
+        marginBottom: 30,
+        width: 200,
+      },
+
+      itemText: {
+        fontSize: 18,
+        marginRight: 10,
+      },
+
+      button: {
+
         backgroundColor: "#4A90E2",
+        paddingVertical: 30,
+        paddingHorizontal: 50,
+        marginTop: 10,
+        marginHorizontal: 5,
+        borderRadius: 5,
+        shadowColor: "black",
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 6,
+        shadowOpacity: 0.16,
+      },
+
+      friendText: {
+        color: 'white',
+        fontSize: 16,
+        
       },
 });
 
