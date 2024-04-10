@@ -8,6 +8,7 @@ import {
     TouchableOpacity, 
     ScrollView, 
     Image, 
+    FlatList,
     ActivityIndicator
 } from 'react-native';
 import makeThemeStyle from '../../tools/Theme.js';
@@ -24,6 +25,8 @@ const Friends = ({navigation}) => {
     const [username, setUsername] = useState("");
     const [usernameSearch, setUsernameSearch] = useState("");
     const [errorMessage, setErrorMessage] = useState(null);
+    const [friends, setFriends] = useState([]);
+    const [profilePics, setProfilePics] = useState([]);
 
     useEffect(() => {
         const loadUsername = async() => {
@@ -32,6 +35,72 @@ const Friends = ({navigation}) => {
         };
         loadUsername();
     }, []);
+
+    useEffect(() => {
+
+        handleGetProfilePic();
+      }, [friends]);
+
+    // const loadUsername = async () => {
+    //     const storedUsername = await Storage.getItem("@username");
+    //     setUsername(storedUsername || "No username");
+    //   };
+    
+    //   useEffect(() => {
+    //     loadUsername();
+    //   }, []);
+
+    useEffect(() => {
+        getFriends();
+      }, [username]);
+
+      const getCsrfToken = async () => {
+        try {
+          const response = await axios.get(`${API_URL}/csrf-token/`);
+          return response.data.csrfToken;
+        } catch (error) {
+          console.error("Error retrieving CSRF token:", error);
+          throw new Error("CSRF token retrieval failed");
+        }
+      };
+
+    const getFriends = async () => {
+
+        try {
+          const csrfToken = await getCsrfToken();
+          const response = await axios.get(`${API_URL}/get_friend_info/`, {
+            params: {
+              username: username,
+            },
+          });
+          console.log("response of friends:", response);
+          const friendsList = response.data
+            .filter((item) => item.status === true)
+            .map((item) => item.username);
+          console.log("friends list: ", friendsList);
+          setFriends(friendsList);
+        } catch (error) {
+          console.log("error fetching friends:", error);
+        }
+      };
+
+      const handleGetProfilePic = async () => {
+        console.log("getting profile pics for ", friends);
+        try {
+          const csrfToken = await getCsrfToken();
+          const response = await axios.get(`${API_URL}/profile_pictures_view/`, {
+            params: {
+              username_list: friends,
+            },
+          });
+          setProfilePics(response.data);
+          console.log("got profile pic success!", response.data);
+          return response.data;
+        } catch (error) {
+          console.log("Error retrieving profile pics:", error);
+          throw new Error("profile pic retreival failed");
+        }
+      };
 
     const navigateAddFriends = () => {
         navigation.navigate("AddFriends")
@@ -83,22 +152,51 @@ const Friends = ({navigation}) => {
         }
     };
 
+    const UserListItem = ({ user }) => (
+        <View style={styles.userItem}>
+          <Image
+            source={require("../../assets/images/notebookPen.png")}
+            style={styles.avatar}
+          />
+          <Text
+            style={styles.statusUserName}
+            ellipsizeMode="tail"
+            numberOfLines={1}
+          >
+            {user}
+          </Text>
+        </View>
+      );
+
     return(
         <View style={styles.container}>
-            <TouchableOpacity style={styles.button} >
-                <Text style={styles.buttonText}>Add Friend</Text>
-            </TouchableOpacity>
+            <View style={styles.userList}>
+          <ScrollView vertical>
+            <View style={styles.userContainer}>
+              {friends.map((user) => (
+                <UserListItem key={user.id} user={user} />
+              ))}
+            </View>
+          </ScrollView>
         </View>
+    </View>
+        
     );
 }
 
 const styles = StyleSheet.create({
+    // container: {
+    //     flex: 1,
+    //     margin: 10,
+    //     //justifyContent: "center",
+    //     alignItems: "center",
+    // },
     container: {
-        flex: 1,
-        margin: 10,
-        //justifyContent: "center",
-        alignItems: "center",
-    },
+        // paddingTop: 60,
+        paddingBottom: 100,
+        height: "100%",
+        // backgroundColor: "red",
+      },
     input: {
         width: "80%",
         height: 40,
@@ -161,6 +259,17 @@ const styles = StyleSheet.create({
       },
       errorMessageTextSucceed: {
         color: "#006400",
+      },
+
+      userContainer: {
+        flexDirection: "column",
+        padding: 10,
+        height: 2000,
+        width: "100%",
+      },
+      userList: {
+        width: "20%",
+        backgroundColor: "#4A90E2",
       },
 });
 
