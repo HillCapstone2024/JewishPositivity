@@ -708,6 +708,7 @@ def get_checkin_info_view(request):
                         "text_entry": checkin.text_entry,
                         "user_id": checkin.user_id.id,
                         "date": checkin.date.strftime('%Y-%m-%d'), # Convert date to string to be JSON serializable
+                        "time": checkin.date.strftime('%H:%M:%S'),
                     }
                     response_data.append(current_checkin) #add checkin to the list to be returned
   
