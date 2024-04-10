@@ -14,12 +14,11 @@ import makeThemeStyle from '../../tools/Theme.js';
 import * as Storage from "../../AsyncStorage.js";
 import IP_ADDRESS from "../../ip.js";
 import axios from 'axios';
-
-//import AddFriends from '../screens/home/AddFriends.js';
+import { SearchBar } from '@rneui/themed';
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
-const Friends = ({navigation}) => {
+const AddFriends = () => {
     theme = makeThemeStyle();
     const [username, setUsername] = useState("");
     const [usernameSearch, setUsernameSearch] = useState("");
@@ -33,9 +32,9 @@ const Friends = ({navigation}) => {
         loadUsername();
     }, []);
 
-    const navigateAddFriends = () => {
-        navigation.navigate("AddFriends")
-    }
+    const updateUsernameSearch = (usernameSearch) => {
+        setUsernameSearch(usernameSearch);
+    };
 
     const handleFriends = async() => {
         setErrorMessage(<ActivityIndicator />);
@@ -70,7 +69,7 @@ const Friends = ({navigation}) => {
             console.log("Friend response:", response.data);
             setErrorMessage(
                 <View style={styles.errorMessageBoxSucceed}>
-                  <Text style={styles.errorMessageTextSucceed}>  </Text>
+                  <Text style={styles.errorMessageTextSucceed}> Friend Request Sent </Text>
                 </View>
               );
         } catch(error) {
@@ -85,9 +84,16 @@ const Friends = ({navigation}) => {
 
     return(
         <View style={styles.container}>
-            <TouchableOpacity style={styles.button} >
-                <Text style={styles.buttonText}>Add Friend</Text>
+            <TextInput 
+                style = {[styles.input]}
+                placeholder='Find User...'
+                onChangeText={(text) => updateUsernameSearch(text)}
+                value={usernameSearch}
+            />
+            <TouchableOpacity style={styles.button} onPress={handleFriends}>
+                <Text style={styles.buttonText}>Search</Text>
             </TouchableOpacity>
+            {errorMessage}
         </View>
     );
 }
@@ -164,11 +170,24 @@ const styles = StyleSheet.create({
       },
 });
 
-export default Friends;
+export default AddFriends;
 
 
 /*
+<Text
+    onPress={() => alert('This is the "Friends" screen ')}
+    style={[styles.tempText]}>Friends
+</Text>
+*/
 
+/*
 
-onPress={navigateAddFriends}
+Add friend
+- get_user to see if user exists
+- add_friend_view (?)
+
+Extras(?)
+1. Delete friends
+2. Friend requests inbox
+3. Actually do a search
 */
