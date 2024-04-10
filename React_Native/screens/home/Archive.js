@@ -213,7 +213,7 @@ export default function Archive({ navigation }) {
     }
   };
 
-  const renderDateTimeSection = (date) => (
+  const renderDateTimeSection = (date, time) => (
     <View style={styles.datetimeContainer}>
       <Text style={[styles.text, styles.dayOfWeekText]}>
         {moment(date, 'YYYY-MM-DD').format('ddd')}
@@ -222,7 +222,7 @@ export default function Archive({ navigation }) {
         {moment(date, 'YYYY-MM-DD').format('D')}
       </Text>
       <Text style={styles.text}>
-        {moment(date, 'YYYY-MM-DD').format('h:mm A')}
+        {moment(time, 'HH-mm').format('h:mm A')}
       </Text>
     </View>
   );
@@ -246,7 +246,7 @@ export default function Archive({ navigation }) {
     return (
       <View style={styles.contentContainer}>
         <View style={{ flexDirection: 'row' }}>
-          {renderDateTimeSection(data.date)}
+          {renderDateTimeSection(data.date, data.time)}
           <View style={[styles.divider, { backgroundColor: dividerColor }]} />
           <View style={[styles.contentSection, data.content_type === "text" && { flex: 3.05 }]}>
             <View style={styles.middleContent}>

@@ -394,7 +394,6 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-      {/* <ScrollView keyboardDismissMode="interactive"> */}
 
       {/* Keyboard bar view below */}
       {showMediaBar ? (

@@ -79,7 +79,24 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
   }, []);
 
   useEffect(() => {
-    setCheckin_id(selectedEntry.checkin_id)
+    setCheckin_id(selectedEntry.checkin_id);
+
+    //sets media uri 
+    if(selectedEntry?.content_type === "image")
+    {
+      setMediaUri(`data:image/jpeg;base64,${selectedEntry?.content}`);
+      console.log("set mediaUri to passed in image");
+    }
+    if(selectedEntry?.content_type === "video")
+    {
+      setMediaUri(`data:video/mp4;base64,${selectedEntry?.content}`);
+      console.log("set mediaUri to passed in video");
+    }
+    if(selectedEntry?.content_type === "recording")
+    {
+      setMediaUri(`data:audio/mp3;base64,${selectedEntry?.content}`);
+      console.log("set mediaUri to passed in audio");
+    }
   }, []);
 
   useEffect(() => {
@@ -189,6 +206,7 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
   const handleHeaderComplete = (text) => {
     setHeaderText(text);
     console.log(text);
+    setDisableUpdate(text.trim().length === 0);
   };
 
   const handleTextComplete = (text) => {
@@ -269,14 +287,14 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={[styles.container]}
             >
-            <ScrollView style={styles.contentContainer}>
+              <ScrollView style={styles.contentContainer}>
                 <Text style={styles.header}>Update CheckIn Moment!</Text>
                 <Text style={[styles.datetime, theme["color"]]}>
                 {formattedDateTime}{" "}
                 </Text>
 
                 {/* Media Box Below */}
-                {/* {mediaBox ? (
+                {mediaBox ? (
                 <View style={styles.mediaContainer}>
                     {mediaType === "image" ? (
                       <ImageViewer
@@ -291,15 +309,15 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
                         onDelete={deleteMedia}
                         dimensions={{ height: 60, width: 60 }}
                       />
-                    ) : mediaType === "recording" ?(
+                    ) : mediaType === "recording" ? (
                       <RecordingViewer
                         uri={mediaUri}
                         onDelete={deleteMedia}
                         dimensions={{ height: 60, width: 60 }}
                       />
                     ) : selectedEntry?.content_type === "image" ? (
-                      <Image
-                        source={{uri: `data:image/jpeg;base64,${selectedEntry?.content}`}}
+                      <ImageViewer
+                        source={mediaUri}
                         style={[styles.JournalEntryModalImage,]}
                         onDelete={deleteMedia}
                         // dimensions={{ height: 60, width: 60 }}
@@ -307,50 +325,19 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
                       />
                     ) : selectedEntry?.content_type === "video" ? (
                       <VideoViewer
-                        source={{uri: `data:video/mp4;base64,${selectedEntry?.content}`}}
+                        source={mediaUri}
                         onDelete={deleteMedia}
                         dimensions={{ height: 60, width: 60 }}
                       />
                     ) : (
                       <RecordingViewer
-                        source={`data:audio/mp3;base64,${selectedEntry?.content}`}
+                        source={mediaUri}
+                        onDelete={deleteMedia}
                         style={{ height: 60, width: 60, borderRadius: 5 }}
                       />
                     ) }
                     <ProgressBar onMediaChange={mediaChanged} />
                 </View>
-                ) : null} */}
-                {mediaBox ? (
-                  <View style={styles.mediaContainer}>
-                    {mediaType === "image" ? (
-                      <ImageViewer
-                        source={mediaUri}
-                        onDelete={deleteMedia}
-                        style={{
-                          height: 60,
-                          width: 60,
-                          borderTopLeftRadius: 5,
-                          borderTopRightRadius: 5,
-                        }}
-                      />
-                    ) : mediaType === "video" ? (
-                      <VideoViewer
-                        source={mediaUri}
-                        onDelete={deleteMedia}
-                        style={{ height: 60, width: 60 }}
-                      />
-                    ) : (
-                      // <View style={styles.container}>
-                      //   <Button title="Play Sound" onPress={playSound} />
-                      // </View>
-                      <RecordingViewer
-                        source={mediaUri}
-                        onDelete={deleteMedia}
-                        style={{ height: 60, width: 60 }}
-                      />
-                    )}
-                    <ProgressBar onMediaChange={mediaChanged} />
-                  </View>
                 ) : null}
 
                 {/* Header */}
@@ -391,9 +378,8 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
                         </TextInput>
                     </ScrollView>
                 </View>
-            </ScrollView>
-        </KeyboardAvoidingView>
-        {/* <ScrollView keyboardDismissMode="interactive"> */}
+              </ScrollView>
+            </KeyboardAvoidingView>
 
         {/* Keyboard bar view below */}
         {showMediaBar ? (
