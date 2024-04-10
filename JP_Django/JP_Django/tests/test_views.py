@@ -1233,6 +1233,15 @@ class GetCheckinsViewTestCase(TestCase): # to test retreving all checkin moments
         # Check if response status code is 200
         self.assertEqual(response.status_code, 200)
 
+        # Create test data
+        get_data2 = {'username': 'testuser2'} # to retrieve all (or if one add in moment#) checkins for this user
+
+        # Send GET request to get_checkin_info_view
+        response2 = client.get(reverse('get_checkin_info_view'), data=get_data2)
+
+        # Check if response status code is 200
+        self.assertEqual(response2.status_code, 200)
+
         # Printing DB after attempted getting of checkins
         logging.info('Response: %s', response)
         logging.info('')
