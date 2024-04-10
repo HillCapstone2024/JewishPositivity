@@ -12,9 +12,13 @@ import { Ionicons } from "@expo/vector-icons";
 import moment from 'moment';
 
 import EditCheckIn from "./EditCheckIn.js";
+import VideoViewer from "../../tools/VideoViewer.js";
+import ImageViewer from "../../tools/ImageViewer.js";
+import RecordingViewer from "../../tools/RecordingViewer.js";
 
-export default function Archive({ navigaton }) {
+export default function Archive({ navigation }) {
   const [username, setUsername] = useState("");
+  const [checkin_id, setCheckin_id] = useState("");
   const [entries, setEntries] = useState([]);
   const [message, setMessage] = useState(<ActivityIndicator />);
   const [groupedEntries, setGroupedEntries] = useState({});
@@ -116,6 +120,47 @@ export default function Archive({ navigaton }) {
     setEditModalVisible(true);
   }
 
+  const onDelete = async() => {
+    console.log("Deleting Journal Entry:", checkin_id);
+    const getCsrfToken = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/csrf-token/`);
+        return response.data.csrfToken;
+      } catch (error) {
+        console.error("Error retrieving CSRF token:", error);
+        throw new Error("CSRF token retrieval failed");
+      }
+    };
+    try {
+      const csrfToken = await getCsrfToken();
+      const response = await axios.post(
+        `${API_URL}/delete_checkin/`,
+        {
+          username: username,
+          checkin_id: checkin_id,
+        },
+        {
+          headers: {
+            "X-CSRFToken": csrfToken,
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+      console.log("Delete response:", response.data);
+      // await Storage.removeItem("@username");
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Archive" }],
+      });
+      navigation.navigate("Archive");
+    } catch (error) {
+      if (error.response.data) {
+        console.error("Error Deleting Journal Entry:", error.response.data);
+      }
+    }
+  }
+
   const getDividerColor = (moment_number) => {
     switch (moment_number) {
       case 1: //Modeh Ani
@@ -130,6 +175,7 @@ export default function Archive({ navigaton }) {
   };
 
   handleGetEntries = async () => {
+    console.log("Fetching Journal Entries");
     try {
       const csrfToken = await getCsrfToken();
       const response = await axios.get(`${API_URL}/get_checkin_info/`,
@@ -202,7 +248,7 @@ export default function Archive({ navigaton }) {
         <View style={{ flexDirection: 'row' }}>
           {renderDateTimeSection(data.date)}
           <View style={[styles.divider, { backgroundColor: dividerColor }]} />
-          <View style={[styles.contentSection, data.content_type !== "image" && { flex: 3.05 }]}>
+          <View style={[styles.contentSection, data.content_type === "text" && { flex: 3.05 }]}>
             <View style={styles.middleContent}>
               <Text style={styles.middleContentHeader} numberOfLines={1} ellipsizeMode="tail">{data.header !== null ? data.header : "Header Would Go Here"}</Text>
               <Text style={styles.middleContentMoment_Number}>{getMomentText(data.moment_number)}</Text>
@@ -229,7 +275,10 @@ export default function Archive({ navigaton }) {
           )}
           {data.content_type === "recording" && (
             <View style={styles.audioContainer}>
-              <Text style={styles.text}>Recording</Text>
+              <RecordingViewer
+                style={styles.audio}
+                source={`data:audio/mp3;base64,${data.content}`}               
+              />
             </View>
           )}
           {/* {!["image", "video", "recording"].includes(data.content_type) && (
@@ -376,7 +425,9 @@ export default function Archive({ navigaton }) {
                                 <View style={styles.horizontalBar} />
                                 {/* Delete button */}
                                 <TouchableOpacity onPress={() => {
-                                  // onDelete();
+                                  setCheckin_id(selectedEntry?.checkin_id);
+                                  console.log(checkin_id);
+                                  onDelete();
                                   // setEditDeleteModalVisible(false);
                                 }}>
                                   <Text style={styles.deleteText}>Delete</Text>
@@ -441,7 +492,10 @@ export default function Archive({ navigaton }) {
                           />
                         )}
                         {selectedEntry?.content_type === "recording" && (
-                          <Text style={styles.text}>Recording</Text>
+                          <RecordingViewer
+                            source={`data:audio/mp3;base64,${selectedEntry?.content}`}
+                            style={{ height: 60, width: 60, borderRadius: 5 }}
+                          />
                         )}
                         <Text style={[styles.detailText, { marginBottom: 20 }]}>
                           {selectedEntry?.text_entry !== null ? selectedEntry?.text_entry: "  This is some long content text that will be truncated if it takes up too much space in the container."}
@@ -511,6 +565,11 @@ const styles = StyleSheet.create({
   video: {
     height: "100%",
     aspectRatio: 1,
+    borderRadius: 5,
+  },
+  audio: {
+    height: 90,
+    width: 90,
     borderRadius: 5,
   },
   text: {
