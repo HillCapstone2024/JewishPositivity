@@ -38,10 +38,11 @@ SECRET_KEY = os.getenv("DJ_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', f'{os.getenv("IP_ADDRESS")}']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', 'jewishpositivity.com', f'{os.getenv("IP_ADDRESS")}']
 
 CORS_ORIGIN_WHITELIST = [
     f'http://{os.getenv("IP_ADDRESS")}:8081',
+    'jewishpositivity.com'
 ]
 
 # Application definition
