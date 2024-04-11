@@ -810,6 +810,9 @@ def get_todays_checkin_info_view(request):
                         
                         if checkin.content is not None and checkin.content_type != "video": #get content if not None and if not video
                             obj_content= base64.b64encode(checkin.content).decode('utf-8')
+                            
+                        if checkin.content_type == "video": #get thumbnail if video to pass as content
+                            obj_content = videothumb #image of play video screen as base 64 from file- global var above view
                         
                         current_checkin = { # dictionary to append to list
                             "username": username,

@@ -8,8 +8,10 @@ import {
   StyleSheet,
   FlatList,
   ActivityIndicator,
-  RefreshControl
+  RefreshControl,
+  Animated
 } from "react-native";
+import { Video } from "expo-av";
 import VideoViewer from "../../tools/VideoViewer.js";
 import ImageViewer from "../../tools/ImageViewer.js";
 import axios from "axios";
@@ -18,47 +20,125 @@ import IP_ADDRESS from "../../ip.js";
 import * as Storage from "../../AsyncStorage.js";
 import RecordingViewer from "../../tools/RecordingViewer.js";
 import ViewCheckIn from "./ViewCheckIn.js";
+import LoadingScreen from "../greet/Loading.js";
 
 const FriendFeed = () => {
   const [username, setUsername] = useState();
   const [posts, setPosts] = useState([]);
   const [friends, setFriends] = useState([]);
   const [profilePics, setProfilePics] = useState([]);
+  const [profilePicMap, setProfilePicMap] = useState({});
   const [video, setVideo] = useState(null);
   const [contentLoading, setContentLoading] = useState(true);
   const [refreshing, setRefreshing] = React.useState(false);
   const [showViewCheckIn, setShowViewCheckIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const slideAnimFlatList = useRef(new Animated.Value(-800)).current; // Initial position for FlatList
+  const slideAnimScrollView = useRef(new Animated.Value(-800)).current; // Initial position for ScrollView
 
   const openModal = () => setShowViewCheckIn(true);
   const closeModal = () => setShowViewCheckIn(false);
 
+  const initializeData = async () => {
+    try {
+      setIsLoading(true);
+      const storedUsername = await Storage.getItem("@username");
+      setUsername(storedUsername);
+
+      const csrfToken = await getCsrfToken();
+      const friendsList = await fetchFriendsList(storedUsername, csrfToken);
+      // setFriends(friendsList);
+
+      const entries = await fetchEntries(friendsList, csrfToken);
+
+      const map = await fetchProfilePics(friendsList, csrfToken);
+      // const picsMap = mapPicsToUser(pics);
+      // setProfilePics(picsMap);
+      // setProfilePicMap(map);
+
+      const updatedPosts = entries.map((post) => ({
+        ...post,
+        profilepic: map[post.username] || "default_pic_base64",
+      }));
+
+      //updated all states at once to prevent rerenders and 'flickers'
+      setFriends(friendsList);
+      setProfilePicMap(map);
+      setPosts(updatedPosts);
+      setVideo(null);
+
+      setIsLoading(false);
+      setContentLoading(false);
+    } catch (error) {
+      console.error("Initialization failed:", error);
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    initializeData();
+  }, []);
+
+  useEffect(() => {
+    if (!isLoading && !contentLoading) {
+    Animated.parallel([
+      Animated.spring(slideAnimScrollView, {
+        toValue: 0,
+        useNativeDriver: true,
+        speed: 1,
+        bounciness: 12,
+      }),
+      Animated.spring(slideAnimFlatList, {
+        toValue: 0,
+        useNativeDriver: true,
+        speed: 1,
+        bounciness: 12,
+      }),
+    ]).start();
+  }
+  }, [isLoading, contentLoading]);
+
   const onRefresh = React.useCallback(() => {
-    console.log('friends list on refresh: ', friends);
+    console.log("friends list on refresh: ", friends);
     setRefreshing(true);
-    handleGetEntries();
+    // fetchEntries();
+    initializeData();
     setTimeout(() => {
       setRefreshing(false);
     }, 2000);
+    // setRefreshing(false);
   }, []);
+  // const onRefresh = useCallback(async () => {
+  //   setRefreshing(true);
+  //   try {
+  //     const csrfToken = await getCsrfToken();
+  //     const entries = await fetchEntries(friends, csrfToken);
+  //     setPosts(entries);
+  //   } catch (error) {
+  //     console.error("Refresh failed:", error);
+  //   }
+  //   setRefreshing(false);
+  // }, [friends]);
 
   const loadUsername = async () => {
     const storedUsername = await Storage.getItem("@username");
     setUsername(storedUsername || "No username");
   };
 
-  useEffect(() => {
-    loadUsername();
-  }, []);
+  // useEffect(() => {
+  //   loadUsername();
+  // }, []);
 
-  useEffect(() => {
-    getFriends();
-  }, [username]);
+  // useEffect(() => {
+  //   getFriends();
+  // }, [username]);
 
-  useEffect(() => {
-    // console.log("now we will fetch check ins.");
-    handleGetEntries();
-    handleGetProfilePic();
-  }, [friends]);
+  // useEffect(() => {
+  //   // console.log("now we will fetch check ins.");
+  //   handleGetEntries();
+  //   handleGetProfilePic();
+  // }, [friends]);
 
   const getCsrfToken = async () => {
     try {
@@ -70,7 +150,7 @@ const FriendFeed = () => {
     }
   };
 
-  const getFriends = async () => {
+  const fetchFriendsList = async (username) => {
     try {
       const csrfToken = await getCsrfToken();
       const response = await axios.get(`${API_URL}/get_friend_info/`, {
@@ -78,19 +158,19 @@ const FriendFeed = () => {
           username: username,
         },
       });
-      console.log("response of friends:", response);
+      // console.log("response of friends:", response);
       const friendsList = response.data
         .filter((item) => item.status === true)
         .map((item) => item.username);
-      console.log("friends list: ", friendsList);
-      setFriends(friendsList);
+      // console.log("friends list: ", friendsList);
+      return friendsList;
     } catch (error) {
       console.log("error fetching friends:", error);
     }
   };
 
-  const handleGetEntries = async () => {
-    console.log("friends list being sent: ", friends);
+  const fetchEntries = async (friends) => {
+    // console.log("friends list being sent: ", friends);
     try {
       const csrfToken = await getCsrfToken();
       const response = await axios.get(`${API_URL}/get_todays_checkin_info/`, {
@@ -98,18 +178,18 @@ const FriendFeed = () => {
           username: friends,
         },
       });
-      setPosts(response.data);
-      setContentLoading(false);
+      // setPosts(response.data);
+      // setContentLoading(false);
       return response.data;
     } catch (error) {
       console.log("Error retrieving friends check in entries:", error);
-      setContentLoading(false);
+      // setContentLoading(false);
       throw new Error("Check in entries failed");
     }
   };
 
   const handleGetVideo = async (checkin_id) => {
-    console.log('getting video for check num:', checkin_id);
+    console.log("getting video for check num:", checkin_id);
     try {
       const csrfToken = await getCsrfToken();
       const response = await axios.get(`${API_URL}/get_video_info/`, {
@@ -119,7 +199,7 @@ const FriendFeed = () => {
       });
       setVideo(response.data);
       // console.log(response.data);
-      console.log("got video success");
+      console.log("got video success:", response.data.slice(-10));
       return response.data;
     } catch (error) {
       console.log("Error retrieving video:", error);
@@ -127,7 +207,7 @@ const FriendFeed = () => {
     }
   };
 
-  const handleGetProfilePic = async () => {
+  const fetchProfilePics = async (friends) => {
     console.log("getting profile pics for ", friends);
     try {
       const csrfToken = await getCsrfToken();
@@ -136,9 +216,22 @@ const FriendFeed = () => {
           username_list: friends,
         },
       });
-      setProfilePics(response.data);
-      console.log("got profile pic success!", response.data);
-      return response.data;
+      // setProfilePics(response.data);
+      console.log("got profile pic success!");
+      const map = {};
+      response.data.forEach((pic) => {
+        map[pic.username] = pic.profile_picture;
+      });
+      // console.log("profile map", map["admin"].slice(100, 200));
+      // setProfilePicMap(map);
+
+      // const updatedPosts = posts.map((post) => ({
+      //   ...post,
+      //   profilepic: map[post.username] || "default_pic_base64", // assuming 'default_pic_base64' is your default profile pic in base64
+      // }));
+      // console.log('testing post profilepic',updatedPosts[0].profilepic.slice(1,100))
+      // setPosts(updatedPosts); // update posts with profile pics
+      return map;
     } catch (error) {
       console.log("Error retrieving profile pics:", error);
       throw new Error("profile pic retreival failed");
@@ -157,10 +250,10 @@ const FriendFeed = () => {
 
   const flatListRef = useRef(null);
 
-  const UserListItem = ({ user }) => (
+  const UserListItem = ({ user, profilepic }) => (
     <View style={styles.userItem}>
       <Image
-        source={require("../../assets/images/notebookPen.png")}
+        source={{ uri: `data:Image/mp4;base64,${profilepic}` }}
         style={styles.avatar}
       />
       <Text
@@ -186,7 +279,7 @@ const FriendFeed = () => {
           <View style={styles.postHeaderBar}>
             {/* note profile picture would replace logo image below */}
             <Image
-              source={require("../../assets/images/notebookPen.png")}
+              source={{ uri: `data:Image/mp4;base64,${post.profilepic}` }}
               style={styles.postAvatar}
             />
             <Text style={styles.postUsername}>{post.username}</Text>
@@ -203,11 +296,26 @@ const FriendFeed = () => {
             </View>
           )}
           {post.content_type === "video" && (
-            <View style={styles.videoContainer}>
-              <ImageViewer
-                source={`data:Image/mp4;base64,${post?.content}`}
-                style={styles.JournalEntryModalImage}
-              />
+            <View style={[styles.JournalEntryModalImage, { marginBottom: 20 }]}>
+              <TouchableOpacity
+                onPress={() => {
+                  handleGetVideo(post.checkin_id);
+                }}
+              >
+                <ImageViewer
+                  source={`data:Image/mp4;base64,${post?.content}`}
+                  style={styles.JournalEntryModalImage}
+                />
+                <Text>load video</Text>
+              </TouchableOpacity>
+              {video && (
+                <View>
+                  <VideoViewer
+                    source={`data:video/quicktime;base64,${video}`}
+                  />
+                  <Text>{typeof post.checkin_id}</Text>
+                </View>
+              )}
             </View>
           )}
           {post.content_type === "recording" && (
@@ -226,38 +334,68 @@ const FriendFeed = () => {
           onClose={closeModal}
         />
       </View>
-    );};
+    );
+  };
+
+  // if (isLoading) {
+  //   return <LoadingScreen styleProp={styles.loadingStyle}/>;
+  // }
 
   return (
     <View style={styles.container}>
+      {isLoading && contentLoading ? (
+        // <ActivityIndicator style={{ height: 100, width: 100 }} />
+        <LoadingScreen styleProp={styles.loadingStyle} />
+      ) 
+      :
+      (
+      <View>
       <View style={styles.userList}>
-        <ScrollView horizontal>
+        <Animated.ScrollView
+          horizontal
+          style={[
+            styles.scrollView,
+            {
+              transform: [{ translateX: slideAnimScrollView }],
+            },
+          ]}
+        >
           <View style={styles.userContainer}>
             {friends.map((user) => (
-              <UserListItem key={user.id} user={user} />
+              <UserListItem
+                key={user.id}
+                user={user}
+                profilepic={profilePicMap[user]}
+              />
             ))}
           </View>
-        </ScrollView>
+        </Animated.ScrollView>
       </View>
-      {contentLoading ? <ActivityIndicator style={{height: 100, width: 100}}/> : null}
-
-      <FlatList
+      <Animated.FlatList
         data={posts}
         ref={flatListRef}
         contentContainerStyle={styles.postListContainer}
-        keyExtractor={(post) => post.checkin_id}
+        keyExtractor={(post) => toString(post.checkin_id + " ")}
         renderItem={({ item }) => <PostCard post={item} />}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }/>
-      {/* <Button onPress={getFriends} title={"get friends"}>
-        Get friends
-      </Button> */}
+        }
+        style={{
+          transform: [{ translateY: slideAnimFlatList }],
+        }}
+      />
+    </View>
+    )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  loadingStyle: {
+    width: 20,
+    height: 20,
+    alignSelf: "center",
+  },
   container: {
     // paddingTop: 60,
     paddingBottom: 100,
@@ -353,6 +491,7 @@ const styles = StyleSheet.create({
     width: 100,
     aspectRatio: 1,
     borderRadius: 5,
+    borderWidth: 2,
   },
 });
 

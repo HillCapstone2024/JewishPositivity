@@ -41,7 +41,7 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
   const [mediaBox, setMediaBox] = useState(false);
   const [mediaType, setMediaType] = useState("text");
   const [base64Data, setBase64Data] = useState("");
-  const [journalText, setJournalText] = useState("");
+  const [journalText, setJournalText] = useState(null);
   const [headerText, setHeaderText] = useState("");
   const [showMediaBar, setShowMediaBar] = useState(true);
   const [mediaChanged, setMediaChanged] = useState(false);
@@ -221,7 +221,7 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
 
   const handleTextComplete = (text) => {
     setJournalText(text);
-    console.log(text);
+    // console.log(text);
     if (mediaUri === null) {
       setDisableSubmit(text.trim().length === 0);
     }
@@ -421,7 +421,7 @@ const ProgressBar = ({ onMediaChange }) => {
 
   useEffect(() => {
     progress.setValue(0); // Reset progress to 0 without needing to re-create the Animated.Value
-    console.log(parentWidth);
+    // console.log(parentWidth);
     if (parentWidth > 0) {
       Animated.timing(progress, {
         toValue: parentWidth,

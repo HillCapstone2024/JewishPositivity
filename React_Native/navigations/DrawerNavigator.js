@@ -60,6 +60,15 @@ const CustomDrawerContent = (props) => {
     getUserInfo();
   }, []);
 
+  // useFocusEffect(() => {
+  //   const getUser = async () => {
+  //     getUserInfo;
+  //   };
+  //   getUser();
+  //   getUserInfo();
+  // }
+  // );
+
   const getCsrfToken = async () => {
     try {
       const response = await axios.get(`${API_URL}/csrf-token/`);
@@ -74,10 +83,11 @@ const CustomDrawerContent = (props) => {
     try {
       const csrfToken = await getCsrfToken();
       const storedUsername = await Storage.getItem("@username");
+      console.log('stored username: ', storedUsername)
       setUsername(storedUsername || "No username");
       const response = await axios.get(`${API_URL}/get_user_info/`, {
         params: {
-          username: username,
+          username: storedUsername,
         },
         headers: {
           "X-CSRFToken": csrfToken,
@@ -157,16 +167,16 @@ const CustomDrawerContent = (props) => {
 
 const MyDrawer = ({ navigation }) => {
   //work in progress
-  useFocusEffect(
-    React.useCallback(() => {
-      const unsubscribe = navigation.addListener("drawerOpen", () => {
-        // Dismiss the keyboard when the drawer is opened
-        Keyboard.dismiss();
-      });
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     const unsubscribe = navigation.addListener("drawerOpen", () => {
+  //       // Dismiss the keyboard when the drawer is opened
+  //       Keyboard.dismiss();
+  //     });
 
-      return unsubscribe;
-    }, [navigation])
-  );
+  //     return unsubscribe;
+  //   }, [navigation])
+  // );
   return (
     <Drawer.Navigator initialRouteName="BottomTabNavigator"
       screenOptions={{
