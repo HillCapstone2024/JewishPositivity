@@ -45,8 +45,8 @@ class Checkin(models.Model): #to store checkin moments data
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_column='id')  #referencing id of user model 
     date = models.DateTimeField() 
     moment_number = models.IntegerField() #should be 1,2, or 3
-    content_type = models.CharField(max_length=100) #either of following option: photo, audio, video
-    text_entry= models.CharField(null=True, max_length=255) 
+    content_type = models.CharField(max_length=100, null=True) #either of following option: photo, audio, video
+    text_entry= models.TextField(null=True) 
     content = models.BinaryField(null=True) #actual content
     header = models.CharField(null=True, max_length=100) #header for the content
 

@@ -34,7 +34,8 @@ import * as Storage from "../../AsyncStorage.js";
 import IP_ADDRESS from "../../ip.js";
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
-export default function EditCheckIn({ editModalVisible, setEditModalVisible, selectedEntry, handleUpdateClose }) {
+export default function EditCheckIn({ editModalVisible, setEditModalVisible, selectedEntry, modalVisible, closeModal }) {
+  const [checkin_id, setCheckin_id] = useState("");
   const [username, setUsername] = useState("");
   const [momentType, setMomentType] = useState(3);
   const [mediaUri, setMediaUri] = useState(null);
@@ -78,44 +79,31 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
   }, []);
 
   useEffect(() => {
+    setCheckin_id(selectedEntry.checkin_id);
+
+    //sets media uri 
+    if(selectedEntry?.content_type === "image")
+    {
+      setMediaUri(`data:image/jpeg;base64,${selectedEntry?.content}`);
+      console.log("set mediaUri to passed in image");
+    }
+    if(selectedEntry?.content_type === "video")
+    {
+      setMediaUri(`data:video/mp4;base64,${selectedEntry?.content}`);
+      console.log("set mediaUri to passed in video");
+    }
+    if(selectedEntry?.content_type === "recording")
+    {
+      setMediaUri(`data:audio/mp3;base64,${selectedEntry?.content}`);
+      console.log("set mediaUri to passed in audio");
+    }
+  }, []);
+
+  useEffect(() => {
     if (selectedEntry.content_type && selectedEntry.content_type !== "text") {
         setMediaBox(true);
     }
     }, [selectedEntry.content_type]);
-
-  // async function configureAudioMode() {
-  //   try {
-  //     await Audio.setAudioModeAsync({
-  //       allowsRecordingIOS: false,
-  //       interruptionModeIOS: 1,
-  //       playsInSilentModeIOS: true,
-  //       interruptionModeAndroid: 1,
-  //       shouldDuckAndroid: true,
-  //       staysActiveInBackground: true,
-  //       playThroughEarpieceAndroid: false,
-  //     });
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // }
-
-  // async function playSound() {
-  //   console.log("Loading Sound");
-  //   const { sound } = await Audio.Sound.createAsync({ uri: mediaUri });
-  //   setSound(sound);
-
-  //   console.log("Playing Sound");
-  //   await sound.playAsync();
-  // }
-
-  // useEffect(() => {
-  //   return sound
-  //     ? () => {
-  //         console.log("Unloading Sound");
-  //         sound.unloadAsync();
-  //       }
-  //     : undefined;
-  // }, [sound]);
 
   async function readFileAsBase64(uri) {
     try {
@@ -144,6 +132,7 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
   };
 
   const updateJournal = async () => {
+    console.log("updating journal entry");
     let base64JournalText = "";
     if (mediaType === "text") {
       base64JournalText = textToBase64(journalText);
@@ -153,15 +142,14 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
     try {
       const csrfToken = await getCsrfToken();
       const response = await axios.post(
-        `${API_URL}/check-in/`,
+        `${API_URL}/update_checkin_info/`,
         {
           username: username,
-          moment_number: momentType,
+          checkin_id: checkin_id,
           content: base64Data,
           header: headerText,
           content_type: mediaType,
           text_entry: journalText,
-          date: formattedDateTime,
         },
         {
           headers: {
@@ -172,15 +160,13 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
         }
       );
       console.log("check in response:", response.data);
-      //on successful update close the page
-      if (handleUpdateClose) {
-        handleUpdateClose(true);
-      }
+      // Check for successful update and close modal
+      setEditModalVisible(false);
     } catch (error) {
       console.log(error);
       console.error("Journal Error:", error.response.data);
     }
-  };
+  };  
 
   const deleteMedia = () => {
     setMediaUri(null);
@@ -220,6 +206,7 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
   const handleHeaderComplete = (text) => {
     setHeaderText(text);
     console.log(text);
+    setDisableUpdate(text.trim().length === 0);
   };
 
   const handleTextComplete = (text) => {
@@ -231,17 +218,6 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
   const handleToggle = (toggle) => {
     console.log("journal side:", toggle);
     setShowMediaBar(!toggle);
-  };
-
-  const handleOptionChange = (itemValue) => {
-    setSelectedOption(itemValue);
-    if (itemValue === "Modeh Ani") {
-      setMomentType(1);
-    } else if (itemValue === "Ashrei") {
-      setMomentType(2);
-    } else if (itemValue === "Shema") {
-      setMomentType(3);
-    }
   };
 
   const mediaBoxAnim = useRef(new Animated.Value(0)).current;
@@ -311,7 +287,7 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={[styles.container]}
             >
-            <ScrollView style={styles.contentContainer}>
+              <ScrollView style={styles.contentContainer}>
                 <Text style={styles.header}>Update CheckIn Moment!</Text>
                 <Text style={[styles.datetime, theme["color"]]}>
                 {formattedDateTime}{" "}
@@ -321,43 +297,45 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
                 {mediaBox ? (
                 <View style={styles.mediaContainer}>
                     {mediaType === "image" ? (
-                        <ImageViewer
-                            source={mediaUri}
-                            onDelete={deleteMedia}
-                            dimensions={{ height: 60, width: 60 }}
-                        />
-                    ) : selectedEntry.content_type === "image" ? (
-                        <Image
-                            style={[styles.JournalEntryModalImage,]}
-                            source={{uri: `data:image/jpeg;base64,${selectedEntry?.content}`,}}
-                            dimensions={{ height: 60, width: 60 }}
-                        />
+                      <ImageViewer
+                          source={mediaUri}
+                          onDelete={deleteMedia}
+                          dimensions={{ height: 60, width: 60 }}
+                          onMediaChange={mediaChanged}
+                      />
                     ) : mediaType === "video" ? (
-                        <VideoViewer
-                            mediaUri={mediaUri}
-                            onDelete={deleteMedia}
-                            dimensions={{ height: 60, width: 60 }}
-                        />
-                    ) : selectedEntry.content_type === "video" ? (
-                        <VideoViewer
-                            source={{uri: `data:video/mp4;base64,${selectedEntry?.content}`,}}
-                            onDelete={deleteMedia}
-                            dimensions={{ height: 60, width: 60 }}
-                        />
-                    ) 
-                    : mediaType === "audio" ? (
-                        <VideoViewer
-                            mediaUri={mediaUri}
-                            onDelete={deleteMedia}
-                            dimensions={{ height: 60, width: 60 }}
-                        />
+                      <VideoViewer
+                        mediaUri={mediaUri}
+                        onDelete={deleteMedia}
+                        dimensions={{ height: 60, width: 60 }}
+                      />
+                    ) : mediaType === "recording" ? (
+                      <RecordingViewer
+                        uri={mediaUri}
+                        onDelete={deleteMedia}
+                        dimensions={{ height: 60, width: 60 }}
+                      />
+                    ) : selectedEntry?.content_type === "image" ? (
+                      <ImageViewer
+                        source={mediaUri}
+                        style={[styles.JournalEntryModalImage,]}
+                        onDelete={deleteMedia}
+                        // dimensions={{ height: 60, width: 60 }}
+                        onMediaChange={mediaChanged}
+                      />
+                    ) : selectedEntry?.content_type === "video" ? (
+                      <VideoViewer
+                        source={mediaUri}
+                        onDelete={deleteMedia}
+                        dimensions={{ height: 60, width: 60 }}
+                      />
                     ) : (
-                        <RecordingViewer
-                            uri={mediaUri}
-                            onDelete={deleteMedia}
-                            dimensions={{ height: 60, width: 60 }}
-                        />
-                    )}
+                      <RecordingViewer
+                        source={mediaUri}
+                        onDelete={deleteMedia}
+                        style={{ height: 60, width: 60, borderRadius: 5 }}
+                      />
+                    ) }
                     <ProgressBar onMediaChange={mediaChanged} />
                 </View>
                 ) : null}
@@ -400,9 +378,8 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
                         </TextInput>
                     </ScrollView>
                 </View>
-            </ScrollView>
-        </KeyboardAvoidingView>
-        {/* <ScrollView keyboardDismissMode="interactive"> */}
+              </ScrollView>
+            </KeyboardAvoidingView>
 
         {/* Keyboard bar view below */}
         {showMediaBar ? (

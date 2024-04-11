@@ -37,10 +37,17 @@ const Signup = ({ navigation }) => {
 
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
+
   const saveUsername = async () => {
     await Storage.setItem("@username", username);
-    console.log("successfully saved username: ", username);
+    await Storage.setItem("@first_name", firstname);
+    await Storage.setItem("@last_name", lastname);
+    await Storage.setItem("@email", email);
+    await Storage.setItem("@password", password);
+    //await Storage.setItem("@profilePicture", profilePicture);
+    console.log("Saved user information");
   };
+
 
   const navigateLogin = () => {
     navigation.navigate("Login");

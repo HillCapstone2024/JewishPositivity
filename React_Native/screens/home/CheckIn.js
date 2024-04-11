@@ -36,7 +36,7 @@ const API_URL = "http://" + IP_ADDRESS + ":8000";
 
 export default function JournalEntry({ handleCancel, handleSubmitClose }) {
   const [username, setUsername] = useState("");
-  const [momentType, setMomentType] = useState(3);
+  const [momentType, setMomentType] = useState(1);
   const [mediaUri, setMediaUri] = useState(null);
   const [mediaBox, setMediaBox] = useState(false);
   const [mediaType, setMediaType] = useState("text");
@@ -221,7 +221,7 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
 
   const handleTextComplete = (text) => {
     setJournalText(text);
-    console.log(text);
+    // console.log(text);
     if (mediaUri === null) {
       setDisableSubmit(text.trim().length === 0);
     }
@@ -362,11 +362,11 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
               <RNPickerSelect
                 style={pickerSelectStyles}
                 value={selectedOption}
-                placeholder={{ label: "Select Type Here..." }}
+                placeholder={{ label: "Modeh Ani", value: "Modeh Ani" }}
                 placeholderTextColor="black"
                 onValueChange={handleOptionChange}
                 items={[
-                  { label: "Modeh Ani", value: "Modeh Ani" },
+                  // { label: "Modeh Ani", value: "Modeh Ani" },
                   { label: "Ashrei", value: "Ashrei" },
                   { label: "Shema", value: "Shema" },
                 ]}
@@ -394,7 +394,6 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-      {/* <ScrollView keyboardDismissMode="interactive"> */}
 
       {/* Keyboard bar view below */}
       {showMediaBar ? (
@@ -422,7 +421,7 @@ const ProgressBar = ({ onMediaChange }) => {
 
   useEffect(() => {
     progress.setValue(0); // Reset progress to 0 without needing to re-create the Animated.Value
-    console.log(parentWidth);
+    // console.log(parentWidth);
     if (parentWidth > 0) {
       Animated.timing(progress, {
         toValue: parentWidth,

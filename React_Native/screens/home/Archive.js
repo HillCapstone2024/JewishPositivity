@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { View, Text, ActivityIndicator, TouchableOpacity, StyleSheet, ScrollView, Button, Image, Dimensions, Modal, Pressable, TouchableWithoutFeedback } from 'react-native';
 import makeThemeStyle from '../../tools/Theme.js';
 import * as Storage from "../../AsyncStorage.js";
@@ -10,14 +10,20 @@ import { Buffer } from "buffer";
 import { SearchBar } from 'react-native-elements';
 import { Ionicons } from "@expo/vector-icons";
 import moment from 'moment';
+import * as FileSystem from "expo-file-system";
 
 import EditCheckIn from "./EditCheckIn.js";
+import VideoViewer from "../../tools/VideoViewer.js";
+import ImageViewer from "../../tools/ImageViewer.js";
+import RecordingViewer from "../../tools/RecordingViewer.js";
 
-export default function Archive({ navigaton }) {
+export default function Archive({ navigation }) {
   const [username, setUsername] = useState("");
+  const [checkin_id, setCheckin_id] = useState("");
   const [entries, setEntries] = useState([]);
   const [message, setMessage] = useState(<ActivityIndicator />);
   const [groupedEntries, setGroupedEntries] = useState({});
+  const [video, setVideo] = useState({});
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -26,6 +32,7 @@ export default function Archive({ navigaton }) {
   const [sortBy, setSortBy] = useState("Sort by Newest to Oldest");
   const [deleteModalVisible, setEditDeleteModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
+  const videoRefs = useRef({});
 
   theme = makeThemeStyle();
 
@@ -48,22 +55,42 @@ export default function Archive({ navigaton }) {
     }
   };
 
-  const decodeBase64ToText = (base64String) => {
+  const saveBase64Video = async (base64String, checkin_id) => {
+    console.log("reached file function");
+    const filename = FileSystem.documentDirectory + checkin_id + "downloadedVideo.mp4";
+    await FileSystem.writeAsStringAsync(filename, base64String, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    return filename; // This is a URI that can be used in the app
+  };
+
+  const handleGetVideo = async (checkin_id) => {
+    console.log("getting video for check num:", checkin_id);
     try {
-      if (!base64String) {
-        // throw new Error('Base64 string is null or undefined');
-      }
-  
-      // Convert the Base64 string to a Buffer
-      const buffer = Buffer.from(base64String, 'base64');
-      // Convert the Buffer to a UTF-8 string
-      const text = buffer.toString('utf-8');
-      return text;
+      const csrfToken = await getCsrfToken();
+      const response = await axios.get(`${API_URL}/get_video_info/`, {
+        params: {
+          checkin_id: checkin_id,
+        },
+      });
+      // console.log(response.data);
+      const videoUri = await saveBase64Video(response.data, checkin_id);
+      console.log("got video success:", videoUri);
+
+      setVideo((prevVideos) => ({
+        ...prevVideos,
+        [checkin_id]: videoUri,
+      }));
+      // setVideo(videoUri);
+      // videoUriRef.current = videoUri;
+      videoRefs.current[checkin_id] = videoUri;
+      console.log(videoRefs.current);
+      return response.data;
     } catch (error) {
-      // console.error('Error decoding base64 string:', error);
-      return 'Error decoding content';
+      console.log("Error retrieving video:", error);
+      throw new Error("video retreival failed");
     }
-  };  
+  };
 
   const toggleFilterModal = () => {
     setIsFilterModalVisible(!isFilterModalVisible);
@@ -116,6 +143,47 @@ export default function Archive({ navigaton }) {
     setEditModalVisible(true);
   }
 
+  const onDelete = async() => {
+    console.log("Deleting Journal Entry:", checkin_id);
+    const getCsrfToken = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/csrf-token/`);
+        return response.data.csrfToken;
+      } catch (error) {
+        console.error("Error retrieving CSRF token:", error);
+        throw new Error("CSRF token retrieval failed");
+      }
+    };
+    try {
+      const csrfToken = await getCsrfToken();
+      const response = await axios.post(
+        `${API_URL}/delete_checkin/`,
+        {
+          username: username,
+          checkin_id: checkin_id,
+        },
+        {
+          headers: {
+            "X-CSRFToken": csrfToken,
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+      console.log("Delete response:", response.data);
+      // await Storage.removeItem("@username");
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Archive" }],
+      });
+      navigation.navigate("Archive");
+    } catch (error) {
+      if (error.response.data) {
+        console.error("Error Deleting Journal Entry:", error.response.data);
+      }
+    }
+  }
+
   const getDividerColor = (moment_number) => {
     switch (moment_number) {
       case 1: //Modeh Ani
@@ -130,23 +198,24 @@ export default function Archive({ navigaton }) {
   };
 
   handleGetEntries = async () => {
+    console.log("Fetching Journal Entries");
     try {
       const csrfToken = await getCsrfToken();
-      const response = await axios.get(`${API_URL}/get_checkin_info/`,
-      {
+      const response = await axios.get(`${API_URL}/get_checkin_info/`, {
         params: {
           username: username
         }
       });
-
+  
       if (response.data && response.data.length > 3 && response.data[3].content_type) {
         console.log('RESPONSE:', response.data[3].content_type);
       } else {
         console.error("Unexpected response format:", response.data);
       }
-      console.log('number of entries: ',response.data.length)
-      
+      console.log('number of entries: ', response.data.length)
+  
       // Group entries by year/month
+      console.log("Grouping the entries by year")
       const groupedEntries = {};
       response.data.forEach(entry => {
         const yearMonth = moment(entry.date).format('YYYY-MM');
@@ -155,19 +224,20 @@ export default function Archive({ navigaton }) {
         }
         groupedEntries[yearMonth].push(entry);
       });
-
-      // Set grouped entries state
+  
+      // Set grouped entries state along with their corresponding videos
       setGroupedEntries(groupedEntries);
-      // setEntries(response.data);
-
+  
+      console.log("Returning Journal Entry Data")
       return response.data;
     } catch (error) {
       console.error("Error retrieving check in entries:", error);
       throw new Error("Check in entries failed");
     }
-  };
+  };  
+  
 
-  const renderDateTimeSection = (date) => (
+  const renderDateTimeSection = (date, time) => (
     <View style={styles.datetimeContainer}>
       <Text style={[styles.text, styles.dayOfWeekText]}>
         {moment(date, 'YYYY-MM-DD').format('ddd')}
@@ -176,7 +246,7 @@ export default function Archive({ navigaton }) {
         {moment(date, 'YYYY-MM-DD').format('D')}
       </Text>
       <Text style={styles.text}>
-        {moment(date, 'YYYY-MM-DD').format('h:mm A')}
+        {moment(time, 'HH-mm').format('h:mm A')}
       </Text>
     </View>
   );
@@ -196,13 +266,13 @@ export default function Archive({ navigaton }) {
 
   const renderContent = (data) => {
     const dividerColor = getDividerColor(data.moment_number);
-  
+
     return (
       <View style={styles.contentContainer}>
         <View style={{ flexDirection: 'row' }}>
-          {renderDateTimeSection(data.date)}
+          {renderDateTimeSection(data.date, data.time)}
           <View style={[styles.divider, { backgroundColor: dividerColor }]} />
-          <View style={[styles.contentSection, data.content_type !== "image" && { flex: 3.05 }]}>
+          <View style={[styles.contentSection, data.content_type === "text" && { flex: 3.05 }]}>
             <View style={styles.middleContent}>
               <Text style={styles.middleContentHeader} numberOfLines={1} ellipsizeMode="tail">{data.header !== null ? data.header : "Header Would Go Here"}</Text>
               <Text style={styles.middleContentMoment_Number}>{getMomentText(data.moment_number)}</Text>
@@ -217,26 +287,37 @@ export default function Archive({ navigaton }) {
               />
             </View>
           )}
-          {data.content_type === "video" && (
-            <View style={styles.videoContainer}>
-              <Video
-                style={styles.video}
-                source={{ uri: `data:video/mp4;base64,${data.content}` }}
-                useNativeControls
-                resizeMode="contain"
-              />
+          {(data.content_type === "video") && (
+            <View style={styles.video}>
+              <View style={styles.videoContainer}>
+                {video[data.checkin_id] ? (
+                  <VideoViewer
+                    source={video[data.checkin_id]}
+                    style={{ height: "100%", aspectRatio: 1, borderRadius: 5 }}
+                  />
+                ) : (
+                  <TouchableOpacity
+                    onPress={() => {
+                      handleGetVideo(data.checkin_id);
+                    }}
+                  >
+                    <Image
+                      source={{ uri: `data:Image/mp4;base64,${data?.content}` }}
+                      style={styles.JournalEntryModalImage}
+                    />
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
           )}
           {data.content_type === "recording" && (
             <View style={styles.audioContainer}>
-              <Text style={styles.text}>Recording</Text>
+              <RecordingViewer
+                style={styles.audio}
+                source={`data:audio/mp3;base64,${data.content}`}               
+              />
             </View>
           )}
-          {/* {!["image", "video", "recording"].includes(data.content_type) && (
-            <View style={styles.unsupportedContainer}>
-              <Text style={styles.text}>Unsupported content type</Text>
-            </View>
-          )} */}
         </View>
       </View>
     );
@@ -376,7 +457,9 @@ export default function Archive({ navigaton }) {
                                 <View style={styles.horizontalBar} />
                                 {/* Delete button */}
                                 <TouchableOpacity onPress={() => {
-                                  // onDelete();
+                                  setCheckin_id(selectedEntry?.checkin_id);
+                                  console.log(checkin_id);
+                                  onDelete();
                                   // setEditDeleteModalVisible(false);
                                 }}>
                                   <Text style={styles.deleteText}>Delete</Text>
@@ -433,15 +516,31 @@ export default function Archive({ navigaton }) {
                           />
                         )}
                         {selectedEntry?.content_type === "video" && (
-                          <Video
-                            style={styles.video}
-                            source={{uri: `data:video/mp4;base64,${selectedEntry?.content}`,}}
-                            useNativeControls
-                            resizeMode="contain"
-                          />
+                          <View style={styles.JournalEntryModalVideo}>
+                            {video[selectedEntry.checkin_id] ? (
+                              <VideoViewer
+                                source={video[selectedEntry.checkin_id]}
+                                style={styles.JournalEntryModalVideo}
+                              />
+                            ) : (
+                              <TouchableOpacity
+                                onPress={() => {
+                                  handleGetVideo(selectedEntry.checkin_id);
+                                }}
+                              >
+                                <Image
+                                  source={{ uri: `data:Image/mp4;base64,${selectedEntry?.content}` }}
+                                  style={styles.JournalEntryModalImage}
+                                />
+                              </TouchableOpacity>
+                            )}
+                          </View>
                         )}
                         {selectedEntry?.content_type === "recording" && (
-                          <Text style={styles.text}>Recording</Text>
+                          <RecordingViewer
+                            source={`data:audio/mp3;base64,${selectedEntry?.content}`}
+                            style={{ height: 60, width: 60, borderRadius: 5 }}
+                          />
                         )}
                         <Text style={[styles.detailText, { marginBottom: 20 }]}>
                           {selectedEntry?.text_entry !== null ? selectedEntry?.text_entry: "  This is some long content text that will be truncated if it takes up too much space in the container."}
@@ -511,6 +610,11 @@ const styles = StyleSheet.create({
   video: {
     height: "100%",
     aspectRatio: 1,
+    borderRadius: 5,
+  },
+  audio: {
+    height: 90,
+    width: 90,
     borderRadius: 5,
   },
   text: {
@@ -632,6 +736,11 @@ const styles = StyleSheet.create({
     color: "#4A90E2",
   },
   JournalEntryModalImage: {
+    width: "100%",
+    aspectRatio: 1,
+    borderRadius: 5,
+  },
+  JournalEntryModalVideo: {
     width: "100%",
     aspectRatio: 1,
     borderRadius: 5,
