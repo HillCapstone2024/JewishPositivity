@@ -70,15 +70,17 @@ export default function Badges({navigaton}) {
             withCredentials: true,
           });
           console.log('successful response:', badgeResponse.data);
+          console.log('successful response:', currentStreakResponse.data);
+          console.log('successful response:', longestStreakResponse.data);
           setIsDayBadgeUnlocked(badgeResponse.data.one_day)
           setIsWeekBadgeUnlocked(badgeResponse.data.one_week)
           setIsMonthBadgeUnlocked(badgeResponse.data.one_month)
           setIsYearBadgeUnlocked(badgeResponse.data.one_year)
-          setCurrentStreak(currentStreakResponse.data.current_streak);
-          setLongestStreak(longestStreakResponse.data.longest_streak);
+          setCurrentStreak(currentStreakResponse.data);
+          setLongestStreak(longestStreakResponse.data);
 
         } catch (error) {
-          console.log('Error getting the  info from database: ', error);
+          console.log('Error getting the info from database: ', error);
         }
       };
 
@@ -163,7 +165,7 @@ export default function Badges({navigaton}) {
                         <View style={styles.centeredView}>
                             <View style={styles.modalView}>
                                 <Text>Your Current Streak is:</Text>
-                               <Text>{currentStreak}</Text>
+                               <Text style={styles.mainHeader}>{currentStreak} Days</Text>
 
                                 <Pressable
                                     style={[styles.buttonClose]}
@@ -189,7 +191,7 @@ export default function Badges({navigaton}) {
                         <View style={styles.centeredView}>
                             <View style={styles.modalView}>
                                 <Text>Your Longest Streak is:</Text>
-                               <Text>{longestStreak}</Text>
+                               <Text style={styles.mainHeader}>{longestStreak} Days</Text>
 
                                 <Pressable
                                     style={[styles.buttonClose]}
