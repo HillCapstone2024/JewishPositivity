@@ -117,6 +117,16 @@ const UserProfile = ({ navigation, onSwitch }) => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={[styles.container, theme["background"]]}
     >
+     <View style={styles.topBar}>
+        <View style={styles.buttonContainer}>
+        <TouchableOpacity
+            style={styles.submitButton}
+            onPress={navigateEdit}
+        >
+          <Text style={styles.submitText}>Edit Profile</Text>
+          </TouchableOpacity>
+        </View>
+  </View> 
     <View style={styles.profilePicContainer}>
     {userInfo.profilePicture && userInfo.profilePicture.trim != "" ? (
       <Image 
@@ -134,9 +144,9 @@ const UserProfile = ({ navigation, onSwitch }) => {
         {<Text style={[styles.info, theme["color"]]}>{userInfo.username}</Text>}
         {<Text style={styles.attribute} >Email:</Text>}
         {<Text style={[styles.info, theme["color"]]}>{userInfo.email} </Text>}
-        <TouchableOpacity style={styles.button} onPress={navigateEdit}>
+        {/* <TouchableOpacity style={styles.button} onPress={navigateEdit}>
               <Text style={styles.buttonText}>Edit Profile</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
     </View>
   );
 };
@@ -199,6 +209,32 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     backgroundColor: "#4A90E2", 
+  },
+  topBar: {
+    flexDirection: "row",
+    marginTop: 5,
+    //marginRight: 15,
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: 'flex-end',
+    flex: 1,
+  },
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    fontSize: 19,
+  },
+  submitButton: {
+    marginRight: 20,
+    justifyContent: 'flex-end',
+  },
+  submitText: {
+    color: "#4A90E2",
+    fontSize: 19,
   },
 });
 

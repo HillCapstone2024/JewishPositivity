@@ -115,8 +115,9 @@ const EditProfile = ({navigation, onSwitch}) => {
         }
       );
       console.log("update profile response:", response.data);
-      saveUsername();
       navigateProfileView();
+      saveUsername();
+      
     } catch (error) {
       console.log(error)
       setErrorMessage(
@@ -247,8 +248,8 @@ const takeMedia = async () => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={[styles.container, theme["background"]]}
     >
-  {/* <View style={styles.topBar}>
-        <View style={styles.buttonContainer}>
+   <View style={styles.topBar}>
+        <View style={{ flexDirection: "row", width:"80%" }}>
           <TouchableOpacity onPress={navigateProfileView}>
             <View style={styles.buttonContent}>
               <Ionicons name="caret-back" size={25} color="#4A90E2" />
@@ -263,9 +264,7 @@ const takeMedia = async () => {
           <Text style={styles.submitText}>Submit</Text>
           </TouchableOpacity>
         
-  </View> */}
-      {/* <View style={styles.horizontalBar} /> */}
-
+  </View> 
       <TouchableOpacity onPress={handleEditProfilePicture} >
         <View style={styles.profilePicContainer}>
         {userInfo.profilePicture && userInfo.profilePicture.trim() != "" ? (
@@ -321,14 +320,6 @@ const takeMedia = async () => {
                                     }))}
 
         >{userInfo.email}</TextInput>
-        <View style={{ flexDirection: "column", width:"80%" }}>
-        <TouchableOpacity style={styles.button} onPress={handleUpdateUser}>
-              <Text style={styles.buttonText}>Update Profile</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={navigateProfileView}>
-              <Text style={styles.buttonText}>Cancel</Text>
-        </TouchableOpacity>
-
         {/*Password Modal - (move to another file)*/}
         <Modal
         animationType="slide"
@@ -358,6 +349,7 @@ const takeMedia = async () => {
                                         }))}
             ></TextInput>
             </View>
+            
             <View style={{ flexDirection: "row", width:"80%" }}>
               <TouchableOpacity 
                   style={styles.button} 
@@ -371,6 +363,7 @@ const takeMedia = async () => {
                   <Text style={styles.buttonText}>Update</Text>
               </TouchableOpacity>
             </View>
+            
           </View>
         </View>
       </Modal>
@@ -379,7 +372,6 @@ const takeMedia = async () => {
         onPress={() => setPasswordModalVisible(true)}>
         <Text style={styles.buttonText}>Change Password</Text>
       </Pressable> */}
-        </View>
     </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
   );
