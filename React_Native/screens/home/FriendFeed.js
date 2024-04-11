@@ -28,12 +28,14 @@ const FriendFeed = () => {
   const [posts, setPosts] = useState([]);
   const [friends, setFriends] = useState([]);
   const [profilePicMap, setProfilePicMap] = useState({});
-  const [video, setVideo] = useState(null);
+  const [video, setVideo] = useState({});
   const [contentLoading, setContentLoading] = useState(true);
   const [refreshing, setRefreshing] = React.useState(false);
   const [showViewCheckIn, setShowViewCheckIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const videoUriRef = useRef(null);
+  const [noFriends, setNoFriends] = useState(false);
+  const [noPosts, setNoPosts] = useState(false);
+  const videoRefs = useRef({});
 
   const slideAnimFlatList = useRef(new Animated.Value(-800)).current; // Initial position for FlatList
   const slideAnimScrollView = useRef(new Animated.Value(-800)).current; // Initial position for ScrollView
@@ -58,19 +60,29 @@ const FriendFeed = () => {
 
       const csrfToken = await getCsrfToken();
       const friendsList = await fetchFriendsList(storedUsername, csrfToken);
-      const entries = await fetchEntries(friendsList, csrfToken);
-      const map = await fetchProfilePics(friendsList, csrfToken);
+      if (friendsList.length > 1) {
+        // console.log('you have friends!');
+        const entries = await fetchEntries(friendsList, csrfToken);
+          if (entries.length > 1) {
+            const map = await fetchProfilePics(friendsList, csrfToken);
 
-      const updatedPosts = entries.map((post) => ({
-        ...post,
-        profilepic: map[post.username] || "default_pic_base64",
-      }));
+            const updatedPosts = entries.map((post) => ({
+              ...post,
+              profilepic: map[post.username] || "default_pic_base64",
+            }));
 
-      //updated all states at once to prevent rerenders and 'flickers'
-      setFriends(friendsList);
-      setProfilePicMap(map);
-      setPosts(updatedPosts);
-      setVideo(null);
+            //updated all states at once to prevent rerenders and 'flickers'
+            setFriends(friendsList);
+            setProfilePicMap(map);
+            setPosts(updatedPosts);
+            // setVideo(null);
+        } else {
+          setNoPosts(true);
+        }
+      } else {
+        setNoFriends(true);
+      }
+
 
       setIsLoading(false);
       setContentLoading(false);
@@ -91,13 +103,13 @@ const FriendFeed = () => {
           toValue: 0,
           useNativeDriver: true,
           speed: 1,
-          bounciness: 12,
+          bounciness: 1,
         }),
         Animated.spring(slideAnimFlatList, {
           toValue: 0,
           useNativeDriver: true,
           speed: 1,
-          bounciness: 12,
+          bounciness: 1,
         }),
       ]).start();
     }
@@ -179,8 +191,15 @@ const FriendFeed = () => {
       // console.log(response.data);
       const videoUri = await saveBase64Video(response.data);
       console.log("got video success:", videoUri);
-      setVideo(videoUri);
-      videoUriRef.current = videoUri;
+
+      setVideo((prevVideos) => ({
+        ...prevVideos,
+        [checkin_id]: videoUri,
+      }));
+      // setVideo(videoUri);
+      // videoUriRef.current = videoUri;
+      videoRefs.current[checkin_id] = videoUri;
+      console.log(videoRefs.current);
       return response.data;
     } catch (error) {
       console.log("Error retrieving video:", error);
@@ -290,7 +309,7 @@ const FriendFeed = () => {
               source={{ uri: `data:Image/mp4;base64,${post.profilepic}` }}
               style={styles.postAvatar}
             />
-            <Text style={styles.postUsername}>{post.username}</Text>
+            <Text style={styles.postUsername}>{post.checkin_id}</Text>
             <Text style={styles.postDate}>{post.date}</Text>
           </View>
           <Moment moment_number={post.moment_number} />
@@ -299,6 +318,7 @@ const FriendFeed = () => {
             <View
               style={[styles.JournalEntryModalImage, { marginBottom: 20 }]}
               testID={`image-${post.checkin_id}`}
+              key={`image-${post.checkin_id}`}
             >
               <ImageViewer
                 source={`data:Image/mp4;base64,${post?.content}`}
@@ -310,10 +330,11 @@ const FriendFeed = () => {
             <View
               style={[styles.video, { marginBottom: 20 }]}
               testID={`video-${post.checkin_id}`}
+              key={`video-${post.checkin_id}`}
             >
-              {video ? (
+              {videoRefs.current[post.checkin_id] ? (
                 <VideoViewer
-                  source={video}
+                  source={videoRefs.current[post.checkin_id]}
                   style={{ height: 100, width: 100, borderRadius: 5 }}
                 />
               ) : (
@@ -326,7 +347,6 @@ const FriendFeed = () => {
                     source={{ uri: `data:Image/mp4;base64,${post?.content}` }}
                     style={styles.JournalEntryModalImage}
                   />
-                  {/* <Text>load video</Text> */}
                 </TouchableOpacity>
               )}
             </View>
@@ -336,6 +356,7 @@ const FriendFeed = () => {
             <View
               style={styles.audioContainer}
               testID={`recording-${post.checkin_id}`}
+              key={`recording-${post.checkin_id}`}
             >
               <RecordingViewer
                 source={`data:audio/mp3;base64,${post.content}`}
@@ -345,11 +366,11 @@ const FriendFeed = () => {
           )}
           {post.text_entry && <Text>{truncateText(post.text_entry, 100)}</Text>}
         </TouchableOpacity>
-        <ViewCheckIn
+        {/* <ViewCheckIn
           checkin={post}
           modalVisible={showViewCheckIn}
           onClose={closeModal}
-        />
+        /> */}
       </View>
     );
   };
@@ -362,8 +383,8 @@ const FriendFeed = () => {
     <View style={styles.container}>
       {isLoading && contentLoading ? (
         // <ActivityIndicator style={{ height: 100, width: 100 }} />
-        <View testID="loading-screen">
-          <LoadingScreen styleProp={styles.loadingStyle} />
+        <View testID="loading-screen" style={styles.loadingStyle}>
+          <LoadingScreen />
         </View>
       ) : (
         <View>
@@ -388,12 +409,22 @@ const FriendFeed = () => {
               </View>
             </Animated.ScrollView>
           </View>
+          {noFriends && (
+            <View>
+              <Text style={styles.Message}>Add friends to see their posts!</Text>
+            </View>
+          )}
+          {noPosts && (
+            <View>
+              <Text style={styles.Message}>Be the first to post!</Text>
+            </View>
+          )}
           <Animated.FlatList
             testID={"flat-list"}
             data={posts}
             ref={flatListRef}
             contentContainerStyle={styles.postListContainer}
-            // keyExtractor={(post) => post.checkin_id}
+            keyExtractor={(post) => post.checkin_id.toString()}
             renderItem={({ item }) => <PostCard post={item} />}
             refreshControl={
               <RefreshControl
@@ -414,9 +445,11 @@ const FriendFeed = () => {
 
 const styles = StyleSheet.create({
   loadingStyle: {
-    width: 20,
-    height: 20,
-    alignSelf: "center",
+    // width: 20,
+    // height: 20,
+    // alignContent: "center",
+    marginTop: 200,
+    backgroundColor: "red"
   },
   container: {
     // paddingTop: 60,
@@ -518,6 +551,12 @@ const styles = StyleSheet.create({
   video: {
     flexDirection: "row",
   },
+  Message: {
+    fontSize: 24,
+    textAlign: "center",
+    textAlignVertical: "center",
+    marginTop: 200,
+  }
 });
 
 export default FriendFeed;

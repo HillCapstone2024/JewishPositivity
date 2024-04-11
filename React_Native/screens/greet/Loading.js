@@ -88,7 +88,7 @@ const LoadingScreen = ({ width = 180, height = 204 }) => {
       {/* <SvgXml xml={logos['notebook.svg']} style={styles.book} /> */}
       <Image
         source={require("../../assets/images/notebook.png")}
-        style={[styles.book, {width, height}]}
+        style={[styles.book]}
       />
       <Animated.Image
         style={[
@@ -124,8 +124,8 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: '33%',
         left: '26%',
-        // height: 204,
-        // width: 180,
+        height: 204,
+        width: 180,
     }
 });
 

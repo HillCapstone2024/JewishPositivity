@@ -14,11 +14,27 @@ import {
   TouchableWithoutFeedback,
   RefreshControl,
 } from "react-native";
+import axios from "axios";
+const API_URL = "http://" + IP_ADDRESS + ":8000";
+import IP_ADDRESS from "../../ip.js";
 import { Video, Audio } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
 import moment from "moment";
+import * as FileSystem from "expo-file-system";
 
 export default function ViewCheckIn({ checkin, modalVisible, onClose }) {
+  const [video, setVideo] = useState(null);
+
+
+  const saveBase64Video = async (base64String) => {
+    console.log("reached file function");
+    const filename = FileSystem.documentDirectory + "downloadedVideo.mp4";
+    await FileSystem.writeAsStringAsync(filename, base64String, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    return filename; // This is a URI that can be used in the app
+  };
+
   const getMomentText = (momentNumber) => {
     switch (momentNumber) {
       case 1:
@@ -32,14 +48,44 @@ export default function ViewCheckIn({ checkin, modalVisible, onClose }) {
     }
   };
 
+    const getCsrfToken = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/csrf-token/`);
+        return response.data.csrfToken;
+      } catch (error) {
+        console.error("Error retrieving CSRF token:", error);
+        throw new Error("CSRF token retrieval failed");
+      }
+    };
+
+    const handleGetVideo = async (checkin_id) => {
+      console.log("getting video for check num:", checkin_id);
+      try {
+        const csrfToken = await getCsrfToken();
+        const response = await axios.get(`${API_URL}/get_video_info/`, {
+          params: {
+            checkin_id: checkin_id,
+          },
+        });
+        // console.log(response.data);
+        const videoUri = await saveBase64Video(response.data);
+        console.log("got video success:", videoUri);
+        setVideo(videoUri);
+        return response.data;
+      } catch (error) {
+        console.log("Error retrieving video:", error);
+        throw new Error("video retreival failed");
+      }
+    };
+
   return (
     <View style={styles.modalContainer}>
-        <Modal
+      <Modal
         animationType="slide"
         transparent={true}
         visible={modalVisible}
         onRequestClose={onClose}
-    >
+      >
         <View style={styles.modalContainer}>
           {/* modal to show EditDeleteModal */}
           {/* <EditCheckIn 
@@ -87,12 +133,17 @@ export default function ViewCheckIn({ checkin, modalVisible, onClose }) {
                 />
               )}
               {checkin?.content_type === "video" && (
-                <Video
-                  style={styles.video}
-                  source={{ uri: `data:video/mp4;base64,${checkin?.content}` }}
-                  useNativeControls
-                  resizeMode="contain"
-                />
+                <TouchableOpacity>
+                  <Image
+                    style={[
+                      styles.JournalEntryModalImage,
+                      { marginBottom: 20 },
+                    ]}
+                    source={{
+                      uri: `data:image/jpeg;base64,${checkin?.content}`,
+                    }}
+                  />
+                </TouchableOpacity>
               )}
               {checkin?.content_type === "recording" && (
                 <Text style={styles.text}>Recording</Text>
