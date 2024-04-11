@@ -42,7 +42,6 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', 'jewishpositivity.com', f'
 
 CORS_ORIGIN_WHITELIST = [
     f'http://{os.getenv("IP_ADDRESS")}:8081',
-    'jewishpositivity.com'
 ]
 
 # Application definition
