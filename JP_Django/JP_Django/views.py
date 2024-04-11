@@ -947,6 +947,8 @@ def add_friend_view(request):
         username1 = data.get("user1")
         username2 = data.get("user2")
         logging.info("USERNAME1: %s, USERNAME2: %s", username1, username2)
+        if username1 == username2:
+            return HttpResponse("Can't Add Yourself!", status=400)
 
         try:
             # Check if both users exist

@@ -2035,6 +2035,12 @@ class AddFriendViewTestCase(TestCase): #to test adding friends to user's friend 
         'user2': 'testuser2',
     }
 
+    ADD_FRIEND_DATA_ADDED_YOURSELF = {
+        'user1': 'testuser1',
+        'user2': 'testuser1',
+
+    }
+
     ACCEPT_FRIEND_DATA = {
         'user1': 'testuser2',
         'user2': 'testuser1',
@@ -2073,6 +2079,17 @@ class AddFriendViewTestCase(TestCase): #to test adding friends to user's friend 
 
         # Check if response status code is 400 -- failure
         self.assertEqual(response.status_code, 400)
+
+    def test_add_friend_request_failure_added_yourself(self): # Fails to make a friend request, user2 does not exist
+        logging.info("***************test_add_friend_request_failure_added_yourself**************".upper())
+        client = Client()
+
+        # Send POST request to add_friend_view
+        response = client.post(reverse('add_friend_view'), data=json.dumps(self.ADD_FRIEND_DATA_ADDED_YOURSELF), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 400 -- failure
+        self.assertEqual(response.status_code, 400)
+
 
     def test_accept_friend_request_success(self): # Successfully accepts a friend request
         logging.info("***************test_accept_friend_request_success**************".upper())
