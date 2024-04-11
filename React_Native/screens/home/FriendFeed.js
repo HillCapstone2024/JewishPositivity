@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
   FlatList,
   ActivityIndicator,
   RefreshControl,
-  Animated
+  Animated,
 } from "react-native";
 import { Video } from "expo-av";
 import VideoViewer from "../../tools/VideoViewer.js";
@@ -21,24 +21,34 @@ import * as Storage from "../../AsyncStorage.js";
 import RecordingViewer from "../../tools/RecordingViewer.js";
 import ViewCheckIn from "./ViewCheckIn.js";
 import LoadingScreen from "../greet/Loading.js";
+import * as FileSystem from "expo-file-system";
 
 const FriendFeed = () => {
   const [username, setUsername] = useState();
   const [posts, setPosts] = useState([]);
   const [friends, setFriends] = useState([]);
-  const [profilePics, setProfilePics] = useState([]);
   const [profilePicMap, setProfilePicMap] = useState({});
   const [video, setVideo] = useState(null);
   const [contentLoading, setContentLoading] = useState(true);
   const [refreshing, setRefreshing] = React.useState(false);
   const [showViewCheckIn, setShowViewCheckIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const videoUriRef = useRef(null);
 
   const slideAnimFlatList = useRef(new Animated.Value(-800)).current; // Initial position for FlatList
   const slideAnimScrollView = useRef(new Animated.Value(-800)).current; // Initial position for ScrollView
 
   const openModal = () => setShowViewCheckIn(true);
   const closeModal = () => setShowViewCheckIn(false);
+
+  const saveBase64Video = async (base64String) => {
+    console.log("reached file function");
+    const filename = FileSystem.documentDirectory + "downloadedVideo.mp4";
+    await FileSystem.writeAsStringAsync(filename, base64String, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    return filename; // This is a URI that can be used in the app
+  };
 
   const initializeData = async () => {
     try {
@@ -48,14 +58,8 @@ const FriendFeed = () => {
 
       const csrfToken = await getCsrfToken();
       const friendsList = await fetchFriendsList(storedUsername, csrfToken);
-      // setFriends(friendsList);
-
       const entries = await fetchEntries(friendsList, csrfToken);
-
       const map = await fetchProfilePics(friendsList, csrfToken);
-      // const picsMap = mapPicsToUser(pics);
-      // setProfilePics(picsMap);
-      // setProfilePicMap(map);
 
       const updatedPosts = entries.map((post) => ({
         ...post,
@@ -82,21 +86,21 @@ const FriendFeed = () => {
 
   useEffect(() => {
     if (!isLoading && !contentLoading) {
-    Animated.parallel([
-      Animated.spring(slideAnimScrollView, {
-        toValue: 0,
-        useNativeDriver: true,
-        speed: 1,
-        bounciness: 12,
-      }),
-      Animated.spring(slideAnimFlatList, {
-        toValue: 0,
-        useNativeDriver: true,
-        speed: 1,
-        bounciness: 12,
-      }),
-    ]).start();
-  }
+      Animated.parallel([
+        Animated.spring(slideAnimScrollView, {
+          toValue: 0,
+          useNativeDriver: true,
+          speed: 1,
+          bounciness: 12,
+        }),
+        Animated.spring(slideAnimFlatList, {
+          toValue: 0,
+          useNativeDriver: true,
+          speed: 1,
+          bounciness: 12,
+        }),
+      ]).start();
+    }
   }, [isLoading, contentLoading]);
 
   const onRefresh = React.useCallback(() => {
@@ -109,36 +113,11 @@ const FriendFeed = () => {
     }, 2000);
     // setRefreshing(false);
   }, []);
-  // const onRefresh = useCallback(async () => {
-  //   setRefreshing(true);
-  //   try {
-  //     const csrfToken = await getCsrfToken();
-  //     const entries = await fetchEntries(friends, csrfToken);
-  //     setPosts(entries);
-  //   } catch (error) {
-  //     console.error("Refresh failed:", error);
-  //   }
-  //   setRefreshing(false);
-  // }, [friends]);
 
   const loadUsername = async () => {
     const storedUsername = await Storage.getItem("@username");
     setUsername(storedUsername || "No username");
   };
-
-  // useEffect(() => {
-  //   loadUsername();
-  // }, []);
-
-  // useEffect(() => {
-  //   getFriends();
-  // }, [username]);
-
-  // useEffect(() => {
-  //   // console.log("now we will fetch check ins.");
-  //   handleGetEntries();
-  //   handleGetProfilePic();
-  // }, [friends]);
 
   const getCsrfToken = async () => {
     try {
@@ -197,9 +176,11 @@ const FriendFeed = () => {
           checkin_id: checkin_id,
         },
       });
-      setVideo(response.data);
       // console.log(response.data);
-      console.log("got video success:", response.data.slice(-10));
+      const videoUri = await saveBase64Video(response.data);
+      console.log("got video success:", videoUri);
+      setVideo(videoUri);
+      videoUriRef.current = videoUri;
       return response.data;
     } catch (error) {
       console.log("Error retrieving video:", error);
@@ -222,15 +203,7 @@ const FriendFeed = () => {
       response.data.forEach((pic) => {
         map[pic.username] = pic.profile_picture;
       });
-      // console.log("profile map", map["admin"].slice(100, 200));
-      // setProfilePicMap(map);
 
-      // const updatedPosts = posts.map((post) => ({
-      //   ...post,
-      //   profilepic: map[post.username] || "default_pic_base64", // assuming 'default_pic_base64' is your default profile pic in base64
-      // }));
-      // console.log('testing post profilepic',updatedPosts[0].profilepic.slice(1,100))
-      // setPosts(updatedPosts); // update posts with profile pics
       return map;
     } catch (error) {
       console.log("Error retrieving profile pics:", error);
@@ -251,7 +224,7 @@ const FriendFeed = () => {
   const flatListRef = useRef(null);
 
   const UserListItem = ({ user, profilepic }) => (
-    <View style={styles.userItem}>
+    <View style={styles.userItem} testID={`usernameList-${user}`}>
       <Image
         source={{ uri: `data:Image/mp4;base64,${profilepic}` }}
         style={styles.avatar}
@@ -265,6 +238,41 @@ const FriendFeed = () => {
       </Text>
     </View>
   );
+
+  const VideoPost = React.memo(({ video, post }) => {
+    //implement this code later to prevent an entire page rerender
+    //the rerender is ugly and causes a flicker with the images
+    //also later on it would be a good idea to have video be a dictionary
+    //so multiple videos can be loaded at once
+    const handlePress = useCallback(() => {
+      handleGetVideo(post.checkin_id);
+    }, [post.checkin_id]);
+
+    return (
+      <View style={[styles.video, { marginBottom: 20 }]}>
+        {video ? (
+          <VideoViewer
+            source={video}
+            style={{ height: 100, width: 100, borderRadius: 5 }}
+          />
+        ) : (
+          <TouchableOpacity
+            onPress={
+              handlePress
+            }
+          >
+            <Image
+              source={{ uri: `data:Image/mp4;base64,${post?.content}` }}
+              style={styles.JournalEntryModalImage}
+            />
+            {/* <Text>load video</Text> */}
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  }, (prevProps, nextProps) => {
+    return prevProps.video === nextProps.video && prevProps.post.checkin_id === nextProps.post.checkin_id;
+});
 
   const PostCard = ({ post }) => {
     const truncateText = (text, maxLength) => {
@@ -288,7 +296,10 @@ const FriendFeed = () => {
           <Moment moment_number={post.moment_number} />
           <Text style={styles.postHeader}>{post.header}</Text>
           {post.content_type === "image" && (
-            <View style={[styles.JournalEntryModalImage, { marginBottom: 20 }]}>
+            <View
+              style={[styles.JournalEntryModalImage, { marginBottom: 20 }]}
+              testID={`image-${post.checkin_id}`}
+            >
               <ImageViewer
                 source={`data:Image/mp4;base64,${post?.content}`}
                 style={styles.JournalEntryModalImage}
@@ -296,30 +307,36 @@ const FriendFeed = () => {
             </View>
           )}
           {post.content_type === "video" && (
-            <View style={[styles.JournalEntryModalImage, { marginBottom: 20 }]}>
-              <TouchableOpacity
-                onPress={() => {
-                  handleGetVideo(post.checkin_id);
-                }}
-              >
-                <ImageViewer
-                  source={`data:Image/mp4;base64,${post?.content}`}
-                  style={styles.JournalEntryModalImage}
+            <View
+              style={[styles.video, { marginBottom: 20 }]}
+              testID={`video-${post.checkin_id}`}
+            >
+              {video ? (
+                <VideoViewer
+                  source={video}
+                  style={{ height: 100, width: 100, borderRadius: 5 }}
                 />
-                <Text>load video</Text>
-              </TouchableOpacity>
-              {video && (
-                <View>
-                  <VideoViewer
-                    source={`data:video/quicktime;base64,${video}`}
+              ) : (
+                <TouchableOpacity
+                  onPress={() => {
+                    handleGetVideo(post.checkin_id);
+                  }}
+                >
+                  <Image
+                    source={{ uri: `data:Image/mp4;base64,${post?.content}` }}
+                    style={styles.JournalEntryModalImage}
                   />
-                  <Text>{typeof post.checkin_id}</Text>
-                </View>
+                  {/* <Text>load video</Text> */}
+                </TouchableOpacity>
               )}
             </View>
+            // <VideoPost uri={videoUriRef} post={post} />
           )}
           {post.content_type === "recording" && (
-            <View style={styles.audioContainer}>
+            <View
+              style={styles.audioContainer}
+              testID={`recording-${post.checkin_id}`}
+            >
               <RecordingViewer
                 source={`data:audio/mp3;base64,${post.content}`}
                 style={{ height: 60, width: 60, borderRadius: 5 }}
@@ -345,47 +362,52 @@ const FriendFeed = () => {
     <View style={styles.container}>
       {isLoading && contentLoading ? (
         // <ActivityIndicator style={{ height: 100, width: 100 }} />
-        <LoadingScreen styleProp={styles.loadingStyle} />
-      ) 
-      :
-      (
-      <View>
-      <View style={styles.userList}>
-        <Animated.ScrollView
-          horizontal
-          style={[
-            styles.scrollView,
-            {
-              transform: [{ translateX: slideAnimScrollView }],
-            },
-          ]}
-        >
-          <View style={styles.userContainer}>
-            {friends.map((user) => (
-              <UserListItem
-                key={user.id}
-                user={user}
-                profilepic={profilePicMap[user]}
-              />
-            ))}
+        <View testID="loading-screen">
+          <LoadingScreen styleProp={styles.loadingStyle} />
+        </View>
+      ) : (
+        <View>
+          <View style={styles.userList}>
+            <Animated.ScrollView
+              horizontal
+              style={[
+                styles.scrollView,
+                {
+                  transform: [{ translateX: slideAnimScrollView }],
+                },
+              ]}
+            >
+              <View style={styles.userContainer}>
+                {friends.map((user) => (
+                  <UserListItem
+                    key={user.id}
+                    user={user}
+                    profilepic={profilePicMap[user]}
+                  />
+                ))}
+              </View>
+            </Animated.ScrollView>
           </View>
-        </Animated.ScrollView>
-      </View>
-      <Animated.FlatList
-        data={posts}
-        ref={flatListRef}
-        contentContainerStyle={styles.postListContainer}
-        keyExtractor={(post) => toString(post.checkin_id + " ")}
-        renderItem={({ item }) => <PostCard post={item} />}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        style={{
-          transform: [{ translateY: slideAnimFlatList }],
-        }}
-      />
-    </View>
-    )}
+          <Animated.FlatList
+            testID={"flat-list"}
+            data={posts}
+            ref={flatListRef}
+            contentContainerStyle={styles.postListContainer}
+            // keyExtractor={(post) => post.checkin_id}
+            renderItem={({ item }) => <PostCard post={item} />}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                testID="refresh-control"
+              />
+            }
+            style={{
+              transform: [{ translateY: slideAnimFlatList }],
+            }}
+          />
+        </View>
+      )}
     </View>
   );
 };
@@ -491,7 +513,10 @@ const styles = StyleSheet.create({
     width: 100,
     aspectRatio: 1,
     borderRadius: 5,
-    borderWidth: 2,
+    // borderWidth: 2,
+  },
+  video: {
+    flexDirection: "row",
   },
 });
 
