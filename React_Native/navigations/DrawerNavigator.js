@@ -44,6 +44,11 @@ const CustomDrawerContent = (props) => {
   const handleLogout = () => {
     const logout = async () => {
       await Storage.removeItem("@username");
+      await Storage.removeItem("@first_name");
+      await Storage.removeItem("@last_name");
+      await Storage.removeItem("@email");
+      await Storage.removeItem("@profilePicture");
+      await Storage.removeItem("@password");
       props.navigation.reset({
         index: 0,
         routes: [{ name: "Landing" }],

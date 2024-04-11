@@ -27,6 +27,7 @@ const UserProfile = ({ navigation, onSwitch }) => {
     profilePicture: "",
   });
 
+
   const [errorMessage, setErrorMessage] = useState(null);
 
   const navigateEdit = () => {
@@ -42,75 +43,31 @@ const UserProfile = ({ navigation, onSwitch }) => {
     mouth: ["smile", "smirk", "laughing"],
   }).toString();
 
-  useEffect(() => {
-    const loadUserInfo = async () => {
-      try {
-        const storedUsername = await Storage.getItem("@username");
-        setUserInfo(prevState => ({
-          ...prevState,
-          username: storedUsername || ""
-        }));
-        const csrfToken = await getCsrfToken();
 
-        const response = await axios.get(`${API_URL}/get_user_info/`, {
-          params: {
-            username: storedUsername,
-          },
-          headers: {
-            "X-CSRFToken": csrfToken,
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        });
-  
-        setUserInfo(prevUserInfo => ({
-          ...prevUserInfo,
-          fname: response.data.first_name, 
-          lname: response.data.last_name,
-          email:  response.data.email,
-          password: response.data.password,
-          profilePicture: response.data.profilepicture,
-        }));
-      } catch (error) {
-        handleUserInfoError(error);
-      }
-    };
-  
-    const handleUserInfoError = (error) => {
-      console.log(error);
-      setErrorMessage(
-        <View style={styles.errorMessageBox}>
-          <Text style={styles.errorMessageText}>{error.response.data}</Text>
-        </View>
-      );
-      console.error("Error Loading User:", error.response.data);
-    };
-  
-    const getCsrfToken = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/csrf-token/`);
-        return response.data.csrfToken;
-      } catch (error) {
-        handleCsrfTokenError(error);
-      }
-    };
-  
-    const handleCsrfTokenError = (error) => {
-      console.error("Error retrieving CSRF token:", error);
-      setErrorMessage(
-        <View style={styles.errorMessageBox}>
-          <Text style={styles.errorMessageText}>
-            CSRF token retrieval failed
-          </Text>
-        </View>
-      );
-      throw new Error("CSRF token retrieval failed");
-    };
-  
-    loadUserInfo();
-  
+  const getUser = async () => {
+    const storedUsername = await Storage.getItem("@username");
+    const storedEmail = await Storage.getItem("@email");
+    const storedFirstName = await Storage.getItem("@first_name");
+    const storedLastName = await Storage.getItem("@last_name");
+    const storedProfilePicture = await Storage.getItem("@profilePicture");
+    const storedPassword = await Storage.getItem("@password");
+
+    setUserInfo(prevState => ({
+      ...prevState,
+      username: storedUsername || "",
+      originalUsername: storedUsername || "", //dont update this value after retrieval 
+      password: storedPassword || "",
+      fname: storedFirstName || "",
+      lname: storedLastName || "",
+      profilePicture: storedProfilePicture || "",
+      email: storedEmail || "",
+    }));
+    console.log("successfully retrieved user")
+  };
+
+  useEffect(() => {
+    getUser();
   }, []);
-  
 
   return (
     <View

@@ -40,10 +40,38 @@ const EditProfile = ({navigation, onSwitch}) => {
     }
   }
 
-  const saveUsername = async () => {
+  const saveUserInfo = async () => {
     await Storage.setItem("@username", userInfo.username);
-    console.log("successfully saved username: ", userInfo.username);
+    await Storage.setItem("@email", userInfo.email);
+    await Storage.setItem("@first_name", userInfo.fname);
+    await Storage.setItem("@last_name", userInfo.lname);
+    await Storage.setItem("@profilePicture", userInfo.profilePicture);
+    await Storage.setItem("@password", userInfo.password);
+    console.log("successfully saved user info: ", userInfo.username);
   };
+
+  const getUser = async () => {
+    const storedUsername = await Storage.getItem("@username");
+    const storedEmail = await Storage.getItem("@email");
+    const storedFirstName = await Storage.getItem("@first_name");
+    const storedLastName = await Storage.getItem("@last_name");
+    const storedProfilePicture = await Storage.getItem("@profilePicture");
+    const storedPassword = await Storage.getItem("@password");
+
+    setUserInfo(prevState => ({
+      ...prevState,
+      username: storedUsername || "",
+      originalUsername: storedUsername || "", //dont update this value after retrieval 
+      password: storedPassword || "",
+      fname: storedFirstName || "",
+      lname: storedLastName || "",
+      profilePicture: storedProfilePicture || "",
+      email: storedEmail || "",
+    }));
+    console.log("successfully retrieved user")
+  };
+
+  const [updateProfilePicture, setUpdateProfilePicture] = useState(false);
 
   const avatar = createAvatar(micah, {
     seed: userInfo.originalUsername,
@@ -94,18 +122,20 @@ const EditProfile = ({navigation, onSwitch}) => {
 
     try {
       const csrfToken = await getCsrfToken();
+      const requestData = {
+        username: userInfo.originalUsername,
+        newusername: userInfo.username,
+        firstname: userInfo.fname,
+        lastname: userInfo.lname,
+        email: userInfo.email,
+      };
+      // Conditionally include profile picture if it exists
+      if (updateProfilePicture) {
+        requestData.profilepicture = userInfo.profilePicture ? userInfo.profilePicture : undefined;
+      }
       const response = await axios.post(
         `${API_URL}/update_user_information/`,
-        {
-          username: userInfo.originalUsername,
-          newusername: userInfo.username,
-          //password: ,
-          //reentered_password: reentered_password,
-          firstname: userInfo.fname,
-          lastname: userInfo.lname,
-          email: userInfo.email,
-          profilepicture: userInfo.profilePicture ? userInfo.profilePicture : undefined,
-        },
+          requestData,
         {
           headers: {
             "X-CSRFToken": csrfToken,
@@ -115,9 +145,8 @@ const EditProfile = ({navigation, onSwitch}) => {
         }
       );
       console.log("update profile response:", response.data);
+      saveUserInfo();
       navigateProfileView();
-      saveUsername();
-      
     } catch (error) {
       console.log(error)
       setErrorMessage(
@@ -138,6 +167,7 @@ const EditProfile = ({navigation, onSwitch}) => {
     });
 
     if (!result.cancelled) {
+      setUpdateProfilePicture(true);
       const base64String = await readFileAsBase64(result.assets[0].uri);    
       setUserInfo(prevUserInfo => ({
         ...prevUserInfo,
@@ -162,6 +192,7 @@ const takeMedia = async () => {
     });
 
     if (result && !result.cancelled) {
+      setUpdateProfilePicture(true);
       const base64String = await readFileAsBase64(result.assets[0].uri);    
         setUserInfo(prevUserInfo => ({
           ...prevUserInfo,
@@ -171,76 +202,9 @@ const takeMedia = async () => {
 };
 
   useEffect(() => {
-    const loadUserInfo = async () => {
-      try {
-        const storedUsername = await Storage.getItem("@username");
-        setUserInfo(prevState => ({
-          ...prevState,
-          username: storedUsername || "",
-          originalUsername: storedUsername || "", //dont update this value after retrieval 
-        }));
-        const csrfToken = await getCsrfToken();
-
-        const response = await axios.get(`${API_URL}/get_user_info/`, {
-          params: {
-            username: storedUsername,
-          },
-          headers: {
-            "X-CSRFToken": csrfToken,
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        });
-  
-        //console.log("Response fname:", response.data);
-        setUserInfo(prevUserInfo => ({
-          ...prevUserInfo,
-          fname: response.data.first_name, 
-          lname: response.data.last_name,
-          email:  response.data.email,
-          password: response.data.password,
-          profilePicture: response.data.profilepicture,
-        }));
-      } catch (error) {
-        handleUserInfoError(error);
-      }
-    };
-  
-    const handleUserInfoError = (error) => {
-      console.log(error);
-      setErrorMessage(
-        <View style={styles.errorMessageBox}>
-          <Text style={styles.errorMessageText}>{error.response.data}</Text>
-        </View>
-      );
-      console.error("Error Loading User:", error.response.data);
-    };
-  
-    const getCsrfToken = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/csrf-token/`);
-        return response.data.csrfToken;
-      } catch (error) {
-        handleCsrfTokenError(error);
-      }
-    };
-  
-    const handleCsrfTokenError = (error) => {
-      console.error("Error retrieving CSRF token:", error);
-      setErrorMessage(
-        <View style={styles.errorMessageBox}>
-          <Text style={styles.errorMessageText}>
-            CSRF token retrieval failed
-          </Text>
-        </View>
-      );
-      throw new Error("CSRF token retrieval failed");
-    };
-  
-    loadUserInfo();
-  
+    getUser();
   }, []);
-  
+ 
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -320,58 +284,6 @@ const takeMedia = async () => {
                                     }))}
 
         >{userInfo.email}</TextInput>
-        {/*Password Modal - (move to another file)*/}
-        <Modal
-        animationType="slide"
-        transparent={true}
-        visible={passwordModalVisible}
-        onRequestClose={() => {
-          setPasswordModalVisible(!passwordModalVisible);
-        }}>
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.title}>Edit Password</Text>
-            <View style={{ flexDirection: "column", width:"80%" }}>
-            <TextInput
-              style={styles.info}
-              placeholder="Current Password"
-            ></TextInput>
-             <TextInput
-              style={styles.info}
-              placeholder="New Password"
-            ></TextInput>
-             <TextInput
-              style={styles.info}
-              placeholder="Confirm New Password"
-              onChangeText = {(text) =>   setUserInfo(prevUserInfo => ({
-                                          ...prevUserInfo,
-                                          password: (text), 
-                                        }))}
-            ></TextInput>
-            </View>
-            
-            <View style={{ flexDirection: "row", width:"80%" }}>
-              <TouchableOpacity 
-                  style={styles.button} 
-                  onPress={() => setPasswordModalVisible(!passwordModalVisible)}>
-                  <Text style={styles.buttonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                  style={styles.button} 
-                  onPress={() => setPasswordModalVisible(!passwordModalVisible)}>
-                  {/*trigger password change here! */}
-                  <Text style={styles.buttonText}>Update</Text>
-              </TouchableOpacity>
-            </View>
-            
-          </View>
-        </View>
-      </Modal>
-      {/* <Pressable
-        style={[styles.button, styles.buttonOpen]}
-        onPress={() => setPasswordModalVisible(true)}>
-        <Text style={styles.buttonText}>Change Password</Text>
-      </Pressable> */}
     </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
   );

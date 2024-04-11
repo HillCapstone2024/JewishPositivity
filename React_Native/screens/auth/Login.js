@@ -24,12 +24,83 @@ const API_URL = "http://" + IP_ADDRESS + ":8000";
 const Login = ({ navigation }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [first_name, setFirstName] = useState("");
+  const [last_name, setLastName] = useState("");
+  const [profilePicture, setProfilePicture] = useState(""); //make avatar initially?
   const [errorMessage, setErrorMessage] = useState(null);
   const theme = makeThemeStyle();
 
-  const saveUsername = async () => {
+  const saveUser = async () => {
     await Storage.setItem("@username", username);
-    console.log("successfully saved username")
+
+    const loadUserInfo = async () => {
+      try {
+        const csrfToken = await getCsrfToken();
+
+        const response = await axios.get(`${API_URL}/get_user_info/`, {
+          params: {
+            username: username,
+          },
+          headers: {
+            "X-CSRFToken": csrfToken,
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        });
+
+        setFirstName(first_name,response.data.first_name);
+        setLastName(last_name,response.data.last_name);
+        setPassword(last_name,response.data.password); //encoded
+        setProfilePicture(last_name,response.data.profilePicture); //avatar?
+        setEmail(email,response.data.email);
+  
+        //save to storage
+        await Storage.setItem("@first_name", response.data.first_name);
+        await Storage.setItem("@last_name", response.data.last_name);
+        await Storage.setItem("@email", response.data.email);
+        await Storage.setItem("@password", response.data.password);
+        await Storage.setItem("@profilePicture", response.data.profilepicture);
+
+        console.log("successfully saved user")
+      } catch (error) {
+        handleUserInfoError(error);
+      }
+    };
+  
+    const handleUserInfoError = (error) => {
+      console.log(error);
+      setErrorMessage(
+        <View style={styles.errorMessageBox}>
+          <Text style={styles.errorMessageText}>{error.response.data}</Text>
+        </View>
+      );
+      console.error("Error Loading User:", error.response.data);
+    };
+  
+    const getCsrfToken = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/csrf-token/`);
+        return response.data.csrfToken;
+      } catch (error) {
+        handleCsrfTokenError(error);
+      }
+    };
+  
+    const handleCsrfTokenError = (error) => {
+      console.error("Error retrieving CSRF token:", error);
+      setErrorMessage(
+        <View style={styles.errorMessageBox}>
+          <Text style={styles.errorMessageText}>
+            CSRF token retrieval failed
+          </Text>
+        </View>
+      );
+      throw new Error("CSRF token retrieval failed");
+    };
+  
+    loadUserInfo();
+
   };
 
   const navigateSignUp = () => {
@@ -90,7 +161,7 @@ const Login = ({ navigation }) => {
         }
       );
       console.log("Login response:", response.data);
-      saveUsername();
+      saveUser();
       navigateDrawer();
     } catch (error) {
       console.log(error);
