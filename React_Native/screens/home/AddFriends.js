@@ -74,9 +74,10 @@ const AddFriends = ({navigation, onSwitch}) => {
                 }
             );
             console.log("Friend response:", response.data);
+            let message = response.data.message
             setErrorMessage(
                 <View style={styles.errorMessageBoxSucceed}>
-                  <Text style={styles.errorMessageTextSucceed}> Friend Request Sent </Text>
+                  <Text style={styles.errorMessageTextSucceed}> {message} </Text>
                 </View>
               );
         } catch(error) {
@@ -98,7 +99,7 @@ const AddFriends = ({navigation, onSwitch}) => {
                 value={usernameSearch}
             />
             <TouchableOpacity style={styles.button} onPress={handleFriends}>
-                <Text style={styles.buttonText}>Search</Text>
+                <Text style={styles.buttonText}>Send Friend Request</Text>
             </TouchableOpacity>
             {errorMessage}
             <TouchableOpacity style = {styles.backButton} onPress={navigateFriendList}>
@@ -140,7 +141,7 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowRadius: 6,
         shadowOpacity: 0.06,
-        width: "80%",
+        width: "90%",
       },
       errorMessageText: {
         textAlign: "center",
@@ -152,7 +153,7 @@ const styles = StyleSheet.create({
         marginTop: 5,
         marginBottom: 10,
         marginHorizontal: 5,
-        width: "80%",
+        width: "90%",
         shadowOffset: { width: 0, height: 2 },
         shadowRadius: 6,
         shadowOpacity: 0.06,
@@ -173,7 +174,7 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowRadius: 6,
         shadowOpacity: 0.06,
-        width: "80%",
+        width: "90%",
       },
       errorMessageTextSucceed: {
         color: "#006400",
@@ -197,23 +198,3 @@ const styles = StyleSheet.create({
 });
 
 export default AddFriends;
-
-
-/*
-<Text
-    onPress={() => alert('This is the "Friends" screen ')}
-    style={[styles.tempText]}>Friends
-</Text>
-*/
-
-/*
-
-Add friend
-- get_user to see if user exists
-- add_friend_view (?)
-
-Extras(?)
-1. Delete friends
-2. Friend requests inbox
-3. Actually do a search
-*/
