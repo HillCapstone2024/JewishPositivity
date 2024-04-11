@@ -43,9 +43,9 @@ const FriendFeed = () => {
   const openModal = () => setShowViewCheckIn(true);
   const closeModal = () => setShowViewCheckIn(false);
 
-  const saveBase64Video = async (base64String) => {
+  const saveBase64Video = async (base64String, checkin_id) => {
     console.log("reached file function");
-    const filename = FileSystem.documentDirectory + "downloadedVideo.mp4";
+    const filename = FileSystem.documentDirectory + checkin_id + "downloadedVideo.mp4";
     await FileSystem.writeAsStringAsync(filename, base64String, {
       encoding: FileSystem.EncodingType.Base64,
     });
@@ -189,7 +189,7 @@ const FriendFeed = () => {
         },
       });
       // console.log(response.data);
-      const videoUri = await saveBase64Video(response.data);
+      const videoUri = await saveBase64Video(response.data, checkin_id);
       console.log("got video success:", videoUri);
 
       setVideo((prevVideos) => ({
@@ -309,7 +309,7 @@ const FriendFeed = () => {
               source={{ uri: `data:Image/mp4;base64,${post.profilepic}` }}
               style={styles.postAvatar}
             />
-            <Text style={styles.postUsername}>{post.checkin_id}</Text>
+            <Text style={styles.postUsername}>{post.username}</Text>
             <Text style={styles.postDate}>{post.date}</Text>
           </View>
           <Moment moment_number={post.moment_number} />
@@ -332,9 +332,9 @@ const FriendFeed = () => {
               testID={`video-${post.checkin_id}`}
               key={`video-${post.checkin_id}`}
             >
-              {videoRefs.current[post.checkin_id] ? (
+              {video[post.checkin_id] ? (
                 <VideoViewer
-                  source={videoRefs.current[post.checkin_id]}
+                  source={video[post.checkin_id]}
                   style={{ height: 100, width: 100, borderRadius: 5 }}
                 />
               ) : (
