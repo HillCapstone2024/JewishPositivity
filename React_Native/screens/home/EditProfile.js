@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TextInput, Button, Image,ImageViewer, Modal, Pressable } from "react-native";
+import { View, Text, StyleSheet, TextInput, ScrollView, Image,ImageViewer, Modal, Pressable } from "react-native";
 import * as Storage from "../../AsyncStorage.js";
 import { createAvatar } from "@dicebear/core";
 import axios from "axios";
@@ -10,7 +10,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import IP_ADDRESS from "../../ip.js";
 import { Alert } from "react-native";
-import { KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform } from "react-native";
+import { KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform, SafeAreaView } from "react-native";
 import { ActivityIndicator } from "react-native";
 import { xml } from "@dicebear/core/lib/utils/license.js";
 import * as FileSystem from "expo-file-system";
@@ -32,7 +32,7 @@ const EditProfile = ({navigation, onSwitch}) => {
 
   const [errorMessage, setErrorMessage] = useState(null);
   const [passwordModalVisible, setPasswordModalVisible] = useState(false);
-
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
 
   const navigateProfileView = () => {
     if (onSwitch) {
@@ -109,6 +109,7 @@ const EditProfile = ({navigation, onSwitch}) => {
   };
 
   const handleUpdateUser = async () => {
+    setLoadingSubmit(true);
     setErrorMessage(<ActivityIndicator />);
     const getCsrfToken = async () => {
       try {
@@ -145,6 +146,7 @@ const EditProfile = ({navigation, onSwitch}) => {
         }
       );
       console.log("update profile response:", response.data);
+      setLoadingSubmit(false);
       saveUserInfo();
       navigateProfileView();
     } catch (error) {
@@ -207,6 +209,7 @@ const takeMedia = async () => {
  
 
   return (
+    <SafeAreaView style={{ flex: 1 }}>
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -214,21 +217,32 @@ const takeMedia = async () => {
     >
    <View style={styles.topBar}>
         <View style={{ flexDirection: "row", width:"80%" }}>
-          <TouchableOpacity onPress={navigateProfileView}>
+          <TouchableOpacity 
+          onPress={navigateProfileView}>
             <View style={styles.buttonContent}>
               <Ionicons name="caret-back" size={25} color="#4A90E2" />
               <Text style={styles.cancelText}>Cancel</Text>
             </View>
           </TouchableOpacity>
         </View>
+
+        {loadingSubmit ? (
+          <View style={styles.ActivityIndicator}>
+            <ActivityIndicator />
+          </View>
+        ) : (
           <TouchableOpacity
             style={styles.submitButton}
             onPress={handleUpdateUser}
           >
-          <Text style={styles.submitText}>Submit</Text>
+            <Text
+              style={styles.submitText}
+            >
+              Submit
+            </Text>
           </TouchableOpacity>
-        
-  </View> 
+        )}
+    </View> 
       <TouchableOpacity onPress={handleEditProfilePicture} >
         <View style={styles.profilePicContainer}>
         {userInfo.profilePicture && userInfo.profilePicture.trim() != "" ? (
@@ -242,7 +256,6 @@ const takeMedia = async () => {
          <Ionicons name="camera" size={24} color="black" />
         </View>
       </View>
-
         </TouchableOpacity>
         {<Text style={styles.attribute} >First Name:</Text>}
         <TextInput
@@ -286,6 +299,7 @@ const takeMedia = async () => {
         >{userInfo.email}</TextInput>
     </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
+    </SafeAreaView>
   );
 };
 
