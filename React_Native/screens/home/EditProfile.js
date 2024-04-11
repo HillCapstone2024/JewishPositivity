@@ -211,10 +211,14 @@ const takeMedia = async () => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={[styles.container, theme["background"]]}
-    >
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={100}
+      style={[styles.container, theme["background"]]}>
+    <ScrollView 
+      horizontal={false} 
+      contentContainerStyle={styles.scrollViewContent}>
+    <View style={styles.container}>
    <View style={styles.topBar}>
         <View style={{ flexDirection: "row", width:"80%" }}>
           <TouchableOpacity 
@@ -256,7 +260,7 @@ const takeMedia = async () => {
          <Ionicons name="camera" size={24} color="black" />
         </View>
       </View>
-        </TouchableOpacity>
+      </TouchableOpacity>
         {<Text style={styles.attribute} >First Name:</Text>}
         <TextInput
           style={styles.info}
@@ -297,6 +301,8 @@ const takeMedia = async () => {
                                     }))}
 
         >{userInfo.email}</TextInput>
+    </View>
+    </ScrollView>
     </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
     </SafeAreaView>
@@ -328,6 +334,10 @@ const styles = StyleSheet.create({
     right: 5, 
     backgroundColor: "rgba(255, 255, 255, 0.7)",
     padding: 4,
+  },
+  scrollViewContent: {
+    flexGrow: 1, 
+    marginHorizontal: 1,
   },
   button: {
     backgroundColor: '#4A90E2',
