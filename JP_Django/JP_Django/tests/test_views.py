@@ -784,6 +784,10 @@ class GetUserInformationViewTestCase(TestCase):
 
         # Send GET request to get_user_information_view
         response = client.get(reverse('get_user_information_view'), data=get_data)
+        response2 = client.get(reverse('get_longest_streak_view'), data=get_data)
+        response3 = client.get(reverse('get_current_streak_view'), data=get_data)
+        logging.info('longest streak response: %s', response2)
+        logging.info('current streak response: %s', response3)
 
         # Check if response status code is 200
         self.assertEqual(response.status_code, 200)
