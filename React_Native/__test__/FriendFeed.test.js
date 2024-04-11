@@ -23,7 +23,7 @@ const navigationMock = {
   navigate: mockNavigate,
 };
 
-describes.skip("FriendFeed", () => {
+describe.skip("FriendFeed", () => {
     afterEach(() => {
         cleanup();
         jest.resetAllMocks();
