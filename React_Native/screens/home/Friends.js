@@ -11,6 +11,7 @@ import {
     FlatList,
     ActivityIndicator
 } from 'react-native';
+import BottomTab from "../../navigations/BottomTabNavigator";
 import makeThemeStyle from '../../tools/Theme.js';
 import * as Storage from "../../AsyncStorage.js";
 import IP_ADDRESS from "../../ip.js";
@@ -20,13 +21,22 @@ import axios from 'axios';
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
-const Friends = ({navigation}) => {
+const Friends = ({navigation, onSwitch}) => {
     theme = makeThemeStyle();
     const [username, setUsername] = useState("");
     const [usernameSearch, setUsernameSearch] = useState("");
     const [errorMessage, setErrorMessage] = useState(null);
     const [friends, setFriends] = useState([]);
     const [profilePics, setProfilePics] = useState([]);
+
+    const navigateAdd = () => {
+        console.log('reached navigate',onSwitch);
+        if (onSwitch) {
+          console.log('reache inside if statement');
+            onSwitch();
+
+          };
+      };
 
     useEffect(() => {
         const loadUsername = async() => {
@@ -102,10 +112,6 @@ const Friends = ({navigation}) => {
         }
       };
 
-    const navigateAddFriends = () => {
-        navigation.navigate("AddFriends")
-    }
-
     const handleFriends = async() => {
         setErrorMessage(<ActivityIndicator />);
         const getCsrfToken = async() => {
@@ -180,16 +186,19 @@ const Friends = ({navigation}) => {
     //       </ScrollView>
     //   </View>
     // </View>
+    
     <View style={styles.container}>
-      <View style={styles.userButtonContainer}>
+        <TouchableOpacity style = {styles.addButton} onPress={navigateAdd}>
+              <Text style={styles.addText}> Add Friend </Text>
+        </TouchableOpacity>
+        <View style={styles.userButtonContainer}>
         {friends.map((user, index) => (
-          <View key={index}  style={styles.userContainer}>
+        <View key={index}  style={styles.userContainer}>
             <TouchableOpacity style={styles.button}>
               {/* <Text style={styles.buttonText}>Press me</Text> */}
               <Text style={styles.friendText}>{user}</Text>
             </TouchableOpacity>
-          </View>
-        
+        </View>
         ))}
       </View>
     </View>
@@ -200,8 +209,9 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         margin: 10,
+        
         //justifyContent: "center",
-        // alignItems: "center",
+        //alignItems: "center",
     },
     // container: {
     //     // paddingTop: 60,
@@ -218,8 +228,21 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         paddingHorizontal: 10,
     },
-    button: {
-        alignItems: "left"
+    addButton: {
+        backgroundColor: "lightgray",
+        width: 100,
+        paddingVertical: 10,
+        marginTop: 10,
+        marginHorizontal: 5,
+        borderRadius: 5,
+        shadowColor: "black",
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 6,
+        shadowOpacity: 0.16,
+    },
+    addText: {
+        textAlign: "center",
+        color: "#000000"
     },
     errorMessageBox: {
         textAlign: "center",
@@ -312,10 +335,3 @@ const styles = StyleSheet.create({
 });
 
 export default Friends;
-
-
-/*
-
-
-onPress={navigateAddFriends}
-*/

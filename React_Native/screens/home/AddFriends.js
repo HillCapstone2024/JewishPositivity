@@ -18,12 +18,19 @@ import { SearchBar } from '@rneui/themed';
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
-const AddFriends = () => {
+const AddFriends = ({navigation, onSwitch}) => {
     theme = makeThemeStyle();
     const [username, setUsername] = useState("");
     const [usernameSearch, setUsernameSearch] = useState("");
     const [errorMessage, setErrorMessage] = useState(null);
 
+    const navigateFriendList = () => {
+        console.log(onSwitch);
+        if (onSwitch) {
+          onSwitch();
+        }
+    };
+    
     useEffect(() => {
         const loadUsername = async() => {
             const storedUsername = await Storage.getItem("@username");
@@ -94,6 +101,9 @@ const AddFriends = () => {
                 <Text style={styles.buttonText}>Search</Text>
             </TouchableOpacity>
             {errorMessage}
+            <TouchableOpacity style = {styles.backButton} onPress={navigateFriendList}>
+              <Text style={styles.backText}> Back </Text>
+            </TouchableOpacity>
         </View>
     );
 }
@@ -168,6 +178,22 @@ const styles = StyleSheet.create({
       errorMessageTextSucceed: {
         color: "#006400",
       },
+      backButton: {
+        backgroundColor: "lightgray",
+        width: 100,
+        paddingVertical: 10,
+        marginTop: 10,
+        marginHorizontal: 5,
+        borderRadius: 5,
+        shadowColor: "black",
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 6,
+        shadowOpacity: 0.16,
+    },
+    backText: {
+        textAlign: "center",
+        color: "#000000"
+    },
 });
 
 export default AddFriends;
