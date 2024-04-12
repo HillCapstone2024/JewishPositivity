@@ -57,35 +57,37 @@ const FriendFeed = () => {
       setIsLoading(true);
       const storedUsername = await Storage.getItem("@username");
       setUsername(storedUsername);
+      console.log('username is', storedUsername);
 
       const csrfToken = await getCsrfToken();
       const friendsList = await fetchFriendsList(storedUsername, csrfToken);
-      if (friendsList.length > 1) {
-        // console.log('you have friends!');
-        const entries = await fetchEntries(friendsList, csrfToken);
-          if (entries.length > 1) {
-            const map = await fetchProfilePics(friendsList, csrfToken);
+      console.log('friends list', friendsList);
+      // if (friendsList.length > 0) {
+      // console.log('you have friends!');
+      const entries = await fetchEntries(friendsList, csrfToken);
+      console.log('entries:', entries.length);
+          // if (entries.length >= 1) {
+      const map = await fetchProfilePics(friendsList, csrfToken);
 
-            const updatedPosts = entries.map((post) => ({
-              ...post,
-              profilepic: map[post.username] || "default_pic_base64",
-            }));
+      const updatedPosts = entries.map((post) => ({
+        ...post,
+        profilepic: map[post.username] || "default_pic_base64",
+      }));
 
-            //updated all states at once to prevent rerenders and 'flickers'
-            setFriends(friendsList);
-            setProfilePicMap(map);
-            setPosts(updatedPosts);
-            // setVideo(null);
-        } else {
-          setNoPosts(true);
-        }
-      } else {
-        setNoFriends(true);
-      }
+      //updated all states at once to prevent rerenders and 'flickers'
+      setPosts(updatedPosts);
+      setFriends(friendsList);
+      setProfilePicMap(map);
+      // setNoPosts(true);
 
-
+      // setNoFriends(true);
       setIsLoading(false);
       setContentLoading(false);
+      if (friendsList.length < 1) {
+        setNoFriends(true);
+      } else if (entries.length < 1) {
+        setNoPosts(true);
+      }
     } catch (error) {
       console.error("Initialization failed:", error);
       setIsLoading(false);
@@ -162,6 +164,9 @@ const FriendFeed = () => {
 
   const fetchEntries = async (friends) => {
     // console.log("friends list being sent: ", friends);
+    if (friends.length < 1) {
+      return [];
+    }
     try {
       const csrfToken = await getCsrfToken();
       const response = await axios.get(`${API_URL}/get_todays_checkin_info/`, {
@@ -208,6 +213,9 @@ const FriendFeed = () => {
   };
 
   const fetchProfilePics = async (friends) => {
+    if (friends.length < 1) {
+      return {};
+    };
     console.log("getting profile pics for ", friends);
     try {
       const csrfToken = await getCsrfToken();
