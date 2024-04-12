@@ -12,9 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import moment from 'moment';
 import * as FileSystem from "expo-file-system";
 
-import EditCheckIn from "./EditCheckIn.js";
 import VideoViewer from "../../tools/VideoViewer.js";
-import ImageViewer from "../../tools/ImageViewer.js";
 import RecordingViewer from "../../tools/RecordingViewer.js";
 
 export default function Archive({ navigation }) {
@@ -422,134 +420,15 @@ export default function Archive({ navigation }) {
                   .map((item, index) => (
                     <TouchableOpacity
                       key={index}
-                      onPress={() => handleEntryPress(item)}
+                      // onPress={() => handleEntryPress(item)}
+                      onPress={() => navigation.navigate('JournalEntryDetails', { selectedEntry: item })}
+
                     >
                       {renderContent(item)}
                     </TouchableOpacity>
                   ))}
                 {/* Modal to display journal entry details */}
-                <Modal
-                  animationType="fade"
-                  transparent={true}
-                  visible={modalVisible}
-                  onRequestClose={closeModal}
-                >
-                  <View style={styles.modalContainer}>
-                    {/* modal to show EditDeleteModal */}
-                    <Modal
-                      animationType="slide"
-                      transparent={true}
-                      visible={deleteModalVisible}
-                      onRequestClose={() => setEditDeleteModalVisible(false)}
-                    >
-                      <TouchableWithoutFeedback
-                        onPress={() => setEditDeleteModalVisible(false)}
-                      >
-                        <View style={styles.centeredView}>
-                          {/* Prevents the modal content from closing when pressing on it */}
-                          <TouchableWithoutFeedback>
-                            <View style={styles.modalView}>
-                              <View style={styles.editDeleteContainer}>
-                                {/* Edit button */}
-                                <TouchableOpacity onPress={onEditPress}>
-                                  <Text style={styles.editText}>Edit</Text>
-                                </TouchableOpacity>
-                                <View style={styles.horizontalBar} />
-                                {/* Delete button */}
-                                <TouchableOpacity onPress={() => {
-                                  setCheckin_id(selectedEntry?.checkin_id);
-                                  console.log(checkin_id);
-                                  onDelete();
-                                  // setEditDeleteModalVisible(false);
-                                }}>
-                                  <Text style={styles.deleteText}>Delete</Text>
-                                </TouchableOpacity>
-                              </View>
-                              {/* Cancel button */}
-                              <View style={styles.cancelContainer}>
-                                <TouchableOpacity onPress={() => 
-                                  setEditDeleteModalVisible(false)}>
-                                  <Text style={styles.cancelText}>Cancel</Text>
-                                </TouchableOpacity>
-                              </View>
-                            </View>
-                          </TouchableWithoutFeedback>
-                        </View>
-                      </TouchableWithoutFeedback>
-                    </Modal>
-                    <EditCheckIn 
-                      editModalVisible={editModalVisible} 
-                      setEditModalVisible={setEditModalVisible} 
-                      selectedEntry={selectedEntry}
-                    />
-
-                    <View style={styles.JournalEntryModalContent}>
-                      <View style={styles.buttonRow}>
-                        <Ionicons
-                          name="close-outline"
-                          style={styles.JournalEntryModalIcons}
-                          onPress={closeModal}
-                        />
-                        <Ionicons
-                          name="ellipsis-horizontal-outline"
-                          style={styles.JournalEntryModalIcons}
-                          onPress={() => {
-                            setEditDeleteModalVisible(true);
-                          }}
-                        />
-                      </View>
-                      <ScrollView padding={10}>
-                        <Text style={[styles.headerText]}>
-                          {selectedEntry?.header !== null ? selectedEntry?.header : "Header Would Go Here"}
-                        </Text>
-                        <Text style={[styles.detailText]}>
-                          {moment(selectedEntry?.date, "YYYY-MM-DD").format("dddd, D MMMM YYYY")}{" "}
-                        </Text>
-                        <Text style={[styles.detailText, { marginBottom: 20 }]}>
-                          {getMomentText(selectedEntry?.moment_number)}
-                        </Text>
-
-                        {selectedEntry?.content_type === "image" && (
-                          <Image
-                            style={[styles.JournalEntryModalImage,{ marginBottom: 20 },]}
-                            source={{uri: `data:image/jpeg;base64,${selectedEntry?.content}`,}}
-                          />
-                        )}
-                        {selectedEntry?.content_type === "video" && (
-                          <View style={styles.JournalEntryModalVideo}>
-                            {video[selectedEntry.checkin_id] ? (
-                              <VideoViewer
-                                source={video[selectedEntry.checkin_id]}
-                                style={styles.JournalEntryModalVideo}
-                              />
-                            ) : (
-                              <TouchableOpacity
-                                onPress={() => {
-                                  handleGetVideo(selectedEntry.checkin_id);
-                                }}
-                              >
-                                <Image
-                                  source={{ uri: `data:Image/mp4;base64,${selectedEntry?.content}` }}
-                                  style={styles.JournalEntryModalImage}
-                                />
-                              </TouchableOpacity>
-                            )}
-                          </View>
-                        )}
-                        {selectedEntry?.content_type === "recording" && (
-                          <RecordingViewer
-                            source={`data:audio/mp3;base64,${selectedEntry?.content}`}
-                            style={{ height: 60, width: 60, borderRadius: 5 }}
-                          />
-                        )}
-                        <Text style={[styles.detailText, { marginBottom: 20 }]}>
-                          {selectedEntry?.text_entry !== null ? selectedEntry?.text_entry: "  This is some long content text that will be truncated if it takes up too much space in the container."}
-                        </Text>
-
-                      </ScrollView>
-                    </View>
-                  </View>
-                </Modal>
+                
               </View>
             ))}
         </View>

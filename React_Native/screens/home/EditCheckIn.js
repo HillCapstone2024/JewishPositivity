@@ -409,7 +409,7 @@ const ProgressBar = ({ onMediaChange }) => {
 
   useEffect(() => {
     progress.setValue(0); // Reset progress to 0 without needing to re-create the Animated.Value
-    console.log(parentWidth);
+    console.log("parentWidth: ", parentWidth);
     if (parentWidth > 0) {
       Animated.timing(progress, {
         toValue: parentWidth,

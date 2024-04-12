@@ -14,6 +14,8 @@ import MyDrawer from "./DrawerNavigator.js";
 import Landing from "../screens/greet/Landing.js";
 import TermsofUse from '../screens/home/TermsofUse';
 import Entry from '../screens/home/Entry';
+import JournalEntryDetailsScreen from "../screens/home/JournalEntryDetailsScreen.js";
+import JournalNavigator from "./JournalNavigator.js";
 
 // OneSignal.Debug.setLogLevel(LogLevel.Verbose);
 // OneSignal.initialize(Constants.expoConfig.extra.oneSignalAppId);
@@ -61,7 +63,7 @@ export default function AuthNavigator() {
         <Stack.Screen name="ForgotPassword" component={ForgotPassword} options={{headerTitle: "Forgot Password?"}}/>
         <Stack.Screen name="Drawer" component={MyDrawer} options={{headerShown: false}}/>
         <Stack.Screen name="Terms of Use" component={TermsofUse} />
-        <Stack.Screen name="Entry" component={Entry} />
+        <Stack.Screen name="JournalEntryDetails" component={JournalEntryDetailsScreen} options={{headerTitle: "Journal Entry Details"}}/>
       </Stack.Navigator>
   );
 }

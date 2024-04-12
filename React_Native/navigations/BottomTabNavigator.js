@@ -1,22 +1,32 @@
-import React, { useRef, useState } from "react";
-import { View, Animated, Dimensions, TouchableOpacity } from "react-native";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { NavigationContainer, useNavigation } from "@react-navigation/native";
-import { Ionicons } from "@expo/vector-icons";
-// import { View } from "react-native-reanimated/lib/typescript/Animated";
+// const Tab = createBottomTabNavigator();
 
-import HomeScreen from "../screens/home/HomeScreen";
+
+
+
+// };
+
+// export default BottomTabNavigator;
+
+import React, { useRef, useState } from "react";
+import { View, Animated, Dimensions } from "react-native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { NavigationContainer } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
+
+import FriendFeed from "../screens/home/FriendFeed";
 import JournalEntry from "../screens/home/CheckIn";
 import Archive from "../screens/home/Archive";
 import JournalModal from "../screens/home/JournalModal";
-import FriendFeed from "../screens/home/FriendFeed";
+import JournalEntryDetailsScreen from "../screens/home/JournalEntryDetailsScreen";
 
+const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const BottomTabNavigator = () => {
   const tabOffsetValue = useRef(new Animated.Value(0)).current;
   const [showJournalModal, setShowJournalModal] = useState(false);
-
+ 
   const openJournalModal = () => {
     setShowJournalModal(true);
   };
@@ -30,7 +40,7 @@ const BottomTabNavigator = () => {
   };
 
   return (
-    <NavigationContainer independent={true}>
+    <>
       <Tab.Navigator
         initialRouteName="Feed"
         screenOptions={{
@@ -85,21 +95,29 @@ const BottomTabNavigator = () => {
           component={JournalEntry}
           options={{
             tabBarIcon: ({ focused }) => (
-              <View style={{
-                width: 55,
-                height: 55,
-                backgroundColor: '#4A90E2',
-                borderRadius: 30,
-                justifyContent: 'center',
-                alignItems: 'center',
-                marginBottom: 30
-              }}>
-                <Ionicons name="journal" size={25} color={'#ffffff'} style={{
-                  width: 25,
-                  height: 25,
-                  // tintColor: 'white',
-                }} />
-              </View>),
+              <View
+                style={{
+                  width: 55,
+                  height: 55,
+                  backgroundColor: "#4A90E2",
+                  borderRadius: 30,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginBottom: 30,
+                }}
+              >
+                <Ionicons
+                  name="journal"
+                  size={25}
+                  color={"#ffffff"}
+                  style={{
+                    width: 25,
+                    height: 25,
+                    // tintColor: 'white',
+                  }}
+                />
+              </View>
+            ),
           }}
           listeners={({ navigation, route }) => ({
             tabPress: (e) => {
@@ -148,7 +166,6 @@ const BottomTabNavigator = () => {
         }}
       ></Animated.View>
 
-      {/* Journal modal */}
       {showJournalModal && (
         <JournalModal
           onClose={closeJournalModal}
@@ -157,6 +174,24 @@ const BottomTabNavigator = () => {
           onRequestClose={() => setShowJournalModal(false)}
         />
       )}
+    </>
+  );
+};
+
+const JournalNavigator = () => {
+  return (
+    <NavigationContainer independent={true}>
+      <Stack.Navigator>
+        <Stack.Screen
+          name="Main"
+          component={BottomTabNavigator}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="JournalEntryDetails"
+          component={JournalEntryDetailsScreen}
+        />
+      </Stack.Navigator>
     </NavigationContainer>
   );
 };
@@ -171,4 +206,4 @@ function getWidth() {
   return width / 5;
 }
 
-export default BottomTabNavigator;
+export default JournalNavigator;
