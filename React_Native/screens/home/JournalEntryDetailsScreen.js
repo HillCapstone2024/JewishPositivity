@@ -5,9 +5,6 @@ import * as Storage from "../../AsyncStorage.js";
 import IP_ADDRESS from "../../ip.js";
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 import axios from 'axios';
-import { Video, Audio } from "expo-av";
-import { Buffer } from "buffer";
-import { SearchBar } from 'react-native-elements';
 import { Ionicons } from "@expo/vector-icons";
 import moment from 'moment';
 import * as FileSystem from "expo-file-system";
@@ -19,32 +16,34 @@ import ImageViewer from "../../tools/ImageViewer.js";
 import RecordingViewer from "../../tools/RecordingViewer.js";
 
 const JournalEntryDetailsScreen = ({ route, navigation }) => {
-    const [username, setUsername] = useState("");
+  const [username, setUsername] = useState("");
   const [checkin_id, setCheckin_id] = useState("");
-  const [entries, setEntries] = useState([]);
-  const [message, setMessage] = useState(<ActivityIndicator />);
   const [groupedEntries, setGroupedEntries] = useState({});
   const [video, setVideo] = useState({});
-  const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
-//   const [selectedEntry, setSelectedEntry] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [sortByTime, setSortByTime] = useState(true); // Default to sort by time
-  const [momentTypeSortOrder, setMomentTypeSortOrder] = useState("Most Recent"); // Default to sort by most recent moment type
-  const [sortBy, setSortBy] = useState("Sort by Newest to Oldest");
   const [deleteModalVisible, setEditDeleteModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const videoRefs = useRef({});
-
-  theme = makeThemeStyle();
   const { selectedEntry } = route.params;
+ 
+  theme = makeThemeStyle(); 
 
-  const saveBase64Video = async (base64String, checkin_id) => {
+  const saveBase64Video = async (base64String, checkin_id, handleEllipsisPress ) => {
     console.log("reached file function");
     const filename = FileSystem.documentDirectory + checkin_id + "downloadedVideo.mp4";
     await FileSystem.writeAsStringAsync(filename, base64String, {
       encoding: FileSystem.EncodingType.Base64,
     });
     return filename; // This is a URI that can be used in the app
+  };
+
+  const getCsrfToken = async () => {
+    try {
+    const response = await axios.get(`${API_URL}/csrf-token/`);
+    return response.data.csrfToken;
+    } catch (error) {
+    console.error("Error retrieving CSRF token:", error);
+    throw new Error("CSRF token retrieval failed");
+    }
   };
 
   const handleGetVideo = async (checkin_id) => {
@@ -73,51 +72,6 @@ const JournalEntryDetailsScreen = ({ route, navigation }) => {
       console.log("Error retrieving video:", error);
       throw new Error("video retreival failed");
     }
-  };
-
-  const toggleFilterModal = () => {
-    setIsFilterModalVisible(!isFilterModalVisible);
-  };
-
-  const applyFilter = (filterOption) => {
-    if (filterOption === "Sort by Newest to Oldest") {
-      setSortByTime(true);
-    } else if (filterOption === "Sort by Oldest to Newest") {
-      setSortByTime(false);
-    } else if (filterOption === "Sort by Most Recent Moment Type") {
-      setMomentTypeSortOrder("Most Recent");
-    } else if (filterOption === "Sort by Least Recent Moment Type") {
-      setMomentTypeSortOrder("Least Recent");
-    }
-    setSortBy(filterOption);
-    setIsFilterModalVisible(false);
-  };
-
-  const sortByUploadTime = (a, b) => {
-    if (sortByTime) {
-      return moment(b.date).valueOf() - moment(a.date).valueOf(); // Most recent to oldest
-    } else {
-      return moment(a.date).valueOf() - moment(b.date).valueOf(); // Oldest to most recent
-    }
-  };
-  
-  const sortByMomentType = (a, b) => {
-    if (momentTypeSortOrder === "Most Recent") {
-      return b.moment_number - a.moment_number; // Most recent moment type first
-    } else {
-      return a.moment_number - b.moment_number; // Least recent moment type first
-    }
-  };
-
-  const handleEntryPress = (entry) => {
-    setSelectedEntry(entry);
-    setModalVisible(true);
-    setEditModalVisible(false);
-  };
-
-  const closeModal = () => {
-    setSelectedEntry(null);
-    setModalVisible(false);
   };
 
   const onEditPress = () => {
@@ -167,19 +121,6 @@ const JournalEntryDetailsScreen = ({ route, navigation }) => {
     }
   }
 
-  const getDividerColor = (moment_number) => {
-    switch (moment_number) {
-      case 1: //Modeh Ani
-        return '#F9E79F'; // Gentle Sunbeam Yellow: #F9E79F | Soft Morning Blue: #AED6F1 | Fresh Meadow Green: #ABEBC6
-      case 2: //Ashrei
-        return '#4169E1'; // Royal Psalm Blue: #4169E1 | Golden Hallelujah: #FFD700 | Sacred Scroll Brown: #8B4513
-      case 3: //Shema
-        return '#DC143C'; // Pure White: #FFFFFF | Deep Crimson: #DC143C | Heavenly Violet: #6A5ACD
-      default: //Default
-        return 'grey';
-    }
-  };
-
   handleGetEntries = async () => {
     console.log("Fetching Journal Entries");
     try {
@@ -218,21 +159,6 @@ const JournalEntryDetailsScreen = ({ route, navigation }) => {
       throw new Error("Check in entries failed");
     }
   };  
-  
-
-  const renderDateTimeSection = (date, time) => (
-    <View style={styles.datetimeContainer}>
-      <Text style={[styles.text, styles.dayOfWeekText]}>
-        {moment(date, 'YYYY-MM-DD').format('ddd')}
-      </Text>
-      <Text style={[styles.text, styles.dayNumberText]}>
-        {moment(date, 'YYYY-MM-DD').format('D')}
-      </Text>
-      <Text style={styles.text}>
-        {moment(time, 'HH-mm').format('h:mm A')}
-      </Text>
-    </View>
-  );
 
   const getMomentText = (momentNumber) => {
     switch (momentNumber) {
@@ -334,8 +260,8 @@ const JournalEntryDetailsScreen = ({ route, navigation }) => {
             <View style={styles.JournalEntryModalVideo}>
             {video[selectedEntry.checkin_id] ? (
                 <VideoViewer
-                source={video[selectedEntry.checkin_id]}
-                style={styles.JournalEntryModalVideo}
+                  source={video[selectedEntry.checkin_id]}
+                  style={styles.JournalEntryModalVideo}
                 />
             ) : (
                 <TouchableOpacity
@@ -366,12 +292,6 @@ const JournalEntryDetailsScreen = ({ route, navigation }) => {
     </View>
   );
 };
-
-function getWidth() {
-    let width = Dimensions.get("window").width;
-    
-    return width = width - 25;
-    }
 
 export default JournalEntryDetailsScreen;
 

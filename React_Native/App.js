@@ -2,6 +2,7 @@ import "react-native-gesture-handler";
 import React, { useState, useEffect } from "react";
 import * as Storage from "./AsyncStorage.js";
 import { NavigationContainer } from "@react-navigation/native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { AppRegistry, Platform } from "react-native";
 
@@ -20,8 +21,10 @@ AppRegistry.registerComponent("X", () => App);
 
 export default function App() {
   return (
-    <NavigationContainer>
+    <GestureHandlerRootView style={{ flex: 1 }}> 
+      <NavigationContainer>
         <AuthNavigator />
-    </NavigationContainer>
+      </NavigationContainer>
+    </GestureHandlerRootView>
   );
 }

@@ -23,13 +23,9 @@ export default function Archive({ navigation }) {
   const [groupedEntries, setGroupedEntries] = useState({});
   const [video, setVideo] = useState({});
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
-  const [selectedEntry, setSelectedEntry] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false);
   const [sortByTime, setSortByTime] = useState(true); // Default to sort by time
   const [momentTypeSortOrder, setMomentTypeSortOrder] = useState("Most Recent"); // Default to sort by most recent moment type
   const [sortBy, setSortBy] = useState("Sort by Newest to Oldest");
-  const [deleteModalVisible, setEditDeleteModalVisible] = useState(false);
-  const [editModalVisible, setEditModalVisible] = useState(false);
   const videoRefs = useRef({});
 
   theme = makeThemeStyle();
@@ -123,64 +119,6 @@ export default function Archive({ navigation }) {
       return a.moment_number - b.moment_number; // Least recent moment type first
     }
   };
-
-  const handleEntryPress = (entry) => {
-    setSelectedEntry(entry);
-    setModalVisible(true);
-    setEditModalVisible(false);
-  };
-
-  const closeModal = () => {
-    setSelectedEntry(null);
-    setModalVisible(false);
-  };
-
-  const onEditPress = () => {
-    // console.log("Pressed Edit Button");
-    setEditDeleteModalVisible(false);
-    setEditModalVisible(true);
-  }
-
-  const onDelete = async() => {
-    console.log("Deleting Journal Entry:", checkin_id);
-    const getCsrfToken = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/csrf-token/`);
-        return response.data.csrfToken;
-      } catch (error) {
-        console.error("Error retrieving CSRF token:", error);
-        throw new Error("CSRF token retrieval failed");
-      }
-    };
-    try {
-      const csrfToken = await getCsrfToken();
-      const response = await axios.post(
-        `${API_URL}/delete_checkin/`,
-        {
-          username: username,
-          checkin_id: checkin_id,
-        },
-        {
-          headers: {
-            "X-CSRFToken": csrfToken,
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
-      console.log("Delete response:", response.data);
-      // await Storage.removeItem("@username");
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "Archive" }],
-      });
-      navigation.navigate("Archive");
-    } catch (error) {
-      if (error.response.data) {
-        console.error("Error Deleting Journal Entry:", error.response.data);
-      }
-    }
-  }
 
   const getDividerColor = (moment_number) => {
     switch (moment_number) {

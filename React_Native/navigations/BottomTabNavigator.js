@@ -113,7 +113,6 @@ const BottomTabNavigator = () => {
                   style={{
                     width: 25,
                     height: 25,
-                    // tintColor: 'white',
                   }}
                 />
               </View>
@@ -206,4 +205,4 @@ function getWidth() {
   return width / 5;
 }
 
-export default JournalNavigator;
+export default BottomTabNavigator;
