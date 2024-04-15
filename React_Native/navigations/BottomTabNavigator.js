@@ -12,7 +12,12 @@ import { View, Animated, Dimensions } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
+
 import { Ionicons } from "@expo/vector-icons";
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faPen } from '@fortawesome/free-solid-svg-icons/faPen';
+import { faBoxArchive } from '@fortawesome/free-solid-svg-icons/faBoxArchive';
+import { faUsersLine } from '@fortawesome/free-solid-svg-icons/faUsersLine';
 
 import FriendFeed from "../screens/home/FriendFeed";
 import JournalEntry from "../screens/home/CheckIn";
@@ -42,7 +47,7 @@ const BottomTabNavigator = () => {
   return (
     <>
       <Tab.Navigator
-        initialRouteName="Feed"
+        initialRouteName="Archive"
         screenOptions={{
           tabBarShowLabel: false,
           headerShown: false,
@@ -66,14 +71,18 @@ const BottomTabNavigator = () => {
         }}
       >
         <Tab.Screen
-          name="Feed"
-          component={FriendFeed}
+          name="Archive"
+          component={Archive}
           options={{
             tabBarIcon: ({ focused }) => (
               <View style={{ position: "absolute", top: 15 }}>
-                <Ionicons
-                  name="people"
-                  size={28}
+                {/* <Ionicons
+                  name="archive"
+                  size={25}
+                  color={focused ? "#4A90E2" : "gray"}
+                /> */}
+                <FontAwesomeIcon icon={faBoxArchive} 
+                  size={25}
                   color={focused ? "#4A90E2" : "gray"}
                 />
               </View>
@@ -106,8 +115,16 @@ const BottomTabNavigator = () => {
                   marginBottom: 30,
                 }}
               >
-                <Ionicons
-                  name="journal"
+                {/* <Ionicons
+                  name="pencil"
+                  size={25}
+                  color={"#ffffff"}
+                  style={{
+                    width: 25,
+                    height: 25,
+                  }}
+                /> */}
+                <FontAwesomeIcon icon={faPen} 
                   size={25}
                   color={"#ffffff"}
                   style={{
@@ -127,16 +144,20 @@ const BottomTabNavigator = () => {
         />
 
         <Tab.Screen
-          name="Archive"
-          component={Archive}
+          name="Feed"
+          component={FriendFeed}
           options={{
             tabBarIcon: ({ focused }) => (
               <View style={{ position: "absolute", top: 15 }}>
                 <Ionicons
-                  name="archive"
-                  size={25}
+                  name="people"
+                  size={28}
                   color={focused ? "#4A90E2" : "gray"}
                 />
+                {/* <FontAwesomeIcon icon={faUsersLine} 
+                  size={28}
+                  color={focused ? "#4A90E2" : "gray"}
+                /> */}
               </View>
             ),
           }}
@@ -144,7 +165,7 @@ const BottomTabNavigator = () => {
             // Onpress Update....
             tabPress: (e) => {
               Animated.spring(tabOffsetValue, {
-                toValue: getWidth() * 3.33,
+                toValue: getWidth() * 3.35,
                 useNativeDriver: true,
               }).start();
             },

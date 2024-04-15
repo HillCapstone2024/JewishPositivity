@@ -63,7 +63,7 @@ export default function AuthNavigator() {
         <Stack.Screen name="ForgotPassword" component={ForgotPassword} options={{headerTitle: "Forgot Password?"}}/>
         <Stack.Screen name="Drawer" component={MyDrawer} options={{headerShown: false}}/>
         <Stack.Screen name="Terms of Use" component={TermsofUse} />
-        <Stack.Screen name="JournalEntryDetails" component={JournalEntryDetailsScreen} options={{headerTitle: "Journal Entry Details"}}/>
+        <Stack.Screen name="JournalEntryDetails" component={JournalEntryDetailsScreen} options={{headerTitle: "Check-in Details"}}/>
       </Stack.Navigator>
   );
 }

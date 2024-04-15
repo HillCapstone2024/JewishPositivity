@@ -42,7 +42,6 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
   const [mediaType, setMediaType] = useState("text");
   const [base64Data, setBase64Data] = useState("");
   const [journalText, setJournalText] = useState("");
-  const [headerText, setHeaderText] = useState("");
   const [showMediaBar, setShowMediaBar] = useState(true);
   const [mediaChanged, setMediaChanged] = useState(false);
   const [selectedOption, setSelectedOption] = useState("");
@@ -154,7 +153,6 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
           username: username,
           moment_number: momentType,
           content: base64Data,
-          header: headerText,
           content_type: mediaType,
           text_entry: journalText,
           date: formattedDateTime,
@@ -212,11 +210,6 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
     setMediaBox(true);
     setMediaChanged(!mediaChanged);
     setDisableSubmit(false);
-  };
-
-  const handleHeaderComplete = (text) => {
-    setHeaderText(text);
-    // console.log(text);
   };
 
   const handleTextComplete = (text) => {
@@ -304,7 +297,7 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
         style={[styles.container]}
       >
         <ScrollView style={styles.contentContainer}>
-          <Text style={styles.header}>Whacha checking in for?</Text>
+          <Text style={styles.header}>What are you checking in for?</Text>
           <Text style={[styles.datetime, theme["color"]]}>
             {formattedDateTime}{" "}
           </Text>
@@ -344,31 +337,18 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
           ) : null}
 
           <View style={styles.boxContainer}>
-            <Text style={[styles.boxDescriptor]}>Add a Title</Text>
-            <TextInput
-              style={[styles.title, theme["color"]]}
-              placeholder="Write something..."
-              placeholderTextColor="grey"
-              testID="headerInput"
-              value={headerText}
-              maxLength={100}
-              onChangeText={handleHeaderComplete}
-            ></TextInput>
-          </View>
-
-          <View style={styles.boxContainer}>
             <Text style={[styles.boxDescriptor]}>Check-in Type</Text>
             <View style={styles.dropdownContainer}>
               <RNPickerSelect
                 style={pickerSelectStyles}
                 value={selectedOption}
-                placeholder={{ label: "Modeh Ani", value: "Modeh Ani" }}
+                placeholder={{ label: "A Modeh Ani Moment ", value: "Modeh Ani" }}
                 placeholderTextColor="black"
                 onValueChange={handleOptionChange}
                 items={[
                   // { label: "Modeh Ani", value: "Modeh Ani" },
-                  { label: "Ashrei", value: "Ashrei" },
-                  { label: "Shema", value: "Shema" },
+                  { label: "Ashrei in the Afternoon", value: "Ashrei" },
+                  { label: "A Shema Reflection", value: "Shema" },
                 ]}
               />
               {/* <Ionicons name="chevron-down" size={25} color={"#4A90E2"} style={{ paddingTop: 5 }}/> */}

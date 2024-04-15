@@ -163,11 +163,11 @@ const JournalEntryDetailsScreen = ({ route, navigation }) => {
   const getMomentText = (momentNumber) => {
     switch (momentNumber) {
       case 1:
-        return "Modeh Ani";
+        return "A Modeh Ani Moment ";
       case 2:
-        return "Ashrei";
+        return "Ashrei in the Afternoon";
       case 3:
-        return "Shema";
+        return "A Shema Reflection";
       default:
         return "Unknown Check-in Type";
     }
@@ -241,14 +241,11 @@ const JournalEntryDetailsScreen = ({ route, navigation }) => {
         </View>
         <ScrollView padding={10}>
         <Text style={[styles.headerText]}>
-            {selectedEntry?.header !== null ? selectedEntry?.header : "Header Would Go Here"}
-        </Text>
-        <Text style={[styles.detailText]}>
-            {moment(selectedEntry?.date, "YYYY-MM-DD").format("dddd, D MMMM YYYY")}{" "}
-        </Text>
-        <Text style={[styles.detailText, { marginBottom: 20 }]}>
             {getMomentText(selectedEntry?.moment_number)}
         </Text>
+        <Text style={[styles.detailText, { marginBottom: 20 }]}>
+            {moment(selectedEntry?.date, "YYYY-MM-DD").format("dddd, D MMMM YYYY")}{" "}
+        </Text>      
 
         {selectedEntry?.content_type === "image" && (
             <Image
@@ -326,7 +323,6 @@ const styles = StyleSheet.create({
     headerText: {
       fontSize: 22,
       fontWeight: "bold",
-      marginBottom: 5,
     },
     detailText: {
       fontSize: 14,

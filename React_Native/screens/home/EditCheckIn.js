@@ -43,7 +43,6 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
   const [mediaType, setMediaType] = useState("text");
   const [base64Data, setBase64Data] = useState("");
   const [journalText, setJournalText] = useState("");
-  const [headerText, setHeaderText] = useState("");
   const [showMediaBar, setShowMediaBar] = useState(true);
   const [mediaChanged, setMediaChanged] = useState(false);
   const [selectedOption, setSelectedOption] = useState("");
@@ -203,12 +202,6 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
     setDisableUpdate(false);
   };
 
-  const handleHeaderComplete = (text) => {
-    setHeaderText(text);
-    console.log(text);
-    setDisableUpdate(text.trim().length === 0);
-  };
-
   const handleTextComplete = (text) => {
     setJournalText(text);
     console.log(text);
@@ -339,17 +332,6 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
                     <ProgressBar onMediaChange={mediaChanged} />
                 </View>
                 ) : null}
-
-                {/* Header */}
-                <View style={styles.boxContainer}>
-                    <Text style={[styles.boxDescriptor]}>Title</Text>
-                    <TextInput
-                        style={[styles.title, theme["color"]]}
-                        testID="headerInput"
-                        maxLength={100}
-                        onChangeText={handleHeaderComplete}
-                    >{selectedEntry.header}</TextInput>
-                </View>
 
                 {/* Checkin type */}
                 <View style={styles.boxContainer}>

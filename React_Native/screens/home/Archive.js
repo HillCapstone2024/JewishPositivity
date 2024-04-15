@@ -105,10 +105,13 @@ export default function Archive({ navigation }) {
   };
 
   const sortByUploadTime = (a, b) => {
+    const momentA = moment(`${a.date} ${a.time}`, 'YYYY-MM-DD HH:mm');
+    const momentB = moment(`${b.date} ${b.time}`, 'YYYY-MM-DD HH:mm');
+  
     if (sortByTime) {
-      return moment(b.date).valueOf() - moment(a.date).valueOf(); // Most recent to oldest
+      return momentB.valueOf() - momentA.valueOf(); // Most recent to oldest
     } else {
-      return moment(a.date).valueOf() - moment(b.date).valueOf(); // Oldest to most recent
+      return momentA.valueOf() - momentB.valueOf(); // Oldest to most recent
     }
   };
   
@@ -190,11 +193,11 @@ export default function Archive({ navigation }) {
   const getMomentText = (momentNumber) => {
     switch (momentNumber) {
       case 1:
-        return "Modeh Ani";
+        return "A Modeh Ani Moment ";
       case 2:
-        return "Ashrei";
+        return "Ashrei in the Afternoon";
       case 3:
-        return "Shema";
+        return "A Shema Reflection";
       default:
         return "Unknown Check-in Type";
     }
@@ -210,8 +213,7 @@ export default function Archive({ navigation }) {
           <View style={[styles.divider, { backgroundColor: dividerColor }]} />
           <View style={[styles.contentSection, data.content_type === "text" && { flex: 3.05 }]}>
             <View style={styles.middleContent}>
-              <Text style={styles.middleContentHeader} numberOfLines={1} ellipsizeMode="tail">{data.header !== null ? data.header : "Header Would Go Here"}</Text>
-              <Text style={styles.middleContentMoment_Number}>{getMomentText(data.moment_number)}</Text>
+              <Text style={styles.middleContentMoment_Number} numberOfLines={1} >{getMomentText(data.moment_number)}</Text>
               <Text style={styles.middleContentText} numberOfLines={3} ellipsizeMode="tail">{data.text_entry !== null ? data.text_entry : "This is some long content text that will be truncated if it takes up too much space in the container."}</Text>
             </View>
           </View>
@@ -457,14 +459,11 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingBottom: 10,
   },
-  middleContentHeader: {
+  middleContentMoment_Number: {
+    // fontStyle: "italic",
+    marginBottom: 5,
     fontSize: 20,
     fontWeight: "bold",
-  },
-  middleContentMoment_Number: {
-    fontSize: 10,
-    fontStyle: "italic",
-    marginBottom: 5,
   },
   middleContentText: {
     fontSize: 13,
