@@ -70,3 +70,20 @@ class Badges(models.Model):
     one_week = models.BooleanField(default=False)
     one_month = models.BooleanField(default=False)
     one_year = models.BooleanField(default=False)
+
+class Community(models.Model): # to store communities
+    community_id = models.AutoField(primary_key=True) # autoincremented ID field for community
+    community_name = models.CharField(max_length=100, unique=True)
+    community_photo = models.BinaryField(blank=True, null=True) # Community picture in binary format
+    community_description = models.TextField()
+    owner_id = models.ForeignKey(User,on_delete=models.CASCADE) # user_id of the owner
+    privacy = models.CharField(max_length=100) # 'private' or 'public'
+
+class CommunityUser(models.Model): # to store users-community relationships
+    communityuser_id = models.AutoField(primary_key=True) #the autoincremented ID field for membership
+    user_id = models.ForeignKey(User,on_delete=models.CASCADE) # FK of the user
+    community_id = models.ForeignKey(Community,on_delete=models.CASCADE) # FK of the community
+    status = models.BooleanField(default=False)  # False for pending, True for accepted
+    class Meta:
+        # Define unique constraint for composite key
+        unique_together = [('user_id', 'community_id')] # So members can't join the same community twice
