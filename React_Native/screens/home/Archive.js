@@ -1,5 +1,20 @@
 import React, { useEffect, useState, useRef } from "react";
-import { View, Text, ActivityIndicator, TouchableOpacity, StyleSheet, ScrollView, Button, Image, Dimensions, Modal, Pressable, TouchableWithoutFeedback } from 'react-native';
+import {
+  View,
+  Text,
+  ActivityIndicator,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  Button,
+  Image,
+  Dimensions,
+  Modal,
+  Pressable,
+  TouchableWithoutFeedback,
+  RefreshControl,
+  Animated,
+} from "react-native";
 import makeThemeStyle from '../../tools/Theme.js';
 import * as Storage from "../../AsyncStorage.js";
 import IP_ADDRESS from "../../ip.js";
@@ -11,11 +26,13 @@ import { SearchBar } from 'react-native-elements';
 import { Ionicons } from "@expo/vector-icons";
 import moment from 'moment';
 import * as FileSystem from "expo-file-system";
-
+import LoadingScreen from "../greet/Loading.js";
 import VideoViewer from "../../tools/VideoViewer.js";
 import RecordingViewer from "../../tools/RecordingViewer.js";
 
 export default function Archive({ navigation }) {
+  const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [username, setUsername] = useState("");
   const [checkin_id, setCheckin_id] = useState("");
   const [entries, setEntries] = useState([]);
@@ -31,27 +48,54 @@ export default function Archive({ navigation }) {
   theme = makeThemeStyle();
 
   useEffect(() => {
-  const loadUsername = async () => {
-    const storedUsername = await Storage.getItem("@username");
-    setUsername(storedUsername || "No username");
-  };
-
-  loadUsername();
+    initializeData();
   }, []);
+
+  async function initializeData() {
+    setIsLoading(true);
+    console.log("initializing data");
+    const storedUsername = await Storage.getItem("@username");
+    const groupedEntries = await handleGetEntries(storedUsername);
+
+    setUsername(storedUsername || "No username");
+    setGroupedEntries(groupedEntries);
+    console.log("finished initialzing data.");
+    setIsLoading(false);
+  }
+
+  const onRefresh = React.useCallback(() => {
+    const refresh = async () => {
+      setRefreshing(true);
+      try {
+        console.log("refreshing...");
+        const groupedEntries = await handleGetEntries(username);
+        setGroupedEntries(groupedEntries);
+      } catch (error) {
+        console.error("Failed to refresh:", error);
+      } finally {
+        setRefreshing(false);
+      }
+    };
+
+    if (!refreshing) {
+      refresh(); // Correctly invoke the async function
+    }
+  }, [refreshing]); // Ensure dependencies are correctly listed
 
   const getCsrfToken = async () => {
     try {
-    const response = await axios.get(`${API_URL}/csrf-token/`);
-    return response.data.csrfToken;
+      const response = await axios.get(`${API_URL}/csrf-token/`);
+      return response.data.csrfToken;
     } catch (error) {
-    console.error("Error retrieving CSRF token:", error);
-    throw new Error("CSRF token retrieval failed");
+      console.error("Error retrieving CSRF token:", error);
+      throw new Error("CSRF token retrieval failed");
     }
   };
 
   const saveBase64Video = async (base64String, checkin_id) => {
     console.log("reached file function");
-    const filename = FileSystem.documentDirectory + checkin_id + "downloadedVideo.mp4";
+    const filename =
+      FileSystem.documentDirectory + checkin_id + "downloadedVideo.mp4";
     await FileSystem.writeAsStringAsync(filename, base64String, {
       encoding: FileSystem.EncodingType.Base64,
     });
@@ -105,16 +149,16 @@ export default function Archive({ navigation }) {
   };
 
   const sortByUploadTime = (a, b) => {
-    const momentA = moment(`${a.date} ${a.time}`, 'YYYY-MM-DD HH:mm');
-    const momentB = moment(`${b.date} ${b.time}`, 'YYYY-MM-DD HH:mm');
-  
+    const momentA = moment(`${a.date} ${a.time}`, "YYYY-MM-DD HH:mm");
+    const momentB = moment(`${b.date} ${b.time}`, "YYYY-MM-DD HH:mm");
+
     if (sortByTime) {
       return momentB.valueOf() - momentA.valueOf(); // Most recent to oldest
     } else {
       return momentA.valueOf() - momentB.valueOf(); // Oldest to most recent
     }
   };
-  
+
   const sortByMomentType = (a, b) => {
     if (momentTypeSortOrder === "Most Recent") {
       return b.moment_number - a.moment_number; // Most recent moment type first
@@ -126,67 +170,68 @@ export default function Archive({ navigation }) {
   const getDividerColor = (moment_number) => {
     switch (moment_number) {
       case 1: //Modeh Ani
-        return '#F9E79F'; // Gentle Sunbeam Yellow: #F9E79F | Soft Morning Blue: #AED6F1 | Fresh Meadow Green: #ABEBC6
+        return "#F9E79F"; // Gentle Sunbeam Yellow: #F9E79F | Soft Morning Blue: #AED6F1 | Fresh Meadow Green: #ABEBC6
       case 2: //Ashrei
-        return '#4169E1'; // Royal Psalm Blue: #4169E1 | Golden Hallelujah: #FFD700 | Sacred Scroll Brown: #8B4513
+        return "#4169E1"; // Royal Psalm Blue: #4169E1 | Golden Hallelujah: #FFD700 | Sacred Scroll Brown: #8B4513
       case 3: //Shema
-        return '#DC143C'; // Pure White: #FFFFFF | Deep Crimson: #DC143C | Heavenly Violet: #6A5ACD
+        return "#DC143C"; // Pure White: #FFFFFF | Deep Crimson: #DC143C | Heavenly Violet: #6A5ACD
       default: //Default
-        return 'grey';
+        return "grey";
     }
   };
 
-  handleGetEntries = async () => {
+  const handleGetEntries = async (usernameProp) => {
     console.log("Fetching Journal Entries");
     try {
       const csrfToken = await getCsrfToken();
       const response = await axios.get(`${API_URL}/get_checkin_info/`, {
         params: {
-          username: username
-        }
+          username: usernameProp,
+        },
       });
-  
-      if (response.data && response.data.length > 3 && response.data[3].content_type) {
-        console.log('RESPONSE:', response.data[3].content_type);
+
+      if (
+        response.data &&
+        response.data.length > 3 &&
+        response.data[3].content_type
+      ) {
+        console.log("RESPONSE:", response.data[3].content_type);
       } else {
         console.error("Unexpected response format:", response.data);
       }
-      console.log('number of entries: ', response.data.length)
-  
+      console.log("number of entries: ", response.data.length);
+
       // Group entries by year/month
-      console.log("Grouping the entries by year")
+      console.log("Grouping the entries by year");
       const groupedEntries = {};
-      response.data.forEach(entry => {
-        const yearMonth = moment(entry.date).format('YYYY-MM');
+      response.data.forEach((entry) => {
+        const yearMonth = moment(entry.date).format("YYYY-MM");
         if (!groupedEntries[yearMonth]) {
           groupedEntries[yearMonth] = [];
         }
         groupedEntries[yearMonth].push(entry);
       });
-  
+
       // Set grouped entries state along with their corresponding videos
-      setGroupedEntries(groupedEntries);
-  
-      console.log("Returning Journal Entry Data")
-      return response.data;
+      // setGroupedEntries(groupedEntries);
+
+      console.log("Returning Journal Entry Data");
+      return groupedEntries;
     } catch (error) {
       console.error("Error retrieving check in entries:", error);
       throw new Error("Check in entries failed");
     }
-  };  
-  
+  };
 
   const renderDateTimeSection = (date, time) => (
     <View style={styles.datetimeContainer}>
       <Text style={[styles.text, styles.dayOfWeekText]}>
-        {moment(date, 'YYYY-MM-DD').format('ddd')}
+        {moment(date, "YYYY-MM-DD").format("ddd")}
       </Text>
       <Text style={[styles.text, styles.dayNumberText]}>
-        {moment(date, 'YYYY-MM-DD').format('D')}
+        {moment(date, "YYYY-MM-DD").format("D")}
       </Text>
-      <Text style={styles.text}>
-        {moment(time, 'HH-mm').format('h:mm A')}
-      </Text>
+      <Text style={styles.text}>{moment(time, "HH-mm").format("h:mm A")}</Text>
     </View>
   );
 
@@ -208,13 +253,28 @@ export default function Archive({ navigation }) {
 
     return (
       <View style={styles.contentContainer}>
-        <View style={{ flexDirection: 'row' }}>
+        <View style={{ flexDirection: "row" }}>
           {renderDateTimeSection(data.date, data.time)}
           <View style={[styles.divider, { backgroundColor: dividerColor }]} />
-          <View style={[styles.contentSection, data.content_type === "text" && { flex: 3.05 }]}>
+          <View
+            style={[
+              styles.contentSection,
+              data.content_type === "text" && { flex: 3.05 },
+            ]}
+          >
             <View style={styles.middleContent}>
-              <Text style={styles.middleContentMoment_Number} numberOfLines={1} >{getMomentText(data.moment_number)}</Text>
-              <Text style={styles.middleContentText} numberOfLines={3} ellipsizeMode="tail">{data.text_entry !== null ? data.text_entry : "This is some long content text that will be truncated if it takes up too much space in the container."}</Text>
+              <Text style={styles.middleContentMoment_Number} numberOfLines={1}>
+                {getMomentText(data.moment_number)}
+              </Text>
+              <Text
+                style={styles.middleContentText}
+                numberOfLines={3}
+                ellipsizeMode="tail"
+              >
+                {data.text_entry !== null
+                  ? data.text_entry
+                  : "This is some long content text that will be truncated if it takes up too much space in the container."}
+              </Text>
             </View>
           </View>
           {data.content_type === "image" && (
@@ -225,7 +285,7 @@ export default function Archive({ navigation }) {
               />
             </View>
           )}
-          {(data.content_type === "video") && (
+          {data.content_type === "video" && (
             <View style={styles.video}>
               <View style={styles.videoContainer}>
                 {video[data.checkin_id] ? (
@@ -252,7 +312,7 @@ export default function Archive({ navigation }) {
             <View style={styles.audioContainer}>
               <RecordingViewer
                 style={styles.audio}
-                source={`data:audio/mp3;base64,${data.content}`}               
+                source={`data:audio/mp3;base64,${data.content}`}
               />
             </View>
           )}
@@ -260,127 +320,149 @@ export default function Archive({ navigation }) {
       </View>
     );
   };
-  
+
   useEffect(() => {
     if (entries.length == 0) {
-      setMessage(<Text style={[styles.title, theme['color']]}>No entries yet!</Text>);
+      setMessage(
+        <Text style={[styles.title, theme["color"]]}>No entries yet!</Text>
+      );
     }
   }, []);
-  
+
   return (
     <View style={[{ flex: 1, paddingBottom: 100 }, theme["background"]]}>
-      <View style={styles.searchBarContainer}>
-        <SearchBar
-          placeholder="Search..."
-          inputStyle={{ backgroundColor: "#ffffff", color: "black" }}
-          inputContainerStyle={{ backgroundColor: "#ffffff" }}
-          containerStyle={styles.searchBarContainer}
-        />
-      </View>
-      <View style={styles.buttonContainer}>
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={isFilterModalVisible}
-          onRequestClose={() => {
-            setIsFilterModalVisible(!isFilterModalVisible);
-          }}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Pressable
-                onPress={() => applyFilter("Sort by Newest to Oldest")}
-                style={styles.filterOption}
-              >
-                <Text>Sort by Newest to Oldest</Text>
-              </Pressable>
-              <Pressable
-                onPress={() => applyFilter("Sort by Oldest to Newest")}
-                style={styles.filterOption}
-              >
-                <Text>Sort by Oldest to Newest</Text>
-              </Pressable>
-              {/* <Pressable onPress={() => applyFilter("Sort by Most Recent Moment Type")} style={styles.filterOption}>
+      {isLoading ? (
+        // <ActivityIndicator style={{ height: 100, width: 100 }} />
+        <View testID="loading-screen" style={styles.loadingStyle}>
+          <LoadingScreen />
+        </View>
+      ) : (
+        <View>
+          <View style={styles.searchBarContainer}>
+            <SearchBar
+              placeholder="Search..."
+              inputStyle={{ backgroundColor: "#ffffff", color: "black" }}
+              inputContainerStyle={{ backgroundColor: "#ffffff" }}
+              containerStyle={styles.searchBarContainer}
+            />
+          </View>
+          <View style={styles.buttonContainer}>
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={isFilterModalVisible}
+              onRequestClose={() => {
+                setIsFilterModalVisible(!isFilterModalVisible);
+              }}
+            >
+              <View style={styles.modalContainer}>
+                <View style={styles.modalContent}>
+                  <Pressable
+                    onPress={() => applyFilter("Sort by Newest to Oldest")}
+                    style={styles.filterOption}
+                  >
+                    <Text>Sort by Newest to Oldest</Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => applyFilter("Sort by Oldest to Newest")}
+                    style={styles.filterOption}
+                  >
+                    <Text>Sort by Oldest to Newest</Text>
+                  </Pressable>
+                  {/* <Pressable onPress={() => applyFilter("Sort by Most Recent Moment Type")} style={styles.filterOption}>
                 <Text>Sort by Most Recent Moment Type</Text>
               </Pressable>
               <Pressable onPress={() => applyFilter("Sort by Least Recent Moment Type")} style={styles.filterOption}>
                 <Text>Sort by Least Recent Moment Type</Text>
               </Pressable> */}
-            </View>
-          </View>
-        </Modal>
-        <TouchableOpacity
-          onPress={toggleFilterModal}
-          style={styles.filterButton}
-        >
-          <Ionicons name="filter" size={24} color="#4A90E2" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={handleGetEntries}
-          style={styles.refreshButton}
-        >
-          <Ionicons
-            name="refresh"
-            size={24}
-            color={theme["color"].backgroundColor}
-            style={styles.refreshIcon}
-          />
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        <View
-          style={[
-            { alignItems: "center", justifyContent: "center" },
-            theme["background"],
-          ]}
-        >
-          {Object.keys(groupedEntries)
-            .sort((a, b) => {
-              if (sortBy === "Sort by Newest to Oldest") {
-                return (
-                  moment(b, "YYYY-MM").valueOf() -
-                  moment(a, "YYYY-MM").valueOf()
-                );
-              } else if (sortBy === "Sort by Oldest to Newest") {
-                return (
-                  moment(a, "YYYY-MM").valueOf() -
-                  moment(b, "YYYY-MM").valueOf()
-                );
-              }
-            })
-            .map((yearMonth) => (
-              <View key={yearMonth} style={styles.yearMonthContainer}>
-                <Text style={styles.yearMonthHeader}>
-                  {moment(yearMonth, "YYYY-MM").format("MMMM YYYY")}
-                </Text>
-                {groupedEntries[yearMonth]
-                  .sort(sortByUploadTime) // Apply sorting by upload time
-                  // .sort(sortByMomentType) // Apply sorting by moment type
-                  .map((item, index) => (
-                    <TouchableOpacity
-                      key={index}
-                      // onPress={() => handleEntryPress(item)}
-                      onPress={() => navigation.navigate('JournalEntryDetails', { selectedEntry: item })}
-
-                    >
-                      {renderContent(item)}
-                    </TouchableOpacity>
-                  ))}
-                {/* Modal to display journal entry details */}
-                
+                </View>
               </View>
-            ))}
+            </Modal>
+            <TouchableOpacity
+              onPress={toggleFilterModal}
+              style={styles.filterButton}
+            >
+              <Ionicons name="filter" size={24} color="#4A90E2" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleGetEntries}
+              style={styles.refreshButton}
+            >
+              <Ionicons
+                name="refresh"
+                size={24}
+                color={theme["color"].backgroundColor}
+                style={styles.refreshIcon}
+              />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView
+            contentContainerStyle={styles.scrollViewContent}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                testID="refresh-control"
+              />
+            }
+          >
+            <View
+              style={[
+                { alignItems: "center", justifyContent: "center" },
+                theme["background"],
+              ]}
+            >
+              {Object.keys(groupedEntries)
+                .sort((a, b) => {
+                  if (sortBy === "Sort by Newest to Oldest") {
+                    return (
+                      moment(b, "YYYY-MM").valueOf() -
+                      moment(a, "YYYY-MM").valueOf()
+                    );
+                  } else if (sortBy === "Sort by Oldest to Newest") {
+                    return (
+                      moment(a, "YYYY-MM").valueOf() -
+                      moment(b, "YYYY-MM").valueOf()
+                    );
+                  }
+                })
+                .map((yearMonth) => (
+                  <View key={yearMonth} style={styles.yearMonthContainer}>
+                    <Text style={styles.yearMonthHeader}>
+                      {moment(yearMonth, "YYYY-MM").format("MMMM YYYY")}
+                    </Text>
+                    {groupedEntries[yearMonth]
+                      .sort(sortByUploadTime) // Apply sorting by upload time
+                      // .sort(sortByMomentType) // Apply sorting by moment type
+                      .map((item, index) => (
+                        <TouchableOpacity
+                          key={index}
+                          // onPress={() => handleEntryPress(item)}
+                          onPress={() =>
+                            navigation.navigate("JournalEntryDetails", {
+                              selectedEntry: item,
+                            })
+                          }
+                        >
+                          {renderContent(item)}
+                        </TouchableOpacity>
+                      ))}
+                    {/* Modal to display journal entry details */}
+                  </View>
+                ))}
+            </View>
+          </ScrollView>
         </View>
-      </ScrollView>
+      )}
     </View>
-  );  
+  );
 }
   
 function getWidth() {
 let width = Dimensions.get("window").width;
 
-return width = width - 25;
+return width - 25;
 }
   
 const styles = StyleSheet.create({
@@ -571,7 +653,7 @@ const styles = StyleSheet.create({
     color: "grey",
     fontWeight: 500,
     lineHeight: 20,
-  }, 
+  },
 
   // Edit/Delete Modal
   centeredView: {
@@ -631,5 +713,12 @@ const styles = StyleSheet.create({
   editText: {
     fontSize: 18,
     color: "#4A90E2",
+  },
+  loadingStyle: {
+    // width: 20,
+    // height: 20,
+    // alignContent: "center",
+    marginTop: 200,
+    backgroundColor: "red",
   },
 });

@@ -74,6 +74,11 @@ const Signup = ({ navigation }) => {
     };
 
     try {
+      const avatar = createAvatar(micah, {
+        seed: username,
+        radius: 50,
+        mouth: ["smile", "smirk", "laughing"],
+      }).toString();
       const csrfToken = await getCsrfToken();
       const response = await axios.post(
         `${API_URL}/create_user/`,

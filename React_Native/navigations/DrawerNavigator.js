@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   Image
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 import IP_ADDRESS from "../ip.js";
@@ -39,8 +40,10 @@ const Drawer = createDrawerNavigator();
 
 const CustomDrawerContent = (props) => {
   const [username, setUsername] = useState("");
+  const [profilePicture, setProfilePicture] = useState("");
   const theme = makeThemeStyle();
   const [user, setUser] = useState();
+  const navigation = useNavigation();
 
   const handleLogout = () => {
     const logout = async () => {
@@ -62,57 +65,33 @@ const CustomDrawerContent = (props) => {
     ]);
   };
 
+
+
+
+
   useEffect(() => {
-    getUserInfo();
+    // const unsubscribe = navigation.addListener("drawerOpen", () => {
+      // Call your method here
+      getUserInfo();
+    // });
+
+    // unsubscribe();
   }, []);
 
-  // useFocusEffect(() => {
-  //   const getUser = async () => {
-  //     getUserInfo;
-  //   };
-  //   getUser();
-  //   getUserInfo();
-  // }
-  // );
-
-  const getCsrfToken = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/csrf-token/`);
-      return response.data.csrfToken;
-    } catch (error) {
-      console.error("Error retrieving CSRF token:", error);
-      throw new Error("CSRF token retrieval failed");
-    }
-  };
 
   const getUserInfo = async () => {
+    console.log('get user info called');
     try {
-      const csrfToken = await getCsrfToken();
+      // const csrfToken = await getCsrfToken();
       const storedUsername = await Storage.getItem("@username");
+      const storedProfilePicture = await Storage.getItem("@profilePicture");
       console.log('stored username: ', storedUsername)
+      setProfilePicture(storedProfilePicture);
       setUsername(storedUsername || "No username");
-      const response = await axios.get(`${API_URL}/get_user_info/`, {
-        params: {
-          username: storedUsername,
-        },
-        headers: {
-          "X-CSRFToken": csrfToken,
-          "Content-Type": "application/json",
-        },
-        withCredentials: true,
-      });
-      setUser(response.data);
-      console.log('profile pic: ',response.data.profilepicture);
     } catch (error) {
       console.log('error getting drawer user info', error);
     }
   };
-
-  const avatar = createAvatar(micah, {
-    seed: username,
-    radius: 50,
-    mouth: ["smile", "smirk", "laughing"],
-  }).toString();
 
   return (
     <View style={[{ flex: 1 }, theme["background"]]}>
@@ -123,11 +102,11 @@ const CustomDrawerContent = (props) => {
         >
           {/* <SvgXml xml={avatar} style={styles.drawerImage} /> */}
           <Image
-            source={{ uri: `data:Image/jpeg;base64,${user?.profilepicture}` }}
+            source={{ uri: `data:Image/jpeg;base64,${profilePicture}` }}
             style={styles.drawerImage}
           />
           <Text testID="usernameText" style={[styles.drawerUsername]}>
-            {user?.username}
+            {username}
           </Text>
         </ImageBackground>
         <View
@@ -183,6 +162,8 @@ const MyDrawer = ({ navigation }) => {
   //     return unsubscribe;
   //   }, [navigation])
   // );
+  // const navigation = useNavigation();
+
   return (
     <Drawer.Navigator initialRouteName="BottomTabNavigator"
       screenOptions={{
@@ -193,7 +174,7 @@ const MyDrawer = ({ navigation }) => {
           theme['color']
         
       }}
-      drawerContent={(props) => <CustomDrawerContent {...props} />}
+      drawerContent={(props) => <CustomDrawerContent {...props}/>}
     >
       <Drawer.Screen name="Home" component={BottomTabNavigator} options={{ drawerIcon: () => (<Ionicons name="home" size={22} color={theme['color']['color']} />), }} />
       <Drawer.Screen name="Profile" component={ParentProfile} testID="profileButton" options={{ drawerIcon: () => (<Ionicons name="person" size={22} color={theme['color']['color']} />), }} />

@@ -162,8 +162,8 @@ const EditProfile = ({navigation, onSwitch}) => {
 
   const pickMedia = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.All, // Allows both videos and images
-    allowsEditing: true, // Only applies to images
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: true,
     aspect: [4, 3],
     quality: 1,
     });
@@ -187,7 +187,7 @@ const takeMedia = async () => {
     }
 
     let result = await ImagePicker.launchCameraAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.All, // This will still default to capturing images
+    mediaTypes: ImagePicker.MediaTypeOptions.Images, // This will still default to capturing images
     allowsEditing: true, // Only applies to images
     aspect: [4, 3],
     quality: 1,
@@ -200,6 +200,7 @@ const takeMedia = async () => {
           ...prevUserInfo,
           profilePicture: base64String,
         }));
+        await Storage.setItem("@profilePicture", base64String);
     }
 };
 
