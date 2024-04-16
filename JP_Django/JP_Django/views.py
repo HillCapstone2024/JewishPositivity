@@ -33,7 +33,7 @@ logging.basicConfig(
     level=logging.INFO,  # Set the logging level to INFO
     format="%(asctime)s - %(levelname)s - %(message)s",  # Define log message format
     filename="views.log",  # Specify the log file
-    filemode="a",
+    filemode="w",
 )  # Choose file mode (overwrite in this case)
 
 User = get_user_model()
