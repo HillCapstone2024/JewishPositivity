@@ -1,17 +1,9 @@
-// const Tab = createBottomTabNavigator();
-
-
-
-
-// };
-
-// export default BottomTabNavigator;
-
 import React, { useRef, useState } from "react";
 import { View, Animated, Dimensions } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
+import { useNavigation } from '@react-navigation/native';
 
 import { Ionicons } from "@expo/vector-icons";
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -24,13 +16,16 @@ import JournalEntry from "../screens/home/CheckIn";
 import Archive from "../screens/home/Archive";
 import JournalModal from "../screens/home/JournalModal";
 import JournalEntryDetailsScreen from "../screens/home/JournalEntryDetailsScreen";
+import CheckIn from "../screens/home/CheckIn";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-const BottomTabNavigator = () => {
+const BottomTabNavigator = ( ) => {
   const tabOffsetValue = useRef(new Animated.Value(0)).current;
+  // const [selectedCheckInType, setSelectedCheckInType] = useState(null);
   const [showJournalModal, setShowJournalModal] = useState(false);
+  const navigation = useNavigation(); // Access navigation here
  
   const openJournalModal = () => {
     setShowJournalModal(true);
@@ -101,7 +96,7 @@ const BottomTabNavigator = () => {
 
         <Tab.Screen
           name="Journal"
-          component={JournalEntry}
+          component={CheckIn}
           options={{
             tabBarIcon: ({ focused }) => (
               <View
@@ -191,6 +186,8 @@ const BottomTabNavigator = () => {
           onClose={closeJournalModal}
           onSubmit={submitJournalEntry}
           visible={showJournalModal}
+          navigation={navigation}
+          // checkInType={selectedCheckInType} // Pass the check-in type here
           onRequestClose={() => setShowJournalModal(false)}
         />
       )}

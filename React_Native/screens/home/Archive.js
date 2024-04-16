@@ -181,7 +181,7 @@ export default function Archive({ navigation }) {
   };
 
   const handleGetEntries = async (usernameProp) => {
-    console.log("Fetching Journal Entries");
+    console.log("Fetching Check-in Moments");
     try {
       const csrfToken = await getCsrfToken();
       const response = await axios.get(`${API_URL}/get_checkin_info/`, {
