@@ -2494,7 +2494,6 @@ class CreateCommunityViewTestCase(TestCase): #to test handling of checkin post f
     photo = photoFile.read()
     photoFile.close()
 
-    owner_id=-1 
     
     # Define constant post data
     CREATE_USER_1 = {
@@ -2511,7 +2510,7 @@ class CreateCommunityViewTestCase(TestCase): #to test handling of checkin post f
         'community_name': "Name of Community",
         "community_photo": photo,
         "community_description": "Test Description",
-        "owner_id": owner_id, # user_id of the owner
+        "username": "testuser1", # username of the owner
         "privacy": 'public',
     }
 
@@ -2519,7 +2518,7 @@ class CreateCommunityViewTestCase(TestCase): #to test handling of checkin post f
         'community_name': None,
         "community_photo": photo,
         "community_description": "Test Description",
-        "owner_id": owner_id, # user_id of the owner
+        "username": "testuser1", # username of the owner
         "privacy": 'public',
     }
 
@@ -2527,7 +2526,7 @@ class CreateCommunityViewTestCase(TestCase): #to test handling of checkin post f
         'community_name': "Name of Community Here",
         "community_photo":None,
         "community_description": "Test Description",
-        "owner_id": owner_id, # user_id of the owner
+        "username": "testuser1", # username of the owner
         "privacy": 'public',
     }
 
@@ -2535,15 +2534,15 @@ class CreateCommunityViewTestCase(TestCase): #to test handling of checkin post f
         'community_name': "Name of Community Here",
         "community_photo": photo,
         "community_description": None,
-        "owner_id": owner_id, # user_id of the owner
+        "username": "testuser1", # username of the owner
         "privacy": 'public',
     }
         
-    MISSING_OWNER_ID = {
+    MISSING_USERNAME = {
         'community_name': "Name of Community Here",
         "community_photo": photo,
         "community_description": "Test Description",
-        "owner_id": None, # user_id of the owner
+        "usename": None, # username of the owner
         "privacy": 'public',
     }
 
@@ -2551,15 +2550,15 @@ class CreateCommunityViewTestCase(TestCase): #to test handling of checkin post f
         'community_name': "Name of Community Here",
         "community_photo": photo,
         "community_description": "Test Description",
-        "owner_id": owner_id, # user_id of the owner
+        "username": "testuser1", # username of the owner
         "privacy": None,
     }
 
-    INVALID_OWNERID = { 
+    INVALID_USERNAME = { 
         'community_name': "Name of Community Here",
         "community_photo": photo,
         "community_description": "Test Description",
-        "owner_id": -1, # user_id of the owner
+        "username": "DNE", # invalid username of the owner
         "privacy": 'public',
     }
 
@@ -2567,7 +2566,7 @@ class CreateCommunityViewTestCase(TestCase): #to test handling of checkin post f
         'community_name': "Name of Community Here",
         "community_photo": photo,
         "community_description": "Test Description",
-        "owner_id": owner_id, # user_id of the owner
+        "username": "testuser1", # user_id of the owner
         "privacy": 'public',
     }
 
@@ -2580,22 +2579,12 @@ class CreateCommunityViewTestCase(TestCase): #to test handling of checkin post f
 
         # Make a POST request to create a test user
         client.post(reverse('create_user_view'), data=json.dumps(self.CREATE_USER_1), content_type=CONTENT_TYPE_JSON)
-        
-        # Parse the response content as JSON
-        response = client.get(reverse('get_user_information_view'), data={'username': 'testuser1'})
-        response_data = json.loads(response.content) # Parse the response content as JSON
-        logging.info("response data: %s",response_data)
-        self.owner_id = response_data['id'] # Now you can access the dictionary returned by the view
-        logging.info("owner_id: %s",self.owner_id)
 
     def test_community_success(self): #test of successful text entry submission
         # logging the test we are in
         logging.info("TESTING COMMUNITY_SUCCESS....")
         client = Client()
 
-        
-        self.COMMUNITY_SUCCESS['owner_id'] = self.owner_id #updating post data
-        logging.info(self.COMMUNITY_SUCCESS['owner_id'])
         response = client.post(reverse('create_community_view'), data=json.dumps(self.COMMUNITY_SUCCESS), content_type=CONTENT_TYPE_JSON)
 
         # Check if the response status code is 200
@@ -2605,7 +2594,7 @@ class CreateCommunityViewTestCase(TestCase): #to test handling of checkin post f
         for obj in queryset:
             logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_NAME, obj.community_name)
             logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_DESCRIPTION, obj.community_description)
-            logging.info(LOG_MSG_FORMAT, LOG_OWNER_ID, obj.owner_id)
+            logging.info(LOG_MSG_FORMAT, LOG_OWNER_ID, obj.owner_id.pk) #this is the user obj
             logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
             logging.info('')   
 
@@ -2614,9 +2603,7 @@ class CreateCommunityViewTestCase(TestCase): #to test handling of checkin post f
         logging.info(("TESTING CHECKIN_failure_missing_community_name....").upper())
         client = Client()
 
-
         # Make a POST request to the checkin_view
-        self.MISSING_COMMUNITY_NAME['owner_id'] = self.owner_id #updating post data
         response = client.post(reverse('create_community_view'), data=json.dumps(self.MISSING_COMMUNITY_NAME), content_type=CONTENT_TYPE_JSON)
 
         # Check if the response status code is 400
@@ -2628,7 +2615,6 @@ class CreateCommunityViewTestCase(TestCase): #to test handling of checkin post f
         client = Client()
 
         # Make a POST request to the checkin_view
-        self.MISSING_COMMUNITY_DESCRIPTION['owner_id'] = self.owner_id #updating post data
         response = client.post(reverse('create_community_view'), data=json.dumps(self.MISSING_COMMUNITY_DESCRIPTION), content_type=CONTENT_TYPE_JSON)
 
         # Check if the response status code is 400
@@ -2640,7 +2626,7 @@ class CreateCommunityViewTestCase(TestCase): #to test handling of checkin post f
         client = Client()
 
         # Make a POST request to the checkin_view
-        response = client.post(reverse('create_community_view'), data=json.dumps(self.MISSING_OWNER_ID), content_type=CONTENT_TYPE_JSON)
+        response = client.post(reverse('create_community_view'), data=json.dumps(self.MISSING_USERNAME), content_type=CONTENT_TYPE_JSON)
 
         # Check if the response status code is 400
         self.assertEqual(response.status_code, 400)
@@ -2651,7 +2637,6 @@ class CreateCommunityViewTestCase(TestCase): #to test handling of checkin post f
         client = Client()
 
         # Make a POST request to the checkin_view
-        self.MISSING_PRIVACY['owner_id'] = self.owner_id #updating post data
         response = client.post(reverse('create_community_view'), data=json.dumps(self.MISSING_PRIVACY), content_type=CONTENT_TYPE_JSON)
 
         # Check if the response status code is 400
@@ -2664,7 +2649,6 @@ class CreateCommunityViewTestCase(TestCase): #to test handling of checkin post f
         client = Client()
 
         # Make a POST request to the checkin_view
-        self.MISSING_COMMUNITY_PHOTO['owner_id'] = self.owner_id #updating post data
         response = client.post(reverse('create_community_view'), data=json.dumps(self.MISSING_COMMUNITY_PHOTO), content_type=CONTENT_TYPE_JSON)
 
         # Check if the response status code is 200
@@ -2675,7 +2659,7 @@ class CreateCommunityViewTestCase(TestCase): #to test handling of checkin post f
             logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_NAME, obj.community_name)
             logging.info("missing photo allowed")
             logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_DESCRIPTION, obj.community_description)
-            logging.info(LOG_MSG_FORMAT, LOG_OWNER_ID, obj.owner_id)
+            logging.info(LOG_MSG_FORMAT, LOG_OWNER_ID, obj.owner_id.pk)
             logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
             logging.info('')  
 
@@ -2685,7 +2669,6 @@ class CreateCommunityViewTestCase(TestCase): #to test handling of checkin post f
         client = Client()
 
         # Make two POST requests to the checkin_view to simulate a duplicate moment
-        self.DUPLICATE_COMMUNITY_NAME['owner_id'] = self.owner_id #updating post data
         response = client.post(reverse('create_community_view'), data=json.dumps(self.DUPLICATE_COMMUNITY_NAME), content_type=CONTENT_TYPE_JSON)
         response2 = client.post(reverse('create_community_view'), data=json.dumps(self.DUPLICATE_COMMUNITY_NAME), content_type=CONTENT_TYPE_JSON)
 
@@ -2699,7 +2682,174 @@ class CreateCommunityViewTestCase(TestCase): #to test handling of checkin post f
         client = Client()
 
         # Make a POST request to the checkin_view
-        response = client.post(reverse('create_community_view'), data=json.dumps(self.INVALID_OWNERID), content_type=CONTENT_TYPE_JSON)
+        response = client.post(reverse('create_community_view'), data=json.dumps(self.INVALID_USERNAME), content_type=CONTENT_TYPE_JSON)
 
         # Check if the response status code is 400
         self.assertEqual(response.status_code, 400)
+
+
+class GetSpecificCommunityInfoViewTestCase(TestCase): # front end passes us a community_name and we return that communities info
+
+      # Define constant user data
+    USER1_DATA = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+    COMMUNITY_SUCCESS = {
+        'community_name': "Name of Community",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "testuser1", # username of the owner
+        "privacy": 'public',
+    }
+
+    def setUp(self):
+        # Initialize the Django test client
+        client = Client()
+
+        # Make a POST request to create test users and checkins
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)# make user
+        client.post(reverse('create_community_view'), data=json.dumps(self.COMMUNITY_SUCCESS), content_type=CONTENT_TYPE_JSON) #make community
+
+        queryset = Community.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_NAME, obj.community_name)
+            logging.info("missing photo- okay")
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_DESCRIPTION, obj.community_description)
+            logging.info(LOG_MSG_FORMAT, LOG_OWNER_ID, obj.owner_id.pk)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
+            logging.info('') 
+
+
+
+    def test_get_specific_community_success(self):# Successfully retrieves a valid user's checkins from the database
+        logging.info("************TEST_get_specific_community_success**************..........")
+        client = Client()
+
+        # Create test data
+        get_data = {'community_name': "Name of Community"} # to retrieve all (or if one add in moment#) checkins for this user
+
+        # Send GET request to get_checkin_info_view
+        response = client.get(reverse('get_specific_community_info_view'), data=get_data)
+
+        # Check if response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+        # Printing DB after attempted getting of checkins
+        logging.info('Response: %s', response)
+        logging.info('')
+        queryset = Community.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_NAME, obj.community_name)
+            logging.info("missing photo- okay")
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_DESCRIPTION, obj.community_description)
+            logging.info(LOG_MSG_FORMAT, LOG_OWNER_ID, obj.owner_id.pk)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
+            logging.info('') 
+            logging.info('') 
+
+    def test_get_specific_community_fail_name_DNE(self):# Fails to get checkins in database due to user not existing
+        logging.info("***************TEST_get_specific_community_fail_name_DNE**************")
+        client = Client()
+
+        # Create test data
+        get_data = {'community_name': 'doesnotexist'} 
+
+        # Send GET request
+        response = client.get(reverse('get_specific_community_info_view'), data=get_data)
+
+        # Check if response status code is 400 -- failure
+        self.assertEqual(response.status_code, 400)
+
+class GetAllCommunityInfoViewTestCase(TestCase): # front end calls get and we return all public communities info
+
+      # Define constant user data
+    USER1_DATA = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+    USER2_DATA = {
+        'username': 'testuser2',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test2@example.com',
+        'timezone': 'EST',
+    }
+    USER3_DATA = {
+        'username': 'PRIVACYUSERNAME',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'PP@example.com',
+        'timezone': 'EST',
+    }
+
+    COMMUNITY_SUCCESS_1 = {
+        'community_name': "Name of Community",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "testuser1", # username of the owner
+        "privacy": 'public',
+    }
+
+    COMMUNITY_SUCCESS_2 = {
+        'community_name': "THIS IS MY SECOND COMMUNITY",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "testuser2", # username of the owner
+        "privacy": 'public',
+    }
+
+    COMMUNITY_SUCCESS_3 = {
+        'community_name': "THIS IS MY THIRD COMMUNITY",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "PRIVACYUSERNAME", # username of the owner
+        "privacy": 'private',
+    }
+
+    def setUp(self):
+        # Initialize the Django test client
+        client = Client()
+
+        # Make instance of users and their communities
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)# make user
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER2_DATA), content_type=CONTENT_TYPE_JSON)# make user
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER3_DATA), content_type=CONTENT_TYPE_JSON)# make user
+        client.post(reverse('create_community_view'), data=json.dumps(self.COMMUNITY_SUCCESS_1), content_type=CONTENT_TYPE_JSON) #make community
+        client.post(reverse('create_community_view'), data=json.dumps(self.COMMUNITY_SUCCESS_2), content_type=CONTENT_TYPE_JSON) #make community
+        client.post(reverse('create_community_view'), data=json.dumps(self.COMMUNITY_SUCCESS_3), content_type=CONTENT_TYPE_JSON) #make community
+
+
+
+    def test_get_all_community_success(self):# Successfully retrieves all public communities
+        logging.info("************TEST_get_all_community_success**************..........")
+        client = Client()
+
+        # Send GET request to get_checkin_info_view
+        response = client.get(reverse('get_all_community_info_view'))
+
+        response_data = json.loads(response.content)
+        logging.info("response_data: %s",response_data)
+
+        # Check if response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+        
+        
+
+    

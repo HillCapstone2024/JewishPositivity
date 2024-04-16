@@ -1221,20 +1221,21 @@ def create_community_view(request):
         error_response = validate_data(data)
         if error_response:
             return error_response        
-            
-        owner_id = data["owner_id"]
-        community_name = data["community_name"]
-        date_created= date.today()
-        logging.info("date_created: %s", date_created)
         
+        user=None #to be global in view
+        username = data["username"] 
         try: 
-            user = User.objects.get(id=owner_id)
+            user = User.objects.get(username=username)
             logging.info("USER'S PK: %s", user.pk)
             logging.info("got user in create community view")
         except Exception as e:  # Catch exceptions like IntegrityError
             logging.info(e)
             return HttpResponse(constUserDNE, status=400)   
-
+            
+        community_name = data["community_name"]
+        date_created = date.today()
+        logging.info("date_created: %s", date_created)
+        
         if data["community_photo"] is not None: # if there is a photo decode it and save it
             comm_photo_data = base64.b64decode(data["community_photo"])
             logging.info("has community photo")
@@ -1256,7 +1257,7 @@ def create_community_view(request):
             community.save()
             logging.info("community made")
             #add the owner of the community to the communityUser table 
-            CommunityUser.objects.create(user_id= user, community_id= community,status= True, date_joined= date_created)  # Create a new badge object for the user
+            CommunityUser.objects.create(user_id= user, community_id = community, status= True, date_joined= date_created)  # Create a new badge object for the user
             logging.info("added owner to community user table")
             return HttpResponse("Community has been created!")
         except Exception as e:  # Catch exceptions like IntegrityError
@@ -1264,3 +1265,66 @@ def create_community_view(request):
             return HttpResponse("Community has failed to be created.", status=400)   
     else: 
         return HttpResponse(constNotPost)
+    
+def get_specific_community_info_view(request):
+    if request.method == "GET":
+        logging.info("*************IN GET SPECIFIC COMMUNITY INFO VIEW************")
+        
+        community_name = request.GET.get("community_name")
+        logging.info("Community name: %s", community_name)
+        # Make sure the community name is not empty
+        if community_name is not None:
+            try:                
+                #Retrieve the community
+                try: 
+                    community = Community.objects.get(community_name=community_name)
+                    logging.info("GOT Community")
+                except Exception as e: 
+                    logging.info("error: %s", e)
+                    return HttpResponse(e, status=400)
+
+                response_data = {
+                'community_id': community.community_id,
+                'community_name': community.community_name,
+                'community_description': community.community_description,
+                'owner_id': community.owner_id.pk,
+                'privacy': community.privacy,
+                'date_created': community.date_created.strftime('%Y-%m-%d')
+            }
+                logging.info(response_data)
+                return HttpResponse(json.dumps(response_data), content_type='application/json')
+            except Exception as e:
+                logging.error("GET SPECIFIC COMMUNITY ERROR: %s",e)
+                return HttpResponse("An error occurred", status=400)
+        else:  # name  was empty
+            return HttpResponse("No Name Provided", status=400)
+    return HttpResponse(constNotGet)
+
+def get_all_community_info_view(request):
+    if request.method == "GET":
+    
+        try:
+            # Retrieve all public communities from the database
+            communities = Community.objects.filter(privacy="public")
+
+            # List to store communities in
+            communities_list = []
+            for community in communities:
+                communities_list.append({
+                    'community_id': community.community_id,
+                    'community_name': community.community_name,
+                    'community_description': community.community_description,
+                    'owner_id': community.owner_id.pk,
+                    'privacy': community.privacy,
+                    'date_created': community.date_created.strftime('%Y-%m-%d')
+                })
+                
+            logging.info("SPECIFIC COMMUNITY INFO: %s", communities_list)
+            logging.info(communities_list)
+            return HttpResponse(json.dumps(communities_list), content_type='application/json')
+        
+        except Exception as e:
+            logging.error("GETTING ALL COMMUNITIES ERROR: %s",e)
+            return HttpResponse("Getting all communities error", status=400)
+    return HttpResponse(constNotGet)
+
