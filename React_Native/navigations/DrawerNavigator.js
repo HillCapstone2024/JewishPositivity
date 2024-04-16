@@ -12,7 +12,7 @@ import {
   Keyboard,
   ImageBackground,
   TouchableOpacity,
-  Image
+  Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
@@ -25,14 +25,15 @@ import { createAvatar } from "@dicebear/core";
 import { micah } from "@dicebear/collection";
 import { SvgXml } from "react-native-svg";
 import BottomTabNavigator from "./BottomTabNavigator.js";
-import makeThemeStyle from '../tools/Theme.js';
+import makeThemeStyle from "../tools/Theme.js";
 import ParentProfile from "../screens/home/ProfileParent.js";
 import SettingsPage from "../screens/home/Settings.js";
 import Communities from "../screens/home/Communities.js";
 import Badges from "../screens/home/Badges.js";
 import Friends from "../screens/home/Friends.js";
 import FriendFeed from "../screens/home/FriendFeed.js";
-import * as Haptics from 'expo-haptics';
+import FriendTab from "./FriendTab.js";
+import * as Haptics from "expo-haptics";
 import ImageViewer from "../tools/ImageViewer.js";
 import FriendsParent from "../screens/home/FriendsParent.js";
 
@@ -65,31 +66,26 @@ const CustomDrawerContent = (props) => {
     ]);
   };
 
-
-
-
-
   useEffect(() => {
     // const unsubscribe = navigation.addListener("drawerOpen", () => {
-      // Call your method here
-      getUserInfo();
+    // Call your method here
+    getUserInfo();
     // });
 
     // unsubscribe();
   }, []);
 
-
   const getUserInfo = async () => {
-    console.log('get user info called');
+    console.log("get user info called");
     try {
       // const csrfToken = await getCsrfToken();
       const storedUsername = await Storage.getItem("@username");
       const storedProfilePicture = await Storage.getItem("@profilePicture");
-      console.log('stored username: ', storedUsername)
+      console.log("stored username: ", storedUsername);
       setProfilePicture(storedProfilePicture);
       setUsername(storedUsername || "No username");
     } catch (error) {
-      console.log('error getting drawer user info', error);
+      console.log("error getting drawer user info", error);
     }
   };
 
@@ -165,23 +161,79 @@ const MyDrawer = ({ navigation }) => {
   // const navigation = useNavigation();
 
   return (
-    <Drawer.Navigator initialRouteName="BottomTabNavigator"
+    <Drawer.Navigator
+      initialRouteName="BottomTabNavigator"
       screenOptions={{
         drawerStyle: {
           width: "70%",
         },
-        drawerLabelStyle: 
-          theme['color']
-        
+        drawerLabelStyle: theme["color"],
       }}
-      drawerContent={(props) => <CustomDrawerContent {...props}/>}
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
-      <Drawer.Screen name="Home" component={BottomTabNavigator} options={{ drawerIcon: () => (<Ionicons name="home" size={22} color={theme['color']['color']} />), }} />
-      <Drawer.Screen name="Profile" component={ParentProfile} testID="profileButton" options={{ drawerIcon: () => (<Ionicons name="person" size={22} color={theme['color']['color']} />), }} />
-      <Drawer.Screen name="Badges" component={Badges} options={{ drawerIcon: () => (<Ionicons name="trophy" size={22} color={theme['color']['color']} />), }} />
-      <Drawer.Screen name="Friends" component={FriendsParent} options={{ drawerIcon: () => (<Ionicons name="person-add" size={22} color={theme['color']['color']} />), }} />
-      <Drawer.Screen name="Communities" component={Communities} options={{drawerIcon: () => (<Ionicons name="people" size={22} color={theme['color']['color']} />),}}/>
-      <Drawer.Screen name="Settings" component={SettingsPage} options={{ drawerIcon: () => (<Ionicons name="settings" size={22} color={theme['color']['color']} />), }} />
+      <Drawer.Screen
+        name="Home"
+        component={BottomTabNavigator}
+        options={{
+          drawerIcon: () => (
+            <Ionicons name="home" size={22} color={theme["color"]["color"]} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="Profile"
+        component={ParentProfile}
+        testID="profileButton"
+        options={{
+          drawerIcon: () => (
+            <Ionicons name="person" size={22} color={theme["color"]["color"]} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="Badges"
+        component={Badges}
+        options={{
+          drawerIcon: () => (
+            <Ionicons name="trophy" size={22} color={theme["color"]["color"]} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="Friends"
+        component={FriendTab}
+        options={{
+          drawerIcon: () => (
+            <Ionicons
+              name="person-add"
+              size={22}
+              color={theme["color"]["color"]}
+            />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="Communities"
+        component={Communities}
+        options={{
+          drawerIcon: () => (
+            <Ionicons name="people" size={22} color={theme["color"]["color"]} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="Settings"
+        component={SettingsPage}
+        options={{
+          drawerIcon: () => (
+            <Ionicons
+              name="settings"
+              size={22}
+              color={theme["color"]["color"]}
+            />
+          ),
+        }}
+      />
     </Drawer.Navigator>
   );
 };
