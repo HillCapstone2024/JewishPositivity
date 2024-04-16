@@ -66,7 +66,7 @@ def validate_data(data):
     logging.info("NON-INTEGER KEYS: %s", non_integer_keys) # includes nonetypes
 
     # Check for missing or empty required fields in the POST data
-    missing_keys = [key for key in non_integer_keys if key not in ("content","text_entry","header","content_type") and not data.get(key)] #allow content and text to be missing
+    missing_keys = [key for key in non_integer_keys if key not in ("content","text_entry","content_type") and not data.get(key)] #allow content and text to be missing
     logging.info("Missing keys: %s", missing_keys)
 
     # Return an error response if there are missing keys
@@ -517,7 +517,6 @@ def create_checkin(user, data):
         checkin = Checkin.objects.create(
             user_id=user,
             moment_number=data["moment_number"],
-            header=data["header"], #could be None or text chars
             content=content_binary_encoded, #can be media or none
             text_entry=data["text_entry"], #can be text or none
             content_type=data["content_type"],
@@ -603,7 +602,6 @@ def update_checkin_info_view(request):
         'text_entry': (update_text_entry, data.get("text_entry")),
         'content_type': (update_content_type, data.get("content_type")),
         'content': (update_content, data.get("content")),
-        'header' : (update_header, data.get("header"))
     }
 
     # Iterate over the update_actions dictionary, where each entry contains a field to update and its corresponding update function.
@@ -642,15 +640,6 @@ def update_content(checkin, new_content):
     except Exception as e:
         logging.info("ERROR IN CHANGING CONTENT: %s", e)
         return HttpResponse("Error in updating content", status=400)
-    
-def update_header(checkin, new_header):
-    try:
-        checkin.header = new_header
-        checkin.save()
-        logging.info("SUCCESS! Header has been updated to \"%s\"", checkin.header)
-    except Exception as e:
-        logging.info("ERROR IN CHANGING HEADER: %s", e)
-        return HttpResponse("Error in updating header", status=400)
 
 def delete_checkin_view(request): # to delete a specified checkin_id
     if request.method == "POST":
@@ -710,7 +699,6 @@ def get_checkin_info_view(request):
 
                     current_checkin = { # dictionary to append to list
                         "checkin_id": checkin.checkin_id,
-                        "header": checkin.header,
                         "content_type": checkin.content_type,
                         "moment_number": checkin.moment_number,
                         "content": obj_content,  #content converted from binary to base64 then to a base 64 string, or None, or thumbnail image
@@ -817,7 +805,6 @@ def get_todays_checkin_info_view(request):
                         current_checkin = { # dictionary to append to list
                             "username": username,
                             "checkin_id": checkin.checkin_id,
-                            "header": checkin.header,
                             "content_type": checkin.content_type,
                             "moment_number": checkin.moment_number,
                             "content": obj_content,  #content converted from binary to base64 then to a base 64 string, or None
