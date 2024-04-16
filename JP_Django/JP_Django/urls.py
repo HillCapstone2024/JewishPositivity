@@ -1,6 +1,6 @@
 # in Jewish_Positivity_Django/urls.py
 
-from .views import login_view, create_user_view, logout_view, update_times_view, get_times_view, send_report_email_view, checkin_view, get_user_information_view, update_user_information_view, get_checkin_info_view, add_friend_view, delete_friend_view, get_friends_view, delete_user_view, get_video_info_view, get_todays_checkin_info_view, send_password_reset_email_view, change_password_view, get_badges_view, get_current_streak_view, get_longest_streak_view, get_profile_pictures_view, update_checkin_info_view, delete_checkin_view
+from .views import login_view, create_user_view, logout_view, update_times_view, get_times_view, send_report_email_view, checkin_view, get_user_information_view, update_user_information_view, get_checkin_info_view, add_friend_view, delete_friend_view, get_friends_view, delete_user_view, get_video_info_view, get_todays_checkin_info_view, send_password_reset_email_view, change_password_view, get_badges_view, get_current_streak_view, get_longest_streak_view, get_profile_pictures_view, update_checkin_info_view, delete_checkin_view, create_community_view
 from django.urls import path
 from django.contrib import admin
 from .views import csrf_token_view
@@ -30,6 +30,7 @@ urlpatterns = [
     path('get_badges/', get_badges_view, name='get_badges_view'),
     path('current_streak/',get_current_streak_view, name='get_current_streak_view'),
     path('longest_streak/',get_longest_streak_view, name='get_longest_streak_view'),
-    path('profile_pictures_view/',get_profile_pictures_view, name='get_profile_pictures_view')
+    path('profile_pictures_view/',get_profile_pictures_view, name='get_profile_pictures_view'),
+    path('create_community/',create_community_view, name='create_community_view'),
 
 ]

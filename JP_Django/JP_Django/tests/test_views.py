@@ -2,7 +2,7 @@ from django.test import TestCase, Client  #Client class to simulate HTTP request
 from django.urls import reverse #reverse allows you to generate URLs for Django views by providing the view name
 import datetime
 import json
-from JP_Django.models import User, Checkin, Friends, Badges #import model to access printing users in the test DB
+from JP_Django.models import User, Checkin, Friends, Badges, Community, CommunityUser #import model to access printing users in the test DB
 import logging
 import os
 
@@ -42,6 +42,13 @@ LOG_FRIENDSHIP_ID = 'Friendship ID'
 LOG_FRIENDSHIP_STATUS = 'Friendship Status'
 LOG_USER1_ID = 'User1 ID'
 LOG_USER2_ID = 'User1 ID'
+
+#define constants for logging communities
+LOG_COMMUNITY_NAME= 'Community Name'
+LOG_COMMUNITY_PHOTO= "Community Photo"
+LOG_COMMUNITY_DESCRIPTION= "Community Description"
+LOG_OWNER_ID= "Owner ID"
+LOG_PRIVACY= "Privacy"
 
 
 class CreateUserViewTestCase(TestCase):
@@ -2478,5 +2485,221 @@ class GetProfilePictureViewTestCase(TestCase): # to retrieve profile pictures fr
             logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.id)
             logging.info(LOG_MSG_FORMAT, LOG_PROFILE_PICTURE, obj.profile_picture)
             logging.info('')   
+       
+
+class CreateCommunityViewTestCase(TestCase): #to test handling of checkin post for text, photo, video and audio
+
+    photo_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64photo.txt')) #for community pic test
+    photoFile = open(photo_file_path, 'r')
+    photo = photoFile.read()
+    photoFile.close()
+
+    owner_id=-1 
+    
+    # Define constant post data
+    CREATE_USER_1 = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'success21@example.com',
+        'timezone': 'EST',
+    }
+
+    COMMUNITY_SUCCESS = {
+        'community_name': "Name of Community",
+        "community_photo": photo,
+        "community_description": "Test Description",
+        "owner_id": owner_id, # user_id of the owner
+        "privacy": 'public',
+    }
+
+    MISSING_COMMUNITY_NAME = {
+        'community_name': None,
+        "community_photo": photo,
+        "community_description": "Test Description",
+        "owner_id": owner_id, # user_id of the owner
+        "privacy": 'public',
+    }
+
+    MISSING_COMMUNITY_PHOTO = { #this should be okay/no error
+        'community_name': "Name of Community Here",
+        "community_photo":None,
+        "community_description": "Test Description",
+        "owner_id": owner_id, # user_id of the owner
+        "privacy": 'public',
+    }
+
+    MISSING_COMMUNITY_DESCRIPTION= { 
+        'community_name': "Name of Community Here",
+        "community_photo": photo,
+        "community_description": None,
+        "owner_id": owner_id, # user_id of the owner
+        "privacy": 'public',
+    }
         
+    MISSING_OWNER_ID = {
+        'community_name': "Name of Community Here",
+        "community_photo": photo,
+        "community_description": "Test Description",
+        "owner_id": None, # user_id of the owner
+        "privacy": 'public',
+    }
+
+    MISSING_PRIVACY = {
+        'community_name': "Name of Community Here",
+        "community_photo": photo,
+        "community_description": "Test Description",
+        "owner_id": owner_id, # user_id of the owner
+        "privacy": None,
+    }
+
+    INVALID_OWNERID = { 
+        'community_name': "Name of Community Here",
+        "community_photo": photo,
+        "community_description": "Test Description",
+        "owner_id": -1, # user_id of the owner
+        "privacy": 'public',
+    }
+
+    DUPLICATE_COMMUNITY_NAME = { #Call Twice
+        'community_name': "Name of Community Here",
+        "community_photo": photo,
+        "community_description": "Test Description",
+        "owner_id": owner_id, # user_id of the owner
+        "privacy": 'public',
+    }
+
+    # Set up method to create a test user
+    def setUp(self):
+        logging.info("SETTING UP CHECKIN....")
+
+        # Initialize the Django test client
+        client = Client()
+
+        # Make a POST request to create a test user
+        client.post(reverse('create_user_view'), data=json.dumps(self.CREATE_USER_1), content_type=CONTENT_TYPE_JSON)
         
+        # Parse the response content as JSON
+        response = client.get(reverse('get_user_information_view'), data={'username': 'testuser1'})
+        response_data = json.loads(response.content) # Parse the response content as JSON
+        logging.info("response data: %s",response_data)
+        self.owner_id = response_data['id'] # Now you can access the dictionary returned by the view
+        logging.info("owner_id: %s",self.owner_id)
+
+    def test_community_success(self): #test of successful text entry submission
+        # logging the test we are in
+        logging.info("TESTING COMMUNITY_SUCCESS....")
+        client = Client()
+
+        
+        self.COMMUNITY_SUCCESS['owner_id'] = self.owner_id #updating post data
+        logging.info(self.COMMUNITY_SUCCESS['owner_id'])
+        response = client.post(reverse('create_community_view'), data=json.dumps(self.COMMUNITY_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+        queryset = Community.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_NAME, obj.community_name)
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_DESCRIPTION, obj.community_description)
+            logging.info(LOG_MSG_FORMAT, LOG_OWNER_ID, obj.owner_id)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
+            logging.info('')   
+
+    def test_community_failure_missing_community_name(self): #test of failure due to missing username
+        # logging the test we are in
+        logging.info(("TESTING CHECKIN_failure_missing_community_name....").upper())
+        client = Client()
+
+
+        # Make a POST request to the checkin_view
+        self.MISSING_COMMUNITY_NAME['owner_id'] = self.owner_id #updating post data
+        response = client.post(reverse('create_community_view'), data=json.dumps(self.MISSING_COMMUNITY_NAME), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400
+        self.assertEqual(response.status_code, 400)
+
+    def test_community_failure_missing_commUnity_description(self): #test of failure due to missing moment number
+        # logging the test we are in
+        logging.info(("TESTING CHECKIN_failure_missing_COMMUNITY_DESCRIPTION....").upper())
+        client = Client()
+
+        # Make a POST request to the checkin_view
+        self.MISSING_COMMUNITY_DESCRIPTION['owner_id'] = self.owner_id #updating post data
+        response = client.post(reverse('create_community_view'), data=json.dumps(self.MISSING_COMMUNITY_DESCRIPTION), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400
+        self.assertEqual(response.status_code, 400)
+
+    def test_community_failure_missing_OWNERID(self): #test of failure due to missing moment number
+        # logging the test we are in
+        logging.info(("TESTING CHECKIN_failure_missing_OWNERID....").upper())
+        client = Client()
+
+        # Make a POST request to the checkin_view
+        response = client.post(reverse('create_community_view'), data=json.dumps(self.MISSING_OWNER_ID), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400
+        self.assertEqual(response.status_code, 400)
+
+    def test_community_failure_missing_PRIVACY(self): #test of failure due to missing moment number
+        # logging the test we are in
+        logging.info(("TESTING CHECKIN_failure_missing_PRIVACY....").upper())
+        client = Client()
+
+        # Make a POST request to the checkin_view
+        self.MISSING_PRIVACY['owner_id'] = self.owner_id #updating post data
+        response = client.post(reverse('create_community_view'), data=json.dumps(self.MISSING_PRIVACY), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400
+        self.assertEqual(response.status_code, 400)
+
+
+    def test_community_SUCCESS_missing_community_photo(self): #test of failure due to missing content
+        # logging the test we are in
+        logging.info(("TESTING CHECKIN_SUCCESS_missing_community_photo ALLOWED....").upper())
+        client = Client()
+
+        # Make a POST request to the checkin_view
+        self.MISSING_COMMUNITY_PHOTO['owner_id'] = self.owner_id #updating post data
+        response = client.post(reverse('create_community_view'), data=json.dumps(self.MISSING_COMMUNITY_PHOTO), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 200
+        self.assertEqual(response.status_code, 200) #SHOULD ALLOW MISSING PHOTO AND SUCCEED
+
+        queryset = Community.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_NAME, obj.community_name)
+            logging.info("missing photo allowed")
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_DESCRIPTION, obj.community_description)
+            logging.info(LOG_MSG_FORMAT, LOG_OWNER_ID, obj.owner_id)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
+            logging.info('')  
+
+    def test_community_failure_duplicate_community_name(self): #test of failure due to duplicate moment for the same day and user
+        # logging the test we are in
+        logging.info(("TESTING CHECKIN_failure_duplicate_community....").upper())
+        client = Client()
+
+        # Make two POST requests to the checkin_view to simulate a duplicate moment
+        self.DUPLICATE_COMMUNITY_NAME['owner_id'] = self.owner_id #updating post data
+        response = client.post(reverse('create_community_view'), data=json.dumps(self.DUPLICATE_COMMUNITY_NAME), content_type=CONTENT_TYPE_JSON)
+        response2 = client.post(reverse('create_community_view'), data=json.dumps(self.DUPLICATE_COMMUNITY_NAME), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400
+        self.assertEqual(response.status_code, 200) #first should work
+        self.assertEqual(response2.status_code, 400) #second should cause error
+
+    def test_community_failure_invalid_ownerid(self): #test of failure due to invalid user id (foreign key)
+        # logging the test we are in
+        logging.info(("TESTING CHECKIN_failure_invalid_OWNERid....").upper())
+        client = Client()
+
+        # Make a POST request to the checkin_view
+        response = client.post(reverse('create_community_view'), data=json.dumps(self.INVALID_OWNERID), content_type=CONTENT_TYPE_JSON)
+
+        # Check if the response status code is 400
+        self.assertEqual(response.status_code, 400)

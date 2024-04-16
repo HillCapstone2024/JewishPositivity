@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
 from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
-from JP_Django.models import Checkin, Friends, Badges, User
+from JP_Django.models import Checkin, Friends, Badges, User, Community, CommunityUser
 from django.middleware.csrf import get_token
 from django.http import JsonResponse
 from django.core.validators import validate_email
@@ -66,7 +66,7 @@ def validate_data(data):
     logging.info("NON-INTEGER KEYS: %s", non_integer_keys) # includes nonetypes
 
     # Check for missing or empty required fields in the POST data
-    missing_keys = [key for key in non_integer_keys if key not in ("content","text_entry","content_type") and not data.get(key)] #allow content and text to be missing
+    missing_keys = [key for key in non_integer_keys if key not in ("content","text_entry","content_type", "community_photo") and not data.get(key)] #allow content and text to be missing
     logging.info("Missing keys: %s", missing_keys)
 
     # Return an error response if there are missing keys
@@ -1204,3 +1204,63 @@ def get_profile_pictures_view(request):
         else:  # username was empty
             return HttpResponse(constUNnotProvided, status=400)
     return HttpResponse(constNotGet)
+
+
+# ############ Community Management ###########
+
+
+# ############ Community Management ###########
+
+def create_community_view(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        logging.info("IN create_community_view....")
+        logging.info("Parsed JSON data: %s", data)
+
+        # Check for missing keys and return an error response if any are found
+        error_response = validate_data(data)
+        if error_response:
+            return error_response        
+            
+        owner_id = data["owner_id"]
+        community_name = data["community_name"]
+        date_created= date.today()
+        logging.info("date_created: %s", date_created)
+        
+        try: 
+            user = User.objects.get(id=owner_id)
+            logging.info("USER'S PK: %s", user.pk)
+            logging.info("got user in create community view")
+        except Exception as e:  # Catch exceptions like IntegrityError
+            logging.info(e)
+            return HttpResponse(constUserDNE, status=400)   
+
+        if data["community_photo"] is not None: # if there is a photo decode it and save it
+            comm_photo_data = base64.b64decode(data["community_photo"])
+            logging.info("has community photo")
+        else: 
+            comm_photo_data= None
+            logging.info("has NO community photo")
+
+        # Attempt to create a new community
+        logging.info("Attempting to create a community.....")
+        try:
+            community = Community.objects.create(
+                community_name = community_name,
+                community_photo = comm_photo_data, #could be None or a photo in binary
+                community_description = data["community_description"],  # Confirmation password
+                owner_id = user, 
+                privacy = data["privacy"],
+                date_created= date_created #today's date
+            )
+            community.save()
+            logging.info("community made")
+            #add the owner of the community to the communityUser table 
+            CommunityUser.objects.create(user_id= user, community_id= community,status= True, date_joined= date_created)  # Create a new badge object for the user
+            logging.info("added owner to community user table")
+            return HttpResponse("Community has been created!")
+        except Exception as e:  # Catch exceptions like IntegrityError
+            logging.info(e)
+            return HttpResponse("Community has failed to be created.", status=400)   
+    else: 
+        return HttpResponse(constNotPost)

@@ -2,6 +2,7 @@
 
 from django.db import models
 import datetime
+from datetime import date
 import time
 import pytz
 from django.contrib.auth.models import AbstractUser
@@ -76,13 +77,15 @@ class Community(models.Model): # to store communities
     community_photo = models.BinaryField(blank=True, null=True) # Community picture in binary format
     community_description = models.TextField()
     owner_id = models.ForeignKey(User,on_delete=models.CASCADE) # user_id of the owner
-    privacy = models.CharField(max_length=100) # 'private' or 'public'
+    privacy = models.CharField(max_length=100) # 'private' or 'public' 
+    date_created= models.DateField(default=date.today) 
 
 class CommunityUser(models.Model): # to store users-community relationships
     communityuser_id = models.AutoField(primary_key=True) #the autoincremented ID field for membership
     user_id = models.ForeignKey(User,on_delete=models.CASCADE) # FK of the user
     community_id = models.ForeignKey(Community,on_delete=models.CASCADE) # FK of the community
     status = models.BooleanField(default=False)  # False for pending, True for accepted
+    date_joined= models.DateField(default=date.today)
     class Meta:
         # Define unique constraint for composite key
         unique_together = [('user_id', 'community_id')] # So members can't join the same community twice
