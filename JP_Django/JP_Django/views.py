@@ -565,6 +565,7 @@ def update_checkin_info_view(request):
     data = json.loads(request.body)
 
     # Attempt to retrieve the checkin object based on the checkin id provided in the POST data
+    checkin_id=None #default
     try:
         checkin_id = data["checkin_id"]  # Get the username from the POST data
         checkin = Checkin.objects.get(checkin_id=checkin_id)  # Retrieve the checkin from the database
@@ -1328,3 +1329,101 @@ def get_all_community_info_view(request):
             return HttpResponse("Getting all communities error", status=400)
     return HttpResponse(constNotGet)
 
+def update_community_view(request):
+    # Check if the request method is POST
+    if request.method != "POST":
+        # Return an HTTP 400 response if the method is not POST
+        return HttpResponse("Not a POST request", status=400)
+
+    # Parse the JSON data from the request body
+    data = json.loads(request.body)
+    logging.info("DATA from post: %s", data)
+
+    # Attempt to retrieve the community object based on the commnity id provided in the POST data
+    try:
+        community_id = data["community_id"]  # Get the username from the POST data
+        community = Community.objects.get(community_id=community_id) # Retrieve the checkin from the database
+        logging.info("COMMUNITY ID from post data: %s", community_id)
+        logging.info("COMMUNITY object (name) retrieved from post data: %s", community.community_name)
+    except Exception as e:
+        # Log the error and return an HTTP 400 response if the user cannot be retrieved
+        logging.info("ERROR RETRIEVING COMMUNITY: %s", e)
+        logging.info("RECEIVED COMMUNITYID %s", community_id)
+        return HttpResponse("community_id is in invalid format or does not exist", status=400)
+    
+
+    error_response = validate_data(data) #allows content and text entry to be none type and pass through without error
+    if error_response:
+        return error_response
+
+    # Define a dictionary mapping POST data keys to their respective update functions and expected values
+    update_actions = {
+        'new_community_name': (update_community_name, data.get("new_community_name")),
+        'new_owner': (update_owner, data.get("new_owner")),
+        'new_photo': (update_photo, data.get("new_photo")),
+        'new_privacy': (update_privacy, data.get("new_privacy")),
+        'new_description': (update_description, data.get("new_description")),
+    }
+
+    # Iterate over the update_actions dictionary, where each entry contains a field to update and its corresponding update function.
+    for key, (update_func, value) in update_actions.items(): 
+        if key in data and value: # Check if the key is in the POST data and has a non-empty value
+            error_response = update_func(community, value) # Call the respective update function with the community object and the value from the POST data
+            if error_response: # If the update function returns an error response, return it immediately
+                return error_response
+
+    # Return an HTTP 200 response indicating that the updates were successful
+    return HttpResponse("Changes Successful!")
+
+def update_community_name(community, new_community_name):
+    logging.info("inside update_community_name method.... ")
+    logging.info("new_community_name: %s", new_community_name)
+    logging.info("current obj community_name: %s", community.community_name)
+    try:
+        community.community_name = new_community_name
+        community.save()
+        logging.info("SUCCESS! community_name has been updated to \"%s\"", community.community_name)
+    except Exception as e:
+        logging.info("ERROR IN CHANGING COMMUNITY NAME: %s", e)
+        return HttpResponse("Error in updating community name", status=400)
+
+def update_owner(community, new_owner):
+    logging.info("inside update_owner method.... ")
+    try:
+        new_owner_user = User.objects.get(username=new_owner)
+        community.owner_id = new_owner_user 
+        community.save()
+        logging.info("SUCCESS! Owner has been updated to \"%s\"", community.owner_id)
+    except Exception as e:
+        logging.info("ERROR IN CHANGING OWNER: %s", e)
+        return HttpResponse("Error in updating owner", status=400)
+    
+def update_photo(community, new_photo):
+    logging.info("inside update community photo method.... ")
+    try:
+        community.community_photo = base64.b64decode(new_photo)
+        community.save()
+        logging.info("SUCCESS! photo has been updated!")
+    except Exception as e:
+        logging.info("ERROR IN CHANGING photo: %s", e)
+        return HttpResponse("Error in updating photo", status=400)
+
+def update_privacy(community, new_privacy):
+    logging.info("inside update community privacy method.... ")
+    try:
+        community.privacy = new_privacy
+        community.save()
+        logging.info("SUCCESS! privacy has been updated!")
+    except Exception as e:
+        logging.info("ERROR IN CHANGING privacy: %s", e)
+        return HttpResponse("Error in updating privacy", status=400)
+    
+def update_description(community, new_description):
+    logging.info("inside update_community_description method.... ")
+    try:
+        community.community_description = new_description
+        community.save()
+        logging.info("SUCCESS! description has been updated!")
+    except Exception as e:
+        logging.info("ERROR IN CHANGING description: %s", e)
+        return HttpResponse("Error in updating description", status=400)

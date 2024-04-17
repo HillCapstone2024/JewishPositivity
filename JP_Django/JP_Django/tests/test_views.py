@@ -2851,5 +2851,354 @@ class GetAllCommunityInfoViewTestCase(TestCase): # front end calls get and we re
 
         
         
+class UpdateCommunityViewTestCase(TestCase): 
+    
+    photo_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64photo.txt'))
+    photoFile = open(photo_file_path, 'r')
+    photo = photoFile.read()
+    #logging.info("PHOTO: %s", photo)
+    photoFile.close()
 
+    community_id = -1
+
+    # Define constant user data
+    USER1_DATA = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+    USER2_DATA = {
+        'username': 'testuser2',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test2@example.com',
+        'timezone': 'EST',
+    }
+
+    # Define post data
+    COMMUNITY_SUCCESS = {
+        'community_name': "Name of Community",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "testuser1", # username of the owner
+        "privacy": 'public',
+    }
+
+    COMMUNITY_TAKEN_SUCCESS = { #to test switching name to a duplicate
+        'community_name': "taken",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "testuser1", # username of the owner
+        "privacy": 'public',
+    }
+    
+    UPDATE_COMMUNITY_NAME_SUCCESS = {
+        'community_id' : community_id,
+        'new_community_name': 'Updated name'
+    }
+
+    UPDATE_COMMUNITY_DESCRIPTION_SUCCESS = {
+        'community_id' : community_id,
+        "new_description": "UPDATED Test Description", 
+    }
+
+    UPDATE_COMMUNITY_OWNER_SUCCESS = {
+        'community_id' : community_id,
+        "new_owner": "testuser2", 
+    }
+
+    UPDATE_COMMUNITY_PHOTO_SUCCESS = {
+        'community_id' : community_id,
+        "new_photo": photo, 
+    }
+
+    UPDATE_COMMUNITY_PRIVACY_SUCCESS = {
+        'community_id' : community_id,
+        "new_privacy": "private", 
+    }
+
+    UPDATE_MULTIPLE_FIELDS = {
+        'community_id' : community_id,
+        "new_privacy": "private", 
+        'new_community_name': 'Updated name again',
+    }
+
+    INVALID_COMMUNITY_ID = {
+        'community_id' : -999,
+    }
+
+    INVALID_NEW_OWNER = {
+        'community_id' : community_id,
+        "new_owner": "DNE", 
+    }
+
+    INVALID_DUPLICATE_COMMUNITY_NAME = {
+        'community_id' : community_id,
+        "new_community_name": "taken", 
+    }
+
+    def setUp(self):
+        # Initialize the Django test client
+        client = Client()
+
+        # Make a POST request to create test users and checkins
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)# make two users
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER2_DATA), content_type=CONTENT_TYPE_JSON)# make two users
+        client.post(reverse('create_community_view'), data=json.dumps(self.COMMUNITY_SUCCESS), content_type=CONTENT_TYPE_JSON) #make community to update
+        client.post(reverse('create_community_view'), data=json.dumps(self.COMMUNITY_TAKEN_SUCCESS), content_type=CONTENT_TYPE_JSON) #use to call community name the same as previous to test duplicate
+       
+        #get community_id of the community 
+        response = client.get(reverse('get_specific_community_info_view'), data={'community_name': 'Name of Community'})
+        
+        # Parse the response content as JSON
+        response_data = json.loads(response.content)
+        logging.info("response_data: %s",response_data)
+        # Now you can access the dictionary returned by the view
+        self.community_id = response_data['community_id']
+        logging.info("community_id: %s",self.community_id)
+        
+    #success cases
+    def test_update_community_name_success(self):
+        logging.info("************TEST_update_community_name_success**************..........")
+        client = Client()
+
+        logging.info('Before update name:')
+        queryset = Community.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_NAME, obj.community_name)
+            logging.info("missing photo")
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_DESCRIPTION, obj.community_description)
+            logging.info(LOG_MSG_FORMAT, LOG_OWNER_ID, obj.owner_id.pk)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
+            logging.info("")   
+
+        # Send GET request
+        self.UPDATE_COMMUNITY_NAME_SUCCESS['community_id'] = self.community_id #updating post data with the correct checkin ID from the setup
+        response = client.post(reverse('update_community_view'), data=json.dumps(self.UPDATE_COMMUNITY_NAME_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+        # Printing DB after attempted getting of community
+        logging.info('Response: %s', response)
+        logging.info('After update name:')
+        queryset = Community.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_NAME, obj.community_name)
+            logging.info("missing photo")
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_DESCRIPTION, obj.community_description)
+            logging.info(LOG_MSG_FORMAT, LOG_OWNER_ID, obj.owner_id.pk)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
+            logging.info("")   
+
+    
+   
+    def test_update_community_owner_success(self):# Successfully retrieves a valid user's checkins from the database
+        logging.info("************TEST_update_community_owner_success**************..........")
+        client = Client()
+
+        logging.info('Before Updated community_owner:')
+        queryset = Community.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_NAME, obj.community_name)
+            logging.info("missing photo")
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_DESCRIPTION, obj.community_description)
+            logging.info(LOG_MSG_FORMAT, LOG_OWNER_ID, obj.owner_id.pk)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
+            logging.info("")    
+
+        # Send GET request to get_checkin_info_view
+        self.UPDATE_COMMUNITY_OWNER_SUCCESS['community_id'] = self.community_id #updating post data with the correct checkin ID from the setup
+        response = client.post(reverse('update_community_view'), data=json.dumps(self.UPDATE_COMMUNITY_OWNER_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+        # Printing DB after attempted getting of checkins
+        logging.info('Response: %s', response)
+        logging.info('After Updated owner:')
+        queryset = Community.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_NAME, obj.community_name)
+            logging.info("missing photo")
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_DESCRIPTION, obj.community_description)
+            logging.info(LOG_MSG_FORMAT, LOG_OWNER_ID, obj.owner_id.pk)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
+            logging.info("")   
+
+    
+    def test_update_community_photo_success(self):
+        logging.info("************TEST_update_community_photo_success**************..........")
+        client = Client()
+
+        logging.info('Before update community photo:')
+        queryset = Community.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_NAME, obj.community_name)
+            logging.info("missing photo")
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_DESCRIPTION, obj.community_description)
+            logging.info(LOG_MSG_FORMAT, LOG_OWNER_ID, obj.owner_id.pk)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
+            logging.info("")      
+
+        # Send GET request to get_checkin_info_view
+        self.UPDATE_COMMUNITY_PHOTO_SUCCESS['community_id'] = self.community_id #updating post data with the correct checkin ID from the setup
+        response = client.post(reverse('update_community_view'), data=json.dumps(self.UPDATE_COMMUNITY_PHOTO_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+        # Printing DB after attempted getting of checkins
+        logging.info('Response: %s', response)
+        logging.info('After update photo:')
+        queryset = Community.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_NAME, obj.community_name)
+            logging.info("new photo: %s",obj.community_photo)
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_DESCRIPTION, obj.community_description)
+            logging.info(LOG_MSG_FORMAT, LOG_OWNER_ID, obj.owner_id.pk)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
+            logging.info("")   
+
+    def test_update_community_privacy_success(self):
+        logging.info("************TEST_update_community_privacy_success**************..........")
+        client = Client()
+
+        logging.info('Before update privacy:')
+        queryset = Community.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_NAME, obj.community_name)
+            logging.info("missing photo")
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_DESCRIPTION, obj.community_description)
+            logging.info(LOG_MSG_FORMAT, LOG_OWNER_ID, obj.owner_id.pk)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
+            logging.info("")     
+
+        # Send GET request to get_checkin_info_view
+        self.UPDATE_COMMUNITY_PRIVACY_SUCCESS['community_id'] = self.community_id #updating post data with the correct checkin ID from the setup
+        response = client.post(reverse('update_community_view'), data=json.dumps(self.UPDATE_COMMUNITY_PRIVACY_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+        # Printing DB after attempted getting of checkins
+        logging.info('Response: %s', response)
+        logging.info('After update privacy:')
+        queryset = Community.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_NAME, obj.community_name)
+            logging.info("missing photo")
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_DESCRIPTION, obj.community_description)
+            logging.info(LOG_MSG_FORMAT, LOG_OWNER_ID, obj.owner_id.pk)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
+            logging.info("")     
+
+
+    def test_update_community_description_success(self):
+        logging.info("************TEST_update_community_description_success**************..........")
+        client = Client()
+
+        logging.info('Before update description:')
+        queryset = Community.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_NAME, obj.community_name)
+            logging.info("missing photo")
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_DESCRIPTION, obj.community_description)
+            logging.info(LOG_MSG_FORMAT, LOG_OWNER_ID, obj.owner_id.pk)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
+            logging.info("")    
+
+        # Send GET request to get_checkin_info_view
+        self.UPDATE_COMMUNITY_DESCRIPTION_SUCCESS['community_id'] = self.community_id #updating post data with the correct checkin ID from the setup
+        response = client.post(reverse('update_community_view'), data=json.dumps(self.UPDATE_COMMUNITY_DESCRIPTION_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+        # Printing DB after attempted getting of checkins
+        logging.info('Response: %s', response)
+        logging.info('After update description:')
+        queryset = Community.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_NAME, obj.community_name)
+            logging.info("missing photo")
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_DESCRIPTION, obj.community_description)
+            logging.info(LOG_MSG_FORMAT, LOG_OWNER_ID, obj.owner_id.pk)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
+            logging.info("")    
+
+
+    def test_update_community_multiple_fields_success(self):
+        logging.info("************TEST_update_community_multiple_fields_success**************..........")
+        client = Client()
+
+        logging.info('Before update name and privacy:')
+        queryset = Community.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_NAME, obj.community_name)
+            logging.info("missing photo")
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_DESCRIPTION, obj.community_description)
+            logging.info(LOG_MSG_FORMAT, LOG_OWNER_ID, obj.owner_id.pk)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
+            logging.info("")    
+
+        # Send GET request to get_checkin_info_view
+        self.UPDATE_MULTIPLE_FIELDS['community_id'] = self.community_id #updating post data with the correct checkin ID from the setup
+        response = client.post(reverse('update_community_view'), data=json.dumps(self.UPDATE_MULTIPLE_FIELDS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+        # Printing DB after attempted getting of checkins
+        logging.info('Response: %s', response)
+        logging.info('After update name and privacy:')
+        queryset = Community.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_NAME, obj.community_name)
+            logging.info("missing photo")
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_DESCRIPTION, obj.community_description)
+            logging.info(LOG_MSG_FORMAT, LOG_OWNER_ID, obj.owner_id.pk)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
+            logging.info("")    
+  
+
+
+    # #fail cases
+    def test_update_community_fail_communityID_DNE(self):# Fails to get checkins in database due to user not existing
+        logging.info("***************TEST_update_community_fail_CommunityID_DNE**************")
+        client = Client()
+
+        response = client.post(reverse('update_community_view'), data=json.dumps(self.INVALID_COMMUNITY_ID), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 400 -- failure
+        self.assertEqual(response.status_code, 400)
+
+
+    def test_update_community_fail_invalid_new_owner(self):# Fails to get checkins in database due to user not existing
+        logging.info("***************TEST_update_community_fail_invalid_new_owner**************")
+        client = Client()
+
+        response = client.post(reverse('update_community_view'), data=json.dumps(self.INVALID_NEW_OWNER), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 400 -- failure
+        self.assertEqual(response.status_code, 400)
+
+
+    def test_update_community_fail_duplicate_community_name(self):# Fails to get checkins in database due to user not existing
+        logging.info("***************TEST_update_community_fail_duplicate_community_name**************")
+        client = Client()
+
+        self.INVALID_DUPLICATE_COMMUNITY_NAME['community_id'] = self.community_id #updating post data with the correct checkin ID from the setup
+        response = client.post(reverse('update_community_view'), data=json.dumps(self.INVALID_DUPLICATE_COMMUNITY_NAME), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 400 -- failure
+        self.assertEqual(response.status_code, 400)
+    
     
