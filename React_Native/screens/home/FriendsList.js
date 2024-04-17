@@ -20,6 +20,7 @@ import makeThemeStyle from "../../tools/Theme.js";
 import * as Storage from "../../AsyncStorage.js";
 import IP_ADDRESS from "../../ip.js";
 import axios from "axios";
+import ViewPager from 'react-native-pager-view';
 
 const layout = Dimensions.get("window");
 
