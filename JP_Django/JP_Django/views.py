@@ -13,7 +13,7 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 import time
 import datetime
-from datetime import datetime, time, date, timezone
+from datetime import datetime, time, date, timedelta, timezone
 import pytz
 import logging
 from django.core.mail import send_mail
@@ -720,6 +720,17 @@ def get_checkin_info_view(request):
     return HttpResponse(constNotGet)
 
 def update_streak(user): # called in create checkin to update the streak each day
+    logging.info("in update_streak")
+    # Check if streak needs to be reset, if there is no checkin from yesterday
+    last_checkin = Checkin.objects.filter(user_id=user).order_by('-date').first()
+    # Check if there is any checkin found
+    if last_checkin is not None:
+        yesterday = (datetime.now() + timedelta(days=-1)).date()
+        last_checkin_date = last_checkin.date.date()
+        if last_checkin_date != yesterday: # Reset streak if there was no checkin yesterday
+            user.current_streak = 0
+            user.save()
+            logging.info("Streak reset")
     logging.info("Updating streak")
     # Update user's streak
     user.current_streak += 1
