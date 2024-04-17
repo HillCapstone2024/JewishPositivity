@@ -210,11 +210,11 @@ export default function CheckIn({ navigation, route }) {
   const getMomentText = (momentNumber) => {
     switch (momentNumber) {
       case "ModehAni":
-        return "A Modeh Ani Moment ";
+        return "Modeh Ani - Gratitude";
       case "Ashrei":
-        return "Ashrei in the Afternoon";
+        return "Ashrei - Happiness";
       case "Shema":
-        return "A Shema Reflection";
+        return "Shema - Reflection";
       default:
         return "Unknown Check-in Type";
     }
