@@ -30,7 +30,7 @@ import ParentProfile from "../screens/home/ProfileParent.js";
 import SettingsPage from "../screens/home/Settings.js";
 import Communities from "../screens/home/Communities.js";
 import Badges from "../screens/home/Badges.js";
-import Friends from "../screens/home/Friends.js";
+import Friends from "../screens/home/FriendsList.js";
 import FriendFeed from "../screens/home/FriendFeed.js";
 import FriendTab from "./FriendTab.js";
 import * as Haptics from "expo-haptics";
