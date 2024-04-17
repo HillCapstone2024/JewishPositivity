@@ -2,9 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, Platform, StyleSheet, Image} from "react-native";
 import BottomTab from "../../navigations/BottomTabNavigator";
 import * as Storage from "../../AsyncStorage.js";
-import { createAvatar } from "@dicebear/core";
 import axios from "axios";
-import { micah } from "@dicebear/collection";
 import { SvgXml } from "react-native-svg";
 import * as ImagePicker from "expo-image-picker"; 
 import { Ionicons } from "@expo/vector-icons";
@@ -37,11 +35,11 @@ const UserProfile = ({ navigation, onSwitch }) => {
     }
   };
 
-  const avatar = createAvatar(micah, {
-    seed: userInfo.username,
-    radius: 50,
-    mouth: ["smile", "smirk", "laughing"],
-  }).toString();
+  // const avatar = createAvatar(micah, {
+  //   seed: userInfo.username,
+  //   radius: 50,
+  //   mouth: ["smile", "smirk", "laughing"],
+  // }).toString();
 
 
   const getUser = async () => {
@@ -85,13 +83,11 @@ const UserProfile = ({ navigation, onSwitch }) => {
         </View>
   </View> 
     <View style={styles.profilePicContainer}>
-    {userInfo.profilePicture && userInfo.profilePicture.trim != "" ? (
       <Image 
         style={styles.profilePic}
-        source={{uri: `data:image/jpeg;base64,${userInfo?.profilePicture}`,}}/>
-    ) : (
-      <SvgXml xml={avatar} style={styles.profilePic} /> 
-    )}
+        source={{uri: `data:image/jpeg;base64,${userInfo?.profilePicture}`,}}
+        />
+
       </View>
         {<Text style={styles.attribute} >First Name:</Text>}
         {<Text style={[styles.info, theme["color"]]} >{userInfo.fname} </Text>}

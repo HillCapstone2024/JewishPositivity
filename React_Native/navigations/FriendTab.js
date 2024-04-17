@@ -4,6 +4,7 @@ import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import Friends from "../screens/home/FriendsList";
 import AddFriends from "../screens/home/AddFriends";
 import FriendRequest from "../screens/home/FriendRequest";
+import FriendRequests from "../screens/home/FriendRequests";
 
 const FirstRoute = () => (
   <View style={{ flex: 1, backgroundColor: "#ff4081" }} />
@@ -16,7 +17,7 @@ const SecondRoute = () => (
 const renderScene = SceneMap({
   View: Friends,
   Add: AddFriends,
-  Request: FriendRequest,
+  Request: FriendRequests,
 });
 
 export default function FriendTab() {

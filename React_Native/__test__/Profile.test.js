@@ -8,7 +8,7 @@
 import React from "react";
 import { fireEvent, render, waitFor } from "@testing-library/react-native";
 import axios from "axios";
-import Profile from "../screens/auth/Profile.js";
+import ParentProfile from "../screens/home/ProfileParent";
 
 //mock axios call
 jest.mock("axios");
@@ -16,6 +16,10 @@ jest.mock("axios");
 //Mocking navigateDrawer
 const mockNavigateDrawer = jest.fn();
 const mockResetNavigation = jest.fn();
+
+jest.mock("@fortawesome/react-native-fontawesome", () => ({
+  FontAwesomeIcon: "",
+}));
 
 jest.mock("@react-native-async-storage/async-storage", () => ({
   setItem: jest.fn(),
@@ -30,7 +34,7 @@ describe("Profile Component", () => {
   });
 
   it("Successfully renders username, first name, last name, and email", () => {
-    const {getByTestId} = render(<Profile />);
+    const { getByTestId } = render(<ParentProfile />);
     expect(getByTestId("firstnameInput")).toBeTruthy();
     expect(getByTestId("lastnameInput")).toBeTruthy();
     expect(getByTestId("usernameInput")).toBeTruthy();

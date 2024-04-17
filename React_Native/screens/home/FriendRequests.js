@@ -19,7 +19,7 @@ import makeThemeStyle from '../../tools/Theme.js';
 import * as Storage from "../../AsyncStorage.js";
 import IP_ADDRESS from "../../ip.js";
 import axios from 'axios';
-import ImageViewer from '../../tools/ImageViewer.js';
+import { Ionicons } from "@expo/vector-icons";
 const layout = Dimensions.get("window");
 
 //import AddFriends from '../screens/home/AddFriends.js';
@@ -33,9 +33,11 @@ const FriendRequests = ({navigation, onSwitch}) => {
   const [errorMessage, setErrorMessage] = useState(null);
   const [friends, setFriends] = useState([]);
   const [filteredFriends, setFilteredFriends] = useState([]);
-  const [profilePics, setProfilePics] = useState([]);
-  const [profilePicMap, setProfilePicMap] = useState({});
   const [search, setSearch] = useState("");
+  const [sentRequests, setSentRequests] = useState([]);
+  const [numSentRequests, setNumSentRequests] = useState(0);
+  const [recievedRequests, setRecievedRequests] = useState([]);
+  const [numRecievedRequests, setNumRecievedRequests] = useState(0);
 
   useEffect(() => {
     console.log('friends list initialize data');
@@ -192,7 +194,7 @@ const FriendRequests = ({navigation, onSwitch}) => {
     // fetchUserIDs(search);
   };
 
-  const renderItem = ({ item, profilepicProp }) => {
+  const renderItem = ({ item, isRecieved }) => {
     // Check if the user is already a friend
 
     return (
@@ -217,8 +219,32 @@ const FriendRequests = ({navigation, onSwitch}) => {
             </View>
             <View style={styles.msgContainer}>
               <Text style={styles.msgTxt}>@{item.username}</Text>
+              <Text>{isRecieved}</Text>
             </View>
           </View>
+          {isRecieved === 1 ? (
+            <View>
+              <View style={styles.acceptRequestButton}>
+                <TouchableOpacity>
+                  {/* <Ionicons name={"close"} size={20} color="#0066cc" /> */}
+                  <Text style={styles.acceptButtonText}>ADD</Text>
+                </TouchableOpacity>
+              </View>
+              <View>
+                <TouchableOpacity>
+                  <Ionicons name={"close"} size={20} color="#0066cc" />
+                  {/* <Text>Reject</Text> */}
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : (
+            <View style={styles.acceptRequestButton}>
+              <TouchableOpacity>
+                {/* <Ionicons name={"close"} size={20} color="#0066cc" /> */}
+                <Text style={styles.acceptButtonText}>CANCEL</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </TouchableOpacity>
     );
@@ -226,26 +252,35 @@ const FriendRequests = ({navigation, onSwitch}) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* <SearchBar
-        placeholder="Search friends..."
-        onChangeText={updateSearch}
-        value={search}
-        // backgroundColor="blue"
-        lightTheme
-        searchIcon={{ color: "#0066cc" }}
-        clearIcon={{ color: "#0066cc" }}
-        // placeholderTextColor="#0066cc"
-        // showCancel={true}
-        cancelButtonTitle={"Cancel"}
-        // platform={"ios"}
-      /> */}
       <View style={styles.container}>
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>
+            Pending Requests ({numSentRequests})
+          </Text>
+          <View style={styles.horizontalLine} />
+        </View>
         <View style={[styles.body, { height: layout.height }]}>
           <FlatList
             enableEmptySections={true}
             data={filteredFriends}
             keyExtractor={(item) => item.username}
-            renderItem={(item) => renderItem(item, item.profilepic)}
+            renderItem={(item) => renderItem(item, 1)}
+          />
+        </View>
+      </View>
+      <View style={styles.container}>
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>
+            Sent Requests ({numSentRequests})
+          </Text>
+          <View style={styles.horizontalLine} />
+        </View>
+        <View style={[styles.body, { height: layout.height }]}>
+          <FlatList
+            enableEmptySections={true}
+            data={filteredFriends}
+            keyExtractor={(item) => item.username}
+            renderItem={(item) => renderItem(item, 0)}
           />
         </View>
       </View>
@@ -321,31 +356,13 @@ const styles = StyleSheet.create({
     borderColor: "#0066cc",
     marginLeft: 20,
   },
-  followButtonText: {
-    // backgroundColor: "blue",
-    color: "#0066cc",
-    fontSize: 12,
-    marginLeft: 5,
-    fontWeight: "bold",
-    // paddingRight: 16,
-    paddingTop: 2,
-  },
-  unfollowButton: {
-    backgroundColor: "#0066cc",
-    padding: 5,
-    borderRadius: 7,
-    flexDirection: "row",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: "#0066cc",
-  },
-  unfollowButtonText: {
+  acceptButtonText: {
     // backgroundColor: "blue",
     color: "white",
     fontSize: 12,
-    marginHorizontal: 5,
     fontWeight: "bold",
-    paddingTop: 2,
+    // paddingRight: 16,
+    marginHorizontal: 4,
   },
   container: {
     flex: 1,
@@ -354,12 +371,6 @@ const styles = StyleSheet.create({
     //justifyContent: "center",
     //alignItems: "center",
   },
-  // container: {
-  //     // paddingTop: 60,
-  //     paddingBottom: 100,
-  //     height: "100%",
-  //     // backgroundColor: "red",
-  //   },
   input: {
     width: "80%",
     height: 40,
@@ -464,6 +475,12 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     shadowOpacity: 0.16,
   },
+  acceptRequestButton: {
+    padding: 5,
+    borderRadius: 15,
+    backgroundColor: "#0066cc",
+    marginRight: 15,
+  },
 
   friendText: {
     color: "white",
@@ -473,6 +490,25 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
+  },
+  sectionTitle: {
+    paddingVertical: 12,
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#9e9e9e",
+    textTransform: "uppercase",
+    letterSpacing: 1.1,
+  },
+  sectionContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    margin: 10,
+  },
+  horizontalLine: {
+    flex: 1,
+    height: 1.25,
+    backgroundColor: "#9e9e9e",
+    marginLeft: 8, // Adjust spacing between title and line
   },
 });
 
