@@ -102,9 +102,6 @@ const AddFriends = ({navigation, onSwitch}) => {
                 <Text style={styles.buttonText}>Send Friend Request</Text>
             </TouchableOpacity>
             {errorMessage}
-            <TouchableOpacity style = {styles.backButton} onPress={navigateFriendList}>
-              <Text style={styles.backText}> Back </Text>
-            </TouchableOpacity>
         </View>
     );
 }
