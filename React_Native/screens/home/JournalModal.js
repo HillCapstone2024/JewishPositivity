@@ -79,7 +79,7 @@ const JournalModal = ({ onClose, visible, navigation }) => {
             <TouchableOpacity 
               style={styles.pressableBox} 
               onPress={() => {
-                const type = "Modeh Ani";
+                const type = "ModehAni";
                 setCheckInType(type);
                 console.log("JournalModal Passing:", type);
                 navigation.navigate('CheckIn', { checkInType: type });

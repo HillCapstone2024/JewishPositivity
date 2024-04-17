@@ -209,7 +209,7 @@ export default function CheckIn({ navigation, route }) {
 
   const getMomentText = (momentNumber) => {
     switch (momentNumber) {
-      case "Modeh Ani":
+      case "ModehAni":
         return "A Modeh Ani Moment ";
       case "Ashrei":
         return "Ashrei in the Afternoon";
@@ -222,7 +222,7 @@ export default function CheckIn({ navigation, route }) {
 
   renderTextBasedOnType = () => {
     switch (checkInType) {
-      case 'Modeh Ani':
+      case 'ModehAni':
         return (
           <View style={styles.textContainer}>
             <Text style={{marginBottom: 10, }}>
