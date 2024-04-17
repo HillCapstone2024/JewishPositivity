@@ -7,7 +7,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { AppRegistry, Platform } from "react-native";
 
 // import { LogLevel, OneSignal } from "react-native-onesignal";
-import Constants from "expo-constants";
+// import Constants from "expo-constants";
 
 import AuthNavigator from "./navigations/AuthNavigator.js";
 
@@ -22,13 +22,13 @@ const linking = {
   prefixes: ["https://jewishpositivity.com", "jewishpositivity://"],
   config: {
     screens: {
-      Drawer: {
-        screens: {
-          Home: {
-            screens: {
-              Feed: "Feed",
-            },
-          },
+      CheckIn: {
+        path: "CheckIn/:checkInType",
+        parse: {
+          momentType: (checkInType) => `CheckIn-${checkInType}`,
+        },
+        stringify: {
+          momentType: (checkInType) => checkInType.replace(/^CheckIn-/, ""),
         },
       },
     },

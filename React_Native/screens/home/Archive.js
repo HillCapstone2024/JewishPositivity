@@ -238,11 +238,11 @@ export default function Archive({ navigation }) {
   const getMomentText = (momentNumber) => {
     switch (momentNumber) {
       case 1:
-        return "A Modeh Ani Moment ";
+        return "Modeh Ani - Gratitude";
       case 2:
-        return "Ashrei in the Afternoon";
+        return "Ashrei - Happiness";
       case 3:
-        return "A Shema Reflection";
+        return "Shema - Reflection";
       default:
         return "Unknown Check-in Type";
     }
@@ -385,7 +385,7 @@ export default function Archive({ navigation }) {
               <Ionicons name="filter" size={24} color="#4A90E2" />
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={handleGetEntries}
+              onPress={onRefresh}
               style={styles.refreshButton}
             >
               <Ionicons

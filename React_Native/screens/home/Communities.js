@@ -1,4 +1,4 @@
-import { Text, Modal, View, TouchableOpacity, TextInput, StyleSheet, Keyboard, KeyboardAvoidingView, TouchableWithoutFeedback, Platform, ScrollView } from 'react-native'
+import { Text, Modal, View, TouchableOpacity, TextInput, StyleSheet, Keyboard, FlatList, KeyboardAvoidingView, TouchableWithoutFeedback, Image, RefreshControl, Platform, ScrollView } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import * as Storage from "../../AsyncStorage.js";
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
@@ -62,6 +62,7 @@ const BottomPopupCreate = ({ visible, onRequestClose }) => {
         console.log("Create a community");
     }
 
+
     return (
         <Modal
             animationType="slide"
@@ -94,6 +95,58 @@ const Communities = () => {
     const [username, setUsername] = useState("");
     const [joinModalVisible, setJoinModalVisible] = useState(false);
     const [createModalVisible, setCreateModalVisible] = useState(false);
+    const [search, setSearch] = useState("");
+    const [communities, setCommunities] = useState([]);
+    const [refreshing, setRefreshing] = useState(false);
+
+
+    const onRefresh = () => {
+        //refresh function here
+    };
+
+    const renderItem = ({ item, profilepicProp }) => {
+
+        return (
+            <TouchableOpacity>
+                <View style={styles.row}>
+                    <View style={styles.pic}>
+                        {/* <SvgUri style={styles.pic} uri={item.profile_pic} /> */}
+                        <Image
+                            source={{ uri: `data:Image/jpeg;base64,${item.profile_picture}` }}
+                            style={styles.avatar}
+                        />
+                    </View>
+                    <View style={styles.textContainer}>
+                        <View style={styles.nameContainer}>
+                            <Text
+                                style={styles.nameTxt}
+                                numberOfLines={1}
+                                ellipsizeMode="tail"
+                            >
+                                {item.username}
+                            </Text>
+                        </View>
+                        <View style={styles.msgContainer}>
+                            <Text style={styles.msgTxt}>@{item.name}</Text>
+                        </View>
+                    </View>
+                    <View>
+                        <TouchableOpacity
+                            style={styles.deleteFriendButton}
+                            onPress={() => {
+                                console.log("delete button pressed.");
+                                //add functionality here
+                            }}
+                        >
+                            <Text style={styles.deleteFriendButtonText}>Remove</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </TouchableOpacity>
+        );
+    };
+
+
 
     useEffect(() => {
         const loadUsername = async () => {
@@ -101,41 +154,59 @@ const Communities = () => {
             setUsername(storedUsername || "No username");
         };
         loadUsername();
+        setCommunities(prevCommunities => [...prevCommunities, {
+            id: communities.length + 1,
+            name: 'New Community',
+            description: 'Community Description',
+            members: [],
+        },]);
     }, []);
 
     return (
-        // <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        //     <KeyboardAvoidingView
-        //         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        //         style={[styles.container, theme["background"]]}
-        //     >
-        <View style={[
-            // themeStyle['background'], 
-            styles.container]}>
-            <View style={{ flexDirection: "row" }}>
-                <TouchableOpacity style={styles.join} onPress={() => setJoinModalVisible(true)}>
-                    <Text style={styles.buttonText}>Join</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.create} onPress={() => setCreateModalVisible(true)}>
-                    <Text style={styles.buttonText}>Create</Text>
-                </TouchableOpacity>
-                <BottomPopupJoin
-                    visible={joinModalVisible}
-                    onRequestClose={() => setJoinModalVisible(false)}
-                />
-                <BottomPopupCreate
-                    visible={createModalVisible}
-                    onRequestClose={() => setCreateModalVisible(false)}
-                />
-            </View>
-            <View style={styles.middleView}>
-                <Text style={styles.noCommunities}>
-                    Join or create a community to get started!
-                </Text>
-            </View>
-        </View>
-        //     </KeyboardAvoidingView>
-        // </TouchableWithoutFeedback>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <KeyboardAvoidingView
+                // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={[styles.container, theme["background"]]}>
+                <TextInput style={styles.search} placeholder='search...' onChangeText={(text) => setSearch(text)}></TextInput>
+                <View style={{ flexDirection: "row" }}>
+                    <TouchableOpacity style={styles.join} onPress={() => setJoinModalVisible(true)}>
+                        <Text style={styles.buttonText}>Join</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.create} onPress={() => setCreateModalVisible(true)}>
+                        <Text style={styles.buttonText}>Create</Text>
+                    </TouchableOpacity>
+                    <BottomPopupJoin
+                        visible={joinModalVisible}
+                        onRequestClose={() => setJoinModalVisible(false)}
+                    />
+                    <BottomPopupCreate
+                        visible={createModalVisible}
+                        onRequestClose={() => setCreateModalVisible(false)}
+                    />
+                </View>
+                <View style={styles.middleView}>
+                    {communities.length === 0 ? (
+                        <Text style={styles.noCommunities}>
+                            Join or create a community to get started!
+                        </Text>) : (
+                        <FlatList
+                            enableEmptySections={true}
+                            data={communities}
+                            keyExtractor={(item) => item.name}
+                            renderItem={(item) => renderItem(item, item.pic)}
+                            refreshControl={
+                                <RefreshControl
+                                    refreshing={refreshing}
+                                    onRefresh={onRefresh}
+                                    testID="refresh-control"
+                                />
+                            }
+                        />
+                    )}
+
+                </View>
+            </KeyboardAvoidingView>
+        </TouchableWithoutFeedback >
     )
 };
 
@@ -187,6 +258,23 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         marginBottom: 20,
     },
+    nameContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        width: 200,
+        // backgroundColor: "yellow",
+    },
+    msgContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        // backgroundColor: "red",
+    },
+    msgTxt: {
+        fontWeight: "400",
+        color: "#0066cc",
+        fontSize: 12,
+        marginLeft: 15,
+    },
     input: {
         width: "80%",
         height: 40,
@@ -195,6 +283,22 @@ const styles = StyleSheet.create({
         borderBottomWidth: 2,
         marginBottom: 20,
         paddingHorizontal: 10,
+    },
+
+    deleteFriendButton: {
+        backgroundColor: "#0066cc",
+        padding: 5,
+        borderRadius: 5,
+        color: "#0066cc",
+        flexDirection: "row",
+        justifyContent: "center",
+    },
+    deleteFriendButtonText: {
+        // backgroundColor: "blue",
+        color: "white",
+        fontSize: 12,
+        fontWeight: "bold",
+        // paddingRight: 16,
     },
     inputDesc: {
         width: "100%",
@@ -241,7 +345,18 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-    }
+    },
+    search: {
+        alignSelf: "center",
+        width: "95%",
+        height: 40,
+        borderColor: "grey",
+        borderWidth: 1,
+        borderRadius: 10,
+        // fontWeight: "bold",
+        marginBottom: 10,
+        paddingHorizontal: 10,
+    },
 });
 
 export default Communities;

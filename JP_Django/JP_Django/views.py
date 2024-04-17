@@ -13,7 +13,7 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 import time
 import datetime
-from datetime import datetime, time, date, timezone
+from datetime import datetime, time, date, timedelta, timezone
 import pytz
 import logging
 from django.core.mail import send_mail
@@ -137,6 +137,12 @@ def login_view(request):
             return HttpResponse("Login failed!", status=400)
     return HttpResponse(constNotPost)
 
+#Retrieve default profile picture as global variable defaultProfilePic
+defaultPPfile_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'tests/test_resources/b64profilepicture.txt'))
+defaultPPFile = open(defaultPPfile_path, 'r')
+defaultProfilePic = defaultPPFile.read()
+defaultPPFile.close()
+
 def create_user_view(request):
     # Ensure the request method is POST
     if request.method != "POST":
@@ -158,6 +164,7 @@ def create_user_view(request):
     password2 = data["reentered_password"]  # Confirmation password
     email = data["email"]
     timezone = data["timezone"]
+    default = base64.b64decode(defaultProfilePic)
 
     # Validate the timezone
     if timezone not in pytz.all_timezones:
@@ -187,6 +194,7 @@ def create_user_view(request):
             first_name=data["firstname"],
             last_name=data["lastname"],
             timezone=timezone,
+            profile_picture=default,
         )
         Badges.objects.create(user_id=user)  # Create a new badge object for the user
         return HttpResponse("User has been created!")
@@ -766,6 +774,17 @@ def get_checkin_info_view(request):
     return HttpResponse(constNotGet)
 
 def update_streak(user): # called in create checkin to update the streak each day
+    logging.info("in update_streak")
+    # Check if streak needs to be reset, if there is no checkin from yesterday
+    last_checkin = Checkin.objects.filter(user_id=user).order_by('-date').first()
+    # Check if there is any checkin found
+    if last_checkin is not None:
+        yesterday = (datetime.now() + timedelta(days=-1)).date()
+        last_checkin_date = last_checkin.date.date()
+        if last_checkin_date != yesterday: # Reset streak if there was no checkin yesterday
+            user.current_streak = 0
+            user.save()
+            logging.info("Streak reset")
     logging.info("Updating streak")
     # Update user's streak
     user.current_streak += 1

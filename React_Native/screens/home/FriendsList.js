@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -12,60 +12,56 @@ import {
   ActivityIndicator,
   SafeAreaView,
   Dimensions,
+  RefreshControl,
 } from "react-native";
 import { SearchBar } from "react-native-elements";
-import BottomTab from "../../navigations/BottomTabNavigator";
-import makeThemeStyle from '../../tools/Theme.js';
+import LoadingScreen from "../greet/Loading.js";
+import makeThemeStyle from "../../tools/Theme.js";
 import * as Storage from "../../AsyncStorage.js";
 import IP_ADDRESS from "../../ip.js";
-import axios from 'axios';
-import ImageViewer from '../../tools/ImageViewer.js';
+import axios from "axios";
+import ViewPager from 'react-native-pager-view';
+
 const layout = Dimensions.get("window");
 
 //import AddFriends from '../screens/home/AddFriends.js';
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
-const Friends = ({navigation, onSwitch}) => {
+const FriendsList = ({ navigation, onSwitch }) => {
   theme = makeThemeStyle();
   const [username, setUsername] = useState("");
   const [usernameSearch, setUsernameSearch] = useState("");
-  const [errorMessage, setErrorMessage] = useState(null);
   const [friends, setFriends] = useState([]);
-  const [filteredFriends, setFilteredFriends] = useState([]);
-  const [profilePics, setProfilePics] = useState([]);
-  const [profilePicMap, setProfilePicMap] = useState({});
-  const [search, setSearch] = useState("");
+  const [numFriends, setNumFriends] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const navigateAdd = () => {
-    console.log("reached navigate", onSwitch);
-    if (onSwitch) {
-      console.log("reache inside if statement");
-      onSwitch();
-    }
-  };
 
   useEffect(() => {
-    console.log('friends list initialize data');
+    if (isLoading === false) {
+      console.log("friends list initialize data");
       initializeData();
-    }, []);
+    }
+  }, []);
+
+  const onRefresh = () => {
+    //refresh function here
+  };
 
   const initializeData = async () => {
+    setIsLoading(true);
     const storedUsername = await Storage.getItem("@username");
     const retrievedFriends = await getFriends(storedUsername);
     const retrievedProfilepics = await fetchProfilePics(retrievedFriends);
-
-    setFriends(retrievedFriends);
-    setFilteredFriends(retrievedProfilepics);
+    console.log("you have friends");
+    setFriends(retrievedProfilepics);
+    // setNumFriends(retrievedFriends.length());
     //we want to set them all at the same time so theres not a bunch of rerenders
     setUsername(storedUsername || "No username");
-    // setProfilePics(retrievedFriends);
-    setProfilePicMap(map);
-
-
-    // console.log("profile pics:", retrievedFriends);
+    setIsLoading(false);
+    console.log("finished initializing data.");
   };
-
 
   const getCsrfToken = async () => {
     try {
@@ -89,7 +85,6 @@ const Friends = ({navigation, onSwitch}) => {
       const friendsList = response.data
         .filter((item) => item.status === true)
         .map((item) => item.username);
-      console.log("friends list: ", friendsList);
       return friendsList;
     } catch (error) {
       console.log("error fetching friends:", error);
@@ -110,12 +105,12 @@ const Friends = ({navigation, onSwitch}) => {
         },
       });
       // setProfilePics(response.data);
+      // console.log("got profile pic success!");
+      // const map = {};
+      // response.data.forEach((pic) => {
+      //   map[pic.username] = pic.profile_picture;
+      // });
       console.log("got profile pic success!");
-      const map = {};
-      response.data.forEach((pic) => {
-        map[pic.username] = pic.profile_picture;
-      });
-      console.log("map reachec", typeof(response.data));
       return response.data;
     } catch (error) {
       console.log("Error retrieving profile pics:", error);
@@ -168,20 +163,6 @@ const Friends = ({navigation, onSwitch}) => {
     }
   };
 
-  useEffect(() => {
-    setFilteredFriends(
-      search.trim() === ""
-        ? friends
-        : friends.filter((friend) =>
-            friend.toLowerCase().includes(search.toLowerCase())
-          )
-    );
-  }, [search]);
-
-  const updateSearch = (search) => {
-    setSearch(search);
-    // fetchUserIDs(search);
-  };
 
   const renderItem = ({ item, profilepicProp }) => {
     // Check if the user is already a friend
@@ -203,12 +184,23 @@ const Friends = ({navigation, onSwitch}) => {
                 numberOfLines={1}
                 ellipsizeMode="tail"
               >
-                First Last
+                {item.username}
               </Text>
             </View>
             <View style={styles.msgContainer}>
               <Text style={styles.msgTxt}>@{item.username}</Text>
             </View>
+          </View>
+          <View>
+            <TouchableOpacity
+              style={styles.deleteFriendButton}
+              onPress={() => {
+                console.log("delete button pressed.");
+                //add functionality here
+              }}
+            >
+              <Text style={styles.deleteFriendButtonText}>Remove</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </TouchableOpacity>
@@ -217,34 +209,60 @@ const Friends = ({navigation, onSwitch}) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* <SearchBar
-        placeholder="Search friends..."
-        onChangeText={updateSearch}
-        value={search}
-        // backgroundColor="blue"
-        lightTheme
-        searchIcon={{ color: "#0066cc" }}
-        clearIcon={{ color: "#0066cc" }}
-        // placeholderTextColor="#0066cc"
-        // showCancel={true}
-        cancelButtonTitle={"Cancel"}
-        // platform={"ios"}
-      /> */}
+      <View style={styles.sectionContainer}>
+        <Text style={styles.sectionTitle}>My Friends ({numFriends})</Text>
+        <View style={styles.horizontalLine} />
+      </View>
+            {isLoading ? (
+        // <ActivityIndicator style={{ height: 100, width: 100 }} />
+        <View testID="loading-screen" style={styles.loadingStyle}>
+          <LoadingScreen />
+        </View>
+      ) : (
       <View style={styles.container}>
         <View style={[styles.body, { height: layout.height }]}>
           <FlatList
             enableEmptySections={true}
-            data={filteredFriends}
+            data={friends}
             keyExtractor={(item) => item.username}
             renderItem={(item) => renderItem(item, item.profilepic)}
-          />
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                testID="refresh-control"
+              />
+            } 
+            />
         </View>
-      </View>
+      </View> )}
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  loadingStyle: {
+    marginTop: 150,
+    backgroundColor: "red",
+  },
+  sectionTitle: {
+    paddingVertical: 12,
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#9e9e9e",
+    textTransform: "uppercase",
+    letterSpacing: 1.1,
+  },
+  sectionContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  horizontalLine: {
+    flex: 1,
+    height: 1.25,
+    backgroundColor: "#9e9e9e",
+    marginLeft: 8, // Adjust spacing between title and line
+  },
   body: {
     // backgroundColor: "white",
   },
@@ -282,11 +300,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     width: 170,
   },
-  mblTxt: {
-    fontWeight: "200",
-    color: "#777",
-    fontSize: 13,
-  },
   msgContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -298,45 +311,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginLeft: 15,
   },
-  followContainer: {
-    marginLeft: 40,
-  },
-  followButton: {
-    backgroundColor: "white",
-    padding: 10,
-    borderRadius: 5,
-    color: "white",
-    flexDirection: "row",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: "#0066cc",
-    marginLeft: 20,
-  },
-  followButtonText: {
-    // backgroundColor: "blue",
-    color: "#0066cc",
-    fontSize: 12,
-    marginLeft: 5,
-    fontWeight: "bold",
-    // paddingRight: 16,
-    paddingTop: 2,
-  },
-  unfollowButton: {
+  deleteFriendButton: {
     backgroundColor: "#0066cc",
     padding: 5,
-    borderRadius: 7,
+    borderRadius: 5,
+    color: "#0066cc",
     flexDirection: "row",
     justifyContent: "center",
-    borderWidth: 2,
-    borderColor: "#0066cc",
   },
-  unfollowButtonText: {
+  deleteFriendButtonText: {
     // backgroundColor: "blue",
     color: "white",
     fontSize: 12,
-    marginHorizontal: 5,
     fontWeight: "bold",
-    paddingTop: 2,
+    // paddingRight: 16,
   },
   container: {
     flex: 1,
@@ -344,37 +332,6 @@ const styles = StyleSheet.create({
 
     //justifyContent: "center",
     //alignItems: "center",
-  },
-  // container: {
-  //     // paddingTop: 60,
-  //     paddingBottom: 100,
-  //     height: "100%",
-  //     // backgroundColor: "red",
-  //   },
-  input: {
-    width: "80%",
-    height: 40,
-    borderStyle: "solid",
-    borderBottomColor: "#e8bd25",
-    borderBottomWidth: 2,
-    marginBottom: 10,
-    paddingHorizontal: 10,
-  },
-  addButton: {
-    backgroundColor: "lightgray",
-    width: 100,
-    paddingVertical: 10,
-    marginTop: 10,
-    marginHorizontal: 5,
-    borderRadius: 5,
-    shadowColor: "black",
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
-    shadowOpacity: 0.16,
-  },
-  addText: {
-    textAlign: "center",
-    color: "#000000",
   },
   errorMessageBox: {
     textAlign: "center",
@@ -442,24 +399,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginRight: 10,
   },
-
-  button: {
-    backgroundColor: "#4A90E2",
-    paddingVertical: 30,
-    paddingHorizontal: 50,
-    marginTop: 10,
-    marginHorizontal: 5,
-    borderRadius: 5,
-    shadowColor: "black",
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
-    shadowOpacity: 0.16,
-  },
-
-  friendText: {
-    color: "white",
-    fontSize: 16,
-  },
   avatar: {
     width: 40,
     height: 40,
@@ -467,4 +406,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Friends;
+export default FriendsList;

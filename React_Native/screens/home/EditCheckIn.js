@@ -228,11 +228,11 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
   const getMomentText = (momentNumber) => {
     switch (momentNumber) {
       case 1:
-        return "A Modeh Ani Moment ";
+        return "Modeh Ani - Gratitude";
       case 2:
-        return "Ashrei in the Afternoon";
+        return "Ashrei - Happiness";
       case 3:
-        return "A Shema Reflection";
+        return "Shema - Reflection";
       default:
         return "Unknown Check-in Type";
     }
@@ -253,7 +253,7 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
 
   renderTextBasedOnType = () => {
     switch (selectedEntry?.moment_number) {
-      case 'Modeh Ani':
+      case 'ModehAni':
         return (
           <View style={styles.textContainer}>
             <Text style={{marginBottom: 10, }}>
@@ -402,16 +402,22 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
                         onMediaChange={mediaChanged}
                       />
                     ) : selectedEntry?.content_type === "video" ? (
-                      <VideoViewer
-                        source={mediaUri}
-                        onDelete={deleteMedia}
-                        dimensions={{ height: 60, width: 60 }}
+                      
+                      <Image
+                        source={{uri: `data:Image/mp4;base64,${selectedEntry?.content}`}}
+                        style={{ height: 60, width: 60 }}
                       />
+                      // <VideoViewer
+                      //   source={mediaUri}
+                      //   onDelete={deleteMedia}
+                      //   style={{ height: 60, width: 60 }}
+                      //   // dimensions={{ height: 60, width: 60 }}
+                      // />
                     ) : (
                       <RecordingViewer
                         source={mediaUri}
                         onDelete={deleteMedia}
-                        style={{ height: 60, width: 60, borderRadius: 5 }}
+                        style={{ height: 60, width: 60}}
                       />
                     ) }
                     <ProgressBar onMediaChange={mediaChanged} />
@@ -466,7 +472,7 @@ const ProgressBar = ({ onMediaChange }) => {
 
   useEffect(() => {
     progress.setValue(0); // Reset progress to 0 without needing to re-create the Animated.Value
-    console.log("parentWidth: ", parentWidth);
+    // console.log("parentWidth: ", parentWidth);
     if (parentWidth > 0) {
       Animated.timing(progress, {
         toValue: parentWidth,
