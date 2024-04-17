@@ -356,8 +356,6 @@ def get_user_information_view(request):
                     "profilepicture": profile_picture_encoded,
                     "timezone" : user.timezone
                 }
-                logging.info("get data:")
-                logging.info(response_data)
                 return HttpResponse(json.dumps(response_data), content_type=constAppJson)
             except Exception as e:
                 logging.info(e)
@@ -475,6 +473,55 @@ def delete_user_view(request):
 
     return HttpResponse(constInvalidReq, status=400)
 
+
+def get_users_information_view(request):
+    if request.method == "GET":
+        usernames = request.GET.getlist("username[]")
+
+        # Make sure the get data is not empty
+        if usernames:
+            try:
+                user_info_list = []
+                for username in usernames:
+                    # Retrieve the user from the database by username
+                    user = User.objects.get(username=username)
+
+                    profile_picture_data = user.profile_picture
+                    if profile_picture_data:
+                        profile_picture_encoded = base64.b64encode(profile_picture_data).decode('utf-8')
+                    else:
+                        profile_picture_encoded = None  # a default image or keep it empty
+
+                    # get all of the information for the user
+                    user_info = {
+                        "id": user.pk,
+                        "username": user.username,
+                        "password": user.password,
+                        "email": user.email,
+                        "first_name": user.first_name,
+                        "last_name": user.last_name,
+                        "profilepicture": profile_picture_encoded,
+                        "timezone": user.timezone
+                    }
+                    user_info_list.append(user_info)
+
+                logging.info("get data:")
+                logging.info(user_info_list)
+                return HttpResponse(json.dumps(user_info_list), content_type='application/json')
+            except User.DoesNotExist:
+                return HttpResponse("User does not exist", status=400)
+            except Exception as e:
+                logging.error(str(e))
+                return HttpResponse("Error: " + str(e), status=400)
+        else:  # usernames were empty
+            return HttpResponse("Usernames not provided", status=400)
+    return HttpResponse("This endpoint only accepts GET requests", status=400)
+
+
+
+
+
+
 # ########## Check-in Management ##########
 
 
@@ -565,7 +612,6 @@ def update_checkin_info_view(request):
     data = json.loads(request.body)
 
     # Attempt to retrieve the checkin object based on the checkin id provided in the POST data
-    checkin_id=None #default
     try:
         checkin_id = data["checkin_id"]  # Get the username from the POST data
         checkin = Checkin.objects.get(checkin_id=checkin_id)  # Retrieve the checkin from the database
@@ -1427,3 +1473,35 @@ def update_description(community, new_description):
     except Exception as e:
         logging.info("ERROR IN CHANGING description: %s", e)
         return HttpResponse("Error in updating description", status=400)
+
+
+def delete_community_view(request):
+    logging.info('in delete community view')
+    if request.method == "POST":
+        # Retrieve community ID from POST request
+        data = json.loads(request.body)
+        community_id = data.get("community_id")
+        logging.info('Retrieved community_id %s', community_id)
+
+        try:
+            # Check if the community exists
+            community = Community.objects.get(community_id=community_id)
+            logging.info('Retrieved community: %s', community)
+
+            logging.info('attempting to delete community.....')
+            community.delete()
+            logging.info('deleted.....')
+            # communityuser= CommunityUser.objects.filter(community_id=community_id).delete()
+            return HttpResponse("Community deleted successfully", status=200)
+            
+        except Exception as e:
+            return HttpResponse("Error deleting community: " + str(e), status=400)
+
+    return HttpResponse(constInvalidReq, status=400)
+
+
+
+
+
+
+    

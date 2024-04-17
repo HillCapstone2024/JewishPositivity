@@ -798,19 +798,8 @@ class GetUserInformationViewTestCase(TestCase):
         # Check if response status code is 200
         self.assertEqual(response.status_code, 200)
 
-        # Printing DB after attempted getting of info
-        logging.info('Response: %s', response)
-        logging.info('')
-        queryset = User.objects.all()
-        for obj in queryset:
-            logging.info(LOG_MSG_FORMAT, LOG_USER, obj.username)
-            logging.info(LOG_MSG_FORMAT, LOG_FIRST_NAME, obj.first_name)
-            logging.info(LOG_MSG_FORMAT, LOG_LAST_NAME, obj.last_name)
-            logging.info(LOG_MSG_FORMAT, LOG_TIME1, obj.time1)
-            logging.info(LOG_MSG_FORMAT, LOG_TIME2, obj.time2)
-            logging.info(LOG_MSG_FORMAT, LOG_TIME3, obj.time3)
-            #logging.info(LOG_MSG_FORMAT, "photo: ", obj.profile_picture)
-            logging.info('')   
+        response_data = json.loads(response.content)
+        logging.info("response_data: %s",response_data)
 
     def test_get_user_information_fail(self): # Fails to get user info in database due to user not existing
         client = Client()
@@ -824,18 +813,82 @@ class GetUserInformationViewTestCase(TestCase):
         # Check if response status code is 400 -- failure
         self.assertEqual(response.status_code, 400)
 
-        # Printing DB after attempted getting of times
-        logging.info('Response: %s', response)
-        logging.info('')
-        queryset = User.objects.all()
-        for obj in queryset:
-            logging.info(LOG_MSG_FORMAT, LOG_USER, obj.username)
-            logging.info(LOG_MSG_FORMAT, LOG_FIRST_NAME, obj.first_name)
-            logging.info(LOG_MSG_FORMAT, LOG_LAST_NAME, obj.last_name)
-            logging.info(LOG_MSG_FORMAT, LOG_TIME1, obj.time1)
-            logging.info(LOG_MSG_FORMAT, LOG_TIME2, obj.time2)
-            logging.info(LOG_MSG_FORMAT, LOG_TIME3, obj.time3)
-            logging.info('')   
+
+class GetUsersInformationViewTestCase(TestCase):
+
+    photo_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64photo.txt'))
+    photoFile = open(photo_file_path, 'r')
+    photo = photoFile.read()
+    #logging.info("PHOTO: %s", photo)
+    photoFile.close()
+
+    # Define constant user data
+    USER_DATA = {
+        'username': 'testuser',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+    USER_DATA_2 = {
+        'username': 'testuser2',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test2@example.com',
+        'timezone': 'EST',
+    }
+
+    
+
+    def setUp(self):
+        # Initialize the Django test client
+        client = Client()
+
+        # Make a POST request to create a test user to display information of
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER_DATA), content_type=CONTENT_TYPE_JSON)
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER_DATA_2), content_type=CONTENT_TYPE_JSON)
+
+        # Update the profile picture of the created user
+        update_data = {
+            'username': 'testuser',
+            'profilepicture': self.photo
+        }
+        self.client.post(reverse('update_user_information_view'), data=json.dumps(update_data), content_type=CONTENT_TYPE_JSON)
+
+    def test_get_users_information_success(self): # Successfully retrieves a valid user's information from the database
+        client = Client()
+
+        # Create test data
+        get_data = {'username[]': ['testuser', 'testuser2']}
+
+        # Send GET request to get_user_information_view
+        response = client.get(reverse('get_users_information_view'), data=get_data)
+
+        # Check if response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+        response_data = json.loads(response.content)
+        logging.info("response_data: %s",response_data) 
+
+    def test_get_user_information_fail(self): # Fails to get user info in database due to user not existing
+        client = Client()
+
+        # Create test data
+        get_data = {'username[]': ['doesnotexist', 'doesnotexist2']}
+
+        # Send GET request to get_users_information_view
+        response = client.get(reverse('get_users_information_view'), data=get_data)
+
+        # Check if response status code is 400 -- failure
+        self.assertEqual(response.status_code, 400)
+
+
+
 
 class CheckinViewTestCase(TestCase): #to test handling of checkin post for text, photo, video and audio
 
@@ -2849,8 +2902,6 @@ class GetAllCommunityInfoViewTestCase(TestCase): # front end calls get and we re
         # Check if response status code is 200
         self.assertEqual(response.status_code, 200)
 
-        
-        
 class UpdateCommunityViewTestCase(TestCase): 
     
     photo_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64photo.txt'))
@@ -3201,4 +3252,122 @@ class UpdateCommunityViewTestCase(TestCase):
         # Check if response status code is 400 -- failure
         self.assertEqual(response.status_code, 400)
     
+    
+
+class DeleteCommunityViewTestCase(TestCase):  # To test deleting community
+    
+    photo_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64photo.txt'))
+    photoFile = open(photo_file_path, 'r')
+    photo = photoFile.read()
+    #logging.info("PHOTO: %s", photo)
+    photoFile.close()
+    # Define constant user data
+
+    USER1_DATA = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+    COMMUNITY_SUCCESS_1 = {
+        'community_name': "Name of Community",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "testuser1", # username of the owner
+        "privacy": 'public',
+    }
+
+    COMMUNITY_SUCCESS_2 = {
+        'community_name': "THIS IS MY SECOND COMMUNITY",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "testuser1", # username of the owner
+        "privacy": 'public',
+    }
+
+    community_id = -1 #default, will change in test
+
+    DELETE_COMMUNITY_DATA_SUCCESS = {
+        'community_id': community_id,
+    }
+
+    DELETE_COMMUNITY_DATA_FAILURE = {
+        'community_id': -999,
+    }
+    
+    def setUp(self):
+        logging.info("Setting up DeleteCommunityViewTestCase")
+
+        self.client = Client()
+        
+        # Create test user to test delete
+        self.client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)
+        self.client.post(reverse('create_community_view'), data=json.dumps(self.COMMUNITY_SUCCESS_1), content_type=CONTENT_TYPE_JSON) #make community
+        self.client.post(reverse('create_community_view'), data=json.dumps(self.COMMUNITY_SUCCESS_2), content_type=CONTENT_TYPE_JSON) #make community
+
+        #get community_id of the checkin
+        response = self.client.get(reverse('get_specific_community_info_view'), data={'community_name': 'Name of Community'})
+
+        # Parse the response content as JSON
+        response_data = json.loads(response.content)
+        logging.info("response_data of getting community_id: %s",response_data)
+
+        # Now you can access the dictionary returned by the view
+        self.community_id = response_data['community_id']
+        logging.info("community_id: %s",self.community_id)
+
+    def test_delete_community_success(self):
+        logging.info("***************test_community_delete_success**************".upper())
+        logging.info('Printing BEFORE delete........')
+
+        queryset = Community.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_NAME, obj.community_name)
+            logging.info("missing photo- okay")
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_DESCRIPTION, obj.community_description)
+            logging.info(LOG_MSG_FORMAT, LOG_OWNER_ID, obj.owner_id.pk)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
+            logging.info('')
+
+        logging.info('Printing users in communityuser table before........')
+        queryset = CommunityUser.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, "Community ID: ", obj.community_id)
+            logging.info(LOG_MSG_FORMAT, "Community user ID: ", obj.community_id)
+
+        self.DELETE_COMMUNITY_DATA_SUCCESS['community_id'] = self.community_id #change the checkin id to the id got in the setup
+        response = self.client.post(reverse('delete_community_view'), data=json.dumps(self.DELETE_COMMUNITY_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 200 -- success
+        self.assertEqual(response.status_code, 200)
+        
+        logging.info('Printing AFTER delete........')
+        queryset = Community.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_NAME, obj.community_name)
+            logging.info("missing photo- okay")
+            logging.info(LOG_MSG_FORMAT, LOG_COMMUNITY_DESCRIPTION, obj.community_description)
+            logging.info(LOG_MSG_FORMAT, LOG_OWNER_ID, obj.owner_id.pk)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
+            logging.info('')
+
+        logging.info('Printing users in communityuser table after........')
+        queryset = CommunityUser.objects.all()   
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, "Community ID: ", obj.community_id)
+            logging.info(LOG_MSG_FORMAT, "Community user ID: ", obj.community_id)
+
+    def test_delete_checkin_failure(self):
+        logging.info("***************test_delete_community_failure**************".upper())
+
+        # Attempt to delete to nonexistent checkin
+
+        response = self.client.post(reverse('delete_community_view'), data=json.dumps(self.DELETE_COMMUNITY_DATA_FAILURE), content_type=CONTENT_TYPE_JSON)
+        
+        # Check if response status code is 400 -- failure
+        self.assertEqual(response.status_code, 400)
     
