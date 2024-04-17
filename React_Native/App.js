@@ -11,9 +11,9 @@ import Constants from "expo-constants";
 
 import AuthNavigator from "./navigations/AuthNavigator.js";
 
-OneSignal.Debug.setLogLevel(LogLevel.Verbose);
-OneSignal.initialize(Constants.expoConfig.extra.oneSignalAppId);
-OneSignal.Notifications.requestPermission(true);
+// OneSignal.Debug.setLogLevel(LogLevel.Verbose);
+// OneSignal.initialize(Constants.expoConfig.extra.oneSignalAppId);
+// OneSignal.Notifications.requestPermission(true);
 
 const Stack = createNativeStackNavigator();
 AppRegistry.registerComponent("X", () => App);
