@@ -8,6 +8,7 @@ import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import IP_ADDRESS from "../../ip.js";
+import makeThemeStyle from '../../tools/Theme.js';
 
  
 const API_URL = "http://" + IP_ADDRESS + ":8000";
@@ -27,6 +28,7 @@ const UserProfile = ({ navigation, onSwitch }) => {
 
 
   const [errorMessage, setErrorMessage] = useState(null);
+  const theme = makeThemeStyle();
 
   const navigateEdit = () => {
     // navigation.navigate("EditProfile");
@@ -90,13 +92,13 @@ const UserProfile = ({ navigation, onSwitch }) => {
 
       </View>
         {<Text style={styles.attribute} >First Name:</Text>}
-        {<Text style={[styles.info, theme["color"]]} >{userInfo.fname} </Text>}
+        {<Text style={[styles.info, theme["color"]]} testID="firstnameInput">{userInfo.fname} </Text>}
         {<Text style={styles.attribute} >Last Name:</Text>}
-        {<Text style={[styles.info, theme["color"]]}>{userInfo.lname} </Text>}
+        {<Text style={[styles.info, theme["color"]]} testID="lastnameInput">{userInfo.lname} </Text>}
         {<Text style={styles.attribute} >Username:</Text>}
-        {<Text style={[styles.info, theme["color"]]}>{userInfo.username}</Text>}
+        {<Text style={[styles.info, theme["color"]]} testID="usernameInput">{userInfo.username}</Text>}
         {<Text style={styles.attribute} >Email:</Text>}
-        {<Text style={[styles.info, theme["color"]]}>{userInfo.email} </Text>}
+        {<Text style={[styles.info, theme["color"]]} testID="emailInput">{userInfo.email} </Text>}
         {/* <TouchableOpacity style={styles.button} onPress={navigateEdit}>
               <Text style={styles.buttonText}>Edit Profile</Text>
         </TouchableOpacity> */}
@@ -192,3 +194,4 @@ const styles = StyleSheet.create({
 });
 
 export default UserProfile;
+
