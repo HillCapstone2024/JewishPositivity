@@ -34,7 +34,7 @@ import * as Storage from "../../AsyncStorage.js";
 import IP_ADDRESS from "../../ip.js";
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
-export default function JournalEntry({ handleCancel, handleSubmitClose }) {
+export default function CheckIn({ navigation, route }) {
   const [username, setUsername] = useState("");
   const [momentType, setMomentType] = useState(1);
   const [mediaUri, setMediaUri] = useState(null);
@@ -47,6 +47,8 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
   const [selectedOption, setSelectedOption] = useState("");
   const [disableSubmit, setDisableSubmit] = useState(true);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const { checkInType } = route.params;
   const mediaAccessoryViewID = "MediaBar";
   const theme = makeThemeStyle();
   const now = new Date();
@@ -65,6 +67,11 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
   const videoRef = useRef(null);
 
   useEffect(() => {
+    console.log("CheckIn Recieved:",checkInType)
+    handleOptionChange(checkInType)
+  }, [checkInType])
+
+  useEffect(() => {
     const loadUsername = async () => {
       const storedUsername = await Storage.getItem("@username");
       if (storedUsername) {
@@ -76,40 +83,6 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
     loadUsername();
     // configureAudioMode();
   }, []);
-
-  // async function configureAudioMode() {
-  //   try {
-  //     await Audio.setAudioModeAsync({
-  //       allowsRecordingIOS: false,
-  //       interruptionModeIOS: 1,
-  //       playsInSilentModeIOS: true,
-  //       interruptionModeAndroid: 1,
-  //       shouldDuckAndroid: true,
-  //       staysActiveInBackground: true,
-  //       playThroughEarpieceAndroid: false,
-  //     });
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // }
-
-  // async function playSound() {
-  //   console.log("Loading Sound");
-  //   const { sound } = await Audio.Sound.createAsync({ uri: mediaUri });
-  //   setSound(sound);
-
-  //   console.log("Playing Sound");
-  //   await sound.playAsync();
-  // }
-
-  // useEffect(() => {
-  //   return sound
-  //     ? () => {
-  //         console.log("Unloading Sound");
-  //         sound.unloadAsync();
-  //       }
-  //     : undefined;
-  // }, [sound]);
 
   async function readFileAsBase64(uri) {
     try {
@@ -167,9 +140,7 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
       );
       console.log("check in response:", response.data);
       //on successful submit close the page
-      if (handleSubmitClose) {
-        handleSubmitClose(true);
-      }
+      navigation.goBack();
     } catch (error) {
       console.log(error);
       console.error("Journal Error:", error.response.data);
@@ -236,6 +207,77 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
     }
   };
 
+  const getMomentText = (momentNumber) => {
+    switch (momentNumber) {
+      case "Modeh Ani":
+        return "A Modeh Ani Moment ";
+      case "Ashrei":
+        return "Ashrei in the Afternoon";
+      case "Shema":
+        return "A Shema Reflection";
+      default:
+        return "Unknown Check-in Type";
+    }
+  };
+
+  renderTextBasedOnType = () => {
+    switch (checkInType) {
+      case 'Modeh Ani':
+        return (
+          <View style={styles.textContainer}>
+            <Text style={{marginBottom: 10, }}>
+              מוֶֹד ה אֱ נָי לָ פָ נָיךָ, מ לָ ךְ חֶ י וְ קַ יָּם, שְׁ ה חֶ	 זַרַ תָּ  בָּ י נָשְׁ מ תֶ י בָּ חֶ מ לָ ה ,רַ בָּ ה אֱ	 מוּנָתֶ ךָ! 
+            </Text>
+            <Text style={{marginBottom: 10, fontStyle:"italic"}}>
+              Modeh ani l’fanecha, Melech chai v’kaya, she-hechezarta bi nishmati 
+              b’chemlah, rabbah emunatecha.
+            </Text>
+            <Text style={{marginBottom: 20}}>
+              I give thanks to You, the Ever-Living Sovereign, that with compassion You 
+              have returned my soul to me, how great is Your faith!
+            </Text>
+          </View>
+        );
+      case 'Ashrei':
+        return (
+          <View style={styles.textContainer}>
+            <Text style={{marginBottom: 10, }}>
+              אֱ שְׁ רַ% י יוֹשְׁ בֵ% י בֵ% יתֶ ךָ עוֶֹד יה לָ לָוּךָ סֶּ לָ ה. אֱ שְׁ רַ% י ה ע ם שְׁ כָּ כָ ה לּוֹ אֱ שְׁ רַ% י ה ע ם שְׁ יה)וְ ה אֱ	 לֹה יוְ.           </Text>
+            <Text style={{marginBottom: 10, fontStyle:"italic"}}>
+              Ashrei yoshvei veitecha, od y’hal’lucha selah.
+              Ashrei haam shekachah lo, ashrei haam she-Adonai Elohav
+            </Text>
+            <Text style={{marginBottom: 20}}>
+              Happy are those who dwell in Your house, they shall praise you forever.
+              Happy are those for whom it is so, happy the people from whom Adonai is 
+              God.
+            </Text>
+          </View>
+        );
+      default:
+        return (
+          <View style={styles.textContainer}>
+            <Text style={{marginBottom: 10, }}>
+            שְׁ מ ע יִשרַ אֱ% לָ יה)וְ ה אֱ	 לָה% ינָוּ יה)וְ ה אֱ חֶ ֶד: רַוּךְ שְׁ% ם כָּ בֵוְֶד מ לָ כָוּתֶוְ לָ עוְלָ ם וְ ע ֶד:
+            </Text>
+            <Text style={{marginBottom: 10, fontStyle:"italic"}}>
+              Sh’ma Yisrael, Adonai Eloheinu, Adonai Echad!
+              Baruch Shem k’vod malchuto l’olam va-ed.
+            </Text>
+            <Text style={{marginBottom: 20}}>
+              Hear O Israel, Adonai is our God, Adonai is one.
+              Blessed be the Name whose glorious sovereignty is forever and 
+              ever.
+            </Text>
+          </View>
+        );
+    }
+  };
+
+  const handleAccordianToggle = () => {
+    setIsExpanded(!isExpanded); // Toggle the state variable
+  };
+
   const mediaBoxAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     const loadMediaContainer = () => {
@@ -249,47 +291,8 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
   }, [showMediaBar]);
 
   return (
-    <SafeAreaView style={[styles.container]}>
-      {/* View for cancel and submit buttons */}
-      <View style={styles.topBar}>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity onPress={handleCancel}>
-            <View style={styles.buttonContent}>
-              <Ionicons name="caret-back" size={25} color="#4A90E2" />
-              <Text style={styles.cancelText}>Cancel</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-
-        {loadingSubmit ? (
-          <View style={styles.ActivityIndicator}>
-            <ActivityIndicator />
-          </View>
-        ) : (
-          <TouchableOpacity
-            disabled={disableSubmit}
-            style={styles.submitButton}
-            onPress={submitJournal}
-            testID="submitButton"
-          >
-            <Text
-              style={
-                disableSubmit ? styles.submitTextDisabled : styles.submitText
-              }
-            >
-              Submit
-            </Text>
-          </TouchableOpacity>
-        )}
-        {/* <View
-          style={[
-            styles.separator,
-            { borderBottomColor: theme["color"]["color"] },
-          ]}
-        /> */}
-      </View>
-      <View style={styles.horizontalBar} />
-      {/* end of cancel/submit section */}
+    <SafeAreaView style={[styles.container]}>   
+      {/* <View style={styles.horizontalBar} /> */}
 
       {/* Main Container Section */}
       <KeyboardAvoidingView
@@ -297,10 +300,24 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
         style={[styles.container]}
       >
         <ScrollView style={styles.contentContainer}>
-          <Text style={styles.header}>What are you checking in for?</Text>
+          <Text style={styles.header}>{getMomentText(checkInType)}</Text>
           <Text style={[styles.datetime, theme["color"]]}>
             {formattedDateTime}{" "}
           </Text>
+
+          <TouchableOpacity onPress={handleAccordianToggle}>
+            <View style={styles.headerContainer}>
+              <Text>Learn more about {checkInType}</Text>
+              <Ionicons name={isExpanded ? "chevron-up" : "chevron-down"} size={24} color="black" />
+            </View>
+          </TouchableOpacity>
+
+          {isExpanded && (
+            <ScrollView style={styles.contentContainer}>
+              {/* Your existing content here */}
+              {renderTextBasedOnType()}
+            </ScrollView>
+          )}
 
           {/* Media Box Below */}
           {mediaBox ? (
@@ -323,9 +340,6 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
                   style={{ height: 60, width: 60 }}
                 />
               ) : (
-                // <View style={styles.container}>
-                //   <Button title="Play Sound" onPress={playSound} />
-                // </View>
                 <RecordingViewer
                   source={mediaUri}
                   onDelete={deleteMedia}
@@ -337,26 +351,7 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
           ) : null}
 
           <View style={styles.boxContainer}>
-            <Text style={[styles.boxDescriptor]}>Check-in Type</Text>
-            <View style={styles.dropdownContainer}>
-              <RNPickerSelect
-                style={pickerSelectStyles}
-                value={selectedOption}
-                placeholder={{ label: "A Modeh Ani Moment ", value: "Modeh Ani" }}
-                placeholderTextColor="black"
-                onValueChange={handleOptionChange}
-                items={[
-                  // { label: "Modeh Ani", value: "Modeh Ani" },
-                  { label: "Ashrei in the Afternoon", value: "Ashrei" },
-                  { label: "A Shema Reflection", value: "Shema" },
-                ]}
-              />
-              {/* <Ionicons name="chevron-down" size={25} color={"#4A90E2"} style={{ paddingTop: 5 }}/> */}
-            </View>
-          </View>
-
-          <View style={styles.boxContainer}>
-            <Text style={[styles.boxDescriptor]}>Description</Text>
+            {/* <Text style={[styles.boxDescriptor]}>Description</Text> */}
             <ScrollView style={[styles.dropdownContainer, { height: 350 }]}>
               <TextInput
                 style={styles.journalInput}
@@ -373,6 +368,36 @@ export default function JournalEntry({ handleCancel, handleSubmitClose }) {
             </ScrollView>
           </View>
         </ScrollView>
+
+        {/* View for cancel and submit buttons */}
+        <View style={styles.topBar}>
+          {loadingSubmit ? (
+            <View style={styles.ActivityIndicator}>
+              <Text style={{padding: 10}}>Saving Check-in, this may take a moment!</Text>
+              <ActivityIndicator />
+            </View>
+          ) : (
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                disabled={disableSubmit}
+                style={styles.submitButton}
+                onPress={submitJournal}
+                testID="submitButton"
+              >
+                <Text
+                  style={
+                    disableSubmit ? styles.submitTextDisabled : styles.submitText
+                  }
+                >
+                  Submit
+                </Text>
+              </TouchableOpacity>
+            </View>
+        
+
+          )}
+        </View>
+        {/* end of cancel/submit section */}
       </KeyboardAvoidingView>
 
       {/* Keyboard bar view below */}
@@ -446,41 +471,10 @@ const stylesProgressBar = StyleSheet.create({
   },
 });
 
-const pickerSelectStyles = StyleSheet.create({
-  inputIOS: {
-    fontSize: 16,
-    // paddingVertical: 12,
-    // padding: 16,
-    // paddingHorizontal: 10,
-    // fontWeight: "bold",
-    // borderWidth: 1,
-    // borderColor: 'grey',
-    // borderRadius: 8,
-    color: "grey",
-    // fontSize: 30,
-    // paddingRight: 30,
-    // backgroundColor: "white",
-    // width: "1000",
-    // paddingTop: 20, // Adjust padding to move the text down
-  },
-  inputAndroid: {
-    fontSize: 16,
-    // paddingHorizontal: 10,
-    // paddingVertical: 8,
-    // borderWidth: 0.5,
-    borderColor: "grey",
-    // borderRadius: 8,
-    // color: "black",
-    // paddingRight: 30,
-    // backgroundColor: "white",
-    // paddingTop: 20, // Adjust padding to move the text down
-  },
-});
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
+    // padding: 10,
     backgroundColor: "white",
   },
   contentContainer: {
@@ -508,10 +502,21 @@ const styles = StyleSheet.create({
   boxContainer: {
     paddingBottom: 20,
   },
+  headerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+  },
   header: {
     marginTop: 15,
     fontSize: 28,
     fontWeight: 'bold',
+  },
+  textContainer: {
+    marginBottom: 15,
+    marginHorizontal: 10,
   },
   datetime: {
     marginBottom: 15,
@@ -599,21 +604,50 @@ const styles = StyleSheet.create({
     fontSize: 19,
     color: "#4A90E2",
   },
-  submitButton: {},
+  buttonContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  submitButton: {
+    // backgroundColor: "#4A90E2",
+    height: 60,
+    width: 150,
+    padding: 10,
+    marginVertical: 5,
+    alignItems: "center",
+    borderRadius: 5,
+    // borderWidth: 2,
+    // borderColor: "black",
+    flexDirection: "row",
+    justifyContent: "center",
+
+    backgroundColor: "#f2f2f2",
+    shadowColor: "#4A90E2",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
   ActivityIndicator: {
-    marginRight: 20
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   submitText: {
     color: "#4A90E2",
     fontSize: 19,
   },
   submitTextDisabled: {
-    color: "grey",
+    color: "white",
     fontSize: 19,
   },
   horizontalBar: {
-    height: 1,
+    height: 2,
     backgroundColor: "#ccc",
-    marginTop: 15,
+    // marginTop: 15,
   },
 });

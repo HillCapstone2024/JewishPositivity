@@ -47,6 +47,7 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
   const [mediaChanged, setMediaChanged] = useState(false);
   const [selectedOption, setSelectedOption] = useState("");
   const [disableUpdate, setDisableUpdate] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const mediaAccessoryViewID = "MediaBar";
   const theme = makeThemeStyle();
   const now = new Date();
@@ -146,7 +147,6 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
           username: username,
           checkin_id: checkin_id,
           content: base64Data,
-          header: headerText,
           content_type: mediaType,
           text_entry: journalText,
         },
@@ -228,6 +228,19 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
   const getMomentText = (momentNumber) => {
     switch (momentNumber) {
       case 1:
+        return "A Modeh Ani Moment ";
+      case 2:
+        return "Ashrei in the Afternoon";
+      case 3:
+        return "A Shema Reflection";
+      default:
+        return "Unknown Check-in Type";
+    }
+  };
+
+  const getMomentTextShortHand = (momentNumber) => {
+    switch (momentNumber) {
+      case 1:
         return "Modeh Ani";
       case 2:
         return "Ashrei";
@@ -236,6 +249,64 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
       default:
         return "Unknown Check-in Type";
     }
+  };
+
+  renderTextBasedOnType = () => {
+    switch (selectedEntry?.moment_number) {
+      case 'Modeh Ani':
+        return (
+          <View style={styles.textContainer}>
+            <Text style={{marginBottom: 10, }}>
+              מוֶֹד ה אֱ נָי לָ פָ נָיךָ, מ לָ ךְ חֶ י וְ קַ יָּם, שְׁ ה חֶ	 זַרַ תָּ  בָּ י נָשְׁ מ תֶ י בָּ חֶ מ לָ ה ,רַ בָּ ה אֱ	 מוּנָתֶ ךָ! 
+            </Text>
+            <Text style={{marginBottom: 10, fontStyle:"italic"}}>
+              Modeh ani l’fanecha, Melech chai v’kaya, she-hechezarta bi nishmati 
+              b’chemlah, rabbah emunatecha.
+            </Text>
+            <Text style={{marginBottom: 20}}>
+              I give thanks to You, the Ever-Living Sovereign, that with compassion You 
+              have returned my soul to me, how great is Your faith!
+            </Text>
+          </View>
+        );
+      case 'Ashrei':
+        return (
+          <View style={styles.textContainer}>
+            <Text style={{marginBottom: 10, }}>
+              אֱ שְׁ רַ% י יוֹשְׁ בֵ% י בֵ% יתֶ ךָ עוֶֹד יה לָ לָוּךָ סֶּ לָ ה. אֱ שְׁ רַ% י ה ע ם שְׁ כָּ כָ ה לּוֹ אֱ שְׁ רַ% י ה ע ם שְׁ יה)וְ ה אֱ	 לֹה יוְ.           </Text>
+            <Text style={{marginBottom: 10, fontStyle:"italic"}}>
+              Ashrei yoshvei veitecha, od y’hal’lucha selah.
+              Ashrei haam shekachah lo, ashrei haam she-Adonai Elohav
+            </Text>
+            <Text style={{marginBottom: 20}}>
+              Happy are those who dwell in Your house, they shall praise you forever.
+              Happy are those for whom it is so, happy the people from whom Adonai is 
+              God.
+            </Text>
+          </View>
+        );
+      default:
+        return (
+          <View style={styles.textContainer}>
+            <Text style={{marginBottom: 10, }}>
+            שְׁ מ ע יִשרַ אֱ% לָ יה)וְ ה אֱ	 לָה% ינָוּ יה)וְ ה אֱ חֶ ֶד: רַוּךְ שְׁ% ם כָּ בֵוְֶד מ לָ כָוּתֶוְ לָ עוְלָ ם וְ ע ֶד:
+            </Text>
+            <Text style={{marginBottom: 10, fontStyle:"italic"}}>
+              Sh’ma Yisrael, Adonai Eloheinu, Adonai Echad!
+              Baruch Shem k’vod malchuto l’olam va-ed.
+            </Text>
+            <Text style={{marginBottom: 20}}>
+              Hear O Israel, Adonai is our God, Adonai is one.
+              Blessed be the Name whose glorious sovereignty is forever and 
+              ever.
+            </Text>
+          </View>
+        );
+    }
+  };
+
+  const handleAccordianToggle = () => {
+    setIsExpanded(!isExpanded); // Toggle the state variable
   };
 
   return (
@@ -251,11 +322,13 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
                 <View style={styles.buttonContainer}>
                 <TouchableOpacity onPress={() => setEditModalVisible(false)}>
                     <View style={styles.buttonContent}>
-                    <Ionicons name="caret-back" size={25} color="#4A90E2" />
-                    <Text style={styles.cancelText}>Cancel</Text>
+                    <Ionicons name="chevron-back-outline" size={25} color="white" />
+                    
                     </View>
                 </TouchableOpacity>
                 </View>
+
+                <Text style={styles.centerText}>Edit</Text>
 
                 <TouchableOpacity
                 disabled={disableUpdate}
@@ -263,13 +336,11 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
                 onPress={updateJournal}
                 testID="updateButton"
                 >
-                <Text
+                  <Ionicons name="checkmark-outline" 
                     style={
                     disableUpdate ? styles.updateTextDisabled : styles.updateText
                     }
-                >
-                    Update
-                </Text>
+                  />
                 </TouchableOpacity>
             </View>
             <View style={styles.horizontalBar} />
@@ -281,10 +352,24 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
                 style={[styles.container]}
             >
               <ScrollView style={styles.contentContainer}>
-                <Text style={styles.header}>Update CheckIn Moment!</Text>
+                <Text style={styles.header}>{getMomentText(selectedEntry?.moment_number)}</Text>
                 <Text style={[styles.datetime, theme["color"]]}>
-                {formattedDateTime}{" "}
+                  {formattedDateTime}{" "}
                 </Text>
+
+                <TouchableOpacity onPress={handleAccordianToggle}>
+                  <View style={styles.headerContainer}>
+                    <Text>Learn more about {getMomentTextShortHand(selectedEntry?.moment_number)}</Text>
+                    <Ionicons name={isExpanded ? "chevron-up" : "chevron-down"} size={24} color="black" />
+                  </View>
+                </TouchableOpacity>
+
+                {isExpanded && (
+                  <ScrollView style={styles.contentContainer}>
+                    {/* Your existing content here */}
+                    {renderTextBasedOnType()}
+                  </ScrollView>
+                )}
 
                 {/* Media Box Below */}
                 {mediaBox ? (
@@ -332,20 +417,10 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
                     <ProgressBar onMediaChange={mediaChanged} />
                 </View>
                 ) : null}
-
-                {/* Checkin type */}
-                <View style={styles.boxContainer}>
-                    <Text style={[styles.boxDescriptor]}>Check-in Type *not subject to change</Text>
-                    <View style={styles.dropdownContainer}>
-                        <Text>
-                            {getMomentText(selectedEntry?.moment_number)}
-                        </Text> 
-                    </View>
-                </View>
                 
                 {/* Description */}
                 <View style={styles.boxContainer}>
-                    <Text style={[styles.boxDescriptor]}>Description</Text>
+                    {/* <Text style={[styles.boxDescriptor]}>Description</Text> */}
                     <ScrollView style={[styles.dropdownContainer, { height: 350 }]}>
                         <TextInput
                         style={styles.journalInput}
@@ -436,45 +511,17 @@ const stylesProgressBar = StyleSheet.create({
   },
 });
 
-const pickerSelectStyles = StyleSheet.create({
-  inputIOS: {
-    fontSize: 16,
-    // paddingVertical: 12,
-    // padding: 16,
-    // paddingHorizontal: 10,
-    // fontWeight: "bold",
-    // borderWidth: 1,
-    // borderColor: 'grey',
-    // borderRadius: 8,
-    color: "grey",
-    // fontSize: 30,
-    // paddingRight: 30,
-    // backgroundColor: "white",
-    // width: "1000",
-    // paddingTop: 20, // Adjust padding to move the text down
-  },
-  inputAndroid: {
-    fontSize: 16,
-    // paddingHorizontal: 10,
-    // paddingVertical: 8,
-    // borderWidth: 0.5,
-    borderColor: "grey",
-    // borderRadius: 8,
-    // color: "black",
-    // paddingRight: 30,
-    // backgroundColor: "white",
-    // paddingTop: 20, // Adjust padding to move the text down
-  },
-});
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: "#4A90E2",
     flex: 1,
-    padding: 10,
-    backgroundColor: "white",
+    // padding: 10,
+    // backgroundColor: "white",
   },
   contentContainer: {
-    marginHorizontal: 15,
+    backgroundColor: "white",
+    paddingHorizontal: 15,
   },
   dropdownContainer: {
     borderColor: '#4A90E2',
@@ -569,9 +616,16 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     marginVertical: 10,
   },
+  headerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+  },
   topBar: {
     flexDirection: "row",
-    marginTop: 5,
+    // marginTop: 5,
     marginRight: 15,
     justifyContent: "space-between",
     alignItems: "center",
@@ -585,18 +639,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     fontSize: 19,
   },
-  cancelText: {
+  centerText: {
+    paddingLeft: 15,
     fontSize: 19,
-    color: "#4A90E2",
+    color: "white",
+    fontWeight: "500"
   },
   updateButton: {},
   updateText: {
-    color: "#4A90E2",
-    fontSize: 19,
+    color: "white",
+    fontSize: 25,
   },
   updateTextDisabled: {
-    color: "grey",
-    fontSize: 19,
+    color: "#4A90E2",
+    fontSize: 25,
   },
   horizontalBar: {
     height: 1,
