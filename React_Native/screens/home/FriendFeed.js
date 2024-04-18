@@ -495,8 +495,8 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "white",
+    // borderWidth: 1,
+    // borderColor: "black",
   },
   postListContainer: {
     paddingTop: 20,

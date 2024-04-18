@@ -1,41 +1,84 @@
 import * as React from "react";
-import { View, useWindowDimensions } from "react-native";
+import { View, Animated, StyleSheet, useWindowDimensions } from "react-native";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
+import { Ionicons } from "@expo/vector-icons";
+
 import Friends from "../screens/home/FriendsList";
 import AddFriends from "../screens/home/AddFriends";
-import FriendRequest from "../screens/home/FriendRequest";
 import FriendRequests from "../screens/home/FriendRequests";
 
-const FirstRoute = () => (
-  <View style={{ flex: 1, backgroundColor: "#ff4081" }} />
-);
-
-const SecondRoute = () => (
-  <View style={{ flex: 1, backgroundColor: "#673ab7" }} />
-);
-
 const renderScene = SceneMap({
-  View: Friends,
-  Add: AddFriends,
-  Request: FriendRequests,
+  first: Friends,
+  second: AddFriends,
+  third: FriendRequests,
 });
 
-export default function FriendTab() {
+const FriendTab = () => {
   const layout = useWindowDimensions();
 
   const [index, setIndex] = React.useState(0);
   const [routes] = React.useState([
-    { key: "View", title: "My Friends" },
-    { key: "Add", title: "Add Friends" },
-    { key: "Request", title: "Requests" },
+    { key: "first", icon: "people" },
+    { key: "second", icon: "person-add" },
+    { key: "third", icon: "mail" },
   ]);
+
+  const renderIcon = ({ route, focused }) => (
+    <Ionicons name={route.icon} size={24} color={focused ? "white" : "#0066cc"} />
+  );
+
+  const renderIndicator = (props) => {
+    const { position, navigationState, getTabWidth } = props;
+    const width = layout.width / navigationState.routes.length;
+    // const width = layout.width / routes.length;
+
+    const translateX = Animated.multiply(position, width - 18);
+
+    // const translateX = Animated.multiply(position, new Animated.Value(width));
+
+    return (
+      <Animated.View
+        style={{
+          position: "absolute",
+          // padding: "10%",
+          width: width, // Circle's width as a third of each tab's width
+          height: "100%", // Circle's height
+          borderRadius: 25, // Half of height to make it a perfect circle
+          backgroundColor: "#0066cc",
+          transform: [{ translateX }],
+          shadowColor: "#000",
+          shadowOpacity: 0.2,
+          shadowOffset: { width: 0, height: 2 },
+          shadowRadius: 4,
+        }}
+      />
+    );
+  };
 
   const renderTabBar = (props) => (
     <TabBar
       {...props}
-      indicatorStyle={{ backgroundColor: "#0066cc" }}
-      style={{ backgroundColor: "white" }}
-      labelStyle={{ color: "#0066cc", fontWeight: "bold" }}
+      renderIcon={({ route }) =>
+        renderIcon({
+          route,
+          focused: index === routes.findIndex((e) => e.key === route.key),
+        })
+      }
+      renderIndicator={renderIndicator}
+      indicatorStyle={{ backgroundColor: "transparent" }}
+      style={{
+        backgroundColor: "white",
+        borderRadius: 25,
+        marginHorizontal: 20,
+        overflow: "hidden",
+        elevation: 0,
+        shadowColor: "#000",
+        shadowOpacity: 0.2,
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 4,
+      }}
+      labelStyle={{ display: "none" }}
+      iconStyle={{ justifyContent: "center", alignItems: "center" }}
     />
   );
 
@@ -45,9 +88,10 @@ export default function FriendTab() {
       renderScene={renderScene}
       onIndexChange={setIndex}
       initialLayout={{ width: layout.width }}
-      indicatorStyle={{ backgroundColor: "white" }}
-      bounces={true}
       renderTabBar={renderTabBar}
+      style={{ marginTop: 20 }}
     />
   );
-}
+};
+
+export default FriendTab;

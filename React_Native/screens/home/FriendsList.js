@@ -17,6 +17,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Icon, SearchBar } from "react-native-elements";
 import LoadingScreen from "../greet/Loading.js";
+import SpinningPen from "../greet/Pen.js";
 import makeThemeStyle from "../../tools/Theme.js";
 import * as Storage from "../../AsyncStorage.js";
 import IP_ADDRESS from "../../ip.js";
@@ -46,8 +47,17 @@ const FriendsList = ({ navigation, onSwitch }) => {
     }
   }, []);
 
-  const onRefresh = () => {
-    //refresh function here
+  const onRefresh = async () => {
+    setRefreshing(true);
+    const storedUsername = await Storage.getItem("@username");
+    const retrievedFriends = await getFriends(storedUsername);
+    const retrievedProfilepics = await fetchProfilePics(retrievedFriends);
+    setFriends(retrievedProfilepics);
+    setNumFriends(retrievedFriends.length);
+    //we want to set them all at the same time so theres not a bunch of rerenders
+    setUsername(storedUsername || "No username");
+    setRefreshing(false);
+    console.log("finished refreshing data.");
   };
 
   const initializeData = async () => {
@@ -132,7 +142,7 @@ const FriendsList = ({ navigation, onSwitch }) => {
           {
             text: "Delete",
             onPress: () => deleteFriends(),
-            style: styles.alertDeleteText,
+            style: "destructive",
           },
         ]
       );
@@ -250,7 +260,7 @@ const FriendsList = ({ navigation, onSwitch }) => {
             {isLoading ? (
         // <ActivityIndicator style={{ height: 100, width: 100 }} />
         <View testID="loading-screen" style={styles.loadingStyle}>
-          <LoadingScreen />
+          <SpinningPen />
         </View>
       ) : (
       <View style={styles.container}>
@@ -349,6 +359,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     textAlign: "right",
+    marginLeft: 60,
   },
   deleteFriendButtonText: {
     // backgroundColor: "blue",
