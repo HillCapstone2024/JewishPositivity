@@ -226,15 +226,13 @@ export default function CheckIn({ navigation, route }) {
         return (
           <View style={styles.textContainer}>
             <Text style={{marginBottom: 10, }}>
-              מוֶֹד ה אֱ נָי לָ פָ נָיךָ, מ לָ ךְ חֶ י וְ קַ יָּם, שְׁ ה חֶ	 זַרַ תָּ  בָּ י נָשְׁ מ תֶ י בָּ חֶ מ לָ ה ,רַ בָּ ה אֱ	 מוּנָתֶ ךָ! 
+              !מוֹדֶה אֲנִי לְפָנֶיךָ, מֶלֶךְ חַי וְקַיָּם, שֶׁהֶחֱזַרְתָּ בִּי נִשְׁמָתִי בְּחֶמְלָה ,רַבָּה אֱמוּנָתֶךָ
             </Text>
             <Text style={{marginBottom: 10, fontStyle:"italic"}}>
-              Modeh ani l’fanecha, Melech chai v’kaya, she-hechezarta bi nishmati 
-              b’chemlah, rabbah emunatecha.
+              Modeh ani l’fanecha, Melech chai v’kaya, she-hechezarta bi nishmati b’chemlah, rabbah emunatecha.
             </Text>
             <Text style={{marginBottom: 20}}>
-              I give thanks to You, the Ever-Living Sovereign, that with compassion You 
-              have returned my soul to me, how great is Your faith!
+              I give thanks to You, the Ever-Living Sovereign, that with compassion You have returned my soul to me, how great is Your faith!
             </Text>
           </View>
         );
@@ -242,15 +240,16 @@ export default function CheckIn({ navigation, route }) {
         return (
           <View style={styles.textContainer}>
             <Text style={{marginBottom: 10, }}>
-              אֱ שְׁ רַ% י יוֹשְׁ בֵ% י בֵ% יתֶ ךָ עוֶֹד יה לָ לָוּךָ סֶּ לָ ה. אֱ שְׁ רַ% י ה ע ם שְׁ כָּ כָ ה לּוֹ אֱ שְׁ רַ% י ה ע ם שְׁ יה)וְ ה אֱ	 לֹה יוְ.           </Text>
+              .אַשְׁרֵי יוֹשְׁבֵי בֵיתֶךָ עוֹד יְהַלְלוּךָ סֶּלָה {"\n"}
+              .אַשְׁרֵי הָעָם שֶׁכָּכָה לּוֹ אַשְׁרֵי הָעָם שֶׁיֲהֹוָה אֱלֹהָיו
+            </Text>
             <Text style={{marginBottom: 10, fontStyle:"italic"}}>
-              Ashrei yoshvei veitecha, od y’hal’lucha selah.
+              Ashrei yoshvei veitecha, od y’hal’lucha selah. {"\n"}
               Ashrei haam shekachah lo, ashrei haam she-Adonai Elohav
             </Text>
             <Text style={{marginBottom: 20}}>
-              Happy are those who dwell in Your house, they shall praise you forever.
-              Happy are those for whom it is so, happy the people from whom Adonai is 
-              God.
+              Happy are those who dwell in Your house, they shall praise you forever. {"\n"}
+              Happy are those for whom it is so, happy the people from whom Adonai is God.
             </Text>
           </View>
         );
@@ -258,16 +257,16 @@ export default function CheckIn({ navigation, route }) {
         return (
           <View style={styles.textContainer}>
             <Text style={{marginBottom: 10, }}>
-            שְׁ מ ע יִשרַ אֱ% לָ יה)וְ ה אֱ	 לָה% ינָוּ יה)וְ ה אֱ חֶ ֶד: רַוּךְ שְׁ% ם כָּ בֵוְֶד מ לָ כָוּתֶוְ לָ עוְלָ ם וְ ע ֶד:
+              :שְׁמַע יִשרָאֵל יֲהֹוָה אֱלהֵינוּ יֲהֹוָה אֶחָד {"\n"}
+              :בָּרוּךְ שֵׁם כְּבוד מַלְכוּתו לְעולָם וָעֶד
             </Text>
             <Text style={{marginBottom: 10, fontStyle:"italic"}}>
-              Sh’ma Yisrael, Adonai Eloheinu, Adonai Echad!
+              Sh’ma Yisrael, Adonai Eloheinu, Adonai Echad! {"\n"}
               Baruch Shem k’vod malchuto l’olam va-ed.
             </Text>
             <Text style={{marginBottom: 20}}>
-              Hear O Israel, Adonai is our God, Adonai is one.
-              Blessed be the Name whose glorious sovereignty is forever and 
-              ever.
+              Hear O Israel, Adonai is our God, Adonai is one. {"\n"}
+              Blessed be the Name whose glorious sovereignty is forever and ever.
             </Text>
           </View>
         );
