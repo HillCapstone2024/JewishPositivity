@@ -2902,6 +2902,72 @@ class GetAllCommunityInfoViewTestCase(TestCase): # front end calls get and we re
         # Check if response status code is 200
         self.assertEqual(response.status_code, 200)
 
+class GetUserCommunityInfoViewTestCase(TestCase): # front end calls get and we return all public communities info
+
+      # Define constant user data
+    USER1_DATA = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+    GET_USER_COMMUNITIES_SUCCESS_1 = {
+        'community_name': "THIS IS MY FIRST COMMUNITY",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "testuser1", # username of the owner
+        "privacy": 'public',
+    }
+
+    GET_USER_COMMUNITIES_SUCCESS_2 = {
+        'community_name': "THIS IS MY SECOND COMMUNITY",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "testuser1", # username of the owner
+        "privacy": 'public',
+    }
+
+
+
+    def setUp(self):
+        # Initialize the Django test client
+        client = Client()
+
+        # Make instance of users and their communities
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)# make user
+        client.post(reverse('create_community_view'), data=json.dumps(self.GET_USER_COMMUNITIES_SUCCESS_1), content_type=CONTENT_TYPE_JSON) #make community
+        client.post(reverse('create_community_view'), data=json.dumps(self.GET_USER_COMMUNITIES_SUCCESS_2), content_type=CONTENT_TYPE_JSON) #make community
+
+
+
+    def test_get_user_communities_success(self):# Successfully retrieves all user specific communities
+        logging.info("************TEST_get_user_communities_success**************..........")
+        client = Client()
+
+        # Send GET request to get_user_community_info_view
+        response = client.get(reverse('get_user_community_info_view'), data={'username': 'testuser1'})
+
+        response_data = json.loads(response.content)
+        logging.info("response_data: %s",response_data)
+
+        # Check if response status code is 200
+        self.assertEqual(response.status_code, 200)
+    
+    def test_get_user_communities_fail(self):# Fails retrieves nonexistent user specific communities 
+        logging.info("************TEST_get_user_communities_fail**************..........")
+        client = Client()
+
+        # Send GET request to get_user_community_info_view
+        response = client.get(reverse('get_user_community_info_view'), data={'username': 'doesnotexist'})
+
+        # Check if response status code is 400 -- failing
+        self.assertEqual(response.status_code, 400)
+
+
 class UpdateCommunityViewTestCase(TestCase): 
     
     photo_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64photo.txt'))
@@ -3370,4 +3436,5 @@ class DeleteCommunityViewTestCase(TestCase):  # To test deleting community
         
         # Check if response status code is 400 -- failure
         self.assertEqual(response.status_code, 400)
+    
     
