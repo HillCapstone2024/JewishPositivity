@@ -84,7 +84,7 @@ class CommunityUser(models.Model): # to store users-community relationships
     communityuser_id = models.AutoField(primary_key=True) #the autoincremented ID field for membership
     user_id = models.ForeignKey(User,on_delete=models.CASCADE) # FK of the user
     community_id = models.ForeignKey(Community,on_delete=models.CASCADE) # FK of the community
-    status = models.BooleanField(default=False)  # False for pending, True for accepted
+    status = models.IntegerField()  # 0 for requesting, 1 for invited, 2 for accepted
     date_joined= models.DateField(default=date.today)
     class Meta:
         # Define unique constraint for composite key

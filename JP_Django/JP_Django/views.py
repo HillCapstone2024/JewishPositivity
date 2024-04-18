@@ -1277,7 +1277,7 @@ def create_community_view(request):
             community.save()
             logging.info("community made")
             #add the owner of the community to the communityUser table 
-            CommunityUser.objects.create(user_id= user, community_id = community, status= True, date_joined= date_created)  # Create a new badge object for the user
+            CommunityUser.objects.create(user_id= user, community_id= community, status= 2, date_joined= date_created)  # Create a new badge object for the user
             logging.info("added owner to community user table")
             return HttpResponse("Community has been created!")
         except Exception as e:  # Catch exceptions like IntegrityError
@@ -1446,3 +1446,53 @@ def update_description(community, new_description):
     except Exception as e:
         logging.info("ERROR IN CHANGING description: %s", e)
         return HttpResponse("Error in updating description", status=400)
+    
+def request_to_join_community_view(request):
+    # Check if the request method is POST
+    if request.method != "POST":
+        # Return an HTTP 400 response if the method is not POST
+        return HttpResponse("Not a POST request", status=400)
+
+    # Parse the JSON data from the request body
+    data = json.loads(request.body)
+    logging.info("DATA from post: %s", data)
+
+    # variables from the post data
+    username = data["username"]
+    community_name = data["community_name"]
+    logging.info("USERNAME: '%s', COMMUNITY NAME: '%s'", username, community_name)
+
+    # Get the community object from community name
+    try:
+        community = Community.objects.get(community_name=community_name)
+        logging.info("COMMUNITY OBJECT: %s", community)
+        user = User.objects.get(username=username)
+        logging.info("USER OBJECT: %s", user)
+        relationship = CommunityUser.objects.filter(user_id=user.pk, community_id=community.pk).first()
+        logging.info("RELATIONSHIP OBJECT: %s", relationship)
+
+        if relationship != None:
+            logging.info("Relationship Status: %s", relationship.status)
+            if relationship.status==0: 
+                return HttpResponse("Already requested", status=400)
+            elif relationship.status==2:
+                return HttpResponse("Already a member of this community", status=400)
+            elif relationship.status==1:
+                relationship.status = 2
+                relationship.save()
+                return HttpResponse("Request accepted", status=200)
+            else:
+                return HttpResponse("invalid status value", status=400)
+        else: 
+            if community.privacy == "public":
+                CommunityUser.objects.create(user_id=user, community_id=community, status=2, date_joined= date.today())
+                return HttpResponse("Joined community", status=200)
+            elif community.privacy == "private":
+                CommunityUser.objects.create(user_id=user, community_id=community, status=0, date_joined= date.today())
+                return HttpResponse("Request sent", status=200)
+            else:
+                return HttpResponse("Invalid privacy value", status=400)
+
+    except Exception as e:
+        logging.info("ERROR in joining community: %s", e)
+        return HttpResponse("Error in joining community", status=400)
