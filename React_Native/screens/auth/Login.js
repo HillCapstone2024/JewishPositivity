@@ -169,7 +169,7 @@ const Login = ({ navigation }) => {
       console.log("Login response:", response.data);
       // OneSignal.login(username);
       // console.log("OneSignal login successful");
-      // console.log(username);
+      console.log(username);
       saveUser();
       navigateDrawer();
     } catch (error) {

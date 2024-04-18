@@ -19,8 +19,9 @@ import makeThemeStyle from '../../tools/Theme.js';
 import * as Storage from "../../AsyncStorage.js";
 import IP_ADDRESS from "../../ip.js";
 import axios from 'axios';
-import ImageViewer from '../../tools/ImageViewer.js';
+import { Ionicons } from "@expo/vector-icons";
 const layout = Dimensions.get("window");
+import SpinningPen from "../greet/Pen.js";
 
 //import AddFriends from '../screens/home/AddFriends.js';
 
@@ -32,30 +33,42 @@ const FriendRequests = ({navigation, onSwitch}) => {
   const [usernameSearch, setUsernameSearch] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
   const [friends, setFriends] = useState([]);
-  const [filteredFriends, setFilteredFriends] = useState([]);
-  const [profilePics, setProfilePics] = useState([]);
-  const [profilePicMap, setProfilePicMap] = useState({});
-  const [search, setSearch] = useState("");
+  const [sentRequests, setSentRequests] = useState([]);
+  const [numSentRequests, setNumSentRequests] = useState(0);
+  const [recievedRequests, setRecievedRequests] = useState([]);
+  const [numRecievedRequests, setNumRecievedRequests] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    console.log('friends list initialize data');
+    if (isLoading === false) {
+      console.log("friends requests initialize data");
       initializeData();
-    }, []);
+    }
+  }, []);
 
-  const initializeData = async () => {
+  const onRefresh = async () => {
+    setRefreshing(true);
     const storedUsername = await Storage.getItem("@username");
     const retrievedFriends = await getFriends(storedUsername);
     const retrievedProfilepics = await fetchProfilePics(retrievedFriends);
 
-    setFriends(retrievedFriends);
-    setFilteredFriends(retrievedProfilepics);
-    //we want to set them all at the same time so theres not a bunch of rerenders
+    setFriends(retrievedProfilepics);
     setUsername(storedUsername || "No username");
-    // setProfilePics(retrievedFriends);
-    setProfilePicMap(map);
+    setRefreshing(false);
+    console.log("finished refreshing data.");
+  };
 
+  const initializeData = async () => {
+    setIsLoading(true);
+    const storedUsername = await Storage.getItem("@username");
+    const retrievedFriends = await getFriends(storedUsername);
+    const retrievedProfilepics = await fetchProfilePics(retrievedFriends);
 
-    // console.log("profile pics:", retrievedFriends);
+    setFriends(retrievedProfilepics);
+    setUsername(storedUsername || "No username");
+    setIsLoading(false);
+    console.log("finished initializing data.");
   };
 
 
@@ -115,88 +128,32 @@ const FriendRequests = ({navigation, onSwitch}) => {
     }
   };
 
-  const deleteFriends = async () => {
-    console.log("Deleting Friend...");
-    try{
-      const csrfToken = await getCsrfToken();
-      const response = await axios.get(`${API_URL}/delete_friend/`, {
-        params: {
-          username: username,
-          unfriendusername: usernameSearch,
-        },
-      });
-      console.log("delete Response: ", response);
-    }
-    catch(error){
-      console.log("error deleting friend:", error);
-    }
-  };
-  
-  const handleFriends = async () => {
-    setErrorMessage(<ActivityIndicator />);
-    const getCsrfToken = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/csrf-token/`);
-        return response.data.csrfToken;
-      } catch (error) {
-        console.error("Error retrieving CSRF token:", error);
-        throw new Error("CSRF token retrieval failed");
-      }
-    };
-    try {
-      const csrfToken = await getCsrfToken();
-      console.log("user1: " + username);
-      console.log("user2: " + usernameSearch);
-      const response = await axios.post(
-        `${API_URL}/add_friend/`,
-        {
-          user1: username,
-          user2: usernameSearch,
-        },
-        {
-          headers: {
-            "X-CSRFToken": csrfToken,
-            "Content-Type": "application/json",
+    const handleCancelRequest = async (friendUsername) => {
+      Alert.alert(
+        `Are you sure you want to delete your friend request to ${friendUsername}`,
+        `${friendUsername} will no longer see your friend request and will not be notified.`,
+        [
+          {
+            text: "Cancel",
+            onPress: () => console.log("Cancel Pressed"),
           },
-          withCredentials: true,
-        }
+          {
+            text: "Delete",
+            onPress: () => console.log("Delete Pressed"),
+            style: "destructive",
+          },
+        ]
       );
-      console.log("Friend response:", response.data);
-      setErrorMessage(
-        <View style={styles.errorMessageBoxSucceed}>
-          <Text style={styles.errorMessageTextSucceed}> </Text>
-        </View>
-      );
-    } catch (error) {
-      console.log(error);
-      setErrorMessage(
-        <View style={styles.errorMessageBox}>
-          <Text style={styles.errorMessageText}>{error.response.data}</Text>
-        </View>
-      );
-    }
-  };
+    };
 
-  useEffect(() => {
-    setFilteredFriends(
-      search.trim() === ""
-        ? friends
-        : friends.filter((friend) =>
-            friend.toLowerCase().includes(search.toLowerCase())
-          )
-    );
-  }, [search]);
+  
 
-  const updateSearch = (search) => {
-    setSearch(search);
-    // fetchUserIDs(search);
-  };
 
-  const renderItem = ({ item, profilepicProp }) => {
+  const renderItem = ({ item, isRecieved }) => {
     // Check if the user is already a friend
 
     return (
-      <TouchableOpacity>
+      <View>
         <View style={styles.row}>
           <View style={styles.pic}>
             {/* <SvgUri style={styles.pic} uri={item.profile_pic} /> */}
@@ -219,35 +176,78 @@ const FriendRequests = ({navigation, onSwitch}) => {
               <Text style={styles.msgTxt}>@{item.username}</Text>
             </View>
           </View>
+          {isRecieved ? (
+
+            <View style={{flexDirection: 'row'}}>
+              <View style={styles.acceptRequestButton}>
+                <TouchableOpacity>
+                  {/* <Ionicons name={"close"} size={20} color="#0066cc" /> */}
+                  <Text style={styles.acceptButtonText}>ADD</Text>
+                </TouchableOpacity>
+              </View>
+              <View>
+                <TouchableOpacity>
+                  <Ionicons name={"close"} size={20} color="#0066cc" />
+                  {/* <Text>Reject</Text> */}
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : (
+            <View style={styles.acceptRequestButton}>
+              <TouchableOpacity onPress={() => handleCancelRequest(item.username)}>
+                {/* <Ionicons name={"close"} size={20} color="#0066cc" /> */}
+                <Text style={styles.acceptButtonText}>CANCEL</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
-      </TouchableOpacity>
+      </View>
     );
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* <SearchBar
-        placeholder="Search friends..."
-        onChangeText={updateSearch}
-        value={search}
-        // backgroundColor="blue"
-        lightTheme
-        searchIcon={{ color: "#0066cc" }}
-        clearIcon={{ color: "#0066cc" }}
-        // placeholderTextColor="#0066cc"
-        // showCancel={true}
-        cancelButtonTitle={"Cancel"}
-        // platform={"ios"}
-      /> */}
       <View style={styles.container}>
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>
+            Pending Requests ({numSentRequests})
+          </Text>
+          <View style={styles.horizontalLine} />
+        </View>
+        {isLoading ? (
+        <View testID="loading-screen" style={styles.loadingStyle}>
+          <SpinningPen />
+        </View>
+      ) : (
         <View style={[styles.body, { height: layout.height }]}>
           <FlatList
             enableEmptySections={true}
-            data={filteredFriends}
+            data={friends}
             keyExtractor={(item) => item.username}
-            renderItem={(item) => renderItem(item, item.profilepic)}
+            renderItem={(item) => renderItem({ item, isRecieved: false })}
           />
+        </View>)}
+      </View>
+      <View style={styles.container}>
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>
+            Sent Requests ({numSentRequests})
+          </Text>
+          <View style={styles.horizontalLine} />
         </View>
+        {isLoading ? (
+        <View testID="loading-screen" style={styles.loadingStyle}>
+          <SpinningPen />
+        </View>
+      ) : (
+        <View style={[styles.body, { height: layout.height }]}>
+          <FlatList
+            enableEmptySections={true}
+            data={friends}
+            keyExtractor={(item) => item.username}
+            renderItem={(item) => renderItem({ item, isRecieved: true })}
+          />
+        </View>)}
       </View>
     </SafeAreaView>
   );
@@ -321,31 +321,13 @@ const styles = StyleSheet.create({
     borderColor: "#0066cc",
     marginLeft: 20,
   },
-  followButtonText: {
-    // backgroundColor: "blue",
-    color: "#0066cc",
-    fontSize: 12,
-    marginLeft: 5,
-    fontWeight: "bold",
-    // paddingRight: 16,
-    paddingTop: 2,
-  },
-  unfollowButton: {
-    backgroundColor: "#0066cc",
-    padding: 5,
-    borderRadius: 7,
-    flexDirection: "row",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: "#0066cc",
-  },
-  unfollowButtonText: {
+  acceptButtonText: {
     // backgroundColor: "blue",
     color: "white",
     fontSize: 12,
-    marginHorizontal: 5,
     fontWeight: "bold",
-    paddingTop: 2,
+    // paddingRight: 16,
+    marginHorizontal: 4,
   },
   container: {
     flex: 1,
@@ -354,12 +336,6 @@ const styles = StyleSheet.create({
     //justifyContent: "center",
     //alignItems: "center",
   },
-  // container: {
-  //     // paddingTop: 60,
-  //     paddingBottom: 100,
-  //     height: "100%",
-  //     // backgroundColor: "red",
-  //   },
   input: {
     width: "80%",
     height: 40,
@@ -464,6 +440,12 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     shadowOpacity: 0.16,
   },
+  acceptRequestButton: {
+    padding: 5,
+    borderRadius: 15,
+    backgroundColor: "#0066cc",
+    marginRight: 15,
+  },
 
   friendText: {
     color: "white",
@@ -474,6 +456,28 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
   },
+  sectionTitle: {
+    paddingVertical: 12,
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#9e9e9e",
+    textTransform: "uppercase",
+    letterSpacing: 1.1,
+  },
+  sectionContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    margin: 10,
+  },
+  horizontalLine: {
+    flex: 1,
+    height: 1.25,
+    backgroundColor: "#9e9e9e",
+    marginLeft: 8, // Adjust spacing between title and line
+  },
+  loadingStyle: {
+    marginTop: "30%",
+  }
 });
 
 export default FriendRequests;

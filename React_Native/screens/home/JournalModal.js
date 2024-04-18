@@ -86,7 +86,7 @@ const JournalModal = ({ onClose, visible, navigation }) => {
                 onClose();
               }}
             >
-              <Text style={styles.pressableText}>A Modeh Ani Moment</Text>
+              <Text style={styles.pressableText}>Modeh Ani - Gratitude</Text>
               <Ionicons name="chevron-forward-circle-outline" style={styles.iconStyling} />
             </TouchableOpacity>
             <TouchableOpacity 
@@ -99,7 +99,7 @@ const JournalModal = ({ onClose, visible, navigation }) => {
                 onClose();
               }}
             >
-              <Text style={styles.pressableText}>Ashrei in the Afternoon</Text>
+              <Text style={styles.pressableText}>Ashrei - Happiness</Text>
               <Ionicons name="chevron-forward-circle-outline" style={styles.iconStyling}/>
             </TouchableOpacity>
             <TouchableOpacity 
@@ -112,7 +112,7 @@ const JournalModal = ({ onClose, visible, navigation }) => {
                 onClose();
               }}
             >
-              <Text style={styles.pressableText}>A Shema Reflection</Text>
+              <Text style={styles.pressableText}>Shema - Reflection</Text>
               <Ionicons name="chevron-forward-circle-outline" style={styles.iconStyling} />
             </TouchableOpacity>
           </View>

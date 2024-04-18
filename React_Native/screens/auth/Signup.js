@@ -19,11 +19,11 @@ import makeThemeStyle from '../../tools/Theme.js';
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
-import { LogLevel, OneSignal } from "react-native-onesignal";
-import Constants from "expo-constants";
+// import { LogLevel, OneSignal } from "react-native-onesignal";
+// import Constants from "expo-constants";
 
-OneSignal.Debug.setLogLevel(LogLevel.Verbose);
-OneSignal.initialize(Constants.expoConfig.extra.oneSignalAppId);
+// OneSignal.Debug.setLogLevel(LogLevel.Verbose);
+// OneSignal.initialize(Constants.expoConfig.extra.oneSignalAppId);
 
 const Signup = ({ navigation }) => {
   const [username, setUsername] = useState("");
@@ -101,9 +101,9 @@ const Signup = ({ navigation }) => {
       );
       console.log("Signup response:", response.data);
       saveUsername();
-      OneSignal.login(username);
-      console.log("OneSignal login successful");
-      console.log(username);
+      // OneSignal.login(username);
+      // console.log("OneSignal login successful");
+      // console.log(username);
       navigateDrawer();
     } catch (error) {
       console.log(error)

@@ -364,8 +364,6 @@ def get_user_information_view(request):
                     "profilepicture": profile_picture_encoded,
                     "timezone" : user.timezone
                 }
-                logging.info("get data:")
-                logging.info(response_data)
                 return HttpResponse(json.dumps(response_data), content_type=constAppJson)
             except Exception as e:
                 logging.info(e)
@@ -483,6 +481,55 @@ def delete_user_view(request):
 
     return HttpResponse(constInvalidReq, status=400)
 
+
+def get_users_information_view(request):
+    if request.method == "GET":
+        usernames = request.GET.getlist("username[]")
+
+        # Make sure the get data is not empty
+        if usernames:
+            try:
+                user_info_list = []
+                for username in usernames:
+                    # Retrieve the user from the database by username
+                    user = User.objects.get(username=username)
+
+                    profile_picture_data = user.profile_picture
+                    if profile_picture_data:
+                        profile_picture_encoded = base64.b64encode(profile_picture_data).decode('utf-8')
+                    else:
+                        profile_picture_encoded = None  # a default image or keep it empty
+
+                    # get all of the information for the user
+                    user_info = {
+                        "id": user.pk,
+                        "username": user.username,
+                        "password": user.password,
+                        "email": user.email,
+                        "first_name": user.first_name,
+                        "last_name": user.last_name,
+                        "profilepicture": profile_picture_encoded,
+                        "timezone": user.timezone
+                    }
+                    user_info_list.append(user_info)
+
+                logging.info("get data:")
+                logging.info(user_info_list)
+                return HttpResponse(json.dumps(user_info_list), content_type='application/json')
+            except User.DoesNotExist:
+                return HttpResponse("User does not exist", status=400)
+            except Exception as e:
+                logging.error(str(e))
+                return HttpResponse("Error: " + str(e), status=400)
+        else:  # usernames were empty
+            return HttpResponse("Usernames not provided", status=400)
+    return HttpResponse("This endpoint only accepts GET requests", status=400)
+
+
+
+
+
+
 # ########## Check-in Management ##########
 
 
@@ -573,7 +620,6 @@ def update_checkin_info_view(request):
     data = json.loads(request.body)
 
     # Attempt to retrieve the checkin object based on the checkin id provided in the POST data
-    checkin_id=None #default
     try:
         checkin_id = data["checkin_id"]  # Get the username from the POST data
         checkin = Checkin.objects.get(checkin_id=checkin_id)  # Retrieve the checkin from the database
@@ -1340,12 +1386,51 @@ def get_all_community_info_view(request):
                 })
                 
             logging.info("SPECIFIC COMMUNITY INFO: %s", communities_list)
-            logging.info(communities_list)
             return HttpResponse(json.dumps(communities_list), content_type='application/json')
         
         except Exception as e:
             logging.error("GETTING ALL COMMUNITIES ERROR: %s",e)
             return HttpResponse("Getting all communities error", status=400)
+    return HttpResponse(constNotGet)
+
+def get_user_community_info_view(request):
+    if request.method == "GET":
+        username = request.GET.get("username")
+
+        # Make sure the username is not empty
+        if username is not None:
+            try:
+                # Retrieve the user from the database by username
+                user = User.objects.get(username=username)
+
+                # retreieve the communities grouped by owner ID
+                communities = Community.objects.filter(owner_id=user)
+
+                # Populate the list with dictionaries containing each community and their info
+                communities_list = []
+                for community in communities:
+                    communities_list.append({
+                        'community_id': community.community_id,
+                        'community_name': community.community_name,
+                        'community_description': community.community_description,
+                        'owner_id': community.owner_id.pk,
+                        'privacy': community.privacy,
+                        'date_created': community.date_created.strftime('%Y-%m-%d')
+                    })
+
+                    
+                # Log data and return as JSON response
+                logging.info("Community list:")
+                logging.info(communities_list)
+                return HttpResponse(json.dumps(communities_list), content_type='application/json')
+
+            except User.DoesNotExist:
+                return HttpResponse(constUserDNE, status=400)
+            except Exception as e:
+                logging.error(e)
+                return HttpResponse("An error occurred", status=400)
+        else:  # username was empty
+            return HttpResponse(constUNnotProvided, status=400)
     return HttpResponse(constNotGet)
 
 def update_community_view(request):
@@ -1446,7 +1531,33 @@ def update_description(community, new_description):
     except Exception as e:
         logging.info("ERROR IN CHANGING description: %s", e)
         return HttpResponse("Error in updating description", status=400)
-    
+
+
+def delete_community_view(request):
+    logging.info('in delete community view')
+    if request.method == "POST":
+        # Retrieve community ID from POST request
+        data = json.loads(request.body)
+        community_id = data.get("community_id")
+        logging.info('Retrieved community_id %s', community_id)
+
+        try:
+            # Check if the community exists
+            community = Community.objects.get(community_id=community_id)
+            logging.info('Retrieved community: %s', community)
+
+            logging.info('attempting to delete community.....')
+            community.delete()
+            logging.info('deleted.....')
+            # communityuser= CommunityUser.objects.filter(community_id=community_id).delete()
+            return HttpResponse("Community deleted successfully", status=200)
+            
+        except Exception as e:
+            return HttpResponse("Error deleting community: " + str(e), status=400)
+
+    return HttpResponse(constInvalidReq, status=400)
+
+   
 def request_to_join_community_view(request):
     # Check if the request method is POST
     if request.method != "POST":

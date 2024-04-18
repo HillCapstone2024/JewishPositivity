@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TextInput, ScrollView, Image,ImageViewer, Modal, Pressable } from "react-native";
 import * as Storage from "../../AsyncStorage.js";
-import { createAvatar } from "@dicebear/core";
 import axios from "axios";
-import { micah } from "@dicebear/collection";
 import { SvgXml } from "react-native-svg";
 import * as ImagePicker from "expo-image-picker"; 
 import { Ionicons } from "@expo/vector-icons";
@@ -12,7 +10,6 @@ import IP_ADDRESS from "../../ip.js";
 import { Alert } from "react-native";
 import { KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform, SafeAreaView } from "react-native";
 import { ActivityIndicator } from "react-native";
-import { xml } from "@dicebear/core/lib/utils/license.js";
 import * as FileSystem from "expo-file-system";
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
@@ -73,11 +70,6 @@ const EditProfile = ({navigation, onSwitch}) => {
 
   const [updateProfilePicture, setUpdateProfilePicture] = useState(false);
 
-  const avatar = createAvatar(micah, {
-    seed: userInfo.originalUsername,
-    radius: 50,
-    mouth: ["smile", "smirk", "laughing"],
-  }).toString();
 
   async function readFileAsBase64(uri) {
     try {
@@ -250,13 +242,9 @@ const takeMedia = async () => {
     </View> 
       <TouchableOpacity onPress={handleEditProfilePicture} >
         <View style={styles.profilePicContainer}>
-        {userInfo.profilePicture && userInfo.profilePicture.trim() != "" ? (
           <Image //source={{ uri: userInfo.profilePicture }} />
             style={styles.profilePic}
             source={{uri: `data:image/jpeg;base64,${userInfo?.profilePicture}`,}}/>
-        ) : (
-          <SvgXml xml={avatar} style={styles.profilePic} /> 
-        )}
         <View style={styles.cameraIcon}>
          <Ionicons name="camera" size={24} color="black" />
         </View>
