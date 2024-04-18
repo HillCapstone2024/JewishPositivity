@@ -17,6 +17,7 @@ import Entry from '../screens/home/Entry';
 import JournalEntryDetailsScreen from "../screens/home/JournalEntryDetailsScreen.js";
 import JournalNavigator from "./JournalNavigator.js";
 import CheckIn from "../screens/home/CheckIn.js";
+import Community from "../screens/home/Community.js";
 
 // OneSignal.Debug.setLogLevel(LogLevel.Verbose);
 // OneSignal.initialize(Constants.expoConfig.extra.oneSignalAppId);
@@ -66,6 +67,7 @@ export default function AuthNavigator() {
         <Stack.Screen name="Terms of Use" component={TermsofUse} />
         <Stack.Screen name="CheckIn" component={CheckIn} options={{headerTitle: "Check-in"}}/>
         <Stack.Screen name="JournalEntryDetails" component={JournalEntryDetailsScreen} options={{headerTitle: "Check-in Details"}}/>
+        <Stack.Screen name="Community" component={Community} options={{headerTitle: "Community"}}/>
       </Stack.Navigator>
   );
 }
