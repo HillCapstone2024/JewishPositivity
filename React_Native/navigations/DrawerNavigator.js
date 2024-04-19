@@ -193,7 +193,7 @@ const MyDrawer = ({ navigation }) => {
         }}
       />
       <Drawer.Screen
-        name="Badges"
+        name="Awards"
         component={Badges}
         options={{
           drawerIcon: () => (
