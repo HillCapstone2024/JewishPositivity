@@ -37,6 +37,8 @@ const Login = ({ navigation }) => {
   const [errorMessage, setErrorMessage] = useState(null);
   const theme = makeThemeStyle();
 
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
   const saveUser = async () => {
     await Storage.setItem("@username", username);
 
@@ -68,11 +70,55 @@ const Login = ({ navigation }) => {
         await Storage.setItem("@password", response.data.password);
         await Storage.setItem("@profilePicture", response.data.profilepicture);
 
+        handleUpdateTimeZone();
+
         console.log("successfully saved user")
       } catch (error) {
         handleUserInfoError(error);
       }
     };
+
+    const handleUpdateTimeZone = async () => {
+      const getCsrfToken = async () => {
+        try {
+          const response = await axios.get(`${API_URL}/csrf-token/`);
+          return response.data.csrfToken;
+        } catch (error) {
+          console.error("Error retrieving CSRF token:", error);
+          throw new Error("CSRF token retrieval failed");
+        }
+      };
+  
+      try {
+        const csrfToken = await getCsrfToken();
+        const requestData = {
+          username: username,
+          timezone: timezone,
+        };
+        const response = await axios.post(
+          `${API_URL}/update_user_information/`,
+          requestData,
+          {
+            headers: {
+              "X-CSRFToken": csrfToken,
+              "Content-Type": "application/json",
+            },
+            withCredentials: true,
+          }
+        );
+        console.log("update timezone response:", response.data);
+        console.log("timezone", timezone);
+      } catch (error) {
+        console.log(error)
+        setErrorMessage(
+          <View style={styles.errorMessageBox}>
+            <Text style={styles.errorMessageText}>{error.response.data}</Text>
+          </View>
+        );
+        console.error("Update Timezone error:", error.response.data);
+      }
+    };
+  
   
     const handleUserInfoError = (error) => {
       console.log(error);

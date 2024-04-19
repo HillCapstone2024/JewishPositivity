@@ -3578,3 +3578,78 @@ class JoinCommunityViewTestCase(TestCase):
         # Send POST to join public community AGAIN
         response = client.post(reverse('request_to_join_community_view'), data=json.dumps(self.PUBLIC_JOIN_POST_DATA), content_type=CONTENT_TYPE_JSON)
         self.assertEqual(response.status_code, 400)
+
+class GetUsersInCommunityViewTestCase(TestCase):
+
+
+    USER_DATA = {
+        'username': 'testuser',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+    USER_DATA_2 = {
+        'username': 'testuser2',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test2@example.com',
+        'timezone': 'EST',
+    }
+
+    COMMUNITY_DATA = {
+        'community_name': "Name of Community",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "testuser",  # username of the owner
+        "privacy": 'public',
+    }
+
+    def setUp(self):
+        # Initialize the Django test client
+        self.client = Client()
+
+        # Make a POST request to create test users and a community
+        self.client.post(reverse('create_user_view'), data=json.dumps(self.USER_DATA), content_type='application/json')
+        self.client.post(reverse('create_user_view'), data=json.dumps(self.USER_DATA_2), content_type='application/json')
+        self.client.post(reverse('create_community_view'), data=json.dumps(self.COMMUNITY_DATA), content_type='application/json')
+
+        
+
+    def test_get_users_in_community_success(self):
+    # Create test data
+        community_id = Community.objects.get(community_name="Name of Community").pk
+        get_data = {'community_id': 'Name of Community'}
+
+    # Send GET request to get_users_in_community_view
+        response = self.client.get(reverse('get_users_in_community_view'), data=get_data)
+
+    # Check if response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+    # Log the response data for inspection
+        logging.debug("Response data: %s", response.content)
+
+
+
+    def test_get_users_in_community_fail(self):
+        # Create test data for non-existing community
+        get_data = {'community_id': -1}  # Non-existing community ID
+
+        # Send GET request to get_users_in_community_view
+        response = self.client.get(reverse('get_users_in_community_view'), data=get_data)
+
+        # Log the response status code for inspection
+        logging.info("Response status code: %s", response.status_code)
+
+        # Check if response status code is 400 (Community not found)
+        self.assertEqual(response.status_code, 400)
+
+        # Log the response data for inspection
+        response_data = json.loads(response.content)
+        logging.info("Response data: %s", response_data)

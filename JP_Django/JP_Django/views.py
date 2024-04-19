@@ -1607,3 +1607,35 @@ def request_to_join_community_view(request):
     except Exception as e:
         logging.info("ERROR in joining community: %s", e)
         return HttpResponse("Error in joining community", status=400)
+    
+
+def get_users_in_community_view(request):
+    if request.method == "GET":
+        try:
+            community_id = request.GET.get('community_id')
+
+            # Check if the community exists
+            if not Community.objects.filter(pk=community_id).exists():
+                return HttpResponse(json.dumps({"error": "Community not found"}), status=400)
+
+            # Retrieve all users in the community
+            community_users = CommunityUser.objects.filter(community_id=community_id)
+            
+            # List to store users in the community
+            users_list = []
+            for community_user in community_users:
+                user = community_user.user_id
+                
+                users_list.append({
+                    'username': user.username
+                })
+                
+            return HttpResponse(json.dumps(users_list), content_type='application/json', status=200)
+        
+        except Exception as e:
+            logging.error("Error while retrieving users in the community: %s", e)
+            return HttpResponse(json.dumps({"error": "An error occurred while retrieving users in the community"}), status=400)
+    
+    # Return constNotGet for any method other than GET
+    return HttpResponse(constNotGet)
+

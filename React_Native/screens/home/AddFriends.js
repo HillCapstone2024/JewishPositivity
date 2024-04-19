@@ -16,6 +16,7 @@ import * as Storage from "../../AsyncStorage.js";
 import IP_ADDRESS from "../../ip.js";
 import axios from 'axios';
 import { SearchBar } from '@rneui/themed';
+import ExpandingSearchBar from '../../tools/ExpandingSearchBar.js';
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
@@ -129,7 +130,7 @@ const AddFriends = ({navigation, onSwitch}) => {
               <TouchableOpacity
                 onPress={() => handleDeleteFriend(item.username)}
               >
-                <Ionicons name={"close"} size={20} color="#0066cc" />
+                <Ionicons name={"close"} size={20} color="#4A90E2" />
               </TouchableOpacity>
             </View>
           </View>
@@ -139,25 +140,7 @@ const AddFriends = ({navigation, onSwitch}) => {
 
     return (
       <View style={styles.container}>
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Add Friends</Text>
-          <View style={styles.horizontalLine} />
-        </View>
-        {/* <TextInput
-          style={[styles.input]}
-          placeholder="Find User..."
-          onChangeText={(text) => updateUsernameSearch(text)}
-          value={usernameSearch}
-        /> */}
-        <SearchBar
-          placeholder="Add Friends..."
-          onChangeText={updateSearch}
-          value={search}
-          //   style={styles.input}
-          lightTheme
-          showCancel
-          platform="ios"
-        />
+        <ExpandingSearchBar/>
         <FlatList
           enableEmptySections={true}
           data={users}
@@ -175,7 +158,7 @@ const AddFriends = ({navigation, onSwitch}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // marginTop: 10,
+    marginTop: 10,
     // justifyContent: "center",
     // alignItems: "center",
   },
@@ -209,7 +192,7 @@ const styles = StyleSheet.create({
   nameTxt: {
     marginLeft: 15,
     fontWeight: "600",
-    color: "#0066cc",
+    color: "#4A90E2",
     fontSize: 14,
     width: 170,
   },
@@ -220,7 +203,7 @@ const styles = StyleSheet.create({
   },
   msgTxt: {
     fontWeight: "400",
-    color: "#0066cc",
+    color: "#4A90E2",
     fontSize: 12,
     marginLeft: 15,
   },
