@@ -155,13 +155,22 @@ const FriendsList = ({ navigation, onSwitch }) => {
     );
 
     const deleteFriends = async () => {
-      console.log("Deleting Friend...");
+      console.log("Deleting: ", friendUsername);
       try {
         const csrfToken = await getCsrfToken();
         const response = await axios.post(`${API_URL}/delete_friend/`, {
-          username: username,
-          unfriendusername: friendUsername,
-        });
+            username: username,
+            unfriendusername: friendUsername,
+          },
+          {
+            headers: 
+            {
+                "X-CSRFToken": csrfToken,
+                "Content-Type": "application/json",
+            },
+            withCredentials: true,
+        }
+        );
         console.log("delete Response: ", response);
         //get rid of friend from friends. when they reload the page next time, it wont be included
         //in the initialize data. this way the user doesn't have to wait for page to reload
