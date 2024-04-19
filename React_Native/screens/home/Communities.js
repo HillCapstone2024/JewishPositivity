@@ -14,6 +14,7 @@ const layout = Dimensions.get("window");
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
 const BottomPopupJoin = ({ visible, onRequestClose }) => {
+    const [communityName, setCommunityName] = useState("")
     const onGestureEvent = (event) => {
         if (event.nativeEvent.translationY > 100) {
             onRequestClose();
@@ -26,8 +27,28 @@ const BottomPopupJoin = ({ visible, onRequestClose }) => {
         }
     };
 
-    const handleCommunityJoin = () => {
-        console.log("Joining a community");
+    const handleCommunityJoin = async () => {
+        try {
+            const response = await axios.post(
+                `${API_URL}/create_community/`,
+                {
+                    username: username,
+                    community_name: communityName,
+                },
+                {
+                    headers: {
+                        "X-CSRFToken": csrfToken,
+                        "Content-Type": "application/json",
+                    },
+                    withCredentials: true,
+                }
+            );
+            console.log("Join Community Response:", response.data);
+        } catch (error) {
+            if (error.response.data) {
+                console.error("Error Joining Community:", error.response.data);
+            }
+        }
     }
 
     return (
@@ -43,9 +64,7 @@ const BottomPopupJoin = ({ visible, onRequestClose }) => {
             >
                 <View style={styles.bottomView}>
                     <Text style={styles.joinHeader}>Join a Community</Text>
-                    <TextInput placeholder='Community Name' style={styles.input} />
-                    <TextInput placeholder='Passcode' style={styles.inputPasscode} />
-
+                    <TextInput placeholder='Community Name' onChangeText={(text) => setCommunityName(text)} style={styles.input} />
                     <TouchableOpacity style={styles.joinModal} onPress={handleCommunityJoin}>
                         <Text style={styles.buttonText}>Join</Text>
                     </TouchableOpacity>
@@ -60,7 +79,6 @@ const BottomPopupCreate = ({ visible, onRequestClose }) => {
         id: 0,
         community_name: "",
         description: "",
-        passcode: "",
         community_photo: "",
     });
     const onGestureEvent = (event) => {
@@ -186,7 +204,6 @@ const BottomPopupCreate = ({ visible, onRequestClose }) => {
                     <TextInput placeholder='Community Name' style={styles.input} />
                     <TextInput placeholder='Description' multiline={true} scrollEnabled={true} returnKeyType="default" style={styles.inputDesc} />
 
-                    <TextInput placeholder='Passcode' style={styles.inputPasscode} />
 
                     <TouchableOpacity style={styles.createModal} onPress={handleCommunityCreate}>
                         <Text style={styles.buttonText}>Create</Text>
