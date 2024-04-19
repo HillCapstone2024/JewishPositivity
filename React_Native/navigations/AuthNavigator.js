@@ -13,9 +13,7 @@ import LoadingScreen from "../screens/greet/Loading.js";
 import MyDrawer from "./DrawerNavigator.js";
 import Landing from "../screens/greet/Landing.js";
 import TermsofUse from '../screens/home/TermsofUse';
-import Entry from '../screens/home/Entry';
-import JournalEntryDetailsScreen from "../screens/home/JournalEntryDetailsScreen.js";
-import JournalNavigator from "./JournalNavigator.js";
+import CheckInEntryDetailsScreen from "../screens/home/CheckInEntryDetailsScreen.js";
 import CheckIn from "../screens/home/CheckIn.js";
 
 // OneSignal.Debug.setLogLevel(LogLevel.Verbose);
@@ -65,7 +63,7 @@ export default function AuthNavigator() {
         <Stack.Screen name="Drawer" component={MyDrawer} options={{headerShown: false}}/>
         <Stack.Screen name="Terms of Use" component={TermsofUse} />
         <Stack.Screen name="CheckIn" component={CheckIn} options={{headerTitle: "Check-in"}}/>
-        <Stack.Screen name="JournalEntryDetails" component={JournalEntryDetailsScreen} options={{headerTitle: "Check-in Details"}}/>
+        <Stack.Screen name="CheckInEntryDetails" component={CheckInEntryDetailsScreen} options={{headerTitle: "Check-in Details"}}/>
       </Stack.Navigator>
   );
 }

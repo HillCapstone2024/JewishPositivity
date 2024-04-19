@@ -230,7 +230,7 @@ const MyDrawer = ({ navigation }) => {
         options={{
           drawerIcon: () => (
             <Ionicons
-              name="settings"
+              name="information-circle"
               size={22}
               color={theme["color"]["color"]}
             />

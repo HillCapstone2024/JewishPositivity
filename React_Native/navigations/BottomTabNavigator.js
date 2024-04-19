@@ -14,7 +14,7 @@ import { faUsersLine } from '@fortawesome/free-solid-svg-icons/faUsersLine';
 
 import FriendFeed from "../screens/home/FriendFeed";
 import Archive from "../screens/home/Archive";
-import JournalModal from "../screens/home/JournalModal";
+import CheckInModal from "../screens/home/CheckInModal";
 import CheckIn from "../screens/home/CheckIn";
 
 const Stack = createNativeStackNavigator();
@@ -22,19 +22,19 @@ const Tab = createBottomTabNavigator();
 
 const BottomTabNavigator = ( ) => {
   const tabOffsetValue = useRef(new Animated.Value(0)).current;
-  const [showJournalModal, setShowJournalModal] = useState(false);
+  const [showCheckInModal, setShowCheckInModal] = useState(false);
   const navigation = useNavigation(); // Access navigation here
  
-  const openJournalModal = () => {
-    setShowJournalModal(true);
+  const openCheckInModal = () => {
+    setShowCheckInModal(true);
   };
 
-  const closeJournalModal = () => {
-    setShowJournalModal(false);
+  const closeCheckInModal = () => {
+    setShowCheckInModal(false);
   };
 
-  const submitJournalEntry = () => {
-    closeJournalModal();
+  const submitCheckInEntry = () => {
+    closeCheckInModal();
   };
 
   return (
@@ -88,7 +88,7 @@ const BottomTabNavigator = ( ) => {
         />
 
         <Tab.Screen
-          name="Journal"
+          name="CheckIn"
           component={CheckIn}
           options={{
             tabBarIcon: ({ focused }) => (
@@ -106,13 +106,18 @@ const BottomTabNavigator = ( ) => {
 
                 <TouchableOpacity
                   activeOpacity={0.5}
-                  onPress={() => setShowJournalModal(true)}
+                  onPress={() => setShowCheckInModal(true)}
                   style={[styles.activeBtn]}                
                 >
                   <FontAwesomeIcon icon={faPen} 
                     size={25}
-                    color={"#4A90E2"}
+                    color={"white"}
                   />
+                  {/* <Ionicons
+                  name="add"
+                  size={50}
+                  color={"white"}
+                /> */}
                 </TouchableOpacity>
               </View>
             ),
@@ -120,7 +125,7 @@ const BottomTabNavigator = ( ) => {
           listeners={({ navigation, route }) => ({
             tabPress: (e) => {
               e.preventDefault(); // Prevent default behavior
-              openJournalModal(); // Call the openJournalModal function
+              openCheckInModal(); // Call the openCheckInModal function
             },
           })}
         />
@@ -169,14 +174,14 @@ const BottomTabNavigator = ( ) => {
         }}
       ></Animated.View>
 
-      {showJournalModal && (
-        <JournalModal
-          onClose={closeJournalModal}
-          onSubmit={submitJournalEntry}
-          visible={showJournalModal}
+      {showCheckInModal && (
+        <CheckInModal
+          onClose={closeCheckInModal}
+          onSubmit={submitCheckInEntry}
+          visible={showCheckInModal}
           navigation={navigation}
           // checkInType={selectedCheckInType} // Pass the check-in type here
-          onRequestClose={() => setShowJournalModal(false)}
+          onRequestClose={() => setShowCheckInModal(false)}
         />
       )}
     </>
@@ -207,7 +212,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 50 / 2,
-    backgroundColor: "white",
+    backgroundColor: "#4A90E2",
     alignItems: 'center',
     justifyContent: 'center',
   },

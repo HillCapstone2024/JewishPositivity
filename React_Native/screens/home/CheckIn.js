@@ -41,7 +41,7 @@ export default function CheckIn({ navigation, route }) {
   const [mediaBox, setMediaBox] = useState(false);
   const [mediaType, setMediaType] = useState("text");
   const [base64Data, setBase64Data] = useState("");
-  const [journalText, setJournalText] = useState("");
+  const [CheckInText, setCheckInText] = useState("");
   const [showMediaBar, setShowMediaBar] = useState(true);
   const [mediaChanged, setMediaChanged] = useState(false);
   const [selectedOption, setSelectedOption] = useState("");
@@ -110,12 +110,12 @@ export default function CheckIn({ navigation, route }) {
     }
   };
 
-  const submitJournal = async () => {
+  const submitCheckIn = async () => {
     setLoadingSubmit(true);
-    let base64JournalText = "";
+    let base64CheckInText = "";
     if (mediaType === "text") {
-      base64JournalText = textToBase64(journalText);
-      setBase64Data(base64JournalText);
+      base64CheckInText = textToBase64(CheckInText);
+      setBase64Data(base64CheckInText);
     }
     console.log("check in type: ", mediaType);
     try {
@@ -127,7 +127,7 @@ export default function CheckIn({ navigation, route }) {
           moment_number: momentType,
           content: base64Data,
           content_type: mediaType,
-          text_entry: journalText,
+          text_entry: CheckInText,
           date: formattedDateTime,
         },
         {
@@ -143,7 +143,7 @@ export default function CheckIn({ navigation, route }) {
       navigation.goBack();
     } catch (error) {
       console.log(error);
-      console.error("Journal Error:", error.response.data);
+      console.error("CheckIn Error:", error.response.data);
     }
     setLoadingSubmit(false);
   };
@@ -152,7 +152,7 @@ export default function CheckIn({ navigation, route }) {
     setMediaUri(null);
     setMediaBox(false);
     setMediaType("text");
-    setDisableSubmit(journalText.trim().length === 0);
+    setDisableSubmit(CheckInText.trim().length === 0);
   };
 
   const handleRecordingComplete = async (uri) => {
@@ -163,7 +163,7 @@ export default function CheckIn({ navigation, route }) {
     // setDisableSubmit(true);
     const base64String = await readFileAsBase64(uri);
     setBase64Data(base64String);
-    // setJournalText("");
+    // setCheckInText("");
     setMediaBox(true);
     setMediaChanged(!mediaChanged);
     setDisableSubmit(false);
@@ -184,7 +184,7 @@ export default function CheckIn({ navigation, route }) {
   };
 
   const handleTextComplete = (text) => {
-    setJournalText(text);
+    setCheckInText(text);
     // console.log(text);
     if (mediaUri === null) {
       setDisableSubmit(text.trim().length === 0);
@@ -192,7 +192,7 @@ export default function CheckIn({ navigation, route }) {
   };
 
   const handleToggle = (toggle) => {
-    console.log("journal side:", toggle);
+    console.log("CheckIn side:", toggle);
     setShowMediaBar(!toggle);
   };
 
@@ -353,16 +353,16 @@ export default function CheckIn({ navigation, route }) {
             {/* <Text style={[styles.boxDescriptor]}>Description</Text> */}
             <ScrollView style={[styles.dropdownContainer, { height: 350 }]}>
               <TextInput
-                style={styles.journalInput}
+                style={styles.CheckInInput}
                 inputAccessoryViewID={mediaAccessoryViewID}
                 placeholder={"Enter reflection here…"}
                 placeholderTextColor={"grey"}
                 maxLength={10000}
-                value={journalText}
+                value={CheckInText}
                 onChangeText={handleTextComplete}
                 multiline
                 numberOfLines={4}
-                testID="journalInput"
+                testID="CheckInInput"
               />
             </ScrollView>
           </View>
@@ -380,7 +380,7 @@ export default function CheckIn({ navigation, route }) {
               <TouchableOpacity
                 disabled={disableSubmit}
                 style={styles.submitButton}
-                onPress={submitJournal}
+                onPress={submitCheckIn}
                 testID="submitButton"
               >
                 <Text
@@ -535,7 +535,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     // fontWeight: "bold",
   },
-  journalInput: {
+  CheckInInput: {
     fontSize: 16,
   },
   scrollingInput: {

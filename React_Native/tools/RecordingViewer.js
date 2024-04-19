@@ -138,19 +138,21 @@ const RecordingViewer = ({ source, onDelete, style }) => {
               {/* Prevents the modal content from closing when pressing on it */}
               <TouchableWithoutFeedback>
                 <View style={styles.modalView}>
-                  <Text style={styles.modalText}>
-                    Do you want to delete this recording?
-                  </Text>
-                  <View style={styles.horizontalBar} />
-                  <TouchableOpacity
-                    onPress={() => {
-                      onDelete();
-                      setModalVisible(false);
-                    }}
-                  >
-                    <Text style={styles.deleteText}>Delete</Text>
-                  </TouchableOpacity>
-                  {/* Removed the Cancel button since pressing off the modal now also acts as cancel */}
+                    <View style={styles.editDeleteContainer}>
+                      <Text style={styles.modalText}>
+                        Do you want to delete this recording?
+                      </Text>
+                      <View style={styles.horizontalBar} />
+                      {/* Delete button */}
+                      <TouchableOpacity 
+                        onPress={() => {
+                          onDelete();
+                          setModalVisible(false);
+                        }}
+                      >
+                        <Text style={styles.deleteText}>Delete</Text>
+                      </TouchableOpacity>
+                    </View>
                 </View>
               </TouchableWithoutFeedback>
             </View>
@@ -184,35 +186,28 @@ const styles = StyleSheet.create({
     color: "white",
   },
   modalText: {
-    marginBottom: 15,
     textAlign: "center",
     fontSize: 16,
     fontWeight: "500",
   },
-  deleteText: {
-    color: "red",
-    fontSize: 16,
-    marginVertical: 10,
-  },
-  horizontalBar: {
-    height: 1,
-    width: "90%",
-    backgroundColor: "#ccc",
-    // marginTop: 15,
-    // borderWidth: 2,
-  },
-
   centeredView: {
     flex: 1,
     justifyContent: "flex-end",
     // alignItems: "center",
     marginBottom: 20,
   },
-  modalView: {
-    margin: 20,
+  horizontalBar: {
+    height: 1,
+    width: "100%",
+    backgroundColor: "#ccc",
+    margin: 15,
+  },
+  editDeleteContainer: {
+    marginBottom: 20,
+    marginHorizontal: 20,
     backgroundColor: "white",
-    borderRadius: 20,
-    paddingTop: 35,
+    borderRadius: 10,
+    padding: 15,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
@@ -223,16 +218,9 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  modalText: {
-    marginBottom: 15,
-    textAlign: "center",
-    fontSize: 16,
-    fontWeight: "500",
-  },
   deleteText: {
     color: "red",
-    fontSize: 16,
-    marginVertical: 10,
+    fontSize: 18,
   },
 });
 

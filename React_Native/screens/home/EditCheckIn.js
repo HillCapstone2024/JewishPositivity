@@ -171,7 +171,7 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
     setMediaUri(null);
     setMediaBox(false);
     setMediaType("text");
-    setDisableUpdate(journalText.trim().length === 0);
+    setDisableUpdate(journalText.trim().length === 1);
   };
 
   const handleRecordingComplete = async (uri) => {
@@ -252,7 +252,7 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
   };
 
   renderTextBasedOnType = () => {
-    switch (checkInType) {
+    switch (selectedEntry?.checkInType) {
       case 'ModehAni':
         return (
           <View style={styles.textContainer}>
@@ -668,5 +668,9 @@ const styles = StyleSheet.create({
     width: "100%",
     aspectRatio: 1,
     borderRadius: 5,
+  },
+  textContainer: {
+    marginBottom: 15,
+    marginHorizontal: 10,
   },
 });

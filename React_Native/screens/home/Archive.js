@@ -215,7 +215,7 @@ export default function Archive({ navigation }) {
       // Set grouped entries state along with their corresponding videos
       // setGroupedEntries(groupedEntries);
 
-      console.log("Returning Journal Entry Data");
+      console.log("Returning CheckIn Entry Data");
       return groupedEntries;
     } catch (error) {
       console.error("Error retrieving check in entries:", error);
@@ -301,7 +301,7 @@ export default function Archive({ navigation }) {
                   >
                     <Image
                       source={{ uri: `data:Image/mp4;base64,${data?.content}` }}
-                      style={styles.JournalEntryModalImage}
+                      style={styles.CheckInEntryModalImage}
                     />
                   </TouchableOpacity>
                 )}
@@ -440,7 +440,7 @@ export default function Archive({ navigation }) {
                           key={index}
                           // onPress={() => handleEntryPress(item)}
                           onPress={() =>
-                            navigation.navigate("JournalEntryDetails", {
+                            navigation.navigate("CheckInEntryDetails", {
                               selectedEntry: item,
                             })
                           }
@@ -448,7 +448,7 @@ export default function Archive({ navigation }) {
                           {renderContent(item)}
                         </TouchableOpacity>
                       ))}
-                    {/* Modal to display journal entry details */}
+                    {/* Modal to display CheckIn entry details */}
                   </View>
                 ))}
             </View>
@@ -613,8 +613,8 @@ const styles = StyleSheet.create({
     color: "#4A90E2",
   },
 
-  // JournalEntryModal
-  JournalEntryModalContent: {
+  // CheckInEntryModal
+  CheckInEntryModalContent: {
     backgroundColor: "white",
     width: Dimensions.get("window").width,
     height: "100%",
@@ -629,16 +629,16 @@ const styles = StyleSheet.create({
     borderBottomColor: "grey",
     borderBottomWidth: 2,
   },
-  JournalEntryModalIcons: {
+  CheckInEntryModalIcons: {
     fontSize: 40,
     color: "#4A90E2",
   },
-  JournalEntryModalImage: {
+  CheckInEntryModalImage: {
     width: "100%",
     aspectRatio: 1,
     borderRadius: 5,
   },
-  JournalEntryModalVideo: {
+  CheckInEntryModalVideo: {
     width: "100%",
     aspectRatio: 1,
     borderRadius: 5,
