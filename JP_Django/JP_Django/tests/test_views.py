@@ -3578,3 +3578,197 @@ class JoinCommunityViewTestCase(TestCase):
         # Send POST to join public community AGAIN
         response = client.post(reverse('request_to_join_community_view'), data=json.dumps(self.PUBLIC_JOIN_POST_DATA), content_type=CONTENT_TYPE_JSON)
         self.assertEqual(response.status_code, 400)
+
+
+from datetime import datetime, timedelta, time
+from django.db.models import Min
+class TestingUpdateStreaksEnclosedEnvironment(TestCase):
+
+    # Defining todays date
+    base_data = datetime.now().date()
+
+    def setUp(self):
+        logging.info("Setting up test data.")
+        # Create a test user
+        self.user = User.objects.create(
+            username='testuser1',
+            email='testuser1@example.com',
+            password='testpassword123',
+            timezone='UTC'
+        )
+
+  
+        self.base_date = datetime.now().date()
+
+        # Today's check-in (current streak of 1)
+        checkin_today = Checkin.objects.create(
+            user_id=self.user,
+            date=datetime.combine(self.base_date, time(12, 0)),
+            moment_number=1,
+            content_type='text',
+            text_entry="Check-in today"
+        )
+        logging.info(f"Created check-in: {checkin_today.date}, {checkin_today.text_entry}")
+        
+
+        # Streak of 3 from 2,3,4 days ago
+        for i in range(2, 5):
+            checkin_date = datetime.combine(self.base_date - timedelta(days=i), time(12, 0))
+            checkin = Checkin.objects.create(
+                user_id=self.user,
+                date=checkin_date,
+                moment_number=1,
+                content_type='text',
+                text_entry=f"Check-in {i} days ago"
+            )
+            logging.info(f"Created check-in: {checkin.date}, {checkin.text_entry}")
+
+        # Earlier streak of 2 on day 6,7 from current day
+        for i in range(6, 8):
+            checkin_date = datetime.combine(self.base_date - timedelta(days=i), time(12, 0))
+            checkin = Checkin.objects.create(
+                user_id=self.user,
+                date=checkin_date,
+                moment_number=1,
+                content_type='text',
+                text_entry=f"Check-in {i} days ago"
+            )
+            logging.info(f"Created check-in: {checkin.date}, {checkin.text_entry}")
+        
+
+    def test_update_streak_success(self):
+        logging.info("****************************test_update_streak_success***********************************")
+
+        
+        # Initially check current and longest streak (should be 0)
+        user_initial = User.objects.get(username='testuser1')
+        self.assertEqual(user_initial.current_streak, 0)
+        self.assertEqual(user_initial.longest_streak, 0)
+
+        # Update streak after the set up runs, which is creataing checking on days
+        self.update_user_streaks()
+
+        # GET updated user data
+        user_updated = User.objects.get(username='testuser1')
+        logging.info(f"User {user_updated.username} - Current Streak: {user_updated.current_streak}, Longest Streak: {user_updated.longest_streak}")
+        
+        # Check assertions - 400 successful
+        self.assertEqual(user_updated.current_streak, 1, "Current streak should be 1 due to recent check-in after a break")
+        self.assertEqual(user_updated.longest_streak, 3, "Longest streak should be 3, counting all consecutive days before the break")
+
+    def test_delete_specific_checkin_and_update_streaks(self):
+        logging.info("****************************test_delete_specific_checkin_and_update_streaks***********************************")
+        
+        # GET checkin to delete, specifically the one from 3 days ago
+        checkin_to_delete = Checkin.objects.get(user_id=self.user, date=datetime.combine(self.base_date - timedelta(days=3), time(12, 0)))
+        logging.info(f"Deleting check-in on {checkin_to_delete.date}")
+
+
+        # Update the streaks from checkin initialization (so the highest streak is 3)
+        self.update_user_streaks()
+        
+        # Delete the checkin
+        checkin_to_delete.delete()
+        
+        # Update the streaks after delete (so the highest streak stays 3 even though the chain was broken)
+        self.update_user_streaks()
+        
+        # GET updated user data to check streak changes
+        user_updated = User.objects.get(username='testuser1')
+        logging.info(f"After deletion - User {user_updated.username} - Current Streak: {user_updated.current_streak}, Longest Streak: {user_updated.longest_streak}")
+        
+        # Expectations after the delete
+        expected_current_streak = 1  
+        expected_longest_streak = 3  # There should be no change in the longest streak 
+        self.assertEqual(user_updated.current_streak, expected_current_streak, "Current streak should reset to 1 due to the break caused by deletion")
+        self.assertEqual(user_updated.longest_streak, expected_longest_streak, "Longest streak should remain unchanged")
+
+
+
+    import datetime
+    from django.db.models import F, Q, Max, Min
+    from django.db import transaction
+
+    def update_user_streaks(self): # This is the MAIN method which will do the actual update for all users (can be chnaged to just do one user)
+        logging.info("Updating user streaks")
+
+        all_users = User.objects.all()
+        for user in all_users:
+            dates = list(self.get_sorted_checkin_dates(user.id)) # Get a list of unqiue dates from the checkin table
+            current_streak, new_longest_streak = self.calculate_streaks(dates) #calculate the streak based on those dates
+            logging.info(f"User {user.username} - Dates: {dates}")
+
+            if new_longest_streak > user.longest_streak: # Make sure the new longest streak is not smaller than the previous
+                user.longest_streak = new_longest_streak # This is for deleting an old check-in that was part of the largest chain of dates
+                logging.info(f"New longest streak {new_longest_streak} is greater than the current longest streak. Updating...")
+
+            user.current_streak = current_streak
+            user.save()
+            logging.info(f"Streaks updated - User {user.username}: Current Streak: {current_streak}, Longest Streak: {user.longest_streak}")
+
+            # Check if badges needs to be updated if a streak was
+            self.update_badges(user)
+
+    def get_sorted_checkin_dates(self, user_id): # This method retuens a list of unique dates after reading in all the dates
+        logging.info(f"Retrieving sorted check-in dates for user ID: {user_id}")
+        dates = Checkin.objects.filter(user_id=user_id)\
+            .annotate(date_only=Min('date__date'))\
+            .values('date_only')\
+            .distinct()\
+            .order_by('date_only')\
+            .values_list('date_only', flat=True)
+        logging.info(f"Dates retrieved: {list(dates)}")
+        return dates
+
+    def calculate_streaks(self, dates): # Calculating the dates
+        if not dates: # If no dates found then nothing
+            return 0, 0
+
+        longest_streak = current_streak = 1 # Default to one since this method will only be called upon a checkin
+        previous_date = dates[0]
+        logging.info(f"Starting streak calculation from date: {previous_date}")
+
+        for i in range(1, len(dates)): # Increment the streak if the current date is the previous + a day ahead (today)
+            if dates[i] == previous_date + timedelta(days=1):
+                current_streak += 1
+            else: # Else there is a break in the chain of consecutive dates
+                longest_streak = max(longest_streak, current_streak)
+                current_streak = 1
+                logging.info(f"Break found. Previous date: {previous_date}, Current date: {dates[i]}")
+            previous_date = dates[i]
+
+        longest_streak = max(longest_streak, current_streak)
+        logging.info(f"Final streaks calculated. Current Streak: {current_streak}, Longest Streak: {longest_streak}")
+        return current_streak, longest_streak
+
+    def update_badges(self, user): # Update Badges
+        logging.info("Updating Badges..................")
+        try:
+            badges = Badges.objects.get(user_id=user)
+            logging.info("User badges object found.")
+            updated = False
+
+            if user.current_streak == 1 and not badges.one_day:
+                badges.one_day = True
+                updated = True
+                logging.info("1 day badge added.")
+            if user.current_streak == 7 and not badges.one_week:
+                badges.one_week = True
+                updated = True
+                logging.info("1 week badge added.")
+            if user.current_streak == 30 and not badges.one_month:
+                badges.one_month = True
+                updated = True
+                logging.info("1 month badge added.")
+            if user.current_streak == 365 and not badges.one_year:
+                badges.one_year = True
+                updated = True
+                logging.info("1 year badge added.")
+
+            if updated:
+                badges.save()
+                logging.info("Badges updated.")
+            else:
+                logging.info("No Badges to update")
+        except Badges.DoesNotExist:
+            logging.info(f"No badge object found for {user.username}.")
