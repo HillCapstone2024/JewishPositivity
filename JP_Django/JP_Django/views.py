@@ -482,6 +482,32 @@ def delete_user_view(request):
     return HttpResponse(constInvalidReq, status=400)
 
 
+def search_users_view(request):
+    search_text = request.GET.get("search", "")
+    if search_text:
+        try:
+            #filter users where search matches
+            users = User.objects.filter(username__icontains=search_text)
+            print('users:', users)
+            users_data = []
+            for user in users:
+                #send username and profilepic back
+                profile_picture_data = user.profile_picture
+                if profile_picture_data:
+                    profile_picture_encoded = base64.b64encode(profile_picture_data).decode('utf-8')
+                else:
+                    profile_picture_encoded = None
+                users_data.append({"username": user.username, "profile_picture": profile_picture_encoded})
+            return JsonResponse(users_data, safe=False)
+
+        except Exception as e:
+            logging.error(f"An error occurred: {e}")
+            return HttpResponse("An internal error occurred.", status=500)
+    else:
+        #No search text provided, return an empty list or you could choose to return all users
+        return JsonResponse([], safe=False)
+
+
 def get_users_information_view(request):
     if request.method == "GET":
         usernames = request.GET.getlist("username[]")
@@ -1138,6 +1164,91 @@ def get_friends_view(request):
     return HttpResponse(constNotGet)
 
 
+def get_pending_requests_sent_friends_view(request):
+    if request.method == "GET":
+        username = request.GET.get("username")
+        logging.info("Username retrieved in the get_pending_requests_sent_friends_view ")
+        # Make sure the username is not empty
+        if username is not None:
+            try:
+                # Retrieve the user from the database by username
+                user = User.objects.get(username=username)
+
+                # Get friendships where the given user is either user1 or user2
+                friendships = Friends.objects.filter(user1_id=user.id, complete=False) #pending request sent from user1
+                logging.info("pending friendships retrieved from that username passed to view ")
+                # List to store friend usernames and the friendship status
+                friendship_data = []
+
+                # Populate the list with dictionaries containing usernames and friendship status
+                for friendship in friendships:
+                    friend_id = friendship.user2_id # the recipient of the requests username
+                
+                    # Get the username of the pending friend
+                    pending_friend_username = User.objects.get(id=friend_id).username
+
+                    friendship_data.append({
+                        'username': pending_friend_username,
+                    })
+
+                # Log data and return as JSON response
+                logging.info("Friendship status data:")
+                logging.info(friendship_data)
+                return JsonResponse(friendship_data, safe=False)
+
+            except User.DoesNotExist:
+                return HttpResponse(constUserDNE, status=400)
+            except Exception as e:
+                logging.error(e)
+                return HttpResponse("An error occurred", status=400)
+        else:  # username was empty
+            return HttpResponse(constUNnotProvided, status=400)
+    return HttpResponse(constNotGet)
+
+
+def get_pending_requests_received_friends_view(request):
+    if request.method == "GET":
+        username = request.GET.get("username")
+        logging.info("Username retrieved in the get_pending_requests_received_friends_view ")
+        # Make sure the username is not empty
+        if username is not None:
+            try:
+                # Retrieve the user from the database by username
+                user = User.objects.get(username=username)
+
+                # Get friendships where the given user is either user1 or user2
+                friendships = Friends.objects.filter(user2_id=user.id, complete=False) #pending request sent from user2
+                logging.info("pending friendships retrieved from that username passed to view ")
+                # List to store friend usernames and the friendship status
+                friendship_data = []
+
+                # Populate the list with dictionaries containing usernames and friendship status
+                for friendship in friendships:
+                    friend_id = friendship.user1_id # the sender of the requests username
+                
+                    # Get the username of the pending friend
+                    pending_friend_username = User.objects.get(id=friend_id).username
+
+                    friendship_data.append({
+                        'username': pending_friend_username
+                    })
+
+                # Log data and return as JSON response
+                logging.info("Friendship status data:")
+                logging.info(friendship_data)
+                return JsonResponse(friendship_data, safe=False)
+
+            except User.DoesNotExist:
+                return HttpResponse(constUserDNE, status=400)
+            except Exception as e:
+                logging.error(e)
+                return HttpResponse("An error occurred", status=400)
+        else:  # username was empty
+            return HttpResponse(constUNnotProvided, status=400)
+    return HttpResponse(constNotGet)
+
+
+
 # ########## Badges Management ##########
 
 
@@ -1590,6 +1701,7 @@ def request_to_join_community_view(request):
                 return HttpResponse("Already a member of this community", status=400)
             elif relationship.status==1:
                 relationship.status = 2
+                relationship.date_joined = date.today()
                 relationship.save()
                 return HttpResponse("Request accepted", status=200)
             else:
@@ -1603,7 +1715,94 @@ def request_to_join_community_view(request):
                 return HttpResponse("Request sent", status=200)
             else:
                 return HttpResponse("Invalid privacy value", status=400)
-
     except Exception as e:
         logging.info("ERROR in joining community: %s", e)
         return HttpResponse("Error in joining community", status=400)
+    
+def invite_to_join_community_view(request):
+    # Check if the request method is POST
+    if request.method != "POST":
+        # Return an HTTP 400 response if the method is not POST
+        return HttpResponse("Not a POST request", status=400)
+
+    # Parse the JSON data from the request body
+    data = json.loads(request.body)
+    logging.info("DATA from post: %s", data)
+
+    # variables from the post data
+    owner_username = data["owner_username"]
+    invited_username = data["invited_username"]
+    community_name = data["community_name"]
+    logging.info("OWNER'S USERNAME: '%s', INVITED'S USERNAME: '%s', COMMUNITY NAME: '%s'", owner_username, invited_username, community_name)
+
+    try:
+        # Get the community object
+        community = Community.objects.get(community_name=community_name)
+        logging.info("COMMUNITY OBJECT: %s", community)
+        # Get the owner user object
+        owner_user = User.objects.get(username=owner_username)
+        logging.info("OWNER OBJECT: %s", owner_user)
+        # Check if the owner is the actual owner of the community
+        if community.owner_id != owner_user:
+            return HttpResponse("You are not the owner of this community", status=400)
+        # Get the invited user object
+        invited_user = User.objects.get(username=invited_username)
+        logging.info("USER OBJECT: %s", invited_user)
+
+        # Check for an existing relationship between the invited user and the community
+        relationship = CommunityUser.objects.filter(user_id=invited_user.pk, community_id=community.pk).first()
+        logging.info("RELATIONSHIP OBJECT: %s", relationship)
+
+        if relationship != None:
+            logging.info("Relationship Status: %s", relationship.status)
+            if relationship.status==2:
+                return HttpResponse("Already a member of this community", status=400)
+            elif relationship.status==1:
+                return HttpResponse("Already invited to join", status=400)
+            elif relationship.status==0:
+                relationship.status = 2
+                relationship.date_joined = date.today()
+                relationship.save()
+                return HttpResponse("User Accepted", status=200)
+            else:
+                return HttpResponse("invalid status value", status=400)
+        else:
+            CommunityUser.objects.create(user_id=invited_user, community_id=community, status=1, date_joined= date.today())
+            return HttpResponse("User invited to join", status=200)
+    except Exception as e:
+        logging.info("ERROR in joining community: %s", e)
+        return HttpResponse("Error in joining community", status=400)
+
+def get_users_in_community_view(request):
+    if request.method == "GET":
+        logging.info("in get_users_in_community_view")
+        try:
+            community_name = request.GET.get('community_name')
+
+            # Check if the community exists
+            if not Community.objects.filter(community_name=community_name).exists():
+                return HttpResponse(json.dumps({"error": "Community not found"}), status=400)
+
+            # Retrieve all users in the community
+            community_id = Community.objects.get(community_name=community_name).pk
+            community_users = CommunityUser.objects.filter(community_id=community_id, status = 2) #only get users successfully in community
+            logging.info("filtered table for community users")
+            # List to store users in the community
+            users_list = []
+            for community_user in community_users:
+                user = User.objects.get(pk=community_user.user_id.pk) 
+                logging.info("got user obj in view")
+                
+                users_list.append({
+                    'username': user.username
+                })
+            logging.info("Userlist sent to frontend: %s", users_list)    
+            return HttpResponse(json.dumps(users_list), content_type='application/json', status=200)
+        
+        except Exception as e:
+            logging.error("Error while retrieving users in the community: %s", e)
+            return HttpResponse(json.dumps({"error": "An error occurred while retrieving users in the community"}), status=400)
+    
+    # Return constNotGet for any method other than GET
+    return HttpResponse(constNotGet)
+

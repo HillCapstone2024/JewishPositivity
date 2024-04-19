@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   SafeAreaView,
   Dimensions,
+  Animated
 } from "react-native";
 import { SearchBar } from "react-native-elements";
 import BottomTab from "../../navigations/BottomTabNavigator";
@@ -27,6 +28,7 @@ import SpinningPen from "../greet/Pen.js";
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
+
 const FriendRequests = ({navigation, onSwitch}) => {
   theme = makeThemeStyle();
   const [username, setUsername] = useState("");
@@ -39,6 +41,8 @@ const FriendRequests = ({navigation, onSwitch}) => {
   const [numRecievedRequests, setNumRecievedRequests] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+
+  const translateY = useRef(new Animated.Value(-layout.height)).current;
 
   useEffect(() => {
     if (isLoading === false) {
@@ -69,8 +73,11 @@ const FriendRequests = ({navigation, onSwitch}) => {
     setUsername(storedUsername || "No username");
     setIsLoading(false);
     console.log("finished initializing data.");
+    Animated.spring(translateY, {
+      toValue: 0,
+      useNativeDriver: true,
+    }).start();
   };
-
 
   const getCsrfToken = async () => {
     try {
@@ -120,7 +127,7 @@ const FriendRequests = ({navigation, onSwitch}) => {
       response.data.forEach((pic) => {
         map[pic.username] = pic.profile_picture;
       });
-      console.log("map reachec", typeof(response.data));
+      console.log("map reachec", typeof response.data);
       return response.data;
     } catch (error) {
       console.log("Error retrieving profile pics:", error);
@@ -128,26 +135,23 @@ const FriendRequests = ({navigation, onSwitch}) => {
     }
   };
 
-    const handleCancelRequest = async (friendUsername) => {
-      Alert.alert(
-        `Are you sure you want to delete your friend request to ${friendUsername}`,
-        `${friendUsername} will no longer see your friend request and will not be notified.`,
-        [
-          {
-            text: "Cancel",
-            onPress: () => console.log("Cancel Pressed"),
-          },
-          {
-            text: "Delete",
-            onPress: () => console.log("Delete Pressed"),
-            style: "destructive",
-          },
-        ]
-      );
-    };
-
-  
-
+  const handleCancelRequest = async (friendUsername) => {
+    Alert.alert(
+      `Are you sure you want to delete your friend request to ${friendUsername}`,
+      `${friendUsername} will no longer see your friend request and will not be notified.`,
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+        },
+        {
+          text: "Delete",
+          onPress: () => console.log("Delete Pressed"),
+          style: "destructive",
+        },
+      ]
+    );
+  };
 
   const renderItem = ({ item, isRecieved }) => {
     // Check if the user is already a friend
@@ -177,25 +181,24 @@ const FriendRequests = ({navigation, onSwitch}) => {
             </View>
           </View>
           {isRecieved ? (
-
-            <View style={{flexDirection: 'row'}}>
+            <View style={{ flexDirection: "row" }}>
               <View style={styles.acceptRequestButton}>
                 <TouchableOpacity>
-                  {/* <Ionicons name={"close"} size={20} color="#0066cc" /> */}
                   <Text style={styles.acceptButtonText}>ADD</Text>
                 </TouchableOpacity>
               </View>
               <View>
                 <TouchableOpacity>
-                  <Ionicons name={"close"} size={20} color="#0066cc" />
+                  <Ionicons name={"close"} size={20} color="#4A90E2" />
                   {/* <Text>Reject</Text> */}
                 </TouchableOpacity>
               </View>
             </View>
           ) : (
             <View style={styles.acceptRequestButton}>
-              <TouchableOpacity onPress={() => handleCancelRequest(item.username)}>
-                {/* <Ionicons name={"close"} size={20} color="#0066cc" /> */}
+              <TouchableOpacity
+                onPress={() => handleCancelRequest(item.username)}
+              >
                 <Text style={styles.acceptButtonText}>CANCEL</Text>
               </TouchableOpacity>
             </View>
@@ -207,48 +210,55 @@ const FriendRequests = ({navigation, onSwitch}) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.container}>
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>
-            Pending Requests ({numSentRequests})
-          </Text>
-          <View style={styles.horizontalLine} />
-        </View>
-        {isLoading ? (
-        <View testID="loading-screen" style={styles.loadingStyle}>
-          <SpinningPen />
-        </View>
-      ) : (
-        <View style={[styles.body, { height: layout.height }]}>
-          <FlatList
-            enableEmptySections={true}
-            data={friends}
-            keyExtractor={(item) => item.username}
-            renderItem={(item) => renderItem({ item, isRecieved: false })}
-          />
-        </View>)}
-      </View>
-      <View style={styles.container}>
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>
-            Sent Requests ({numSentRequests})
-          </Text>
-          <View style={styles.horizontalLine} />
-        </View>
-        {isLoading ? (
-        <View testID="loading-screen" style={styles.loadingStyle}>
-          <SpinningPen />
+      {isLoading ? (
+        <View testID="loading-screen">
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Pending Requests (0)</Text>
+            <View style={styles.horizontalLine} />
+          </View>
+          <View style={styles.loadingStyle}>
+            <SpinningPen />
+          </View>
         </View>
       ) : (
-        <View style={[styles.body, { height: layout.height }]}>
-          <FlatList
-            enableEmptySections={true}
-            data={friends}
-            keyExtractor={(item) => item.username}
-            renderItem={(item) => renderItem({ item, isRecieved: true })}
-          />
-        </View>)}
-      </View>
+        <Animated.View
+          style={{ ...styles.container, transform: [{ translateY }] }}
+        >
+          <View>
+            <View style={styles.sectionContainer}>
+              <Text style={styles.sectionTitle}>
+                Recieved Requests ({numSentRequests})
+              </Text>
+              <View style={styles.horizontalLine} />
+            </View>
+            <View style={[styles.body, { height: layout.height }]}>
+              <FlatList
+                enableEmptySections={true}
+                data={friends}
+                keyExtractor={(item) => item.username}
+                renderItem={(item) => renderItem({ item, isRecieved: false })}
+              />
+            </View>
+          </View>
+          <View>
+            <View style={styles.sectionContainer}>
+              <Text style={styles.sectionTitle}>
+                Sent Requests ({numSentRequests})
+              </Text>
+              <View style={styles.horizontalLine} />
+            </View>
+
+            <View style={[styles.body, { height: layout.height }]}>
+              <FlatList
+                enableEmptySections={true}
+                data={friends}
+                keyExtractor={(item) => item.username}
+                renderItem={(item) => renderItem({ item, isRecieved: true })}
+              />
+            </View>
+          </View>
+        </Animated.View>
+      )}
     </SafeAreaView>
   );
 };
@@ -287,7 +297,7 @@ const styles = StyleSheet.create({
   nameTxt: {
     marginLeft: 15,
     fontWeight: "600",
-    color: "#0066cc",
+    color: "#4A90E2",
     fontSize: 14,
     width: 170,
   },
@@ -303,7 +313,7 @@ const styles = StyleSheet.create({
   },
   msgTxt: {
     fontWeight: "400",
-    color: "#0066cc",
+    color: "#4A90E2",
     fontSize: 12,
     marginLeft: 15,
   },
@@ -318,7 +328,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     borderWidth: 2,
-    borderColor: "#0066cc",
+    borderColor: "#4A90E2",
     marginLeft: 20,
   },
   acceptButtonText: {
@@ -443,7 +453,7 @@ const styles = StyleSheet.create({
   acceptRequestButton: {
     padding: 5,
     borderRadius: 15,
-    backgroundColor: "#0066cc",
+    backgroundColor: "#4A90E2",
     marginRight: 15,
   },
 
@@ -477,7 +487,7 @@ const styles = StyleSheet.create({
   },
   loadingStyle: {
     marginTop: "30%",
-  }
+  },
 });
 
 export default FriendRequests;

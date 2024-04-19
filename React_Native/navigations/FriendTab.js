@@ -23,28 +23,40 @@ const FriendTab = () => {
     { key: "third", icon: "mail" },
   ]);
 
-  const renderIcon = ({ route, focused }) => (
-    <Ionicons name={route.icon} size={24} color={focused ? "white" : "#0066cc"} />
-  );
+  const position = React.useRef(new Animated.Value(0)).current; // Use useRef to persist the animated value
+
+  const renderIcon = ({ route, focused }) => {
+    const color = position.interpolate({
+      inputRange: routes.map((_, i) => i),
+      outputRange: routes.map((_, i) => (i === index ? "white" : "#0066cc")),
+    });
+
+    return (
+      <Animated.Text style={{ color }}>
+        <Ionicons
+          name={route.icon}
+          size={24}
+          color={focused ? "white" : "#4A90E2"}
+        />
+      </Animated.Text>
+    );
+  };
 
   const renderIndicator = (props) => {
-    const { position, navigationState, getTabWidth } = props;
-    const width = layout.width / navigationState.routes.length;
-    // const width = layout.width / routes.length;
-
-    const translateX = Animated.multiply(position, width - 18);
-
-    // const translateX = Animated.multiply(position, new Animated.Value(width));
+    const width = layout.width / routes.length;
+    const translateX = position.interpolate({
+      inputRange: [0, 1, 2], // Assuming you have three tabs
+      outputRange: [0, width - 25, 2 * width - 25], // Move between multiples of tab width
+    });
 
     return (
       <Animated.View
         style={{
           position: "absolute",
-          // padding: "10%",
-          width: width, // Circle's width as a third of each tab's width
-          height: "100%", // Circle's height
-          borderRadius: 25, // Half of height to make it a perfect circle
-          backgroundColor: "#0066cc",
+          width: width,
+          height: "100%",
+          borderRadius: 10,
+          backgroundColor: "#4A90E2",
           transform: [{ translateX }],
           shadowColor: "#000",
           shadowOpacity: 0.2,
@@ -58,17 +70,12 @@ const FriendTab = () => {
   const renderTabBar = (props) => (
     <TabBar
       {...props}
-      renderIcon={({ route }) =>
-        renderIcon({
-          route,
-          focused: index === routes.findIndex((e) => e.key === route.key),
-        })
-      }
+      renderIcon={renderIcon}
       renderIndicator={renderIndicator}
       indicatorStyle={{ backgroundColor: "transparent" }}
       style={{
         backgroundColor: "white",
-        borderRadius: 25,
+        borderRadius: 10,
         marginHorizontal: 20,
         overflow: "hidden",
         elevation: 0,
@@ -86,7 +93,15 @@ const FriendTab = () => {
     <TabView
       navigationState={{ index, routes }}
       renderScene={renderScene}
-      onIndexChange={setIndex}
+      onIndexChange={(i) => {
+        Animated.spring(position, {
+          toValue: i,
+          useNativeDriver: true, // Ensure you use the native driver for better performance
+          speed: 15, // Control the speed of the animation
+          bounciness: 8, // This prop will add a bounce effect to the sliding animation
+        }).start();
+        setIndex(i);
+      }}
       initialLayout={{ width: layout.width }}
       renderTabBar={renderTabBar}
       style={{ marginTop: 20 }}

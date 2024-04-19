@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
   SafeAreaView,
   Dimensions,
   RefreshControl,
+  Animated
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Icon, SearchBar } from "react-native-elements";
@@ -39,11 +40,13 @@ const FriendsList = ({ navigation, onSwitch }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
+  const translateY = useRef(new Animated.Value(-layout.height)).current;
 
   useEffect(() => {
     if (isLoading === false) {
       console.log("friends list initialize data");
       initializeData();
+      // Animation to slide in the content
     }
   }, []);
 
@@ -71,6 +74,10 @@ const FriendsList = ({ navigation, onSwitch }) => {
     //we want to set them all at the same time so theres not a bunch of rerenders
     setUsername(storedUsername || "No username");
     setIsLoading(false);
+    Animated.spring(translateY, {
+      toValue: 0,
+      useNativeDriver: true,
+    }).start();
     console.log("finished initializing data.");
   };
 
@@ -105,7 +112,7 @@ const FriendsList = ({ navigation, onSwitch }) => {
 
   const fetchProfilePics = async (friends) => {
     if (friends.length < 1) {
-      return {};
+      return [];
     }
     // console.log("getting profile pics for ", friends);
     try {
@@ -130,42 +137,38 @@ const FriendsList = ({ navigation, onSwitch }) => {
   };
 
   const handleDeleteFriend = async (friendUsername) => {
-      Alert.alert(
-        `Are you sure you want to delete ${friendUsername} from your friends?`,
-        `You wont be able to see ${friendUsername}'s Reflections anymore and yours will no longer be visible`,
-        [
-          {
-            text: "Cancel",
-            onPress: () => console.log("Cancel Pressed"),
-            style: styles.alertCancelText,
-          },
-          {
-            text: "Delete",
-            onPress: () => deleteFriends(),
-            style: "destructive",
-          },
-        ]
-      );
+    Alert.alert(
+      `Are you sure you want to delete ${friendUsername} from your friends?`,
+      `You wont be able to see ${friendUsername}'s Reflections anymore and yours will no longer be visible`,
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: styles.alertCancelText,
+        },
+        {
+          text: "Delete",
+          onPress: () => deleteFriends(),
+          style: "destructive",
+        },
+      ]
+    );
 
     const deleteFriends = async () => {
       console.log("Deleting Friend...");
       try {
         const csrfToken = await getCsrfToken();
         const response = await axios.post(`${API_URL}/delete_friend/`, {
-            username: username,
-            unfriendusername: friendUsername,
-        }
-      );
+          username: username,
+          unfriendusername: friendUsername,
+        });
         console.log("delete Response: ", response);
         //get rid of friend from friends. when they reload the page next time, it wont be included
         //in the initialize data. this way the user doesn't have to wait for page to reload
-
       } catch (error) {
         console.log("error deleting friend:", error);
       }
     };
-
-
   };
 
   const handleFriends = async () => {
@@ -213,7 +216,6 @@ const FriendsList = ({ navigation, onSwitch }) => {
     }
   };
 
-
   const renderItem = ({ item }) => {
     // Check if the user is already a friend
 
@@ -224,7 +226,7 @@ const FriendsList = ({ navigation, onSwitch }) => {
             {/* <SvgUri style={styles.pic} uri={item.profile_pic} /> */}
             <Image
               source={{ uri: `data:Image/jpeg;base64,${item.profile_picture}` }}
-              style={styles.avatar}
+              style={styles.pic}
             />
           </View>
           <View style={styles.textContainer}>
@@ -243,7 +245,7 @@ const FriendsList = ({ navigation, onSwitch }) => {
           </View>
           <View style={styles.deleteFriendButton}>
             <TouchableOpacity onPress={() => handleDeleteFriend(item.username)}>
-              <Ionicons name={"close"} size={20} color="#0066cc" />
+              <Ionicons name={"close"} size={20} color="#4A90E2" />
             </TouchableOpacity>
           </View>
         </View>
@@ -253,33 +255,43 @@ const FriendsList = ({ navigation, onSwitch }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>My Friends ({numFriends})</Text>
-        <View style={styles.horizontalLine} />
-      </View>
-            {isLoading ? (
-        // <ActivityIndicator style={{ height: 100, width: 100 }} />
-        <View testID="loading-screen" style={styles.loadingStyle}>
-          <SpinningPen />
+      {isLoading ? (
+        <View testID="loading-screen">
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>My Friends (0)</Text>
+            <View style={styles.horizontalLine} />
+          </View>
+          <View style={styles.loadingStyle}>
+            <SpinningPen />
+          </View>
         </View>
       ) : (
-      <View style={styles.container}>
-        <View style={[styles.body, { height: layout.height }]}>
-          <FlatList
-            enableEmptySections={true}
-            data={friends}
-            keyExtractor={(item) => item.username}
-            renderItem={(item) => renderItem(item)}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                testID="refresh-control"
+        <Animated.View
+          style={{ ...styles.container, transform: [{ translateY }] }}
+        >
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>My Friends ({numFriends})</Text>
+            <View style={styles.horizontalLine} />
+          </View>
+          <View>
+            <View style={[styles.body, { height: layout.height }]}>
+              <FlatList
+                enableEmptySections={true}
+                data={friends}
+                keyExtractor={(item) => item.username}
+                renderItem={(item) => renderItem(item)}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    testID="refresh-control"
+                  />
+                }
               />
-            } 
-            />
-        </View>
-      </View> )}
+            </View>
+          </View>
+        </Animated.View>
+      )}
     </SafeAreaView>
   );
 };
@@ -317,7 +329,7 @@ const styles = StyleSheet.create({
     // backgroundColor: "#fff",
     // borderBottomWidth: 1,
     padding: 5,
-    // justifyContent: "space-between",
+    justifyContent: "space-between",
   },
   pic: {
     width: 50,
@@ -340,7 +352,7 @@ const styles = StyleSheet.create({
   nameTxt: {
     marginLeft: 15,
     fontWeight: "600",
-    color: "#0066cc",
+    color: "#4A90E2",
     fontSize: 14,
     width: 170,
   },
@@ -351,7 +363,7 @@ const styles = StyleSheet.create({
   },
   msgTxt: {
     fontWeight: "400",
-    color: "#0066cc",
+    color: "#4A90E2",
     fontSize: 12,
     marginLeft: 15,
   },
@@ -448,7 +460,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   alertCancelText: {
-    color: "#0066cc",
+    color: "#4A90E2",
   },
   alertDeleteText: {
     color: "red",
