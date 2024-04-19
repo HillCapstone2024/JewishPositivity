@@ -1138,6 +1138,91 @@ def get_friends_view(request):
     return HttpResponse(constNotGet)
 
 
+def get_pending_requests_sent_friends_view(request):
+    if request.method == "GET":
+        username = request.GET.get("username")
+        logging.info("Username retrieved in the get_pending_requests_sent_friends_view ")
+        # Make sure the username is not empty
+        if username is not None:
+            try:
+                # Retrieve the user from the database by username
+                user = User.objects.get(username=username)
+
+                # Get friendships where the given user is either user1 or user2
+                friendships = Friends.objects.filter(user1_id=user.id, complete=False) #pending request sent from user1
+                logging.info("pending friendships retrieved from that username passed to view ")
+                # List to store friend usernames and the friendship status
+                friendship_data = []
+
+                # Populate the list with dictionaries containing usernames and friendship status
+                for friendship in friendships:
+                    friend_id = friendship.user2_id # the recipient of the requests username
+                
+                    # Get the username of the pending friend
+                    pending_friend_username = User.objects.get(id=friend_id).username
+
+                    friendship_data.append({
+                        'username': pending_friend_username,
+                    })
+
+                # Log data and return as JSON response
+                logging.info("Friendship status data:")
+                logging.info(friendship_data)
+                return JsonResponse(friendship_data, safe=False)
+
+            except User.DoesNotExist:
+                return HttpResponse(constUserDNE, status=400)
+            except Exception as e:
+                logging.error(e)
+                return HttpResponse("An error occurred", status=400)
+        else:  # username was empty
+            return HttpResponse(constUNnotProvided, status=400)
+    return HttpResponse(constNotGet)
+
+
+def get_pending_requests_received_friends_view(request):
+    if request.method == "GET":
+        username = request.GET.get("username")
+        logging.info("Username retrieved in the get_pending_requests_received_friends_view ")
+        # Make sure the username is not empty
+        if username is not None:
+            try:
+                # Retrieve the user from the database by username
+                user = User.objects.get(username=username)
+
+                # Get friendships where the given user is either user1 or user2
+                friendships = Friends.objects.filter(user2_id=user.id, complete=False) #pending request sent from user2
+                logging.info("pending friendships retrieved from that username passed to view ")
+                # List to store friend usernames and the friendship status
+                friendship_data = []
+
+                # Populate the list with dictionaries containing usernames and friendship status
+                for friendship in friendships:
+                    friend_id = friendship.user1_id # the sender of the requests username
+                
+                    # Get the username of the pending friend
+                    pending_friend_username = User.objects.get(id=friend_id).username
+
+                    friendship_data.append({
+                        'username': pending_friend_username
+                    })
+
+                # Log data and return as JSON response
+                logging.info("Friendship status data:")
+                logging.info(friendship_data)
+                return JsonResponse(friendship_data, safe=False)
+
+            except User.DoesNotExist:
+                return HttpResponse(constUserDNE, status=400)
+            except Exception as e:
+                logging.error(e)
+                return HttpResponse("An error occurred", status=400)
+        else:  # username was empty
+            return HttpResponse(constUNnotProvided, status=400)
+    return HttpResponse(constNotGet)
+
+
+
 # ########## Badges Management ##########
 
 
