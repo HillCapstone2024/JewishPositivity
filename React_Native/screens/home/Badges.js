@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Pressable, Modal, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Pressable, Modal, Alert, RefreshControl } from 'react-native';
 import makeThemeStyle from '../../tools/Theme.js';
 import axios from "axios";
 import IP_ADDRESS from "../../ip.js";
 import * as Storage from "../../AsyncStorage.js";
 
-export default function Badges({navigaton}) {
+export default function Badges({}) {
     theme = makeThemeStyle();
 
     const API_URL = "http://" + IP_ADDRESS + ":8000";
@@ -69,15 +69,20 @@ export default function Badges({navigaton}) {
             },
             withCredentials: true,
           });
-          console.log('successful response:', badgeResponse.data);
-          console.log('successful response:', currentStreakResponse.data);
-          console.log('successful response:', longestStreakResponse.data);
-          setIsDayBadgeUnlocked(badgeResponse.data.one_day)
-          setIsWeekBadgeUnlocked(badgeResponse.data.one_week)
-          setIsMonthBadgeUnlocked(badgeResponse.data.one_month)
-          setIsYearBadgeUnlocked(badgeResponse.data.one_year)
+          console.log('Day response:', badgeResponse.data.one_day);
+          console.log('Week response:', badgeResponse.data.one_week);
+          console.log('Month response:', badgeResponse.data.one_month);
+          console.log('Year response:', badgeResponse.data.one_year);
+
+          console.log('Current response:', currentStreakResponse.data);
+          console.log('Longest response:', longestStreakResponse.data);
+          setIsDayBadgeUnlocked(badgeResponse.data.one_day);
+          setIsWeekBadgeUnlocked(badgeResponse.data.one_week);
+          setIsMonthBadgeUnlocked(badgeResponse.data.one_month);
+          setIsYearBadgeUnlocked(badgeResponse.data.one_year);
           setCurrentStreak(currentStreakResponse.data);
           setLongestStreak(longestStreakResponse.data);
+          
 
         } catch (error) {
           console.log('Error getting the info from database: ', error);
@@ -103,24 +108,24 @@ export default function Badges({navigaton}) {
    const [isYearBadgeUnlocked, setIsYearBadgeUnlocked] = useState(false);
     
    //Determines which trophy icon is used
-   const [dayBadgeIcon, setDayBadgeIcon] = useState('https://i.imgur.com/L04TTxf.png');
-   const [weekBadgeIcon, setWeekBadgeIcon] = useState('https://i.imgur.com/L04TTxf.png');
-   const [monthBadgeIcon, setMonthBadgeIcon] = useState('https://i.imgur.com/L04TTxf.png');
-   const [yearBadgeIcon, setYearBadgeIcon] = useState('https://i.imgur.com/L04TTxf.png');
+   const [dayBadgeIcon, setDayBadgeIcon] = useState(require('../../assets/images/badges/starDayGrey.png'));
+   const [weekBadgeIcon, setWeekBadgeIcon] = useState(require('../../assets/images/badges/starWeekGrey.png'));
+   const [monthBadgeIcon, setMonthBadgeIcon] = useState(require('../../assets/images/badges/starMonthGrey.png'));
+   const [yearBadgeIcon, setYearBadgeIcon] = useState(require('../../assets/images/badges/starYearGrey.png'));
 
+    
     //Changes icon depending on lock status
     function checkLock() {
     if (isDayBadgeUnlocked == true){
-        setDayBadgeIcon('https://i.imgur.com/TbdStia.png');
+        setDayBadgeIcon(require('../../assets/images/badges/starDay.png'));
     }if (isWeekBadgeUnlocked == true){
-        setWeekBadgeIcon('https://i.imgur.com/TbdStia.png');
+        setWeekBadgeIcon(require('../../assets/images/badges/starWeek.png'));
     }if (isMonthBadgeUnlocked == true){
-        setMonthBadgeIcon('https://i.imgur.com/TbdStia.png');
+        setMonthBadgeIcon(require('../../assets/images/badges/starMonth.png'));
     }if (isYearBadgeUnlocked == true){
-        setYearBadgeIcon('https://i.imgur.com/TbdStia.png');
+        setYearBadgeIcon(require('../../assets/images/badges/starYear.png'));
     } }
     
-
     const handleModalDay = () => {
         setIsModalVisibleDay(!isModalVisibleDay)
         checkLock()
@@ -144,8 +149,10 @@ export default function Badges({navigaton}) {
         setIsModalVisibleLongest(!isModalVisibleLongest)
     };
 
+
     return(
         <ScrollView contentContainerStyle={styles.container}>
+            
             <View style={[{ flex: 1, alignItems: 'center', justifyContent: 'center'}, theme['background']]}>    
                 <Text style={styles.mainHeader}>Streaks</Text>
 
@@ -154,53 +161,12 @@ export default function Badges({navigaton}) {
                 {/*Current*/}
                 <TouchableOpacity style={styles.button} onPress={handleModalCurrent}>
                     <Text>Current Streak</Text>
-                    <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={isModalVisibleCurrent}
-                    onRequestClose={() => {
-                    Alert.alert('Modal has been closed.');
-                    setIsModalVisibleCurrent(!isModalVisibleCurrent);
-                    }}>
-                        <View style={styles.centeredView}>
-                            <View style={styles.modalView}>
-                                <Text>Your Current Streak is:</Text>
-                               <Text style={styles.mainHeader}>{currentStreak} Days</Text>
-
-                                <Pressable
-                                    style={[styles.buttonClose]}
-                                    onPress={() => setIsModalVisibleCurrent(!isModalVisibleCurrent)}>
-                                    <Text style={styles.textStyle}>Hide Streak</Text>
-                                </Pressable>
-                            </View>
-                        </View>
-                    </Modal>
+                    <Text style={styles.streakHeader}>{currentStreak} Days</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.button} onPress={handleModalLongest}>
                     <Text>Longest Streak</Text>
-                    <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={isModalVisibleLongest}
-                    onRequestClose={() => {
-                    Alert.alert('Modal has been closed.');
-                    setIsModalVisibleLongest(!isModalVisibleLongest);
-                    }}>
-
-                        <View style={styles.centeredView}>
-                            <View style={styles.modalView}>
-                                <Text>Your Longest Streak is:</Text>
-                               <Text style={styles.mainHeader}>{longestStreak} Days</Text>
-
-                                <Pressable
-                                    style={[styles.buttonClose]}
-                                    onPress={() => setIsModalVisibleLongest(!isModalVisibleLongest)}>
-                                    <Text style={styles.textStyle}>Hide Streak</Text>
-                                </Pressable>
-                            </View>
-                        </View>
-                    </Modal>
+                    <Text style={styles.streakHeader}>{longestStreak} Days</Text>
                 </TouchableOpacity>
             </View>
 
@@ -212,9 +178,7 @@ export default function Badges({navigaton}) {
             <View style={styles.rowContainer}>
                 <TouchableOpacity style={styles.button} onPress={handleModalDay}> 
                     <Image
-                        source={{
-                        uri: dayBadgeIcon,
-                        }}
+                        source={dayBadgeIcon}
                         style={styles.trophyButton}
                     />
 
@@ -230,10 +194,8 @@ export default function Badges({navigaton}) {
                         <View style={styles.centeredView}>
                             <View style={styles.modalView}>
                                 <Image
-                                    source={{
-                                    uri: dayBadgeIcon,
-                                    }}
-                                    style={styles.trophyButton}
+                                    source={dayBadgeIcon}
+                                    style={styles.trophyButtonA}
                                 />
 
                                 <Text style={styles.modalText}>Badge for completing a daily check-in</Text>
@@ -250,9 +212,7 @@ export default function Badges({navigaton}) {
                 {/* ==============================================Week Badge============================================== */}
                 <TouchableOpacity style={styles.button} onPress={handleModalWeek}> 
                     <Image
-                        source={{
-                        uri: weekBadgeIcon,
-                        }}
+                        source={weekBadgeIcon}
                         style={styles.trophyButton}
                     />
 
@@ -268,10 +228,8 @@ export default function Badges({navigaton}) {
                         <View style={styles.centeredView}>
                             <View style={styles.modalView}>
                                 <Image
-                                    source={{
-                                    uri: weekBadgeIcon,
-                                    }}
-                                    style={styles.trophyButton}
+                                    source={weekBadgeIcon}
+                                    style={styles.trophyButtonA}
                                 />
 
                                 <Text style={styles.modalText}>Badge for completing a check-in daily for a week</Text>
@@ -292,9 +250,7 @@ export default function Badges({navigaton}) {
             {/* ==============================================Month Badge============================================== */}
             <TouchableOpacity style={styles.button} onPress={handleModalMonth}> 
                     <Image
-                        source={{
-                        uri: monthBadgeIcon,
-                        }}
+                        source={monthBadgeIcon}
                         style={styles.trophyButton}
                     />
 
@@ -310,10 +266,8 @@ export default function Badges({navigaton}) {
                         <View style={styles.centeredView}>
                             <View style={styles.modalView}>
                                 <Image
-                                    source={{
-                                    uri: monthBadgeIcon,
-                                    }}
-                                    style={styles.trophyButton}
+                                    source={monthBadgeIcon}
+                                    style={styles.trophyButtonA}
                                 />
 
                                 <Text style={styles.modalText}>Badge for completing a check-in daily for a month</Text>
@@ -330,9 +284,7 @@ export default function Badges({navigaton}) {
                 {/* ==============================================Year Badge============================================== */}
                 <TouchableOpacity style={styles.button} onPress={handleModalYear}> 
                     <Image
-                        source={{
-                        uri: yearBadgeIcon,
-                        }}
+                        source={yearBadgeIcon}
                         style={styles.trophyButton}
                     />
 
@@ -348,10 +300,8 @@ export default function Badges({navigaton}) {
                         <View style={styles.centeredView}>
                             <View style={styles.modalView}>
                                 <Image
-                                    source={{
-                                    uri: yearBadgeIcon,
-                                    }}
-                                    style={styles.trophyButton}
+                                    source={yearBadgeIcon}
+                                    style={styles.trophyButtonA}
                                 />
 
                                 <Text style={styles.modalText}>Badge for completing a check-in daily for a year</Text>
@@ -374,14 +324,14 @@ export default function Badges({navigaton}) {
 const styles = StyleSheet.create({ 
     container: {
         flex: 1,
-        padding: 20,
+        padding: 0,
         justifyContent: 'center',
         backgroundColor: "000000"
     },
 
     button: {
-        width: 100,
-        height: 100,
+        width: 150, //100
+        height: 150,
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 5,
@@ -393,8 +343,16 @@ const styles = StyleSheet.create({
     trophyButton: {
         padding: 10,
         margin: 5,
-        height: 70,
-        width: 70,
+        height: 120, //70
+        width: 120,
+        alignItems: "center",
+        resizeMode: 'cover',
+    },
+    trophyButtonA: {
+        padding: 10,
+        margin: 5,
+        height: 200, //70
+        width: 200,
         alignItems: "center",
         resizeMode: 'cover',
     },
@@ -410,12 +368,12 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        width: "60%",
+        width: "80%",
         marginBottom: 10,
     },
     streakHeader:{
         color: "black",
-        fontSize: 20,
+        fontSize: 30,
         fontWeight: "bold"
     },
     separator: {
