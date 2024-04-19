@@ -1,4 +1,4 @@
-import { Text, Modal, View, TouchableOpacity, TextInput, StyleSheet, Alert, Dimensions, Keyboard, FlatList, KeyboardAvoidingView, TouchableWithoutFeedback, Image, RefreshControl, Platform, ScrollView } from 'react-native'
+import { Text, Modal, View, TouchableOpacity, Switch, TextInput, StyleSheet, Alert, Dimensions, Keyboard, FlatList, KeyboardAvoidingView, TouchableWithoutFeedback, Image, RefreshControl, Platform, ScrollView } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import * as FileSystem from "expo-file-system";
 import { Ionicons } from "@expo/vector-icons";
@@ -76,10 +76,10 @@ const BottomPopupJoin = ({ visible, onRequestClose }) => {
 
 const BottomPopupCreate = ({ visible, onRequestClose }) => {
     const [communityInfo, setCommunityInfo] = useState({
-        id: 0,
         community_name: "",
-        description: "",
+        community_description: "",
         community_photo: "",
+        privacy: "",
     });
     const onGestureEvent = (event) => {
         if (event.nativeEvent.translationY > 100) {
@@ -107,9 +107,13 @@ const BottomPopupCreate = ({ visible, onRequestClose }) => {
         try {
             const csrfToken = await getCsrfToken();
             const response = await axios.post(
-                `${API_URL}/delete_user/`,
+                `${API_URL}/create_community/`,
                 {
                     username: username,
+                    community_name: communityInfo.community_name,
+                    community_photo: communityInfo.community_photo,
+                    community_description: communityInfo.community_description,
+                    privacy: communityInfo.privacy,
                 },
                 {
                     headers: {
@@ -203,8 +207,12 @@ const BottomPopupCreate = ({ visible, onRequestClose }) => {
                     </TouchableOpacity>
                     <TextInput placeholder='Community Name' style={styles.input} />
                     <TextInput placeholder='Description' multiline={true} scrollEnabled={true} returnKeyType="default" style={styles.inputDesc} />
-
-
+                    <Switch
+                        trackColor={{ false: '#f2f2f2', true: '#4A90E2' }}
+                        thumbColor={'#f2f2f2'} 
+                        onValueChange={() => setCommunityInfo(prevCommunityInfo => ({ ...prevCommunityInfo, privacy: !communityInfo.privacy }))}
+                        value={communityInfo.privacy}
+                    />
                     <TouchableOpacity style={styles.createModal} onPress={handleCommunityCreate}>
                         <Text style={styles.buttonText}>Create</Text>
                     </TouchableOpacity>
@@ -373,200 +381,200 @@ const Communities = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  join: {
-    flex: 1,
-    alignItems: "center",
-    padding: 10,
-    margin: 10,
-    backgroundColor: "#4A90E2",
-    borderRadius: 10,
-  },
-  create: {
-    flex: 1,
-    alignItems: "center",
-    padding: 10,
-    margin: 10,
-    backgroundColor: "gold",
-    borderRadius: 10,
-  },
-  normalText: {
-    fontSize: 20,
-    paddingLeft: 5,
-  },
-  picture: {
-    marginRight: 5,
-    fontSize: 20,
-  },
-  buttonText: {
-    fontWeight: "bold",
-    color: "white",
-    fontSize: 20,
-  },
-  bottomView: {
-    alignItems: "center",
-    marginTop: 120,
-    flex: 1,
-    backgroundColor: "white",
-    borderTopRightRadius: 20,
-    borderTopLeftRadius: 20,
-    padding: 35,
-    shadowColor: "#000",
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  community: {
-    flexDirection: "row",
-    alignItems: "center",
-    height: 50,
-    backgroundColor: "#f2f2f2",
-    borderRadius: 8,
-    marginBottom: 12,
-    paddingLeft: 12,
-    paddingRight: 12,
-    shadowColor: "#4A90E2", // Updated shadow color
-    shadowOffset: {
-      width: 0,
-      height: 2,
+    container: {
+        flex: 1,
+        padding: 20,
     },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  joinHeader: {
-    fontSize: 40,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-  nameContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: 200,
-    // backgroundColor: "yellow",
-  },
-  msgContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    // backgroundColor: "red",
-  },
-  msgTxt: {
-    fontWeight: "400",
-    color: "#4A90E2",
-    fontSize: 12,
-    marginLeft: 15,
-  },
-  input: {
-    width: "80%",
-    height: 40,
-    borderStyle: "solid",
-    borderBottomColor: "#e8bd25",
-    borderBottomWidth: 2,
-    marginBottom: 20,
-    paddingHorizontal: 10,
-  },
+    join: {
+        flex: 1,
+        alignItems: "center",
+        padding: 10,
+        margin: 10,
+        backgroundColor: "#4A90E2",
+        borderRadius: 10,
+    },
+    create: {
+        flex: 1,
+        alignItems: "center",
+        padding: 10,
+        margin: 10,
+        backgroundColor: "gold",
+        borderRadius: 10,
+    },
+    normalText: {
+        fontSize: 20,
+        paddingLeft: 5,
+    },
+    picture: {
+        marginRight: 5,
+        fontSize: 20,
+    },
+    buttonText: {
+        fontWeight: "bold",
+        color: "white",
+        fontSize: 20,
+    },
+    bottomView: {
+        alignItems: "center",
+        marginTop: 120,
+        flex: 1,
+        backgroundColor: "white",
+        borderTopRightRadius: 20,
+        borderTopLeftRadius: 20,
+        padding: 35,
+        shadowColor: "#000",
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    community: {
+        flexDirection: "row",
+        alignItems: "center",
+        height: 50,
+        backgroundColor: "#f2f2f2",
+        borderRadius: 8,
+        marginBottom: 12,
+        paddingLeft: 12,
+        paddingRight: 12,
+        shadowColor: "#4A90E2", // Updated shadow color
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    joinHeader: {
+        fontSize: 40,
+        fontWeight: "bold",
+        marginBottom: 20,
+    },
+    nameContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        width: 200,
+        // backgroundColor: "yellow",
+    },
+    msgContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        // backgroundColor: "red",
+    },
+    msgTxt: {
+        fontWeight: "400",
+        color: "#4A90E2",
+        fontSize: 12,
+        marginLeft: 15,
+    },
+    input: {
+        width: "80%",
+        height: 40,
+        borderStyle: "solid",
+        borderBottomColor: "#e8bd25",
+        borderBottomWidth: 2,
+        marginBottom: 20,
+        paddingHorizontal: 10,
+    },
 
-  profilePic: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    marginBottom: 20,
-    borderWidth: 2,
-    borderColor: "#4A90E2",
-  },
+    profilePic: {
+        width: 150,
+        height: 150,
+        borderRadius: 75,
+        marginBottom: 20,
+        borderWidth: 2,
+        borderColor: "#4A90E2",
+    },
 
-  cameraIcon: {
-    position: "absolute",
-    bottom: 10,
-    right: 5,
-    backgroundColor: "rgba(255, 255, 255, 0.7)",
-    padding: 4,
-  },
-  sectionContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  horizontalLine: {
-    flex: 1,
-    height: 1.25,
-    backgroundColor: "#9e9e9e",
-    marginLeft: 8, // Adjust spacing between title and line
-  },
+    cameraIcon: {
+        position: "absolute",
+        bottom: 10,
+        right: 5,
+        backgroundColor: "rgba(255, 255, 255, 0.7)",
+        padding: 4,
+    },
+    sectionContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    horizontalLine: {
+        flex: 1,
+        height: 1.25,
+        backgroundColor: "#9e9e9e",
+        marginLeft: 8, // Adjust spacing between title and line
+    },
 
-  sectionTitle: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#9e9e9e",
-    textTransform: "uppercase",
-    letterSpacing: 1.1,
-  },
-  deleteCommunityButton: {
-    backgroundColor: "#4A90E2",
-    padding: 5,
-    borderRadius: 5,
-    color: "#4A90E2",
-    marginLeft: 60,
-  },
-  inputDesc: {
-    width: "100%",
-    minHeight: "10%",
-    borderStyle: "solid",
-    borderColor: "#e8bd25",
-    borderWidth: 2,
-    borderRadius: 10,
-    marginBottom: 20,
-    paddingHorizontal: 10,
-  },
-  joinModal: {
-    alignItems: "center",
-    padding: 10,
-    margin: 10,
-    backgroundColor: "#4A90E2",
-    borderRadius: 10,
-  },
-  inputPasscode: {
-    width: "80%",
-    height: 40,
-    borderStyle: "solid",
-    borderColor: "#e8bd25",
-    borderWidth: 2,
-    borderRadius: 10,
-    fontWeight: "bold",
-    marginBottom: 10,
-    paddingHorizontal: 10,
-  },
-  createModal: {
-    alignItems: "center",
-    padding: 10,
-    margin: 10,
-    backgroundColor: "gold",
-    borderRadius: 10,
-  },
-  noCommunities: {
-    fontSize: 30,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginTop: 20,
-  },
-  middleView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  search: {
-    alignSelf: "center",
-    width: "95%",
-    height: 40,
-    borderColor: "grey",
-    borderWidth: 1,
-    borderRadius: 10,
-    // fontWeight: "bold",
-    marginBottom: 10,
-    paddingHorizontal: 10,
-  },
+    sectionTitle: {
+        fontSize: 12,
+        fontWeight: "600",
+        color: "#9e9e9e",
+        textTransform: "uppercase",
+        letterSpacing: 1.1,
+    },
+    deleteCommunityButton: {
+        backgroundColor: "#4A90E2",
+        padding: 5,
+        borderRadius: 5,
+        color: "#4A90E2",
+        marginLeft: 60,
+    },
+    inputDesc: {
+        width: "100%",
+        minHeight: "10%",
+        borderStyle: "solid",
+        borderColor: "#e8bd25",
+        borderWidth: 2,
+        borderRadius: 10,
+        marginBottom: 20,
+        paddingHorizontal: 10,
+    },
+    joinModal: {
+        alignItems: "center",
+        padding: 10,
+        margin: 10,
+        backgroundColor: "#4A90E2",
+        borderRadius: 10,
+    },
+    inputPasscode: {
+        width: "80%",
+        height: 40,
+        borderStyle: "solid",
+        borderColor: "#e8bd25",
+        borderWidth: 2,
+        borderRadius: 10,
+        fontWeight: "bold",
+        marginBottom: 10,
+        paddingHorizontal: 10,
+    },
+    createModal: {
+        alignItems: "center",
+        padding: 10,
+        margin: 10,
+        backgroundColor: "gold",
+        borderRadius: 10,
+    },
+    noCommunities: {
+        fontSize: 30,
+        fontWeight: "bold",
+        textAlign: "center",
+        marginTop: 20,
+    },
+    middleView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    search: {
+        alignSelf: "center",
+        width: "95%",
+        height: 40,
+        borderColor: "grey",
+        borderWidth: 1,
+        borderRadius: 10,
+        // fontWeight: "bold",
+        marginBottom: 10,
+        paddingHorizontal: 10,
+    },
 });
 
 export default Communities;

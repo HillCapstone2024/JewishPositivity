@@ -108,22 +108,22 @@ export default function Badges({}) {
    const [isYearBadgeUnlocked, setIsYearBadgeUnlocked] = useState(false);
     
    //Determines which trophy icon is used
-   const [dayBadgeIcon, setDayBadgeIcon] = useState(require('../../assets/images/badges/starDayGrey.png'));
-   const [weekBadgeIcon, setWeekBadgeIcon] = useState(require('../../assets/images/badges/starWeekGrey.png'));
-   const [monthBadgeIcon, setMonthBadgeIcon] = useState(require('../../assets/images/badges/starMonthGrey.png'));
-   const [yearBadgeIcon, setYearBadgeIcon] = useState(require('../../assets/images/badges/starYearGrey.png'));
+   const [dayBadgeIcon, setDayBadgeIcon] = useState(require('../../assets/images/starDayGrey.png'));
+   const [weekBadgeIcon, setWeekBadgeIcon] = useState(require('../../assets/images/starWeekGrey.png'));
+   const [monthBadgeIcon, setMonthBadgeIcon] = useState(require('../../assets/images/starMonthGrey.png'));
+   const [yearBadgeIcon, setYearBadgeIcon] = useState(require('../../assets/images/starYearGrey.png'));
 
     
     //Changes icon depending on lock status
     function checkLock() {
     if (isDayBadgeUnlocked == true){
-        setDayBadgeIcon(require('../../assets/images/badges/starDay.png'));
+        setDayBadgeIcon(require('../../assets/images/starDay.png'));
     }if (isWeekBadgeUnlocked == true){
-        setWeekBadgeIcon(require('../../assets/images/badges/starWeek.png'));
+        setWeekBadgeIcon(require('../../assets/images/starWeek.png'));
     }if (isMonthBadgeUnlocked == true){
-        setMonthBadgeIcon(require('../../assets/images/badges/starMonth.png'));
+        setMonthBadgeIcon(require('../../assets/images/starMonth.png'));
     }if (isYearBadgeUnlocked == true){
-        setYearBadgeIcon(require('../../assets/images/badges/starYear.png'));
+        setYearBadgeIcon(require('../../assets/images/starYear.png'));
     } }
     
     const handleModalDay = () => {

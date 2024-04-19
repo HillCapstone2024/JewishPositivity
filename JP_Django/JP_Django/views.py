@@ -1675,6 +1675,7 @@ def request_to_join_community_view(request):
                 return HttpResponse("Already a member of this community", status=400)
             elif relationship.status==1:
                 relationship.status = 2
+                relationship.date_joined = date.today()
                 relationship.save()
                 return HttpResponse("Request accepted", status=200)
             else:
@@ -1688,11 +1689,63 @@ def request_to_join_community_view(request):
                 return HttpResponse("Request sent", status=200)
             else:
                 return HttpResponse("Invalid privacy value", status=400)
-
     except Exception as e:
         logging.info("ERROR in joining community: %s", e)
         return HttpResponse("Error in joining community", status=400)
     
+def invite_to_join_community_view(request):
+    # Check if the request method is POST
+    if request.method != "POST":
+        # Return an HTTP 400 response if the method is not POST
+        return HttpResponse("Not a POST request", status=400)
+
+    # Parse the JSON data from the request body
+    data = json.loads(request.body)
+    logging.info("DATA from post: %s", data)
+
+    # variables from the post data
+    owner_username = data["owner_username"]
+    invited_username = data["invited_username"]
+    community_name = data["community_name"]
+    logging.info("OWNER'S USERNAME: '%s', INVITED'S USERNAME: '%s', COMMUNITY NAME: '%s'", owner_username, invited_username, community_name)
+
+    try:
+        # Get the community object
+        community = Community.objects.get(community_name=community_name)
+        logging.info("COMMUNITY OBJECT: %s", community)
+        # Get the owner user object
+        owner_user = User.objects.get(username=owner_username)
+        logging.info("OWNER OBJECT: %s", owner_user)
+        # Check if the owner is the actual owner of the community
+        if community.owner_id != owner_user:
+            return HttpResponse("You are not the owner of this community", status=400)
+        # Get the invited user object
+        invited_user = User.objects.get(username=invited_username)
+        logging.info("USER OBJECT: %s", invited_user)
+
+        # Check for an existing relationship between the invited user and the community
+        relationship = CommunityUser.objects.filter(user_id=invited_user.pk, community_id=community.pk).first()
+        logging.info("RELATIONSHIP OBJECT: %s", relationship)
+
+        if relationship != None:
+            logging.info("Relationship Status: %s", relationship.status)
+            if relationship.status==2:
+                return HttpResponse("Already a member of this community", status=400)
+            elif relationship.status==1:
+                return HttpResponse("Already invited to join", status=400)
+            elif relationship.status==0:
+                relationship.status = 2
+                relationship.date_joined = date.today()
+                relationship.save()
+                return HttpResponse("User Accepted", status=200)
+            else:
+                return HttpResponse("invalid status value", status=400)
+        else:
+            CommunityUser.objects.create(user_id=invited_user, community_id=community, status=1, date_joined= date.today())
+            return HttpResponse("User invited to join", status=200)
+    except Exception as e:
+        logging.info("ERROR in joining community: %s", e)
+        return HttpResponse("Error in joining community", status=400)
 
 def get_users_in_community_view(request):
     if request.method == "GET":
