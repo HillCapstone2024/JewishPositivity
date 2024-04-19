@@ -240,16 +240,16 @@ const Communities = ({ navigation }) => {
                             <Text style={styles.msgTxt}>Members: {Math.floor(item.members.length * Math.random() * 10)}</Text>
                         </View>
                     </View>
-                    <View>
+                    {/* <View>
                         <TouchableOpacity
                             style={styles.deleteCommunityButton}
                             onPress={() => {
-                                console.log("remove button pressed.");
+                                
                             }}
                         >
-                            <Text style={styles.deleteCommunityButtonText}>Remove</Text>
+                            <Ionicons name="trash" size={24} color="white" />
                         </TouchableOpacity>
-                    </View>
+                    </View> */}
                 </View>
             </TouchableOpacity>
         );
@@ -398,7 +398,7 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 20,
         padding: 35,
         shadowColor: '#000',
-        shadowOpacity: 0.45,
+        shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 5,
     },
@@ -491,15 +491,7 @@ const styles = StyleSheet.create({
         padding: 5,
         borderRadius: 5,
         color: "#0066cc",
-        flexDirection: "row",
-        justifyContent: "center",
-    },
-    deleteCommunityButtonText: {
-        // backgroundColor: "blue",
-        color: "white",
-        fontSize: 12,
-        fontWeight: "bold",
-        // paddingRight: 16,
+        marginLeft: 60,
     },
     inputDesc: {
         width: "100%",
