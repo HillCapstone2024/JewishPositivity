@@ -40,4 +40,6 @@ describe("Profile Component", () => {
     expect(getByTestId("usernameInput")).toBeTruthy();
     expect(getByTestId("emailInput")).toBeTruthy();
   });
+
+  
 });
