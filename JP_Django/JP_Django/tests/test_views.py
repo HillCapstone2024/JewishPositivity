@@ -3579,6 +3579,139 @@ class JoinCommunityViewTestCase(TestCase):
         response = client.post(reverse('request_to_join_community_view'), data=json.dumps(self.PUBLIC_JOIN_POST_DATA), content_type=CONTENT_TYPE_JSON)
         self.assertEqual(response.status_code, 400)
 
+class InviteToJoinCommunityViewTestCase(TestCase):
+    # Define constant user data
+    USER1_DATA = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+    USER2_DATA = {
+        'username': 'testuser2',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test2@example.com',
+        'timezone': 'EST',
+    }
+
+    USER3_DATA = {
+        'username': 'testuser3',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test3@example.com',
+        'timezone': 'EST',
+    }
+
+    # Define post data
+    PRIVATE_COMMUNITY = {
+        'community_name': "Name of private Community",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "testuser1", # username of the owner
+        "privacy": 'private',
+    }
+
+    COMMUNITY_INVITE_POST_DATA = {
+        'owner_username': 'testuser1', # username of the owner
+        'invited_username': 'testuser2',
+        'community_name': 'Name of private Community', 
+    }
+
+    IMPOSTER_COMMUNITY_INVITE_POST_DATA = {
+        'owner_username': 'testuser3', # username of the owner
+        'invited_username': 'testuser2',
+        'community_name': 'Name of private Community', 
+    }
+
+    def setUp(self):
+        # Initialize the Django test client
+        client = Client()
+
+        # Make a POST request to create test users and checkins
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)# make owner
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER2_DATA), content_type=CONTENT_TYPE_JSON)# make other user
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER3_DATA), content_type=CONTENT_TYPE_JSON)# make imposter owner
+        client.post(reverse('create_community_view'), data=json.dumps(self.PRIVATE_COMMUNITY), content_type=CONTENT_TYPE_JSON) #make private community
+    
+    def test_invite_to_join_community_success(self):
+        logging.info("************TEST_invite_to_join_community_success**************..........")
+        client = Client()
+
+        # Send POST to invite user to join private community
+        response = client.post(reverse('invite_to_join_community_view'), data=json.dumps(self.COMMUNITY_INVITE_POST_DATA), content_type=CONTENT_TYPE_JSON)
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the member is invited to the community
+        community = Community.objects.get(community_name='Name of private Community')
+        user = User.objects.get(username='testuser2')
+        self.assertEqual(CommunityUser.objects.get(user_id=user.pk, community_id=community.pk).status, 1)
+    
+    def test_accept_join_request_success(self):
+        logging.info("************TEST_invite_to_join_community_success**************..........")
+        client = Client()
+
+        # Get the private community and user objects
+        community = Community.objects.get(community_name='Name of private Community')
+        user = User.objects.get(username='testuser2')
+
+        # Create relationship that simulates user requesting to join a community
+        CommunityUser.objects.create(user_id= user, community_id = community, status= 0, date_joined= datetime.date.today())
+
+        # Send POST to accept the user's request to join the private community
+        response = client.post(reverse('invite_to_join_community_view'), data=json.dumps(self.COMMUNITY_INVITE_POST_DATA), content_type=CONTENT_TYPE_JSON)
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the member is added to the community
+        self.assertEqual(CommunityUser.objects.get(user_id=user.pk, community_id=community.pk).status, 2)
+
+    def test_already_invited_invite_failure(self):
+        logging.info("************TEST_already_invited_invite_failure**************..........")
+        client = Client()
+
+        # Send POST to invite user to join private community
+        response = client.post(reverse('invite_to_join_community_view'), data=json.dumps(self.COMMUNITY_INVITE_POST_DATA), content_type=CONTENT_TYPE_JSON)
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the member is invited to the community
+        community = Community.objects.get(community_name='Name of private Community')
+        user = User.objects.get(username='testuser2')
+        self.assertEqual(CommunityUser.objects.get(user_id=user.pk, community_id=community.pk).status, 1)
+
+        # Send POST to invite user to join private community AGAIN
+        response = client.post(reverse('invite_to_join_community_view'), data=json.dumps(self.COMMUNITY_INVITE_POST_DATA), content_type=CONTENT_TYPE_JSON)
+        self.assertEqual(response.status_code, 400)
+    
+    def test_already_in_community_invite_failure(self):
+        logging.info("************TEST_already_in_community_invite_failure**************..........")
+        client = Client()
+
+        community = Community.objects.get(community_name='Name of private Community')
+        user = User.objects.get(username='testuser2')
+
+        # Create relationship that simulates user already in the community
+        CommunityUser.objects.create(user_id= user, community_id = community, status= 2, date_joined= datetime.date.today())
+
+        # Send POST to invite user to join private community
+        response = client.post(reverse('invite_to_join_community_view'), data=json.dumps(self.COMMUNITY_INVITE_POST_DATA), content_type=CONTENT_TYPE_JSON)
+        self.assertEqual(response.status_code, 400)
+
+    def test_not_owner_invite_failure(self):
+        logging.info("************TEST_not_owner_invite_failure**************..........")
+        client = Client()
+
+        # Send POST to invite user to join private community from someone who is not the owner of the community
+        response = client.post(reverse('invite_to_join_community_view'), data=json.dumps(self.IMPOSTER_COMMUNITY_INVITE_POST_DATA), content_type=CONTENT_TYPE_JSON)
+        self.assertEqual(response.status_code, 400)
+
 class GetUsersInCommunityViewTestCase(TestCase):
 
 
