@@ -14,6 +14,7 @@ from django.core.exceptions import ValidationError
 import time
 import datetime
 from datetime import datetime, time, date, timedelta, timezone
+from django.db.models import F, Q, Max, Min
 import pytz
 import logging
 from django.core.mail import send_mail
@@ -587,12 +588,6 @@ def create_checkin(user, data):
             if data['moment_number']==checkin.moment_number and datetime_current.date() == checkin.date.date():
                 logging.info("DUPLICATE!!!")
                 return HttpResponse("Error: Duplicate Moment Today", status=400)
-        
-        # Check if this is the first checkin of the day for updating the streak
-        today_midnight = datetime_current.replace(hour=0, minute=0, second=0, microsecond=0)
-        if not Checkin.objects.filter(date__gte = today_midnight, user_id=user.pk).exists(): # Checks if there are any checkins from the user today
-            logging.info("First checkin today")
-            update_streak(user) # Update the streak if it is the first checkin of the day
 
         # Create the checkin object and save it to the database
         checkin = Checkin.objects.create(
@@ -605,6 +600,9 @@ def create_checkin(user, data):
         )
         logging.info("Checkin object created")
         checkin.save()
+
+        #Update streak on every checkin
+        update_user_streaks(username=user.username) # Update the streak if it is the first checkin of the day
         return HttpResponse('Data saved successfully', status=200)
     except Exception as e:
         # Log and return an error response if the check-in creation fails
@@ -619,8 +617,6 @@ def checkin_view(request):
 
     # Parse the JSON data from the request body
     data = json.loads(request.body)
-
-    
     
     # Validate the POST data
     error_response = validate_data(data) #allows content and text entry to be none type and pass through without error
@@ -731,14 +727,14 @@ def delete_checkin_view(request): # to delete a specified checkin_id
 
         try:
             # Getting users from the user objects from the user table
-            checkinobj = Checkin.objects.get(checkin_id=checkin_id)
-            logging.info('retrieved user %s', checkinobj)
+            checkin = Checkin.objects.get(checkin_id= checkin_id)
+            logging.info('CHECKIN IN DELETE %s', checkin)
+            logging.info('ITS USERID %s', checkin.user_id)
 
-            checkin = Checkin.objects.filter(checkin_id= checkin_id)
-        
             # Delete the User if it exists
-            if checkin.exists():
+            if checkin: 
                 checkin.delete()
+                update_user_streaks(username= checkin.user_id)
                 return HttpResponse("checkin deleted successfully", status=200)
             else:
                 return HttpResponse("Checkin does not exist", status=400)
@@ -799,48 +795,110 @@ def get_checkin_info_view(request):
             return HttpResponse(constUNnotProvided, status=400)
     return HttpResponse(constNotGet)
 
-def update_streak(user): # called in create checkin to update the streak each day
-    logging.info("in update_streak")
-    # Check if streak needs to be reset, if there is no checkin from yesterday
-    last_checkin = Checkin.objects.filter(user_id=user).order_by('-date').first()
-    # Check if there is any checkin found
-    if last_checkin is not None:
-        yesterday = (datetime.now() + timedelta(days=-1)).date()
-        last_checkin_date = last_checkin.date.date()
-        if last_checkin_date != yesterday: # Reset streak if there was no checkin yesterday
-            user.current_streak = 0
-            user.save()
-            logging.info("Streak reset")
-    logging.info("Updating streak")
-    # Update user's streak
-    user.current_streak += 1
-    if user.current_streak > user.longest_streak: #update the longest streak if needed 
-        user.longest_streak = user.current_streak
-    user.save()
-    logging.info("Streak updated")
-    # Update user's badges
-    badges = Badges.objects.get(user_id=user)
-    if badges != None:
-        logging.info("User badges object found")
-        if user.current_streak == 1 and badges.one_day == False:
-            badges.one_day = True
-            badges.save()
-            logging.info("1 day badge added")
-        elif user.current_streak == 7 and badges.one_week == False:
-            badges.one_week = True
-            badges.save()
-            logging.info("1 week badge added")
-        elif user.current_streak == 30 and badges.one_month == False:
-            badges.one_month = True
-            badges.save()
-            logging.info("1 month badge added")
-        elif user.current_streak == 365 and badges.one_year == False:
-            badges.one_year = True
-            badges.save()
-            logging.info("1 year badge added")
-        logging.info("Badges updated")
+def update_user_streaks(username=None): # This is the MAIN method which will do the actual update for all users (can be chnaged to just do one user)
+    logging.info("Updating user streaks")
+
+    user= None #default- will change below
+    if username is not None: #called from creating checkin
+        try:
+            user = User.objects.get(username=username)
+        except Exception as e:
+            logging.info("update_user_streaks(): Retrieval Failed: %s", e)
+            return HttpResponse("Retrieval Failed", status=400)
     else:
-        logging.info(f"No badge object found for {user.username}")
+        return HttpResponse("No parameters passed", status=400)
+    
+    try:
+        dates = list(get_sorted_checkin_dates(user.id)) # Get a list of unqiue dates from the checkin table
+        current_streak, new_longest_streak = calculate_streaks(dates) #calculate the streak based on those dates
+        logging.info(f"User {user.username} - Dates: {dates}")
+
+        if new_longest_streak > user.longest_streak: # Make sure the new longest streak is not smaller than the previous
+            user.longest_streak = new_longest_streak # This is for deleting an old check-in that was part of the largest chain of dates
+            logging.info(f"New longest streak {new_longest_streak} is greater than the current longest streak. Updating...")
+
+        user.current_streak = current_streak
+        user.save()
+        logging.info(f"Streaks updated - User {user.username}: Current Streak: {current_streak}, Longest Streak: {user.longest_streak}")
+
+        # Check if badges needs to be updated if a streak was
+        update_badges(user)
+    except Exception as e:
+        logging.info("update_user_streaks() Impossible error: %s", e)
+        return HttpResponse("Impossible Error", status=400)
+
+def get_sorted_checkin_dates(user_id): # This method retuens a list of unique dates from OLDEST TO NEWEST
+    logging.info(f"Retrieving sorted check-in dates for user ID: {user_id}")
+    dates = Checkin.objects.filter(user_id=user_id)\
+        .annotate(date_only=Min('date__date'))\
+        .values('date_only')\
+        .distinct()\
+        .order_by('date_only')\
+        .values_list('date_only', flat=True)
+    logging.info(f"Dates retrieved: {list(dates)}")
+    return dates
+
+def calculate_streaks(dates): # Calculating the dates
+    if not dates: # If no dates found then nothing
+        return 0, 0
+
+    longest_streak = current_streak = 1 # Default to one since this method will only be called upon a checkin
+    previous_date = dates[0] # Yesterday
+    logging.info(f"Starting streak calculation from date: {previous_date}")
+
+    for i in range(1, len(dates)): # Increment the streak if the current date is the previous + a day ahead = (today)
+        if dates[i] == previous_date + timedelta(days=1):
+            current_streak += 1
+        else: # Else there is a break in the chain of consecutive dates
+            longest_streak = max(longest_streak, current_streak)
+            current_streak = 1
+            logging.info(f"Break found. Previous date: {previous_date}, Current date: {dates[i]}")
+        previous_date = dates[i]
+
+    # If the last date in dates is not today and it is also not yesterday, current streak must be 0
+    if dates[len(dates)-1] != datetime.now().date() - timedelta(days=1) and dates[len(dates)-1] != datetime.now().date(): #the most recent checkin date is not equal to yesterday or today
+        logging.info("Date of last day in dates list %s", dates[len(dates)-1])
+        logging.info("Date of today in datetime.now() %s", datetime.now().date())
+        logging.info("Date of delta %s", datetime.now().date() - timedelta(days=1))
+        logging.info(dates[len(dates)-1] is not datetime.now().date())
+        current_streak = 0
+
+    
+    longest_streak = max(longest_streak, current_streak)
+    logging.info(f"Final streaks calculated. Current Streak: {current_streak}, Longest Streak: {longest_streak}")
+    return current_streak, longest_streak
+
+def update_badges(user): # Update Badges
+    logging.info("Updating Badges..................")
+    try:
+        badges = Badges.objects.get(user_id=user)
+        logging.info("User badges object found.")
+        updated = False
+
+        if user.current_streak == 1 and not badges.one_day:
+            badges.one_day = True
+            updated = True
+            logging.info("1 day badge added.")
+        if user.current_streak == 7 and not badges.one_week:
+            badges.one_week = True
+            updated = True
+            logging.info("1 week badge added.")
+        if user.current_streak == 30 and not badges.one_month:
+            badges.one_month = True
+            updated = True
+            logging.info("1 month badge added.")
+        if user.current_streak == 365 and not badges.one_year:
+            badges.one_year = True
+            updated = True
+            logging.info("1 year badge added.")
+
+        if updated:
+            badges.save()
+            logging.info("Badges updated.")
+        else:
+            logging.info("No Badges to update")
+    except Badges.DoesNotExist:
+        logging.info(f"No badge object found for {user.username}.")
 
 def get_video_info_view(request): 
     if request.method == "GET":
