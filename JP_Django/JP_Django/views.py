@@ -1664,25 +1664,28 @@ def invite_to_join_community_view(request):
 
 def get_users_in_community_view(request):
     if request.method == "GET":
+        logging.info("in get_users_in_community_view")
         try:
-            community_id = request.GET.get('community_id')
+            community_name = request.GET.get('community_name')
 
             # Check if the community exists
-            if not Community.objects.filter(pk=community_id).exists():
+            if not Community.objects.filter(community_name=community_name).exists():
                 return HttpResponse(json.dumps({"error": "Community not found"}), status=400)
 
             # Retrieve all users in the community
-            community_users = CommunityUser.objects.filter(community_id=community_id)
-            
+            community_id = Community.objects.get(community_name=community_name).pk
+            community_users = CommunityUser.objects.filter(community_id=community_id, status = 2) #only get users successfully in community
+            logging.info("filtered table for community users")
             # List to store users in the community
             users_list = []
             for community_user in community_users:
-                user = community_user.user_id
+                user = User.objects.get(pk=community_user.user_id.pk) 
+                logging.info("got user obj in view")
                 
                 users_list.append({
                     'username': user.username
                 })
-                
+            logging.info("Userlist sent to frontend: %s", users_list)    
             return HttpResponse(json.dumps(users_list), content_type='application/json', status=200)
         
         except Exception as e:

@@ -3752,12 +3752,26 @@ class GetUsersInCommunityViewTestCase(TestCase):
         self.client.post(reverse('create_user_view'), data=json.dumps(self.USER_DATA_2), content_type='application/json')
         self.client.post(reverse('create_community_view'), data=json.dumps(self.COMMUNITY_DATA), content_type='application/json')
 
-        
+        #create connection of user to communities
+        user1= User.objects.get(username="testuser")
+        user2= User.objects.get(username="testuser2")
+        community= Community.objects.get(community_name="Name of Community")
+        logging.info("User1: %s", user1)
+        logging.info("User2: %s", user2)
+        logging.info("Community: %s", community)
+
+        logging.info("communityUsers: ")
+        queryset = CommunityUser.objects.all()
+        for obj in queryset:
+            logging.info(obj)
+
+        logging.info("before")
+        CommunityUser.objects.create(user_id= user2, community_id = community, status= 2, date_joined=datetime.date.today())
+        logging.info("after")
 
     def test_get_users_in_community_success(self):
     # Create test data
-        community_id = Community.objects.get(community_name="Name of Community").pk
-        get_data = {'community_id': 'Name of Community'}
+        get_data = {'community_name': 'Name of Community'}
 
     # Send GET request to get_users_in_community_view
         response = self.client.get(reverse('get_users_in_community_view'), data=get_data)
@@ -3772,7 +3786,7 @@ class GetUsersInCommunityViewTestCase(TestCase):
 
     def test_get_users_in_community_fail(self):
         # Create test data for non-existing community
-        get_data = {'community_id': -1}  # Non-existing community ID
+        get_data = {'community_name': "DNE"}  # Non-existing community ID
 
         # Send GET request to get_users_in_community_view
         response = self.client.get(reverse('get_users_in_community_view'), data=get_data)
