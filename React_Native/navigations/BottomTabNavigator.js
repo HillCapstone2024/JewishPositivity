@@ -1,9 +1,10 @@
 import React, { useRef, useState } from "react";
-import { View, Animated, Dimensions } from "react-native";
+import { View, Text, Animated, Dimensions, StyleSheet, Platform, TouchableOpacity } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { useNavigation } from '@react-navigation/native';
+import Svg, { Path } from 'react-native-svg';
 
 import { Ionicons } from "@expo/vector-icons";
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -12,10 +13,8 @@ import { faBoxArchive } from '@fortawesome/free-solid-svg-icons/faBoxArchive';
 import { faUsersLine } from '@fortawesome/free-solid-svg-icons/faUsersLine';
 
 import FriendFeed from "../screens/home/FriendFeed";
-import JournalEntry from "../screens/home/CheckIn";
 import Archive from "../screens/home/Archive";
-import JournalModal from "../screens/home/JournalModal";
-import JournalEntryDetailsScreen from "../screens/home/JournalEntryDetailsScreen";
+import CheckInModal from "../screens/home/CheckInModal";
 import CheckIn from "../screens/home/CheckIn";
 
 const Stack = createNativeStackNavigator();
@@ -23,20 +22,19 @@ const Tab = createBottomTabNavigator();
 
 const BottomTabNavigator = ( ) => {
   const tabOffsetValue = useRef(new Animated.Value(0)).current;
-  // const [selectedCheckInType, setSelectedCheckInType] = useState(null);
-  const [showJournalModal, setShowJournalModal] = useState(false);
+  const [showCheckInModal, setShowCheckInModal] = useState(false);
   const navigation = useNavigation(); // Access navigation here
  
-  const openJournalModal = () => {
-    setShowJournalModal(true);
+  const openCheckInModal = () => {
+    setShowCheckInModal(true);
   };
 
-  const closeJournalModal = () => {
-    setShowJournalModal(false);
+  const closeCheckInModal = () => {
+    setShowCheckInModal(false);
   };
 
-  const submitJournalEntry = () => {
-    closeJournalModal();
+  const submitCheckInEntry = () => {
+    closeCheckInModal();
   };
 
   return (
@@ -47,14 +45,13 @@ const BottomTabNavigator = ( ) => {
           tabBarShowLabel: false,
           headerShown: false,
           tabBarStyle: {
-            backgroundColor: "white",
             position: "absolute",
+            backgroundColor: "transparent",
             bottom: 40,
             marginHorizontal: 20,
-            // Max Height...
             height: 60,
+            borderTopWidth: 0,
             borderRadius: 10,
-            // Shadow...
             shadowColor: "#000",
             shadowOpacity: 0.06,
             shadowOffset: {
@@ -71,13 +68,9 @@ const BottomTabNavigator = ( ) => {
           options={{
             tabBarIcon: ({ focused }) => (
               <View style={{ position: "absolute", top: 15 }}>
-                {/* <Ionicons
-                  name="archive"
-                  size={25}
-                  color={focused ? "#4A90E2" : "gray"}
-                /> */}
+                <View style={[styles.spaceFillerLeft, styles.borderLeft]} />
                 <FontAwesomeIcon icon={faBoxArchive} 
-                  size={25}
+                  size={28}
                   color={focused ? "#4A90E2" : "gray"}
                 />
               </View>
@@ -95,45 +88,44 @@ const BottomTabNavigator = ( ) => {
         />
 
         <Tab.Screen
-          name="Journal"
+          name="CheckIn"
           component={CheckIn}
           options={{
             tabBarIcon: ({ focused }) => (
-              <View
-                style={{
-                  width: 55,
-                  height: 55,
-                  backgroundColor: "#4A90E2",
-                  borderRadius: 30,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginBottom: 30,
-                }}
-              >
-                {/* <Ionicons
-                  name="pencil"
-                  size={25}
-                  color={"#ffffff"}
-                  style={{
-                    width: 25,
-                    height: 25,
-                  }}
+              <View style={styles.btnWrapper}>
+                <View  style={{ flexDirection: 'row' }}>
+                  <View style={[styles.svgGapFiller, styles.borderLeft]} />
+                    <Svg width={71} height={58} viewBox="0 0 75 61">
+                      <Path
+                        d="M75.2 0v61H0V0c4.1 0 7.4 3.1 7.9 7.1C10 21.7 22.5 33 37.7 33c15.2 0 27.7-11.3 29.7-25.9.5-4 3.9-7.1 7.9-7.1h-.1z"
+                        fill={"white"}
+                      />
+                    </Svg>
+                  <View style={[styles.svgGapFiller, styles.borderRight]} />
+                </View>
+
+                <TouchableOpacity
+                  activeOpacity={0.5}
+                  onPress={() => setShowCheckInModal(true)}
+                  style={[styles.activeBtn]}                
+                >
+                  <FontAwesomeIcon icon={faPen} 
+                    size={25}
+                    color={"white"}
+                  />
+                  {/* <Ionicons
+                  name="add"
+                  size={50}
+                  color={"white"}
                 /> */}
-                <FontAwesomeIcon icon={faPen} 
-                  size={25}
-                  color={"#ffffff"}
-                  style={{
-                    width: 25,
-                    height: 25,
-                  }}
-                />
+                </TouchableOpacity>
               </View>
             ),
           }}
           listeners={({ navigation, route }) => ({
             tabPress: (e) => {
               e.preventDefault(); // Prevent default behavior
-              openJournalModal(); // Call the openJournalModal function
+              openCheckInModal(); // Call the openCheckInModal function
             },
           })}
         />
@@ -144,6 +136,7 @@ const BottomTabNavigator = ( ) => {
           options={{
             tabBarIcon: ({ focused }) => (
               <View style={{ position: "absolute", top: 15 }}>
+                <View style={[styles.spaceFillerRight, styles.borderRight]} />
                 <Ionicons
                   name="people"
                   size={28}
@@ -174,42 +167,24 @@ const BottomTabNavigator = ( ) => {
           height: 2,
           backgroundColor: "#4A90E2",
           position: "absolute",
-          bottom: 39,
+          bottom: 41,
           left: 70,
           borderRadius: 20,
           transform: [{ translateX: tabOffsetValue }],
         }}
       ></Animated.View>
 
-      {showJournalModal && (
-        <JournalModal
-          onClose={closeJournalModal}
-          onSubmit={submitJournalEntry}
-          visible={showJournalModal}
+      {showCheckInModal && (
+        <CheckInModal
+          onClose={closeCheckInModal}
+          onSubmit={submitCheckInEntry}
+          visible={showCheckInModal}
           navigation={navigation}
           // checkInType={selectedCheckInType} // Pass the check-in type here
-          onRequestClose={() => setShowJournalModal(false)}
+          onRequestClose={() => setShowCheckInModal(false)}
         />
       )}
     </>
-  );
-};
-
-const JournalNavigator = () => {
-  return (
-    <NavigationContainer independent={true}>
-      <Stack.Navigator>
-        <Stack.Screen
-          name="Main"
-          component={BottomTabNavigator}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="JournalEntryDetails"
-          component={JournalEntryDetailsScreen}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
   );
 };
 
@@ -224,3 +199,62 @@ function getWidth() {
 }
 
 export default BottomTabNavigator;
+
+const styles = StyleSheet.create({
+  btnWrapper: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  activeBtn: {
+    flex: 1,
+    position: 'absolute',
+    top: -22,
+    width: 50,
+    height: 50,
+    borderRadius: 50 / 2,
+    backgroundColor: "#4A90E2",
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  inactiveBtn: {
+    flex: 1,
+    backgroundColor: "white",
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  svgGapFiller: {
+    // flex: 1,
+    width: 0,
+    height: 58,
+    // left:20,
+    borderTopWidth: 0,
+    // borderRadius: 10,
+    backgroundColor: "red",
+  },
+  spaceFillerLeft: {
+    position: "absolute",
+    width: 142,
+    height: 58,
+    left:-59,
+    bottom: -15,
+    borderTopWidth: 0,
+    backgroundColor: "white",
+  },
+  spaceFillerRight: {
+    position: "absolute",
+    width: 142,
+    height: 58,
+    left:-55,
+    bottom: -15,
+    borderTopWidth: 0,
+    backgroundColor: "white",
+  },
+  borderLeft: {
+    borderBottomLeftRadius: 10,
+    borderTopLeftRadius: 10,
+  },
+  borderRight: {
+    borderBottomRightRadius: 10,
+    borderTopRightRadius: 10,
+  },
+});

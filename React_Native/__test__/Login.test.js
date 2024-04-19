@@ -30,13 +30,13 @@ describe("Login Component", () => {
   });
 
   it("Displays error message on failed login", async () => {
-    axios.get.mockResolvedValue({ data: { csrfToken: "test-csrf-token" } });
-    const mockLoginResponse = {
+    axios.get.mockResolvedValue({ data: { csrfToken: "test-csrf-token" } }); // always suppose to do this
+    const mockLoginResponse = { // set up the response
       response: {
         data: "Login failed!",
       },
     };
-    axios.post.mockRejectedValue(mockLoginResponse);
+    axios.post.mockRejectedValue(mockLoginResponse); // Want this value to fail
 
     const { getByText, getByTestId } = render(<Login />);
     fireEvent.changeText(getByTestId("usernameInput"), "testuser");

@@ -2902,6 +2902,72 @@ class GetAllCommunityInfoViewTestCase(TestCase): # front end calls get and we re
         # Check if response status code is 200
         self.assertEqual(response.status_code, 200)
 
+class GetUserCommunityInfoViewTestCase(TestCase): # front end calls get and we return all public communities info
+
+      # Define constant user data
+    USER1_DATA = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+    GET_USER_COMMUNITIES_SUCCESS_1 = {
+        'community_name': "THIS IS MY FIRST COMMUNITY",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "testuser1", # username of the owner
+        "privacy": 'public',
+    }
+
+    GET_USER_COMMUNITIES_SUCCESS_2 = {
+        'community_name': "THIS IS MY SECOND COMMUNITY",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "testuser1", # username of the owner
+        "privacy": 'public',
+    }
+
+
+
+    def setUp(self):
+        # Initialize the Django test client
+        client = Client()
+
+        # Make instance of users and their communities
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)# make user
+        client.post(reverse('create_community_view'), data=json.dumps(self.GET_USER_COMMUNITIES_SUCCESS_1), content_type=CONTENT_TYPE_JSON) #make community
+        client.post(reverse('create_community_view'), data=json.dumps(self.GET_USER_COMMUNITIES_SUCCESS_2), content_type=CONTENT_TYPE_JSON) #make community
+
+
+
+    def test_get_user_communities_success(self):# Successfully retrieves all user specific communities
+        logging.info("************TEST_get_user_communities_success**************..........")
+        client = Client()
+
+        # Send GET request to get_user_community_info_view
+        response = client.get(reverse('get_user_community_info_view'), data={'username': 'testuser1'})
+
+        response_data = json.loads(response.content)
+        logging.info("response_data: %s",response_data)
+
+        # Check if response status code is 200
+        self.assertEqual(response.status_code, 200)
+    
+    def test_get_user_communities_fail(self):# Fails retrieves nonexistent user specific communities 
+        logging.info("************TEST_get_user_communities_fail**************..........")
+        client = Client()
+
+        # Send GET request to get_user_community_info_view
+        response = client.get(reverse('get_user_community_info_view'), data={'username': 'doesnotexist'})
+
+        # Check if response status code is 400 -- failing
+        self.assertEqual(response.status_code, 400)
+
+
 class UpdateCommunityViewTestCase(TestCase): 
     
     photo_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_resources/b64photo.txt'))
@@ -3251,7 +3317,7 @@ class UpdateCommunityViewTestCase(TestCase):
 
         # Check if response status code is 400 -- failure
         self.assertEqual(response.status_code, 400)
-    
+      
     
 
 class DeleteCommunityViewTestCase(TestCase):  # To test deleting community
@@ -3371,3 +3437,144 @@ class DeleteCommunityViewTestCase(TestCase):  # To test deleting community
         # Check if response status code is 400 -- failure
         self.assertEqual(response.status_code, 400)
     
+class JoinCommunityViewTestCase(TestCase): 
+    # Define constant user data
+    USER1_DATA = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+    USER2_DATA = {
+        'username': 'testuser2',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test2@example.com',
+        'timezone': 'EST',
+    }
+
+
+    # Define post data
+    PUBLIC_COMMUNITY = {
+        'community_name': "Name of public Community",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "testuser1", # username of the owner
+        "privacy": 'public',
+    }
+
+    PUBLIC_JOIN_POST_DATA = {
+        'community_name': "Name of public Community",
+        "username": "testuser2",
+    }
+
+    # Define post data
+    PRIVATE_COMMUNITY = {
+        'community_name': "Name of private Community",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "testuser1", # username of the owner
+        "privacy": 'private',
+    }
+
+    PRIVATE_REQUEST_POST_DATA= {
+        "username": "testuser2",
+        "community_name": "Name of private Community",
+    }
+
+    def setUp(self):
+        # Initialize the Django test client
+        client = Client()
+
+        # Make a POST request to create test users and checkins
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)# make two users
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER2_DATA), content_type=CONTENT_TYPE_JSON)# make two users
+        client.post(reverse('create_community_view'), data=json.dumps(self.PUBLIC_COMMUNITY), content_type=CONTENT_TYPE_JSON) #make public community
+        client.post(reverse('create_community_view'), data=json.dumps(self.PRIVATE_COMMUNITY), content_type=CONTENT_TYPE_JSON) #make private community
+
+
+    # Success cases
+    def test_private_request_community_success(self):
+        logging.info("************TEST_request_community_success**************..........")
+        client = Client()
+
+        response= client.post(reverse('request_to_join_community_view'), data=json.dumps(self.PRIVATE_REQUEST_POST_DATA), content_type=CONTENT_TYPE_JSON)
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the member status is 0
+        community = Community.objects.get(community_name='Name of private Community')
+        user = User.objects.get(username='testuser2')
+        self.assertEqual(CommunityUser.objects.get(user_id=user.pk, community_id=community.pk).status, 0)
+           
+
+    def test_public_community_join_success(self):
+        logging.info("************test_public_community_join_success**************..........")
+        client = Client()
+
+        # Send POST to join public community
+        response = client.post(reverse('request_to_join_community_view'), data=json.dumps(self.PUBLIC_JOIN_POST_DATA), content_type=CONTENT_TYPE_JSON)
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the member is added to the community
+        community = Community.objects.get(community_name='Name of public Community')
+        user = User.objects.get(username='testuser2')
+        self.assertEqual(CommunityUser.objects.get(user_id=user.pk, community_id=community.pk).status, 2)
+
+
+    def test_accepted_join_success(self):
+        logging.info("************test_accepted_join_success**************..........")
+        client = Client()
+
+        # Get the private community and user objects
+        community = Community.objects.get(community_name='Name of private Community')
+        user = User.objects.get(username='testuser2')
+
+        # Create relationship that simulates being invited to a community
+        CommunityUser.objects.create(user_id= user, community_id = community, status= 1, date_joined= datetime.date.today())
+
+        # Check that the member status is 1
+        self.assertEqual(CommunityUser.objects.get(user_id=user.pk, community_id=community.pk).status, 1)
+
+        # Send POST to accept invitation
+        response= client.post(reverse('request_to_join_community_view'), data=json.dumps(self.PRIVATE_REQUEST_POST_DATA), content_type=CONTENT_TYPE_JSON)
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the member status is 2
+        self.assertEqual(CommunityUser.objects.get(user_id=user.pk, community_id=community.pk).status, 2)
+
+
+    def test_already_requested_join_failure(self):
+        logging.info("************test_already_requested_join_failure**************..........")
+        client = Client()
+        
+        community = Community.objects.get(community_name='Name of private Community')
+        user = User.objects.get(username='testuser2')
+        CommunityUser.objects.create(user_id= user, community_id = community, status= 0, date_joined=datetime.date.today())
+        
+        # Send POST to join private community
+        response = client.post(reverse('request_to_join_community_view'), data=json.dumps(self.PRIVATE_REQUEST_POST_DATA), content_type=CONTENT_TYPE_JSON)
+        self.assertEqual(response.status_code, 400)
+        
+
+    def test_already_in_community_join_failure(self):
+        logging.info("************test_already_in_community_join_failure**************..........")
+        client = Client()
+
+        # Send POST to join public community
+        response = client.post(reverse('request_to_join_community_view'), data=json.dumps(self.PUBLIC_JOIN_POST_DATA), content_type=CONTENT_TYPE_JSON)
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the member is added to the community
+        community = Community.objects.get(community_name='Name of public Community')
+        user = User.objects.get(username='testuser2')
+        self.assertEqual(CommunityUser.objects.get(user_id=user.pk, community_id=community.pk).status, 2)
+
+        # Send POST to join public community AGAIN
+        response = client.post(reverse('request_to_join_community_view'), data=json.dumps(self.PUBLIC_JOIN_POST_DATA), content_type=CONTENT_TYPE_JSON)
+        self.assertEqual(response.status_code, 400)

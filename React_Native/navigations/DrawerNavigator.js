@@ -169,6 +169,7 @@ const MyDrawer = ({ navigation }) => {
           width: "70%",
         },
         drawerLabelStyle: theme["color"],
+        // headerShown: false,
       }}
       drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
@@ -229,7 +230,7 @@ const MyDrawer = ({ navigation }) => {
         options={{
           drawerIcon: () => (
             <Ionicons
-              name="settings"
+              name="information-circle"
               size={22}
               color={theme["color"]["color"]}
             />

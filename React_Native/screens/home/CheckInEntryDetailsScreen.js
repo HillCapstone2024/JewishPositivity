@@ -15,7 +15,7 @@ import VideoViewer from "../../tools/VideoViewer.js";
 import ImageViewer from "../../tools/ImageViewer.js";
 import RecordingViewer from "../../tools/RecordingViewer.js";
 
-const JournalEntryDetailsScreen = ({ route, navigation }) => {
+const CheckInEntryDetailsScreen = ({ route, navigation }) => {
   const [username, setUsername] = useState("");
   const [checkin_id, setCheckin_id] = useState("");
   const [groupedEntries, setGroupedEntries] = useState({});
@@ -81,7 +81,7 @@ const JournalEntryDetailsScreen = ({ route, navigation }) => {
   }
 
   const onDelete = async() => {
-    console.log("Deleting Journal Entry:", checkin_id);
+    console.log("Deleting CheckIn Entry:", checkin_id);
     const getCsrfToken = async () => {
       try {
         const response = await axios.get(`${API_URL}/csrf-token/`);
@@ -116,13 +116,13 @@ const JournalEntryDetailsScreen = ({ route, navigation }) => {
       navigation.navigate("Archive");
     } catch (error) {
       if (error.response.data) {
-        console.error("Error Deleting Journal Entry:", error.response.data);
+        console.error("Error Deleting CheckIn Entry:", error.response.data);
       }
     }
   }
 
   handleGetEntries = async () => {
-    console.log("Fetching Journal Entries");
+    console.log("Fetching CheckIn Entries");
     try {
       const csrfToken = await getCsrfToken();
       const response = await axios.get(`${API_URL}/get_checkin_info/`, {
@@ -152,7 +152,7 @@ const JournalEntryDetailsScreen = ({ route, navigation }) => {
       // Set grouped entries state along with their corresponding videos
       setGroupedEntries(groupedEntries);
   
-      console.log("Returning Journal Entry Data")
+      console.log("Returning CheckIn Entry Data")
       return response.data;
     } catch (error) {
       console.error("Error retrieving check in entries:", error);
@@ -223,42 +223,38 @@ const JournalEntryDetailsScreen = ({ route, navigation }) => {
         selectedEntry={selectedEntry}
     />
 
-    <View style={styles.JournalEntryModalContent}>
+    <View style={styles.CheckInEntryModalContent}>  
+      <ScrollView padding={10}>
         <View style={styles.buttonRow}>
-        {/* <Ionicons
-            name="close-outline"
-            style={styles.JournalEntryModalIcons}
-        //   onPress={closeModal}
-        /> */}
-        <Ionicons
-            name="ellipsis-horizontal-outline"
-            style={styles.JournalEntryModalIcons}
-            onPress={() => {
-            setCheckin_id(selectedEntry?.checkin_id);
-            setEditDeleteModalVisible(true);
-            }}
-        />
+          <Text style={[styles.headerText]}>
+              {getMomentText(selectedEntry?.moment_number)}
+          </Text>
+          <Ionicons
+              name="ellipsis-horizontal-outline"
+              style={styles.CheckInEntryModalIcons}
+              onPress={() => {
+              setCheckin_id(selectedEntry?.checkin_id);
+              setEditDeleteModalVisible(true);
+              }}
+          />
         </View>
-        <ScrollView padding={10}>
-        <Text style={[styles.headerText]}>
-            {getMomentText(selectedEntry?.moment_number)}
-        </Text>
+        
         <Text style={[styles.detailText, { marginBottom: 20 }]}>
             {moment(selectedEntry?.date, "YYYY-MM-DD").format("dddd, D MMMM YYYY")}{" "}
         </Text>      
 
         {selectedEntry?.content_type === "image" && (
             <Image
-            style={[styles.JournalEntryModalImage,{ marginBottom: 20 },]}
+            style={[styles.CheckInEntryModalImage,{ marginBottom: 20 },]}
             source={{uri: `data:image/jpeg;base64,${selectedEntry?.content}`,}}
             />
         )}
         {selectedEntry?.content_type === "video" && (
-            <View style={styles.JournalEntryModalVideo}>
+            <View style={styles.CheckInEntryModalVideo}>
             {video[selectedEntry.checkin_id] ? (
                 <VideoViewer
                   source={video[selectedEntry.checkin_id]}
-                  style={styles.JournalEntryModalVideo}
+                  style={styles.CheckInEntryModalVideo}
                 />
             ) : (
                 <TouchableOpacity
@@ -268,7 +264,7 @@ const JournalEntryDetailsScreen = ({ route, navigation }) => {
                 >
                 <Image
                     source={{ uri: `data:Image/mp4;base64,${selectedEntry?.content}` }}
-                    style={styles.JournalEntryModalImage}
+                    style={styles.CheckInEntryModalImage}
                 />
                 </TouchableOpacity>
             )}
@@ -290,32 +286,31 @@ const JournalEntryDetailsScreen = ({ route, navigation }) => {
   );
 };
 
-export default JournalEntryDetailsScreen;
+export default CheckInEntryDetailsScreen;
 
 const styles = StyleSheet.create({
-    // JournalEntryModal
-    JournalEntryModalContent: {
+    // CheckInEntryModal
+    CheckInEntryModalContent: {
       backgroundColor: "white",
       height: "100%",
     },
     buttonRow: {
       flexDirection: "row",
       justifyContent: "space-between",
-    //   marginTop: 50,
-      padding: 5,
-      borderBottomColor: "grey",
-      borderBottomWidth: 2,
+      marginTop: 5,
+      marginBottom: -15,
     },
-    JournalEntryModalIcons: {
+    CheckInEntryModalIcons: {
+      top: -6,
       fontSize: 40,
       color: "#4A90E2",
     },
-    JournalEntryModalImage: {
+    CheckInEntryModalImage: {
       width: "100%",
       aspectRatio: 1,
       borderRadius: 5,
     },
-    JournalEntryModalVideo: {
+    CheckInEntryModalVideo: {
       width: "100%",
       aspectRatio: 1,
       borderRadius: 5,

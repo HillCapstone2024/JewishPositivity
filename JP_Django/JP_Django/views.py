@@ -1323,7 +1323,7 @@ def create_community_view(request):
             community.save()
             logging.info("community made")
             #add the owner of the community to the communityUser table 
-            CommunityUser.objects.create(user_id= user, community_id = community, status= True, date_joined= date_created)  # Create a new badge object for the user
+            CommunityUser.objects.create(user_id= user, community_id= community, status= 2, date_joined= date_created)  # Create a new badge object for the user
             logging.info("added owner to community user table")
             return HttpResponse("Community has been created!")
         except Exception as e:  # Catch exceptions like IntegrityError
@@ -1386,12 +1386,51 @@ def get_all_community_info_view(request):
                 })
                 
             logging.info("SPECIFIC COMMUNITY INFO: %s", communities_list)
-            logging.info(communities_list)
             return HttpResponse(json.dumps(communities_list), content_type='application/json')
         
         except Exception as e:
             logging.error("GETTING ALL COMMUNITIES ERROR: %s",e)
             return HttpResponse("Getting all communities error", status=400)
+    return HttpResponse(constNotGet)
+
+def get_user_community_info_view(request):
+    if request.method == "GET":
+        username = request.GET.get("username")
+
+        # Make sure the username is not empty
+        if username is not None:
+            try:
+                # Retrieve the user from the database by username
+                user = User.objects.get(username=username)
+
+                # retreieve the communities grouped by owner ID
+                communities = Community.objects.filter(owner_id=user)
+
+                # Populate the list with dictionaries containing each community and their info
+                communities_list = []
+                for community in communities:
+                    communities_list.append({
+                        'community_id': community.community_id,
+                        'community_name': community.community_name,
+                        'community_description': community.community_description,
+                        'owner_id': community.owner_id.pk,
+                        'privacy': community.privacy,
+                        'date_created': community.date_created.strftime('%Y-%m-%d')
+                    })
+
+                    
+                # Log data and return as JSON response
+                logging.info("Community list:")
+                logging.info(communities_list)
+                return HttpResponse(json.dumps(communities_list), content_type='application/json')
+
+            except User.DoesNotExist:
+                return HttpResponse(constUserDNE, status=400)
+            except Exception as e:
+                logging.error(e)
+                return HttpResponse("An error occurred", status=400)
+        else:  # username was empty
+            return HttpResponse(constUNnotProvided, status=400)
     return HttpResponse(constNotGet)
 
 def update_community_view(request):
@@ -1518,9 +1557,53 @@ def delete_community_view(request):
 
     return HttpResponse(constInvalidReq, status=400)
 
+   
+def request_to_join_community_view(request):
+    # Check if the request method is POST
+    if request.method != "POST":
+        # Return an HTTP 400 response if the method is not POST
+        return HttpResponse("Not a POST request", status=400)
 
+    # Parse the JSON data from the request body
+    data = json.loads(request.body)
+    logging.info("DATA from post: %s", data)
 
+    # variables from the post data
+    username = data["username"]
+    community_name = data["community_name"]
+    logging.info("USERNAME: '%s', COMMUNITY NAME: '%s'", username, community_name)
 
+    # Get the community object from community name
+    try:
+        community = Community.objects.get(community_name=community_name)
+        logging.info("COMMUNITY OBJECT: %s", community)
+        user = User.objects.get(username=username)
+        logging.info("USER OBJECT: %s", user)
+        relationship = CommunityUser.objects.filter(user_id=user.pk, community_id=community.pk).first()
+        logging.info("RELATIONSHIP OBJECT: %s", relationship)
 
+        if relationship != None:
+            logging.info("Relationship Status: %s", relationship.status)
+            if relationship.status==0: 
+                return HttpResponse("Already requested", status=400)
+            elif relationship.status==2:
+                return HttpResponse("Already a member of this community", status=400)
+            elif relationship.status==1:
+                relationship.status = 2
+                relationship.save()
+                return HttpResponse("Request accepted", status=200)
+            else:
+                return HttpResponse("invalid status value", status=400)
+        else: 
+            if community.privacy == "public":
+                CommunityUser.objects.create(user_id=user, community_id=community, status=2, date_joined= date.today())
+                return HttpResponse("Joined community", status=200)
+            elif community.privacy == "private":
+                CommunityUser.objects.create(user_id=user, community_id=community, status=0, date_joined= date.today())
+                return HttpResponse("Request sent", status=200)
+            else:
+                return HttpResponse("Invalid privacy value", status=400)
 
-    
+    except Exception as e:
+        logging.info("ERROR in joining community: %s", e)
+        return HttpResponse("Error in joining community", status=400)

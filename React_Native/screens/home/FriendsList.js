@@ -14,8 +14,10 @@ import {
   Dimensions,
   RefreshControl,
 } from "react-native";
-import { SearchBar } from "react-native-elements";
+import { Ionicons } from "@expo/vector-icons";
+import { Icon, SearchBar } from "react-native-elements";
 import LoadingScreen from "../greet/Loading.js";
+import SpinningPen from "../greet/Pen.js";
 import makeThemeStyle from "../../tools/Theme.js";
 import * as Storage from "../../AsyncStorage.js";
 import IP_ADDRESS from "../../ip.js";
@@ -45,8 +47,17 @@ const FriendsList = ({ navigation, onSwitch }) => {
     }
   }, []);
 
-  const onRefresh = () => {
-    //refresh function here
+  const onRefresh = async () => {
+    setRefreshing(true);
+    const storedUsername = await Storage.getItem("@username");
+    const retrievedFriends = await getFriends(storedUsername);
+    const retrievedProfilepics = await fetchProfilePics(retrievedFriends);
+    setFriends(retrievedProfilepics);
+    setNumFriends(retrievedFriends.length);
+    //we want to set them all at the same time so theres not a bunch of rerenders
+    setUsername(storedUsername || "No username");
+    setRefreshing(false);
+    console.log("finished refreshing data.");
   };
 
   const initializeData = async () => {
@@ -56,7 +67,7 @@ const FriendsList = ({ navigation, onSwitch }) => {
     const retrievedProfilepics = await fetchProfilePics(retrievedFriends);
     console.log("you have friends");
     setFriends(retrievedProfilepics);
-    // setNumFriends(retrievedFriends.length());
+    setNumFriends(retrievedFriends.length);
     //we want to set them all at the same time so theres not a bunch of rerenders
     setUsername(storedUsername || "No username");
     setIsLoading(false);
@@ -118,6 +129,45 @@ const FriendsList = ({ navigation, onSwitch }) => {
     }
   };
 
+  const handleDeleteFriend = async (friendUsername) => {
+      Alert.alert(
+        `Are you sure you want to delete ${friendUsername} from your friends?`,
+        `You wont be able to see ${friendUsername}'s Reflections anymore and yours will no longer be visible`,
+        [
+          {
+            text: "Cancel",
+            onPress: () => console.log("Cancel Pressed"),
+            style: styles.alertCancelText,
+          },
+          {
+            text: "Delete",
+            onPress: () => deleteFriends(),
+            style: "destructive",
+          },
+        ]
+      );
+
+    const deleteFriends = async () => {
+      console.log("Deleting Friend...");
+      try {
+        const csrfToken = await getCsrfToken();
+        const response = await axios.post(`${API_URL}/delete_friend/`, {
+            username: username,
+            unfriendusername: friendUsername,
+        }
+      );
+        console.log("delete Response: ", response);
+        //get rid of friend from friends. when they reload the page next time, it wont be included
+        //in the initialize data. this way the user doesn't have to wait for page to reload
+
+      } catch (error) {
+        console.log("error deleting friend:", error);
+      }
+    };
+
+
+  };
+
   const handleFriends = async () => {
     setErrorMessage(<ActivityIndicator />);
     const getCsrfToken = async () => {
@@ -164,7 +214,7 @@ const FriendsList = ({ navigation, onSwitch }) => {
   };
 
 
-  const renderItem = ({ item, profilepicProp }) => {
+  const renderItem = ({ item }) => {
     // Check if the user is already a friend
 
     return (
@@ -191,15 +241,9 @@ const FriendsList = ({ navigation, onSwitch }) => {
               <Text style={styles.msgTxt}>@{item.username}</Text>
             </View>
           </View>
-          <View>
-            <TouchableOpacity
-              style={styles.deleteFriendButton}
-              onPress={() => {
-                console.log("delete button pressed.");
-                //add functionality here
-              }}
-            >
-              <Text style={styles.deleteFriendButtonText}>Remove</Text>
+          <View style={styles.deleteFriendButton}>
+            <TouchableOpacity onPress={() => handleDeleteFriend(item.username)}>
+              <Ionicons name={"close"} size={20} color="#0066cc" />
             </TouchableOpacity>
           </View>
         </View>
@@ -216,7 +260,7 @@ const FriendsList = ({ navigation, onSwitch }) => {
             {isLoading ? (
         // <ActivityIndicator style={{ height: 100, width: 100 }} />
         <View testID="loading-screen" style={styles.loadingStyle}>
-          <LoadingScreen />
+          <SpinningPen />
         </View>
       ) : (
       <View style={styles.container}>
@@ -225,7 +269,7 @@ const FriendsList = ({ navigation, onSwitch }) => {
             enableEmptySections={true}
             data={friends}
             keyExtractor={(item) => item.username}
-            renderItem={(item) => renderItem(item, item.profilepic)}
+            renderItem={(item) => renderItem(item)}
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}
@@ -312,12 +356,10 @@ const styles = StyleSheet.create({
     marginLeft: 15,
   },
   deleteFriendButton: {
-    backgroundColor: "#0066cc",
-    padding: 5,
-    borderRadius: 5,
-    color: "#0066cc",
     flexDirection: "row",
     justifyContent: "center",
+    textAlign: "right",
+    marginLeft: 60,
   },
   deleteFriendButtonText: {
     // backgroundColor: "blue",
@@ -325,6 +367,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "bold",
     // paddingRight: 16,
+    textAlign: "right",
   },
   container: {
     flex: 1,
@@ -403,6 +446,12 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
+  },
+  alertCancelText: {
+    color: "#0066cc",
+  },
+  alertDeleteText: {
+    color: "red",
   },
 });
 
