@@ -112,7 +112,7 @@ const FriendsList = ({ navigation, onSwitch }) => {
 
   const fetchProfilePics = async (friends) => {
     if (friends.length < 1) {
-      return {};
+      return [];
     }
     // console.log("getting profile pics for ", friends);
     try {
@@ -226,7 +226,7 @@ const FriendsList = ({ navigation, onSwitch }) => {
             {/* <SvgUri style={styles.pic} uri={item.profile_pic} /> */}
             <Image
               source={{ uri: `data:Image/jpeg;base64,${item.profile_picture}` }}
-              style={styles.avatar}
+              style={styles.pic}
             />
           </View>
           <View style={styles.textContainer}>
@@ -273,7 +273,7 @@ const FriendsList = ({ navigation, onSwitch }) => {
             <Text style={styles.sectionTitle}>My Friends ({numFriends})</Text>
             <View style={styles.horizontalLine} />
           </View>
-          <View style={styles.container}>
+          <View>
             <View style={[styles.body, { height: layout.height }]}>
               <FlatList
                 enableEmptySections={true}
@@ -329,7 +329,7 @@ const styles = StyleSheet.create({
     // backgroundColor: "#fff",
     // borderBottomWidth: 1,
     padding: 5,
-    // justifyContent: "space-between",
+    justifyContent: "space-between",
   },
   pic: {
     width: 50,

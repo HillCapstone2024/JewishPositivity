@@ -1,6 +1,6 @@
 # in Jewish_Positivity_Django/urls.py
 
-from .views import login_view, create_user_view, logout_view, update_times_view, get_times_view, send_report_email_view, checkin_view, get_user_information_view, get_users_information_view, update_user_information_view, get_checkin_info_view, add_friend_view, delete_friend_view, get_friends_view, delete_user_view, get_video_info_view, get_todays_checkin_info_view, send_password_reset_email_view, change_password_view, get_badges_view, get_current_streak_view, get_longest_streak_view, get_profile_pictures_view, update_checkin_info_view, delete_checkin_view, create_community_view, get_specific_community_info_view, get_all_community_info_view, update_community_view,delete_community_view, get_user_community_info_view, request_to_join_community_view, invite_to_join_community_view, get_users_in_community_view, get_pending_requests_sent_friends_view, get_pending_requests_received_friends_view
+from .views import login_view, create_user_view, logout_view, update_times_view, get_times_view, send_report_email_view, checkin_view, get_user_information_view, get_users_information_view, update_user_information_view, get_checkin_info_view, add_friend_view, delete_friend_view, get_friends_view, delete_user_view, get_video_info_view, get_todays_checkin_info_view, send_password_reset_email_view, change_password_view, get_badges_view, get_current_streak_view, get_longest_streak_view, get_profile_pictures_view, update_checkin_info_view, delete_checkin_view, create_community_view, get_specific_community_info_view, get_all_community_info_view, update_community_view,delete_community_view, get_user_community_info_view, request_to_join_community_view, invite_to_join_community_view, get_users_in_community_view, get_pending_requests_sent_friends_view, get_pending_requests_received_friends_view, search_users_view
 from django.urls import path
 from django.contrib import admin
 from .views import csrf_token_view
@@ -14,6 +14,7 @@ urlpatterns = [
     path('get_times/', get_times_view, name='get_times_view'),
     path('get_user_info/',get_user_information_view, name='get_user_information_view'),
     path('get_users_info/',get_users_information_view, name='get_users_information_view'),
+    path('search-users/',search_users_view, name='search_users_view'),
     path('delete_user/', delete_user_view, name='delete_user_view'),
     path('check-in/',checkin_view, name='checkin_view'),
     path('get_checkin_info/', get_checkin_info_view, name='get_checkin_info_view'),

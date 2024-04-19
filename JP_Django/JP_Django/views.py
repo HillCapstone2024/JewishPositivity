@@ -482,6 +482,32 @@ def delete_user_view(request):
     return HttpResponse(constInvalidReq, status=400)
 
 
+def search_users_view(request):
+    search_text = request.GET.get("search", "")
+    if search_text:
+        try:
+            #filter users where search matches
+            users = User.objects.filter(username__icontains=search_text)
+            print('users:', users)
+            users_data = []
+            for user in users:
+                #send username and profilepic back
+                profile_picture_data = user.profile_picture
+                if profile_picture_data:
+                    profile_picture_encoded = base64.b64encode(profile_picture_data).decode('utf-8')
+                else:
+                    profile_picture_encoded = None
+                users_data.append({"username": user.username, "profile_picture": profile_picture_encoded})
+            return JsonResponse(users_data, safe=False)
+
+        except Exception as e:
+            logging.error(f"An error occurred: {e}")
+            return HttpResponse("An internal error occurred.", status=500)
+    else:
+        #No search text provided, return an empty list or you could choose to return all users
+        return JsonResponse([], safe=False)
+
+
 def get_users_information_view(request):
     if request.method == "GET":
         usernames = request.GET.getlist("username[]")

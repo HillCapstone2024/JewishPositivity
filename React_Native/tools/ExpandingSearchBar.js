@@ -8,21 +8,23 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { width } from "@fortawesome/free-solid-svg-icons/faPen";
 
-const ExpandingSearchBar = () => {
+const ExpandingSearchBar = ({ onSearch }) => {
   const [isFocused, setFocused] = useState(false);
-  const widthAnim = useRef(new Animated.Value(150)).current; // Initial width of the search bar
+  const [searchQuery, setSearchQuery] = useState('');
+  const widthAnim = useRef(new Animated.Value(150)).current;
 
   useEffect(() => {
     if (isFocused) {
       Animated.timing(widthAnim, {
-        toValue: 250, // Expanded width
+        toValue: 250,
         duration: 300,
-        useNativeDriver: false, // Width cannot be animated using native driver
+        useNativeDriver: false,
       }).start();
     } else {
       Animated.timing(widthAnim, {
-        toValue: 140, // Initial width
+        toValue: 140,
         duration: 300,
         useNativeDriver: false,
       }).start();
@@ -33,19 +35,26 @@ const ExpandingSearchBar = () => {
     <View style={styles.container}>
       <View style={styles.sectionContainer}>
         <Animated.View style={[styles.searchContainer, { width: widthAnim }]}>
-          <Ionicons
-            name="search"
-            size={20}
-            color="#4A90E2"
-            style={styles.iconStyle}
-          />
           <TextInput
             style={styles.sectionTitle}
             onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
+            onBlur={() => 
+              {setFocused(false);
+              onSearch(searchQuery);
+              }
+            }
             placeholder="ADD FRIENDS"
             placeholderTextColor={"#ccc"}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
           />
+          <TouchableOpacity
+            onPress={() => onSearch(searchQuery)}
+            disabled={searchQuery.trim() === ""}
+            style={styles.iconContainer}
+          >
+            <Ionicons name="search" size={20} color={"#4A90E2"} />
+          </TouchableOpacity>
         </Animated.View>
         <View style={styles.horizontalLine} />
       </View>
@@ -66,19 +75,34 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "white",
+    // paddingHorizontal: 10,
+    borderRadius: 20,
+    height: 40,
+    overflow: "hidden",
+    justifyContent: "space-between",
+  },
+  iconContainer: {
+    // marginRight: "1%",
+    width: "20%",
+    justifyContent: "right",
+    // position: "absolute",
+    alignItems: "flex-end",
+    // backgroundColor: "red",
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
     paddingHorizontal: 10,
     borderRadius: 20,
     height: 40,
-    marginRight: 8,
+    // marginRight: 8,
     overflow: "hidden",
   },
   input: {
     fontSize: 16,
     marginLeft: 5,
-    width: "90%", // TextInput width take the majority of searchContainer
-  },
-  iconStyle: {
-    marginRight: 5,
+    width: "80%", // TextInput width take the majority of searchContainer
   },
   sectionTitle: {
     paddingVertical: 12,
@@ -87,10 +111,7 @@ const styles = StyleSheet.create({
     color: "#9e9e9e",
     textTransform: "uppercase",
     letterSpacing: 1.1,
-  },
-  sectionContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    width: "80%",
   },
   horizontalLine: {
     flex: 1,
