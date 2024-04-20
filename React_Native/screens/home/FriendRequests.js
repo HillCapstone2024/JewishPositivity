@@ -37,8 +37,8 @@ const FriendRequests = ({navigation, onSwitch}) => {
   const [friends, setFriends] = useState([]);
   const [sentRequests, setSentRequests] = useState([]);
   const [numSentRequests, setNumSentRequests] = useState(0);
-  const [recievedRequests, setRecievedRequests] = useState([]);
-  const [numRecievedRequests, setNumRecievedRequests] = useState(0);
+  const [receivedRequests, setReceivedRequests] = useState([]);
+  const [numReceivedRequests, setNumReceivedRequests] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -68,9 +68,15 @@ const FriendRequests = ({navigation, onSwitch}) => {
     const storedUsername = await Storage.getItem("@username");
     const retrievedFriends = await getFriends(storedUsername);
     const retrievedProfilepics = await fetchProfilePics(retrievedFriends);
+    const retrievedSent = await getSentRequests(storedUsername);
+    const retrievedSentProPics = await fetchProfilePics(retrievedSent);
+    const retrievedReceive = await getReceivedRequests(storedUsername);
+    const retrievedReceiveProPics = await fetchProfilePics(retrievedReceive);
 
     setFriends(retrievedProfilepics);
     setUsername(storedUsername || "No username");
+    setSentRequests(retrievedSentProPics);
+    setReceivedRequests(retrievedReceiveProPics);
     setIsLoading(false);
     console.log("finished initializing data.");
     Animated.spring(translateY, {
@@ -109,6 +115,42 @@ const FriendRequests = ({navigation, onSwitch}) => {
     }
   };
 
+  const getSentRequests = async (usernameProp) => {
+    try{
+      const response = await axios.get(`${API_URL}/get_pending_requests_sent_friends`, {
+        params: {
+          username: usernameProp,
+        }
+      });
+      const sentList = response.data
+        .map((item) => item.username);
+      console.log("Sent list: ", sentList);
+      setNumSentRequests(sentList.length);
+      return sentList;
+    } catch(error) {
+      console.log("error fetching sent:", error);
+      return [];
+    }
+  };
+
+  const getReceivedRequests = async (usernameProp) => {
+    try{
+      const response = await axios.get(`${API_URL}/get_pending_requests_received_friends`, {
+        params: {
+          username: usernameProp,
+        }
+      });
+      const recievedList = response.data
+        .map((item) => item.username);
+      console.log("Recieved list: ", recievedList);
+      setNumReceivedRequests(recievedList.length);
+      return recievedList;
+    } catch(error) {
+      console.log("error fetching received:", error);
+      return [];
+    }
+  };
+
   const fetchProfilePics = async (friends) => {
     if (friends.length < 1) {
       return {};
@@ -127,7 +169,7 @@ const FriendRequests = ({navigation, onSwitch}) => {
       response.data.forEach((pic) => {
         map[pic.username] = pic.profile_picture;
       });
-      console.log("map reachec", typeof response.data);
+      console.log("map reached", typeof response.data);
       return response.data;
     } catch (error) {
       console.log("Error retrieving profile pics:", error);
@@ -146,11 +188,57 @@ const FriendRequests = ({navigation, onSwitch}) => {
         },
         {
           text: "Delete",
-          onPress: () => console.log("Delete Pressed"),
+          onPress: () => cancelRequest(),
           style: "destructive",
         },
       ]
     );
+    const cancelRequest = async () => {
+      console.log("Canceling: ", friendUsername);
+      try {
+        const csrfToken = await getCsrfToken();
+        const response = await axios.post(`${API_URL}/delete_friend/`, {
+            username: username,
+            unfriendusername: friendUsername,
+          },
+          {
+            headers: 
+            {
+                "X-CSRFToken": csrfToken,
+                "Content-Type": "application/json",
+            },
+            withCredentials: true,
+        }
+        );
+        console.log("delete Response: ", response);
+      } catch (error) {
+        console.log("error deleting friend:", error);
+      }
+    };
+  };
+
+  const handleAcceptRequest = async (friendUsername) => {
+    console.log("Adding: ", friendUsername);
+    try {
+      const csrfToken = await getCsrfToken();
+      const response = await axios.post(`${API_URL}/add_friend/`, {
+        user1: username,
+        user2: friendUsername,
+      },
+      {
+        headers:
+        {
+          "X-CSRFToken": csrfToken,
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      }
+    );
+    console.log("Add Response: ", response);
+
+    } catch(error) {
+      console.log("error adding friend:", error);
+    }
   };
 
   const renderItem = ({ item, isRecieved }) => {
@@ -183,7 +271,9 @@ const FriendRequests = ({navigation, onSwitch}) => {
           {isRecieved ? (
             <View style={{ flexDirection: "row" }}>
               <View style={styles.acceptRequestButton}>
-                <TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleAcceptRequest(item.username)}
+                >
                   <Text style={styles.acceptButtonText}>ADD</Text>
                 </TouchableOpacity>
               </View>
@@ -227,14 +317,14 @@ const FriendRequests = ({navigation, onSwitch}) => {
           <View>
             <View style={styles.sectionContainer}>
               <Text style={styles.sectionTitle}>
-                Recieved Requests ({numSentRequests})
+                Received Requests ({numReceivedRequests})
               </Text>
               <View style={styles.horizontalLine} />
             </View>
             <View style={[styles.body, { height: layout.height }]}>
               <FlatList
                 enableEmptySections={true}
-                data={friends}
+                data={receivedRequests}
                 keyExtractor={(item) => item.username}
                 renderItem={(item) => renderItem({ item, isRecieved: false })}
               />
@@ -251,7 +341,7 @@ const FriendRequests = ({navigation, onSwitch}) => {
             <View style={[styles.body, { height: layout.height }]}>
               <FlatList
                 enableEmptySections={true}
-                data={friends}
+                data={sentRequests}
                 keyExtractor={(item) => item.username}
                 renderItem={(item) => renderItem({ item, isRecieved: true })}
               />

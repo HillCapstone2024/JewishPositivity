@@ -51,6 +51,15 @@ const AddFriends = ({navigation, onSwitch}) => {
         loadUsername();
     }, []);
 
+    const getCsrfToken = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/csrf-token/`);
+        return response.data.csrfToken;
+      } catch (error) {
+        console.error("Error retrieving CSRF token:", error);
+        throw new Error("CSRF token retrieval failed");
+      }
+    };
 
     const searchUsers = async (searchText) => {
       console.log('searchig for ...', searchText)
@@ -67,8 +76,29 @@ const AddFriends = ({navigation, onSwitch}) => {
       }
     };
 
-    const addFriendRequest = async () => {
+    const handleAddFriend = async (friendUsername) => {
       //add friend logic below
+      console.log("Adding: ", friendUsername);
+      try {
+        const csrfToken = await getCsrfToken();
+        const response = await axios.post(`${API_URL}/add_friend/`, {
+          user1: username,
+          user2: friendUsername,
+        },
+        {
+          headers:
+          {
+            "X-CSRFToken": csrfToken,
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+      console.log("Add Response: ", response);
+
+      } catch(error) {
+        console.log("error adding friend:", error);
+      }
     };
 
     const handleSearch = async (searchText) => {
@@ -115,7 +145,7 @@ const AddFriends = ({navigation, onSwitch}) => {
               </View>
             </View>
             <View style={styles.acceptRequestButton}>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={() => handleAddFriend(item.username)}>
                 <Text style={styles.acceptButtonText}>ADD</Text>
               </TouchableOpacity>
             </View>
