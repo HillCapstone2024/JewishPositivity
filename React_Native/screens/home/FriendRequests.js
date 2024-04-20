@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   SafeAreaView,
   Dimensions,
+  RefreshControl,
   Animated
 } from "react-native";
 import { SearchBar } from "react-native-elements";
@@ -33,7 +34,6 @@ const FriendRequests = ({navigation, onSwitch}) => {
   theme = makeThemeStyle();
   const [username, setUsername] = useState("");
   const [usernameSearch, setUsernameSearch] = useState("");
-  const [errorMessage, setErrorMessage] = useState(null);
   const [friends, setFriends] = useState([]);
   const [sentRequests, setSentRequests] = useState([]);
   const [numSentRequests, setNumSentRequests] = useState(0);
@@ -56,8 +56,14 @@ const FriendRequests = ({navigation, onSwitch}) => {
     const storedUsername = await Storage.getItem("@username");
     const retrievedFriends = await getFriends(storedUsername);
     const retrievedProfilepics = await fetchProfilePics(retrievedFriends);
+    const retrievedSent = await getSentRequests(storedUsername);
+    const retrievedSentProPics = await fetchProfilePics(retrievedSent);
+    const retrievedReceive = await getReceivedRequests(storedUsername);
+    const retrievedReceiveProPics = await fetchProfilePics(retrievedReceive);
 
     setFriends(retrievedProfilepics);
+    setSentRequests(retrievedSentProPics);
+    setReceivedRequests(retrievedReceiveProPics);
     setUsername(storedUsername || "No username");
     setRefreshing(false);
     console.log("finished refreshing data.");
@@ -107,7 +113,7 @@ const FriendRequests = ({navigation, onSwitch}) => {
       const friendsList = response.data
         .filter((item) => item.status === false)
         .map((item) => item.username);
-      console.log("friends list: ", friendsList);
+      //console.log("friends list: ", friendsList);
       return friendsList;
     } catch (error) {
       console.log("error fetching friends:", error);
@@ -177,7 +183,7 @@ const FriendRequests = ({navigation, onSwitch}) => {
     }
   };
 
-  const handleCancelRequest = async (friendUsername) => {
+  const handleDeclineRequest = async (friendUsername) => {
     Alert.alert(
       `Are you sure you want to delete your friend request to ${friendUsername}`,
       `${friendUsername} will no longer see your friend request and will not be notified.`,
@@ -185,18 +191,21 @@ const FriendRequests = ({navigation, onSwitch}) => {
         {
           text: "Cancel",
           onPress: () => console.log("Cancel Pressed"),
+          style: styles.alertCancelText,
         },
         {
           text: "Delete",
-          onPress: () => cancelRequest(),
+          onPress: () => declineRequest(),
           style: "destructive",
         },
       ]
     );
-    const cancelRequest = async () => {
-      console.log("Canceling: ", friendUsername);
+    const declineRequest = async () => {
+      console.log("Declining:", friendUsername);
+      console.log("From:", username);
       try {
         const csrfToken = await getCsrfToken();
+        //need a new view that handles declining requests
         const response = await axios.post(`${API_URL}/delete_friend/`, {
             username: username,
             unfriendusername: friendUsername,
@@ -243,7 +252,8 @@ const FriendRequests = ({navigation, onSwitch}) => {
 
   const renderItem = ({ item, isRecieved }) => {
     // Check if the user is already a friend
-
+    //console.log("rendered item", item.item.username);
+    item = item.item
     return (
       <View>
         <View style={styles.row}>
@@ -261,7 +271,7 @@ const FriendRequests = ({navigation, onSwitch}) => {
                 numberOfLines={1}
                 ellipsizeMode="tail"
               >
-                First Last
+                {item.username}
               </Text>
             </View>
             <View style={styles.msgContainer}>
@@ -278,19 +288,21 @@ const FriendRequests = ({navigation, onSwitch}) => {
                 </TouchableOpacity>
               </View>
               <View>
-                <TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleDeclineRequest(item.username)}
+                >
                   <Ionicons name={"close"} size={20} color="#4A90E2" />
                   {/* <Text>Reject</Text> */}
                 </TouchableOpacity>
               </View>
             </View>
           ) : (
-            <View style={styles.acceptRequestButton}>
-              <TouchableOpacity
-                onPress={() => handleCancelRequest(item.username)}
-              >
-                <Text style={styles.acceptButtonText}>CANCEL</Text>
-              </TouchableOpacity>
+              <View style={styles.acceptRequestButton}>
+                <TouchableOpacity
+                  onPress={() => handleDeclineRequest(item.username)}
+                >
+                  <Text style={styles.acceptButtonText}>CANCEL</Text>
+                </TouchableOpacity>
             </View>
           )}
         </View>
@@ -326,7 +338,14 @@ const FriendRequests = ({navigation, onSwitch}) => {
                 enableEmptySections={true}
                 data={receivedRequests}
                 keyExtractor={(item) => item.username}
-                renderItem={(item) => renderItem({ item, isRecieved: false })}
+                renderItem={(item) => renderItem({ item, isRecieved: true })}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    testID="refresh-control"
+                  />
+                }
               />
             </View>
           </View>
@@ -343,7 +362,7 @@ const FriendRequests = ({navigation, onSwitch}) => {
                 enableEmptySections={true}
                 data={sentRequests}
                 keyExtractor={(item) => item.username}
-                renderItem={(item) => renderItem({ item, isRecieved: true })}
+                renderItem={(item) => renderItem({ item, isRecieved: false })}
               />
             </View>
           </View>
