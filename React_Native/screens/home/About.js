@@ -40,36 +40,68 @@ const About = ({ navigation }) => {
         <View style={styles.horizontalLine} />
       </View>
 
-      <FontAwesomeIcon icon={faBoxArchive} 
-        size={28}
-        color={"#4A90E2"}
-      />
-
-      <TouchableOpacity
-        activeOpacity={100}
-        style={[styles.activeBtn]}                
-      >
-        <FontAwesomeIcon icon={faPen} 
-          size={15}
-          color={"white"}
+      <View style={styles.topContainter}>
+        <View style={styles.mediaContainter}>
+        <FontAwesomeIcon icon={faBoxArchive} 
+          size={28}
+          color={"#4A90E2"}
         />
-        {/* <Ionicons
-        name="add"
-        size={50}
-        color={"white"}
-      /> */}
-      </TouchableOpacity>
+        </View>
 
-      <Ionicons
-        name="people"
-        size={28}
-        color={"#4A90E2"}
-      />
+        <View style={styles.textContainter}>
+          <Text> This icon is how you see your archive of old posts.</Text>
+        </View>
+      </View>
 
-      <FontAwesomeIcon icon={faUsersLine}
-        size = {28}
-        color={"black"}
-      />
+      <View style={styles.topContainter}>
+        <View style={styles.mediaContainter}>
+          <TouchableOpacity
+            activeOpacity={100}
+            style={[styles.activeBtn]}                
+          >
+            <FontAwesomeIcon icon={faPen} 
+              size={15}
+              color={"white"}
+            />
+            {/* <Ionicons
+            name="add"
+            size={50}
+            color={"white"}
+          /> */}
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.textContainter}>
+        <Text>This icon is how you make a reflection post.</Text>
+        </View>
+      </View>
+
+      <View style={styles.topContainter}>
+        <View style={styles.mediaContainter}>
+          <Ionicons
+            name="people"
+            size={28}
+            color={"#4A90E2"}
+          />
+        </View>
+
+        <View style={styles.textContainter}>
+        <Text>This icon is how you see your friends posts.</Text>
+        </View>
+      </View>
+
+      <View style={styles.topContainter}>
+        <View style={styles.mediaContainter}>
+          <FontAwesomeIcon icon={faUsersLine}
+            size = {28}
+            color={"#4A90E2"}
+          />
+        </View>
+
+        <View style={styles.textContainter}>
+          <Text>This icon is how you access you communities.</Text>
+        </View>
+      </View>
 
     </ScrollView> 
   );
@@ -125,6 +157,46 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 2,
     elevation: 2,
+  },
+
+  topContainter: {
+
+    // borderColor : "#00000",
+    // borderWidth: 5,
+    flexDirection: "row",
+    // justifyContent: 'center',
+    // alignContent: 'center',
+    marginBottom: "5%",
+    marginTop: "5%",
+    height: 80,
+  },
+
+  mediaContainter: {
+
+    // borderColor : "#00000",
+    // borderWidth: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: "20%",
+    height: "80%",
+    marginRight: "5%",
+    marginLeft: "2.5%",
+    // marginBottom: "5%",
+    marginTop: "2.5%",
+  },
+
+  textContainter: {
+
+    // borderColor : "#00000",
+    // borderWidth: 5,
+    width: "65%",
+    height: "80%",
+    // marginBottom: "5%",
+    marginTop: "2.5%",
+    // marginRight: "5%",
+    // marginLeft: "5%",
+    justifyContent: 'center',
+    // alignContent: 'center',
   },
 });
 
