@@ -27,7 +27,7 @@ const CheckInEntryDetailsScreen = ({ route, navigation }) => {
  
   theme = makeThemeStyle(); 
 
-  const saveBase64Video = async (base64String, checkin_id, handleEllipsisPress ) => {
+  const saveBase64Video = async (base64String, checkin_id ) => {
     console.log("reached file function");
     const filename = FileSystem.documentDirectory + checkin_id + "downloadedVideo.mp4";
     await FileSystem.writeAsStringAsync(filename, base64String, {
@@ -221,6 +221,7 @@ const CheckInEntryDetailsScreen = ({ route, navigation }) => {
         editModalVisible={editModalVisible} 
         setEditModalVisible={setEditModalVisible} 
         selectedEntry={selectedEntry}
+        navigation={navigation}
     />
 
     <View style={styles.CheckInEntryModalContent}>  
