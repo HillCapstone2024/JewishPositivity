@@ -3892,41 +3892,47 @@ class UpdateStreakTestCase(TestCase):
        
         # Initialize the Django test client
         self.client = Client()
-        # Create a test user
-
+        
+        # Create a test user, and make a checkin for today
         self.client.post(reverse('create_user_view'), data=json.dumps(self.USER_DATA), content_type=CONTENT_TYPE_JSON)
         self.client.post(reverse('checkin_view'), data=json.dumps(self.CHECKIN_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
 
-        user = User.objects.get(username='testuser1')
+        # Initziate GET data to get checkin ID, which will be used for deleting in test_update_streak_success
+        get_data = {'username': 'testuser1'} 
 
-        # Create test data
-        get_data = {'username': 'testuser1'} # to retrieve all (or if one add in moment#) checkins for this user
-
-        # Send GET request to get_checkin_info_view
+        # Send GET request to get_checkin_info_view to retrieve the checkin ID in the database
         response = self.client.get(reverse('get_checkin_info_view'), data=get_data)
         
+        # Save the checkin ID to a global variable used in test_update_streak_success
         response_data = json.loads(response.content)
         logging.info("response_data: %s",response_data)
         self.checkin_id = response_data[0]['checkin_id']
         logging.info("checkin_id: %s",self.checkin_id)
 
-        #make a checkin for 2 days ago without calling the update in the view
+        # Retrieve a fresh user object from the database for creating a checkin
+        user = User.objects.get(username='testuser1')
+
+        # The reason why I do not use the reverse POST to create this checkin is because
+        # our create_checkin_view only uses the current date, so it would be impossible to create a checkin 2 days ago
+        # **THIS WILL NOT UPDATE THE STREAK SINCE IT DOES NOT CALL DELETE_CHECKIN OR CREATE_CHECKIN VIEWS**
         checkin_2_days_ago = Checkin.objects.create(
             user_id=user,
-            date=dt.combine(dt.now().date() - timedelta(days=2), tm(12, 0)),
+            date=dt.combine(dt.now().date() - timedelta(days=2), tm(12, 0)), # Here the date is being set to 2 days ago
             moment_number=1,
             content_type='text',
             text_entry="Check-in 2 days ago"
         )
         logging.info(f"Created check-in: {checkin_2_days_ago.date}, {checkin_2_days_ago.text_entry}")
 
-        #verify the streaks are correct
+        # Verify the streaks are correct, which both should be 1 because the only time the streak was updated
+        # was in the reverse POST at the top of this method
         user = User.objects.get(username='testuser1')
         logging.info(f'{user.username}\'s Current Streak:{user.current_streak}........EXPECT VALUE: 1')
         logging.info(f'{user.username}\'s Longest Streak:{user.longest_streak}........EXPECTED VALUE: 1')
         
 
-
+        # This should return a checkin for today, none for yesterday, and a checkin for 2 days ago 
+        # (which 2 days ago streak was never counted)
         logging.info("------------Printing the Checkin table AT THE END OF SETUP-----------------")
         queryset = Checkin.objects.all()
         for obj in queryset:
@@ -3940,13 +3946,17 @@ class UpdateStreakTestCase(TestCase):
 
         ####################################### SETUP IN UPDATE STREAK SUCCESS ###################################
 
-        #reteive a fresh user object  from the database
+        # With this set up below, I intended to add in a check in without calling the create_checkin_view because the create checkin view
+        # is what is calling update_user_streaks, so if I manually put something into the checkin table, this will not update the streak
+        # hence this is a set up to see if when I call the delete view, it does what is intended when updating a streak
+
+        # Retrieve a fresh user object from the database
         user = User.objects.get(username='testuser1')
 
-        #add in yesterdays checkin to fill the gap created in the setup method between today and checkin 2 days ago 
+        # Add in yesterdays checkin to add a checkin between today and 2 days ago, which I created in the setup method above
         checkin_1_days_ago = Checkin.objects.create(
             user_id=user, #use the user object
-            date=dt.combine(dt.now().date() - timedelta(days=1), tm(12, 0)),
+            date=dt.combine(dt.now().date() - timedelta(days=1), tm(12, 0)), # Again, the checkin view is not called because I cannot manipulate the date there
             moment_number=1,
             content_type='text',
             text_entry="Check-in yesterday"
@@ -3962,11 +3972,11 @@ class UpdateStreakTestCase(TestCase):
             logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
             logging.info('')
 
-        #delete todays checkin- calls the update method
-        self.DELETE_CHECKIN_DATA_SUCCESS['checkin_id'] = self.checkin_id #change the checkin id to the id got in the setup
+        # Delete todays checkin - calls the delete view
+        self.DELETE_CHECKIN_DATA_SUCCESS['checkin_id'] = self.checkin_id # Update the global checkin id in the data retrieved in the setup
         self.client.post(reverse('delete_checkin_view'), data=json.dumps(self.DELETE_CHECKIN_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
 
-        #reteive a fresh user object  from the database
+        # Retrieve a fresh user object from the database
         user = User.objects.get(username='testuser1')
         logging.info(f"User {user.username} - Current Streak: {user.current_streak}, Longest Streak: {user.longest_streak}")
         
@@ -3977,7 +3987,8 @@ class UpdateStreakTestCase(TestCase):
             logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
             logging.info('')
 
-        #  check current and longest streak (should be 2)
+        # Check current and longest streak (should be 2), because there is 2 days ago and 1 day ago, but not today (yet)
+        # because today was just deleted
         user_initial = User.objects.get(username='testuser1')
         self.assertEqual(user_initial.current_streak, 2, "Current streak should be 2")
         self.assertEqual(user_initial.longest_streak, 2, "Current streak should be 2")
@@ -3985,7 +3996,7 @@ class UpdateStreakTestCase(TestCase):
 
         ####################################### CREATING IN UPDATE STREAK SUCCESS ###################################
 
-        #adding back todays checkin- calls update again 
+        # Adding back todays checkin- calls create checkin  
         self.client.post(reverse('checkin_view'), data=json.dumps(self.CHECKIN_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
 
         logging.info("------------Printing the Checkin table after CREATE CHECKIN FOR TODAY-----------------")
@@ -3995,33 +4006,37 @@ class UpdateStreakTestCase(TestCase):
             logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
             logging.info('')
         
-        #reteive a fresh user object  from the database
+        # Retrieve a fresh user object  from the database
         user = User.objects.get(username='testuser1')
         logging.info(f"User {user.username} - Current Streak: {user.current_streak}, Longest Streak: {user.longest_streak}")
         
-        # Check assertions - 200 successful
+        # Now the checkin for today was re-added, so both streaks update to 3
         self.assertEqual(user.current_streak, 3, "Current streak should be 3")
         self.assertEqual(user.longest_streak, 3, "Longest streak should be 3")
 
         ####################################### DELETING TODAY AND YESTERDAY IN UPDATE STREAK SUCCESS ###################################
 
-        get_data = {'username': 'testuser1'} # to retrieve all (or if one add in moment#) checkins for this user
+        # Data to GET the checkin IDs for today and yesterday to delete them
+        get_data = {'username': 'testuser1'} 
 
         # Send GET request to get_checkin_info_view
         response = self.client.get(reverse('get_checkin_info_view'), data=get_data)
         
+        # Load data retreived
         response_data = json.loads(response.content)
         logging.info("response_data: %s",response_data)
+
+        # A list is returned and [2] is today [1] is 1 day ago [0] is 2 days ago
         checkin_id_today = response_data[2]['checkin_id']
         checkin_id_yesterday = response_data[1]['checkin_id']
         logging.info("checkin_id today: %s",checkin_id_today)
         logging.info("checkin_id yesterday: %s",checkin_id_yesterday)
 
-        #delete todays checkin
+        # Delete today's checkin 
         self.DELETE_CHECKIN_DATA_SUCCESS['checkin_id'] = checkin_id_today
         self.client.post(reverse('delete_checkin_view'), data=json.dumps(self.DELETE_CHECKIN_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
        
-        #delete yesterdays checkin
+        # Delete yesterday's checkin
         self.DELETE_CHECKIN_DATA_SUCCESS['checkin_id'] = checkin_id_yesterday
         self.client.post(reverse('delete_checkin_view'), data=json.dumps(self.DELETE_CHECKIN_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
 
@@ -4032,11 +4047,12 @@ class UpdateStreakTestCase(TestCase):
             logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
             logging.info('')
         
-        #reteive a fresh user object  from the database
+        # Retrieve a fresh user object from the database
         user = User.objects.get(username='testuser1')
         logging.info(f"User {user.username} - Current Streak: {user.current_streak}, Longest Streak: {user.longest_streak}")
         
-        # Check assertions - 200 successful
+        # Longest streak remains 3 even though the chain of 3 was broken, and current streak becomes 0 since the 
+        # last checkin was 2 days ago
         self.assertEqual(user.current_streak, 0, "Current streak should be 0")
         self.assertEqual(user.longest_streak, 3, "Longest streak should be 3")
 

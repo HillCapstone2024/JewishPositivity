@@ -598,11 +598,13 @@ def create_checkin(user, data):
             content_type=data["content_type"],
             date=datetime_current #will get you a datetime 
         )
+
+        # Save checkin
         logging.info("Checkin object created")
         checkin.save()
 
-        #Update streak on every checkin
-        update_user_streaks(username=user.username) # Update the streak if it is the first checkin of the day
+        #Update streak on every checkin (It does not matter which one since dates are sorted uniquely)
+        update_user_streaks(username=user.username) 
         return HttpResponse('Data saved successfully', status=200)
     except Exception as e:
         # Log and return an error response if the check-in creation fails
@@ -726,7 +728,7 @@ def delete_checkin_view(request): # to delete a specified checkin_id
         logging.info('retrieved checkin_id %s', checkin_id)
 
         try:
-            # Getting users from the user objects from the user table
+            # Reteiving checkin to delete by ID and logging them
             checkin = Checkin.objects.get(checkin_id= checkin_id)
             logging.info('CHECKIN IN DELETE %s', checkin)
             logging.info('ITS USERID %s', checkin.user_id)
@@ -734,7 +736,7 @@ def delete_checkin_view(request): # to delete a specified checkin_id
             # Delete the User if it exists
             if checkin: 
                 checkin.delete()
-                update_user_streaks(username= checkin.user_id)
+                update_user_streaks(username=checkin.user_id) # Updating the streak after the delete by checkin.user_id (returns username) 
                 return HttpResponse("checkin deleted successfully", status=200)
             else:
                 return HttpResponse("Checkin does not exist", status=400)
@@ -795,11 +797,11 @@ def get_checkin_info_view(request):
             return HttpResponse(constUNnotProvided, status=400)
     return HttpResponse(constNotGet)
 
-def update_user_streaks(username=None): # This is the MAIN method which will do the actual update for all users (can be chnaged to just do one user)
+def update_user_streaks(username=None): # This is the MAIN method which will do the actual update for user streaks
     logging.info("Updating user streaks")
 
-    user= None #default- will change below
-    if username is not None: #called from creating checkin
+    user = None # Default - will change below
+    if username is not None: # Username is called from create/delete checkin, and used to update the streak
         try:
             user = User.objects.get(username=username)
         except Exception as e:
@@ -843,17 +845,18 @@ def calculate_streaks(dates): # Calculating the dates
         return 0, 0
 
     longest_streak = current_streak = 1 # Default to one since this method will only be called upon a checkin
-    previous_date = dates[0] # Yesterday
+    previous_date = dates[0] # Since the list is from OLDEST TO NEWEST, dates[0] is the oldest date, and dates[1] is second to oldest
     logging.info(f"Starting streak calculation from date: {previous_date}")
 
-    for i in range(1, len(dates)): # Increment the streak if the current date is the previous + a day ahead = (today)
+    for i in range(1, len(dates)): 
+        # Increment the streak if the current day (date[i]) == previous day + 1 day (there is a checkin for these 2 consecutive days)
         if dates[i] == previous_date + timedelta(days=1):
             current_streak += 1
         else: # Else there is a break in the chain of consecutive dates
-            longest_streak = max(longest_streak, current_streak)
-            current_streak = 1
+            longest_streak = max(longest_streak, current_streak) # Save longest streak
+            current_streak = 1 # Reset current streak
             logging.info(f"Break found. Previous date: {previous_date}, Current date: {dates[i]}")
-        previous_date = dates[i]
+        previous_date = dates[i] # Move previous date to the next date
 
     # If the last date in dates is not today and it is also not yesterday, current streak must be 0
     if dates[len(dates)-1] != datetime.now().date() - timedelta(days=1) and dates[len(dates)-1] != datetime.now().date(): #the most recent checkin date is not equal to yesterday or today
@@ -863,7 +866,7 @@ def calculate_streaks(dates): # Calculating the dates
         logging.info(dates[len(dates)-1] is not datetime.now().date())
         current_streak = 0
 
-    
+    # Finalize longest streak
     longest_streak = max(longest_streak, current_streak)
     logging.info(f"Final streaks calculated. Current Streak: {current_streak}, Longest Streak: {longest_streak}")
     return current_streak, longest_streak
