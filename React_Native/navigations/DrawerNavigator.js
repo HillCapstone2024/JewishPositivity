@@ -38,6 +38,7 @@ import * as Haptics from "expo-haptics";
 import ImageViewer from "../tools/ImageViewer.js";
 import FriendsParent from "../screens/home/FriendsParent.js";
 import { faUsersLine } from '@fortawesome/free-solid-svg-icons/faUsersLine';
+import { faSynagogue } from '@fortawesome/free-solid-svg-icons/faSynagogue';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 
 const Drawer = createDrawerNavigator();
@@ -222,7 +223,8 @@ const MyDrawer = ({ navigation }) => {
         options={{
           drawerIcon: () => (
             // <Ionicons name="people" size={22} color={theme["color"]["color"]} />
-            <FontAwesomeIcon icon={faUsersLine}
+            <FontAwesomeIcon icon={faSynagogue} 
+            // <FontAwesomeIcon icon={faUsersLine}
             size = {28}
             color={"black"}
           />
