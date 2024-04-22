@@ -6,6 +6,7 @@ import {
   Button,
   Dimensions,
   KeyboardAvoidingView,
+  TouchableWithoutFeedback,
   TextInput,
   Text,
   InputAccessoryView,
