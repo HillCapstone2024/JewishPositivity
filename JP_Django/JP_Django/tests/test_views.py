@@ -4057,6 +4057,148 @@ class UpdateStreakTestCase(TestCase):
         self.assertEqual(user.longest_streak, 3, "Longest streak should be 3")
 
 
+class DeleteUserFromCommunityViewTestCase(TestCase):
 
+    # Define constant user data
+    USER1_DATA = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+    USER2_DATA = {
+        'username': 'testuser2',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test2@example.com',
+        'timezone': 'EST',
+    }
+
+    USER3_DATA = {
+        'username': 'testuser3',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test3@example.com',
+        'timezone': 'EST',
+    }
+
+    USER4_DATA = {
+        'username': 'testuser4',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test4@example.com',
+        'timezone': 'EST',
+    }
+
+    # Define post data
+    PRIVATE_COMMUNITY = {
+        'community_name': "Name of private Community",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "testuser1", # username of the owner
+        "privacy": 'private',
+    }
+
+    user_1_obj = None
+    user_2_obj = None
+    user_3_obj = None
+
+    community_obj = None
+
+    def setUp(self):
+        logging.info("************IN DeleteUserFromCommunityViewTestCase SETUP**************..........")
+        # Initialize the Django test client
+        client = Client()
+
+        # Make a POST request to create test users and checkins
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)# make owner
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER2_DATA), content_type=CONTENT_TYPE_JSON)# make other user
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER3_DATA), content_type=CONTENT_TYPE_JSON)# make other user
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER4_DATA), content_type=CONTENT_TYPE_JSON)# make other user
+        client.post(reverse('create_community_view'), data=json.dumps(self.PRIVATE_COMMUNITY), content_type=CONTENT_TYPE_JSON) #make private community
+
+        self.community_obj = Community.objects.get(community_name='Name of private Community')
+
+        self.user_1_obj = User.objects.get(username='testuser4')
+        CommunityUser.objects.create(user_id= self.user_1_obj, community_id = self.community_obj, status= 1, date_joined=datetime.date.today())
+        self.user_2_obj = User.objects.get(username='testuser2')
+        CommunityUser.objects.create(user_id= self.user_2_obj, community_id = self.community_obj, status= 2, date_joined=datetime.date.today())
+        self.user_3_obj = User.objects.get(username='testuser3')
+        CommunityUser.objects.create(user_id= self.user_3_obj, community_id = self.community_obj, status= 2, date_joined=datetime.date.today())
+       
+        
+    
+    def test_delete_user_from_community_success(self):
+        logging.info("************TEST_delete_user_from_community_success**************..........")
+        client = Client()   
+
+
+        logging.info('Printing users in communityuser table before DELETE........')
+        queryset = CommunityUser.objects.all()   
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, "Community ID: ", obj.community_id.community_id)
+            logging.info(LOG_MSG_FORMAT, "Community user ID: ", obj.communityuser_id)
+
+        DELETE_DATA = {'username': 'testuser2', 'community_name': 'Name of private Community'}
+
+        # Send POST to invite user to DELETE user from community
+        response = client.post(reverse('delete_user_from_community_view'), data=json.dumps(DELETE_DATA), content_type=CONTENT_TYPE_JSON)
+
+
+        logging.info('Printing users in communityuser table after DELETE........')
+        queryset = CommunityUser.objects.all()   
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, "Community ID: ", obj.community_id.community_id)
+            logging.info(LOG_MSG_FORMAT, "Community user ID: ", obj.communityuser_id)
+
+        self.assertEqual(response.status_code, 200)
+
+
+    def test_delete_owner_from_community_fail(self):
+        logging.info("************TEST_delete_owner_from_community_fail**************..........")
+        client = Client()   
+
+        DELETE_DATA = {'username': 'testuser1', 'community_name': 'Name of private Community'}
+
+        #  Send POST to invite user to DELETE user from community
+        response = client.post(reverse('delete_user_from_community_view'), data=json.dumps(DELETE_DATA), content_type=CONTENT_TYPE_JSON)
+
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_delete_requested_user_from_community_success(self):
+        logging.info("************TEST_delete_requested_user_from_community_success**************..........")
+        client = Client()   
+
+        DELETE_DATA = {'username': 'testuser4', 'community_name': 'Name of private Community'}
+
+        # Send POST to invite user to DELETE user from community
+        response = client.post(reverse('delete_user_from_community_view'), data=json.dumps(DELETE_DATA), content_type=CONTENT_TYPE_JSON)
+
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_delete_user_from_community_fail_DNE(self):
+        logging.info("************TEST_delete_requested_user_from_community_success**************..........")
+        client = Client()   
+
+        DELETE_DATA = {'username': 'DOESNOTEXIST', 'community_name': 'Name of private Community'}
+
+        # Send POST to invite user to DELETE user from community
+        response = client.post(reverse('delete_user_from_community_view'), data=json.dumps(DELETE_DATA), content_type=CONTENT_TYPE_JSON)
+
+        self.assertEqual(response.status_code, 400)
+
+    
     
     

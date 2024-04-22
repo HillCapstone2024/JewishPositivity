@@ -1867,3 +1867,32 @@ def get_users_in_community_view(request):
     # Return constNotGet for any method other than GET
     return HttpResponse(constNotGet)
 
+def delete_user_from_community_view(request):
+    if request.method == "POST":
+        # Retrieve user ID and community ID from POST request
+        data = json.loads(request.body)
+        username = data["username"]
+        community_name = data["community_name"]
+
+        try:
+            community = Community.objects.get(community_name=community_name)
+            user = User.objects.get(username=username)
+
+            if not CommunityUser.objects.filter(communityuser_id=user.pk, community_id=community.community_id).exists():
+                logging.info("delete_user_from_community_view(): User not found")
+                return HttpResponse("User not found", status=400)
+            
+            if community.owner_id == user:
+                logging.info("delete_user_from_community_view(): Owner deletion attemp failed...")
+                return HttpResponse("Please update owner status to member before leaving the community", status=400)
+            
+            CommunityUser.objects.filter(communityuser_id=user.pk, community_id=community.community_id).delete()
+            logging.info(f"{user.username} removed from community")
+            return HttpResponse(f"{user.username} removed from community", status=200)
+        except Exception as e:
+            logging.info("delete_user_from_community_view(): ERROR in delete user in community: %s", e)
+            return HttpResponse("Delete user attempt failed", status=400)
+    return HttpResponse("NOT A POST", status=400)
+
+    
+
