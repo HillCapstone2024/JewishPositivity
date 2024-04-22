@@ -69,6 +69,21 @@ const FriendRequests = ({navigation, onSwitch}) => {
     console.log("finished refreshing data.");
   };
 
+  const onReload = async () => {
+    const storedUsername = await Storage.getItem("@username");
+    const retrievedFriends = await getFriends(storedUsername);
+    const retrievedProfilepics = await fetchProfilePics(retrievedFriends);
+    const retrievedSent = await getSentRequests(storedUsername);
+    const retrievedSentProPics = await fetchProfilePics(retrievedSent);
+    const retrievedReceive = await getReceivedRequests(storedUsername);
+    const retrievedReceiveProPics = await fetchProfilePics(retrievedReceive);
+
+    setFriends(retrievedProfilepics);
+    setSentRequests(retrievedSentProPics);
+    setReceivedRequests(retrievedReceiveProPics);
+    setUsername(storedUsername || "No username");
+  }
+
   const initializeData = async () => {
     setIsLoading(true);
     const storedUsername = await Storage.getItem("@username");
@@ -220,6 +235,7 @@ const FriendRequests = ({navigation, onSwitch}) => {
         }
         );
         console.log("delete Response: ", response);
+        onReload();
       } catch (error) {
         console.log("error deleting friend:", error);
       }
@@ -244,7 +260,7 @@ const FriendRequests = ({navigation, onSwitch}) => {
       }
     );
     console.log("Add Response: ", response);
-
+    onReload();
     } catch(error) {
       console.log("error adding friend:", error);
     }
@@ -326,7 +342,7 @@ const FriendRequests = ({navigation, onSwitch}) => {
         <Animated.View
           style={{ ...styles.container, transform: [{ translateY }] }}
         >
-          <View>
+          <View style={styles.container}>
             <View style={styles.sectionContainer}>
               <Text style={styles.sectionTitle}>
                 Received Requests ({numReceivedRequests})
@@ -349,7 +365,7 @@ const FriendRequests = ({navigation, onSwitch}) => {
               />
             </View>
           </View>
-          <View>
+          <View style={styles.container}>
             <View style={styles.sectionContainer}>
               <Text style={styles.sectionTitle}>
                 Sent Requests ({numSentRequests})

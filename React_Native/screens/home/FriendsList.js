@@ -63,6 +63,16 @@ const FriendsList = ({ navigation, onSwitch }) => {
     console.log("finished refreshing data.");
   };
 
+  const onReload = async () => {
+    const storedUsername = await Storage.getItem("@username");
+    const retrievedFriends = await getFriends(storedUsername);
+    const retrievedProfilepics = await fetchProfilePics(retrievedFriends);
+    
+    setFriends(retrievedProfilepics);
+    setNumFriends(retrievedFriends.length);
+    setUsername(storedUsername || "No username");
+  }
+
   const initializeData = async () => {
     setIsLoading(true);
     const storedUsername = await Storage.getItem("@username");
@@ -172,57 +182,13 @@ const FriendsList = ({ navigation, onSwitch }) => {
         }
         );
         console.log("delete Response: ", response);
+        onReload();
         //get rid of friend from friends. when they reload the page next time, it wont be included
         //in the initialize data. this way the user doesn't have to wait for page to reload
       } catch (error) {
         console.log("error deleting friend:", error);
       }
     };
-  };
-
-  const handleFriends = async () => {
-    setErrorMessage(<ActivityIndicator />);
-    const getCsrfToken = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/csrf-token/`);
-        return response.data.csrfToken;
-      } catch (error) {
-        console.error("Error retrieving CSRF token:", error);
-        throw new Error("CSRF token retrieval failed");
-      }
-    };
-    try {
-      const csrfToken = await getCsrfToken();
-      console.log("user1: " + username);
-      console.log("user2: " + usernameSearch);
-      const response = await axios.post(
-        `${API_URL}/add_friend/`,
-        {
-          user1: username,
-          user2: usernameSearch,
-        },
-        {
-          headers: {
-            "X-CSRFToken": csrfToken,
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
-      console.log("Friend response:", response.data);
-      setErrorMessage(
-        <View style={styles.errorMessageBoxSucceed}>
-          <Text style={styles.errorMessageTextSucceed}> </Text>
-        </View>
-      );
-    } catch (error) {
-      console.log(error);
-      setErrorMessage(
-        <View style={styles.errorMessageBox}>
-          <Text style={styles.errorMessageText}>{error.response.data}</Text>
-        </View>
-      );
-    }
   };
 
   const renderItem = ({ item }) => {
