@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
     View,
     Text,
@@ -9,23 +9,32 @@ import {
     ScrollView,
     Image,
     ActivityIndicator,
-    FlatList
+    FlatList,
+    Button,
+    Animated,
+    Dimensions,
+    KeyboardAvoidingView
 } from 'react-native';
+
+import { Ionicons } from "@expo/vector-icons";
 import makeThemeStyle from '../../tools/Theme.js';
 import * as Storage from "../../AsyncStorage.js";
 import IP_ADDRESS from "../../ip.js";
 import axios from 'axios';
-import { SearchBar } from '@rneui/themed';
-
+import SpinningPen from '../greet/Pen.js';
+import ExpandingSearchBar from '../../tools/ExpandingSearchBar.js';
+const layout = Dimensions.get("window");
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
 const AddFriends = ({navigation, onSwitch}) => {
     theme = makeThemeStyle();
     const [username, setUsername] = useState("");
-    const [usernameSearch, setUsernameSearch] = useState("");
-    const [search, setSearch] = useState("");
     const [errorMessage, setErrorMessage] = useState(null);
     const [users, setUsers] = useState([]);
+    const [isLoading, setIsLoading] =  useState(false);
+
+    const translateY = useRef(new Animated.Value(-layout.height)).current;
+
 
     const navigateFriendList = () => {
         console.log(onSwitch);
@@ -42,59 +51,68 @@ const AddFriends = ({navigation, onSwitch}) => {
         loadUsername();
     }, []);
 
-    const updateUsernameSearch = (usernameSearch) => {
-        setUsernameSearch(usernameSearch);
-    };
-    const updateSearch = (search) => {
-        setSearch(search);
+    const getCsrfToken = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/csrf-token/`);
+        return response.data.csrfToken;
+      } catch (error) {
+        console.error("Error retrieving CSRF token:", error);
+        throw new Error("CSRF token retrieval failed");
+      }
     };
 
-    const handleFriends = async() => {
-        setErrorMessage(<ActivityIndicator />);
-        const getCsrfToken = async() => {
-            try{
-                const response = await axios.get(`${API_URL}/csrf-token/`)
-                return response.data.csrfToken;
-            } catch (error) {
-                console.error("Error retrieving CSRF token:", error);
-                throw new Error("CSRF token retrieval failed");
-            }
-        };
-        try {
-            const csrfToken = await getCsrfToken();
-            console.log("user1: " + username);
-            console.log("user2: " + usernameSearch);
-            const response = await axios.post(
-                `${API_URL}/add_friend/`, 
-                {
-                    user1: username,
-                    user2: usernameSearch,
-                },
-                {
-                    headers: 
-                    {
-                        "X-CSRFToken": csrfToken,
-                        "Content-Type": "application/json",
-                    },
-                    withCredentials: true,
-                }
-            );
-            console.log("Friend response:", response.data);
-            let message = response.data.message
-            setErrorMessage(
-                <View style={styles.errorMessageBoxSucceed}>
-                  <Text style={styles.errorMessageTextSucceed}> {message} </Text>
-                </View>
-              );
-        } catch(error) {
-            console.log(error)
-            setErrorMessage(
-                <View style={styles.errorMessageBox}>
-                  <Text style={styles.errorMessageText}>{error.response.data}</Text>
-                </View>
-            );
-        }
+    const searchUsers = async (searchText) => {
+      console.log('searchig for ...', searchText)
+      try {
+        const response = await axios.get(`${API_URL}/search-users/`, {
+          params: {
+            search: searchText.toLowerCase(),
+          },
+        });
+        return response.data;
+      } catch (error) {
+        console.error("Failed to fetch users:", error);
+        return [];
+      }
     };
+
+    const handleAddFriend = async (friendUsername) => {
+      //add friend logic below
+      console.log("Adding: ", friendUsername);
+      try {
+        const csrfToken = await getCsrfToken();
+        const response = await axios.post(`${API_URL}/add_friend/`, {
+          user1: username,
+          user2: friendUsername,
+        },
+        {
+          headers:
+          {
+            "X-CSRFToken": csrfToken,
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+      console.log("Add Response: ", response);
+
+      } catch(error) {
+        console.log("error adding friend:", error);
+      }
+    };
+
+    const handleSearch = async (searchText) => {
+      setIsLoading(true);
+      const foundUsers = await searchUsers(searchText);
+      translateY.setValue(1000);
+      setUsers(foundUsers);
+      setIsLoading(false);
+      Animated.spring(translateY, {
+        toValue: 0,
+        useNativeDriver: true,
+      }).start();
+    };
+
 
     const renderItem = ({ item }) => {
       // Check if the user is already a friend
@@ -110,6 +128,7 @@ const AddFriends = ({navigation, onSwitch}) => {
                 }}
                 style={styles.avatar}
               />
+              {/* <Text>{item.profile_picture}</Text> */}
             </View>
             <View style={styles.textContainer}>
               <View style={styles.nameContainer}>
@@ -125,11 +144,9 @@ const AddFriends = ({navigation, onSwitch}) => {
                 <Text style={styles.msgTxt}>@{item.username}</Text>
               </View>
             </View>
-            <View style={styles.deleteFriendButton}>
-              <TouchableOpacity
-                onPress={() => handleDeleteFriend(item.username)}
-              >
-                <Ionicons name={"close"} size={20} color="#0066cc" />
+            <View style={styles.acceptRequestButton}>
+              <TouchableOpacity onPress={() => handleAddFriend(item.username)}>
+                <Text style={styles.acceptButtonText}>ADD</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -138,45 +155,39 @@ const AddFriends = ({navigation, onSwitch}) => {
     };
 
     return (
-      <View style={styles.container}>
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Add Friends</Text>
-          <View style={styles.horizontalLine} />
-        </View>
-        {/* <TextInput
-          style={[styles.input]}
-          placeholder="Find User..."
-          onChangeText={(text) => updateUsernameSearch(text)}
-          value={usernameSearch}
-        /> */}
-        <SearchBar
-          placeholder="Add Friends..."
-          onChangeText={updateSearch}
-          value={search}
-          //   style={styles.input}
-          lightTheme
-          showCancel
-          platform="ios"
-        />
-        <FlatList
-          enableEmptySections={true}
-          data={users}
-          keyExtractor={(item) => item.username}
-          renderItem={(item) => renderItem(item)}
-        />
-        {/* <TouchableOpacity style={styles.button} onPress={handleFriends}>
-          <Text style={styles.buttonText}>Send Friend Request</Text>
-        </TouchableOpacity> */}
-        {errorMessage}
-      </View>
+      <KeyboardAvoidingView style={styles.container}>
+        <ExpandingSearchBar onSearch={handleSearch} />
+        {isLoading ? (
+          <View style={styles.loadingStyle}>
+            <SpinningPen />
+          </View>
+        ) : (
+          <Animated.View
+            style={{ ...styles.container, transform: [{ translateY }] }}
+          >
+            {users.length === 0 ? (
+              <View style={styles.noUsers}>
+                <Text style={styles.noUsersText}>No matching users found!</Text>
+              </View>
+            ) : (
+              <FlatList
+                enableEmptySections={true}
+                data={users}
+                keyExtractor={(item) => item.username}
+                renderItem={(item) => renderItem(item)}
+              />
+            )}
+          </Animated.View>
+        )}
+      </KeyboardAvoidingView>
     );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // marginTop: 10,
-    // justifyContent: "center",
+    margin: 10,
+    justifyContent: "sapce-between",
     // alignItems: "center",
   },
   row: {
@@ -209,7 +220,7 @@ const styles = StyleSheet.create({
   nameTxt: {
     marginLeft: 15,
     fontWeight: "600",
-    color: "#0066cc",
+    color: "#4A90E2",
     fontSize: 14,
     width: 170,
   },
@@ -220,7 +231,7 @@ const styles = StyleSheet.create({
   },
   msgTxt: {
     fontWeight: "400",
-    color: "#0066cc",
+    color: "#4A90E2",
     fontSize: 12,
     marginLeft: 15,
   },
@@ -316,6 +327,35 @@ const styles = StyleSheet.create({
     height: 1.25,
     backgroundColor: "#9e9e9e",
     marginLeft: 8, // Adjust spacing between title and line
+  },
+  acceptRequestButton: {
+    padding: 5,
+    borderRadius: 15,
+    backgroundColor: "#4A90E2",
+    // marginRight: 15,
+  },
+  acceptButtonText: {
+    // backgroundColor: "blue",
+    color: "white",
+    fontSize: 12,
+    fontWeight: "bold",
+    // paddingRight: 16,
+    marginHorizontal: 4,
+  },
+  loadingStyle: {
+    marginTop: 150,
+    backgroundColor: "red",
+  },
+  noUsers: {
+    justifyContent: "center",
+    margin: 30,
+    // backgroundColor: "yellow",
+    alignItems: "center",
+    
+
+  },
+  noUsersText: {
+    fontSize: 16,
   },
 });
 

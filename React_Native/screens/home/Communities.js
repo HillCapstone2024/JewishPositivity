@@ -1,4 +1,4 @@
-import { Text, Modal, View, TouchableOpacity, TextInput, StyleSheet, Alert, Dimensions, Keyboard, FlatList, KeyboardAvoidingView, TouchableWithoutFeedback, Image, RefreshControl, Platform, ScrollView } from 'react-native'
+import { Text, Modal, View, TouchableOpacity, Switch, TextInput, StyleSheet, Alert, Dimensions, Keyboard, FlatList, KeyboardAvoidingView, TouchableWithoutFeedback, Image, RefreshControl, Platform, ScrollView } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import * as FileSystem from "expo-file-system";
 import { Ionicons } from "@expo/vector-icons";
@@ -14,6 +14,7 @@ const layout = Dimensions.get("window");
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
 const BottomPopupJoin = ({ visible, onRequestClose }) => {
+    const [communityName, setCommunityName] = useState("")
     const onGestureEvent = (event) => {
         if (event.nativeEvent.translationY > 100) {
             onRequestClose();
@@ -26,8 +27,28 @@ const BottomPopupJoin = ({ visible, onRequestClose }) => {
         }
     };
 
-    const handleCommunityJoin = () => {
-        console.log("Joining a community");
+    const handleCommunityJoin = async () => {
+        try {
+            const response = await axios.post(
+                `${API_URL}/create_community/`,
+                {
+                    username: username,
+                    community_name: communityName,
+                },
+                {
+                    headers: {
+                        "X-CSRFToken": csrfToken,
+                        "Content-Type": "application/json",
+                    },
+                    withCredentials: true,
+                }
+            );
+            console.log("Join Community Response:", response.data);
+        } catch (error) {
+            if (error.response.data) {
+                console.error("Error Joining Community:", error.response.data);
+            }
+        }
     }
 
     return (
@@ -43,9 +64,7 @@ const BottomPopupJoin = ({ visible, onRequestClose }) => {
             >
                 <View style={styles.bottomView}>
                     <Text style={styles.joinHeader}>Join a Community</Text>
-                    <TextInput placeholder='Community Name' style={styles.input} />
-                    <TextInput placeholder='Passcode' style={styles.inputPasscode} />
-
+                    <TextInput placeholder='Community Name' onChangeText={(text) => setCommunityName(text)} style={styles.input} />
                     <TouchableOpacity style={styles.joinModal} onPress={handleCommunityJoin}>
                         <Text style={styles.buttonText}>Join</Text>
                     </TouchableOpacity>
@@ -57,11 +76,10 @@ const BottomPopupJoin = ({ visible, onRequestClose }) => {
 
 const BottomPopupCreate = ({ visible, onRequestClose }) => {
     const [communityInfo, setCommunityInfo] = useState({
-        id: 0,
         community_name: "",
-        description: "",
-        passcode: "",
+        community_description: "",
         community_photo: "",
+        privacy: "",
     });
     const onGestureEvent = (event) => {
         if (event.nativeEvent.translationY > 100) {
@@ -89,9 +107,13 @@ const BottomPopupCreate = ({ visible, onRequestClose }) => {
         try {
             const csrfToken = await getCsrfToken();
             const response = await axios.post(
-                `${API_URL}/delete_user/`,
+                `${API_URL}/create_community/`,
                 {
                     username: username,
+                    community_name: communityInfo.community_name,
+                    community_photo: communityInfo.community_photo,
+                    community_description: communityInfo.community_description,
+                    privacy: communityInfo.privacy,
                 },
                 {
                     headers: {
@@ -185,9 +207,12 @@ const BottomPopupCreate = ({ visible, onRequestClose }) => {
                     </TouchableOpacity>
                     <TextInput placeholder='Community Name' style={styles.input} />
                     <TextInput placeholder='Description' multiline={true} scrollEnabled={true} returnKeyType="default" style={styles.inputDesc} />
-
-                    <TextInput placeholder='Passcode' style={styles.inputPasscode} />
-
+                    <Switch
+                        trackColor={{ false: '#f2f2f2', true: '#4A90E2' }}
+                        thumbColor={'#f2f2f2'} 
+                        onValueChange={() => setCommunityInfo(prevCommunityInfo => ({ ...prevCommunityInfo, privacy: !communityInfo.privacy }))}
+                        value={communityInfo.privacy}
+                    />
                     <TouchableOpacity style={styles.createModal} onPress={handleCommunityCreate}>
                         <Text style={styles.buttonText}>Create</Text>
                     </TouchableOpacity>
@@ -365,7 +390,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         padding: 10,
         margin: 10,
-        backgroundColor: '#4A90E2',
+        backgroundColor: "#4A90E2",
         borderRadius: 10,
     },
     create: {
@@ -373,7 +398,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         padding: 10,
         margin: 10,
-        backgroundColor: 'gold',
+        backgroundColor: "gold",
         borderRadius: 10,
     },
     normalText: {
@@ -386,32 +411,32 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         fontWeight: "bold",
-        color: 'white',
+        color: "white",
         fontSize: 20,
     },
     bottomView: {
         alignItems: "center",
         marginTop: 120,
         flex: 1,
-        backgroundColor: 'white',
+        backgroundColor: "white",
         borderTopRightRadius: 20,
         borderTopLeftRadius: 20,
         padding: 35,
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 5,
     },
     community: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: "row",
+        alignItems: "center",
         height: 50,
-        backgroundColor: '#f2f2f2',
+        backgroundColor: "#f2f2f2",
         borderRadius: 8,
         marginBottom: 12,
         paddingLeft: 12,
         paddingRight: 12,
-        shadowColor: '#4A90E2', // Updated shadow color
+        shadowColor: "#4A90E2", // Updated shadow color
         shadowOffset: {
             width: 0,
             height: 2,
@@ -438,7 +463,7 @@ const styles = StyleSheet.create({
     },
     msgTxt: {
         fontWeight: "400",
-        color: "#0066cc",
+        color: "#4A90E2",
         fontSize: 12,
         marginLeft: 15,
     },
@@ -469,28 +494,28 @@ const styles = StyleSheet.create({
         padding: 4,
     },
     sectionContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: "row",
+        alignItems: "center",
     },
     horizontalLine: {
         flex: 1,
         height: 1.25,
-        backgroundColor: '#9e9e9e',
+        backgroundColor: "#9e9e9e",
         marginLeft: 8, // Adjust spacing between title and line
     },
 
     sectionTitle: {
         fontSize: 12,
-        fontWeight: '600',
-        color: '#9e9e9e',
-        textTransform: 'uppercase',
+        fontWeight: "600",
+        color: "#9e9e9e",
+        textTransform: "uppercase",
         letterSpacing: 1.1,
     },
     deleteCommunityButton: {
-        backgroundColor: "#0066cc",
+        backgroundColor: "#4A90E2",
         padding: 5,
         borderRadius: 5,
-        color: "#0066cc",
+        color: "#4A90E2",
         marginLeft: 60,
     },
     inputDesc: {
@@ -507,7 +532,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         padding: 10,
         margin: 10,
-        backgroundColor: '#4A90E2',
+        backgroundColor: "#4A90E2",
         borderRadius: 10,
     },
     inputPasscode: {
@@ -525,7 +550,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         padding: 10,
         margin: 10,
-        backgroundColor: 'gold',
+        backgroundColor: "gold",
         borderRadius: 10,
     },
     noCommunities: {

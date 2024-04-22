@@ -6,7 +6,6 @@ from JP_Django.models import User, Checkin, Friends, Badges, Community, Communit
 import logging
 import os
 
-
 #a test for the create_user_view
 # use this command in terminal to run test: python manage.py test myapp.tests.test_views.CreateUserViewTestCase
 
@@ -1842,152 +1841,6 @@ class GetTodaysCheckinsViewTestCase(TestCase): # to test retreving todays checki
             logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.user_id)
             logging.info('')   
 
-class UpdateStreakTestCase(TestCase): #to test the streak change functionality
-     
-    #Post Data
-    CREATE_USER_1 = {
-        'username': 'testuser1',
-        'password': 'testpassword',
-        'reentered_password': 'testpassword',
-        'firstname': 'Test',
-        'lastname': 'User',
-        'email': 'success21@example.com',
-        'timezone': 'EST',
-    }
-    
-    TEXT_DATA_SUCCESS = {
-        'username': 'testuser1',
-        'moment_number': 1,
-        'content_type': 'text',
-        'content': None,
-        'text_entry': "This is a sample checkin text",
-    }
-
-    TEXT_DATA_SUCCESS_2 = {
-        'username': 'testuser1',
-        'moment_number': 2,
-        'content_type': 'text',
-        'content': None,
-        'text_entry': "This is a sample checkin text",
-    }
-
-    
-    def setUp(self):
-        logging.info("SETTING UP STREAK TESTING....")
-
-        # Initialize the Django test client
-        client = Client()
-
-        # Make a POST request to create a test user
-        client.post(reverse('create_user_view'), data=json.dumps(self.CREATE_USER_1), content_type=CONTENT_TYPE_JSON)
-    
-    def test_update_streak_success(self):
-        logging.info("Testing update_streak_success....")
-        client = Client()
-        
-        # Check current and longest streak (should be 0)
-        user = User.objects.get(username='testuser1')
-        self.assertEqual(user.current_streak, 0)
-        self.assertEqual(user.longest_streak, 0)
-
-        # Check that no badges are true
-        badges = Badges.objects.get(user_id=user.pk)
-        
-
-        self.assertFalse(badges.one_day)
-        logging.info("Badges: %s", badges)
-
-        # Log user data
-        logging.info('')
-        queryset = User.objects.all()
-        for obj in queryset:
-            logging.info(LOG_MSG_FORMAT, LOG_USER, obj.username)
-            logging.info(LOG_MSG_FORMAT, LOG_CURRENT_STREAK, obj.current_streak)
-            logging.info(LOG_MSG_FORMAT, LOG_LONGEST_STREAK, obj.longest_streak)
-            logging.info('') 
-
-        # Check-in new moment
-        response = client.post(reverse('checkin_view'), data=json.dumps(self.TEXT_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON) #updates streak to 1 and gets the oneday badge
-        self.assertEqual(response.status_code, 200)
-
-        # Get updated user data
-        user = User.objects.get(username='testuser1')
-        badges = Badges.objects.get(user_id=user.pk)
-        logging.info("Badges: %s", badges)
-        # Confirm badge for 1 day streak is awarded
-        self.assertTrue(badges.one_day)
-
-        # Check new current and longest streak lengths (should be 1)
-        self.assertEqual(user.current_streak, 1)
-        self.assertEqual(user.longest_streak, 1)
-        # Log user data after update
-        logging.info('')
-        queryset = User.objects.all()
-        for obj in queryset:
-            logging.info(LOG_MSG_FORMAT, LOG_USER, obj.username)
-            logging.info(LOG_MSG_FORMAT, LOG_CURRENT_STREAK, obj.current_streak)
-            logging.info(LOG_MSG_FORMAT, LOG_LONGEST_STREAK, obj.longest_streak)
-            logging.info('')  
-
-    def test_no_update_streak(self): # test to ensure no update after first checkin of the day
-        logging.info("Testing no_update_streak....")
-        client = Client()
-
-        # Check current and longest streak (should be 0)
-        user = User.objects.get(username='testuser1')
-        self.assertEqual(user.current_streak, 0)
-        self.assertEqual(user.longest_streak, 0)
-
-        # Check one day badge is false
-        badges = Badges.objects.get(user_id=user.pk)
-        self.assertFalse(badges.one_day)
-
-        # Check-in first moment
-        response = client.post(reverse('checkin_view'), data=json.dumps(self.TEXT_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON) #updates streak to 1 and sets the oneday badge
-        self.assertEqual(response.status_code, 200)
-        
-        # Check current and longest streak (should be 1)
-        user = User.objects.get(username='testuser1')
-        self.assertEqual(user.current_streak, 1)
-        self.assertEqual(user.longest_streak, 1)
-
-        # Check that one day badge is true
-        badges = Badges.objects.get(user_id=user.pk)
-        self.assertTrue(badges.one_day)
-
-        # Log user data
-        logging.info('')
-        queryset = User.objects.all()
-        for obj in queryset:
-            logging.info(LOG_MSG_FORMAT, LOG_USER, obj.username)
-            logging.info(LOG_MSG_FORMAT, LOG_CURRENT_STREAK, obj.current_streak)
-            logging.info(LOG_MSG_FORMAT, LOG_LONGEST_STREAK, obj.longest_streak)
-            logging.info('') 
-
-        # Check-in new moment
-        response = client.post(reverse('checkin_view'), data=json.dumps(self.TEXT_DATA_SUCCESS_2), content_type=CONTENT_TYPE_JSON) # shouldn't update streak or badges
-        self.assertEqual(response.status_code, 200)
-
-        # Get updated user data
-        user = User.objects.get(username='testuser1')
-        badges = Badges.objects.get(user_id=user.pk)
-
-        # Confirm badge for 1 day streak is awarded
-        self.assertTrue(badges.one_day)
-
-        # Check new current and longest streak lengths (should still be 1)
-        self.assertEqual(user.current_streak, 1)
-        self.assertEqual(user.longest_streak, 1)
-
-        # Log user data after update
-        logging.info('')
-        queryset = User.objects.all()
-        for obj in queryset:
-            logging.info(LOG_MSG_FORMAT, LOG_USER, obj.username)
-            logging.info(LOG_MSG_FORMAT, LOG_CURRENT_STREAK, obj.current_streak)
-            logging.info(LOG_MSG_FORMAT, LOG_LONGEST_STREAK, obj.longest_streak)
-            logging.info('')
-
 class AddFriendViewTestCase(TestCase): #to test adding friends to user's friend list
 
     # Define constant user data
@@ -2318,6 +2171,210 @@ class GetFriendsViewTestCase(TestCase): # to test retreving all checkin moments 
         for obj in queryset:
             logging.info(obj)
             logging.info('')   
+
+
+class GetPendingFriendRequestsSentViewTestCase(TestCase): # to test retreving all checkin moments from backend to frontend
+   
+      # Define constant user data
+    USER1_DATA = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+    USER2_DATA = {
+        'username': 'testuser2',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test2@example.com',
+        'timezone': 'EST',
+    }
+
+    USER3_DATA = {
+        'username': 'testuser3',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test3@example.com',
+        'timezone': 'EST',
+    }
+
+
+    def setUp(self):
+        # Initialize the Django test client
+        client = Client()
+
+        # Make a POST request to create test users and checkins
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)# make two users
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER2_DATA), content_type=CONTENT_TYPE_JSON)
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER3_DATA), content_type=CONTENT_TYPE_JSON)
+
+        # Send a friend request
+        client.post(reverse('add_friend_view'), data=json.dumps({
+            'user1': 'testuser1',
+            'user2': 'testuser2' #user 1 adds user2
+        }), content_type=CONTENT_TYPE_JSON)
+        client.post(reverse('add_friend_view'), data=json.dumps({
+            'user1': 'testuser1',
+            'user2': 'testuser3' #user 1 adds user3
+        }), content_type=CONTENT_TYPE_JSON)
+
+        #accept requests of friend testuser1
+        client.post(reverse('add_friend_view'), data=json.dumps({
+            'user1': 'testuser2',
+            'user2': 'testuser1' #user 2 adds user 1
+        }), content_type=CONTENT_TYPE_JSON) 
+        #leave pending sent by testuser1 to user 3
+
+        
+    def test_GetPendingFriendRequestsSent_success(self):# Successfully retrieves a valid user's checkins from the database
+        logging.info("************test_GetPendingFriendRequestsSent_success**************..........")
+        client = Client()
+
+        # Create test data
+        get_data = {'username': 'testuser1'} # to retrieve all (or if one add in moment#) checkins for this user
+
+        # Send GET request to get_checkin_info_view
+        response = client.get(reverse('get_pending_requests_sent_friends_view'), data=get_data)
+
+        # Check if response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+        # Printing DB after attempted getting of checkins
+        logging.info('Response: %s', response)
+        logging.info('')
+        queryset = Checkin.objects.all()
+        for obj in queryset:
+            logging.info(obj)
+            logging.info('') 
+
+
+    def test_GetPendingFriendRequestsSent_fail_User_DNE(self):# Fails to get checkins in database due to user not existing
+        logging.info("***************Test_GetPendingFriendRequestsSent_fail_User_DNE**************")
+        client = Client()
+
+        # Create test data
+        get_data = {'username': 'doesnotexist'} 
+
+        # Send GET request
+        response = client.get(reverse('get_pending_requests_sent_friends_view'), data=get_data)
+
+        # Check if response status code is 400 -- failure
+        self.assertEqual(response.status_code, 400)
+
+        # Printing DB after attempted getting of checkins
+        queryset = Checkin.objects.all()
+        for obj in queryset:
+            logging.info(obj)
+
+class GetPendingFriendRequestsRecievedViewTestCase(TestCase): # to test retreving all checkin moments from backend to frontend
+   
+      # Define constant user data
+    USER1_DATA = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+    USER2_DATA = {
+        'username': 'testuser2',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test2@example.com',
+        'timezone': 'EST',
+    }
+
+    USER3_DATA = {
+        'username': 'testuser3',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test3@example.com',
+        'timezone': 'EST',
+    }
+
+
+    def setUp(self):
+        # Initialize the Django test client
+        client = Client()
+
+        # Make a POST request to create test users and checkins
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)# make two users
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER2_DATA), content_type=CONTENT_TYPE_JSON)
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER3_DATA), content_type=CONTENT_TYPE_JSON)
+
+        # Send a friend request
+        client.post(reverse('add_friend_view'), data=json.dumps({
+            'user1': 'testuser1',
+            'user2': 'testuser2' #user 1 adds user2
+        }), content_type=CONTENT_TYPE_JSON)
+        client.post(reverse('add_friend_view'), data=json.dumps({
+            'user1': 'testuser1',
+            'user2': 'testuser3' #user 1 adds user3
+        }), content_type=CONTENT_TYPE_JSON)
+
+        #accept requests of friend testuser1
+        client.post(reverse('add_friend_view'), data=json.dumps({
+            'user1': 'testuser2',
+            'user2': 'testuser1' #user 2 adds user 1
+        }), content_type=CONTENT_TYPE_JSON) 
+        #leave pending sent by testuser1 to user 3
+
+        
+    def test_GetPendingFriendRequestsReceivedViewTestCase_success(self):# Successfully retrieves a valid user's checkins from the database
+        logging.info("************test_GetPendingFriendRequestsRecievedViewTestCase_success**************..........")
+        client = Client()
+
+        # Create test data
+        get_data = {'username': 'testuser3'} # to retrieve all (or if one add in moment#) checkins for this user
+
+        # Send GET request to get_checkin_info_view
+        response = client.get(reverse('get_pending_requests_received_friends_view'), data=get_data)
+
+        # Check if response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+        # Printing DB after attempted getting of checkins
+        logging.info('Response: %s', response)
+        logging.info('')
+        queryset = Checkin.objects.all()
+        for obj in queryset:
+            logging.info(obj)
+            logging.info('') 
+
+
+    def test_GetPendingFriendRequestsReceivedViewTestCase_fail_User_DNE(self):# Fails to get checkins in database due to user not existing
+        logging.info("***************Test_GetPendingFriendRequestsReceivedViewTestCase_fail_User_DNE**************")
+        client = Client()
+
+        # Create test data
+        get_data = {'username': 'doesnotexist'} 
+
+        # Send GET request
+        response = client.get(reverse('get_pending_requests_received_friends_view'), data=get_data)
+
+        # Check if response status code is 400 -- failure
+        self.assertEqual(response.status_code, 400)
+
+        # Printing DB after attempted getting of checkins
+        queryset = Checkin.objects.all()
+        for obj in queryset:
+            logging.info(obj)
+
 
 class DeleteUserViewTestCase(TestCase):  # To test deleting users account from the User table
     # Define constant user data
@@ -3578,3 +3635,428 @@ class JoinCommunityViewTestCase(TestCase):
         # Send POST to join public community AGAIN
         response = client.post(reverse('request_to_join_community_view'), data=json.dumps(self.PUBLIC_JOIN_POST_DATA), content_type=CONTENT_TYPE_JSON)
         self.assertEqual(response.status_code, 400)
+
+class InviteToJoinCommunityViewTestCase(TestCase):
+    # Define constant user data
+    USER1_DATA = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+    USER2_DATA = {
+        'username': 'testuser2',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test2@example.com',
+        'timezone': 'EST',
+    }
+
+    USER3_DATA = {
+        'username': 'testuser3',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test3@example.com',
+        'timezone': 'EST',
+    }
+
+    # Define post data
+    PRIVATE_COMMUNITY = {
+        'community_name': "Name of private Community",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "testuser1", # username of the owner
+        "privacy": 'private',
+    }
+
+    COMMUNITY_INVITE_POST_DATA = {
+        'owner_username': 'testuser1', # username of the owner
+        'invited_username': 'testuser2',
+        'community_name': 'Name of private Community', 
+    }
+
+    IMPOSTER_COMMUNITY_INVITE_POST_DATA = {
+        'owner_username': 'testuser3', # username of the owner
+        'invited_username': 'testuser2',
+        'community_name': 'Name of private Community', 
+    }
+
+    def setUp(self):
+        # Initialize the Django test client
+        client = Client()
+
+        # Make a POST request to create test users and checkins
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)# make owner
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER2_DATA), content_type=CONTENT_TYPE_JSON)# make other user
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER3_DATA), content_type=CONTENT_TYPE_JSON)# make imposter owner
+        client.post(reverse('create_community_view'), data=json.dumps(self.PRIVATE_COMMUNITY), content_type=CONTENT_TYPE_JSON) #make private community
+    
+    def test_invite_to_join_community_success(self):
+        logging.info("************TEST_invite_to_join_community_success**************..........")
+        client = Client()
+
+        # Send POST to invite user to join private community
+        response = client.post(reverse('invite_to_join_community_view'), data=json.dumps(self.COMMUNITY_INVITE_POST_DATA), content_type=CONTENT_TYPE_JSON)
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the member is invited to the community
+        community = Community.objects.get(community_name='Name of private Community')
+        user = User.objects.get(username='testuser2')
+        self.assertEqual(CommunityUser.objects.get(user_id=user.pk, community_id=community.pk).status, 1)
+    
+    def test_accept_join_request_success(self):
+        logging.info("************TEST_invite_to_join_community_success**************..........")
+        client = Client()
+
+        # Get the private community and user objects
+        community = Community.objects.get(community_name='Name of private Community')
+        user = User.objects.get(username='testuser2')
+
+        # Create relationship that simulates user requesting to join a community
+        CommunityUser.objects.create(user_id= user, community_id = community, status= 0, date_joined= datetime.date.today())
+
+        # Send POST to accept the user's request to join the private community
+        response = client.post(reverse('invite_to_join_community_view'), data=json.dumps(self.COMMUNITY_INVITE_POST_DATA), content_type=CONTENT_TYPE_JSON)
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the member is added to the community
+        self.assertEqual(CommunityUser.objects.get(user_id=user.pk, community_id=community.pk).status, 2)
+
+    def test_already_invited_invite_failure(self):
+        logging.info("************TEST_already_invited_invite_failure**************..........")
+        client = Client()
+
+        # Send POST to invite user to join private community
+        response = client.post(reverse('invite_to_join_community_view'), data=json.dumps(self.COMMUNITY_INVITE_POST_DATA), content_type=CONTENT_TYPE_JSON)
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the member is invited to the community
+        community = Community.objects.get(community_name='Name of private Community')
+        user = User.objects.get(username='testuser2')
+        self.assertEqual(CommunityUser.objects.get(user_id=user.pk, community_id=community.pk).status, 1)
+
+        # Send POST to invite user to join private community AGAIN
+        response = client.post(reverse('invite_to_join_community_view'), data=json.dumps(self.COMMUNITY_INVITE_POST_DATA), content_type=CONTENT_TYPE_JSON)
+        self.assertEqual(response.status_code, 400)
+    
+    def test_already_in_community_invite_failure(self):
+        logging.info("************TEST_already_in_community_invite_failure**************..........")
+        client = Client()
+
+        community = Community.objects.get(community_name='Name of private Community')
+        user = User.objects.get(username='testuser2')
+
+        # Create relationship that simulates user already in the community
+        CommunityUser.objects.create(user_id= user, community_id = community, status= 2, date_joined= datetime.date.today())
+
+        # Send POST to invite user to join private community
+        response = client.post(reverse('invite_to_join_community_view'), data=json.dumps(self.COMMUNITY_INVITE_POST_DATA), content_type=CONTENT_TYPE_JSON)
+        self.assertEqual(response.status_code, 400)
+
+    def test_not_owner_invite_failure(self):
+        logging.info("************TEST_not_owner_invite_failure**************..........")
+        client = Client()
+
+        # Send POST to invite user to join private community from someone who is not the owner of the community
+        response = client.post(reverse('invite_to_join_community_view'), data=json.dumps(self.IMPOSTER_COMMUNITY_INVITE_POST_DATA), content_type=CONTENT_TYPE_JSON)
+        self.assertEqual(response.status_code, 400)
+
+class GetUsersInCommunityViewTestCase(TestCase):
+
+
+    USER_DATA = {
+        'username': 'testuser',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+    USER_DATA_2 = {
+        'username': 'testuser2',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test2@example.com',
+        'timezone': 'EST',
+    }
+
+    COMMUNITY_DATA = {
+        'community_name': "Name of Community",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "testuser",  # username of the owner
+        "privacy": 'public',
+    }
+
+    def setUp(self):
+        # Initialize the Django test client
+        self.client = Client()
+
+        # Make a POST request to create test users and a community
+        self.client.post(reverse('create_user_view'), data=json.dumps(self.USER_DATA), content_type='application/json')
+        self.client.post(reverse('create_user_view'), data=json.dumps(self.USER_DATA_2), content_type='application/json')
+        self.client.post(reverse('create_community_view'), data=json.dumps(self.COMMUNITY_DATA), content_type='application/json')
+
+        #create connection of user to communities
+        user1= User.objects.get(username="testuser")
+        user2= User.objects.get(username="testuser2")
+        community= Community.objects.get(community_name="Name of Community")
+        logging.info("User1: %s", user1)
+        logging.info("User2: %s", user2)
+        logging.info("Community: %s", community)
+
+        logging.info("communityUsers: ")
+        queryset = CommunityUser.objects.all()
+        for obj in queryset:
+            logging.info(obj)
+
+        logging.info("before")
+        CommunityUser.objects.create(user_id= user2, community_id = community, status= 2, date_joined=datetime.date.today())
+        logging.info("after")
+
+    def test_get_users_in_community_success(self):
+    # Create test data
+        get_data = {'community_name': 'Name of Community'}
+
+    # Send GET request to get_users_in_community_view
+        response = self.client.get(reverse('get_users_in_community_view'), data=get_data)
+
+    # Check if response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+    # Log the response data for inspection
+        logging.debug("Response data: %s", response.content)
+
+
+
+    def test_get_users_in_community_fail(self):
+        # Create test data for non-existing community
+        get_data = {'community_name': "DNE"}  # Non-existing community ID
+
+        # Send GET request to get_users_in_community_view
+        response = self.client.get(reverse('get_users_in_community_view'), data=get_data)
+
+        # Log the response status code for inspection
+        logging.info("Response status code: %s", response.status_code)
+
+        # Check if response status code is 400 (Community not found)
+        self.assertEqual(response.status_code, 400)
+
+        # Log the response data for inspection
+        response_data = json.loads(response.content)
+        logging.info("Response data: %s", response_data)
+
+
+from datetime import datetime as dt, timedelta, time as tm #do not move this import just in case... please
+class UpdateStreakTestCase(TestCase):
+
+    USER_DATA = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test1@example.com',
+        'timezone': 'EST',
+    }
+
+    CHECKIN_DATA_SUCCESS = {
+        'username': 'testuser1',
+        'moment_number': 1,
+        'content_type': 'text',
+        'content': None, #fill in with example entry
+        'text_entry': "This is a sample checkin text",
+    }
+    
+    checkin_id=-1
+    DELETE_CHECKIN_DATA_SUCCESS = {
+        'checkin_id': checkin_id,
+    }
+
+    
+
+    def setUp(self):
+        logging.info("************ IN SET UP********************")
+       
+        # Initialize the Django test client
+        self.client = Client()
+        
+        # Create a test user, and make a checkin for today
+        self.client.post(reverse('create_user_view'), data=json.dumps(self.USER_DATA), content_type=CONTENT_TYPE_JSON)
+        self.client.post(reverse('checkin_view'), data=json.dumps(self.CHECKIN_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Initziate GET data to get checkin ID, which will be used for deleting in test_update_streak_success
+        get_data = {'username': 'testuser1'} 
+
+        # Send GET request to get_checkin_info_view to retrieve the checkin ID in the database
+        response = self.client.get(reverse('get_checkin_info_view'), data=get_data)
+        
+        # Save the checkin ID to a global variable used in test_update_streak_success
+        response_data = json.loads(response.content)
+        logging.info("response_data: %s",response_data)
+        self.checkin_id = response_data[0]['checkin_id']
+        logging.info("checkin_id: %s",self.checkin_id)
+
+        # Retrieve a fresh user object from the database for creating a checkin
+        user = User.objects.get(username='testuser1')
+
+        # The reason why I do not use the reverse POST to create this checkin is because
+        # our create_checkin_view only uses the current date, so it would be impossible to create a checkin 2 days ago
+        # **THIS WILL NOT UPDATE THE STREAK SINCE IT DOES NOT CALL DELETE_CHECKIN OR CREATE_CHECKIN VIEWS**
+        checkin_2_days_ago = Checkin.objects.create(
+            user_id=user,
+            date=dt.combine(dt.now().date() - timedelta(days=2), tm(12, 0)), # Here the date is being set to 2 days ago
+            moment_number=1,
+            content_type='text',
+            text_entry="Check-in 2 days ago"
+        )
+        logging.info(f"Created check-in: {checkin_2_days_ago.date}, {checkin_2_days_ago.text_entry}")
+
+        # Verify the streaks are correct, which both should be 1 because the only time the streak was updated
+        # was in the reverse POST at the top of this method
+        user = User.objects.get(username='testuser1')
+        logging.info(f'{user.username}\'s Current Streak:{user.current_streak}........EXPECT VALUE: 1')
+        logging.info(f'{user.username}\'s Longest Streak:{user.longest_streak}........EXPECTED VALUE: 1')
+        
+
+        # This should return a checkin for today, none for yesterday, and a checkin for 2 days ago 
+        # (which 2 days ago streak was never counted)
+        logging.info("------------Printing the Checkin table AT THE END OF SETUP-----------------")
+        queryset = Checkin.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_CHECKIN_ID, obj.checkin_id)
+            logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
+            logging.info('')
+  
+
+    def test_update_streak_success(self):
+        logging.info("****************************test_update_streak_success***********************************")
+
+        ####################################### SETUP IN UPDATE STREAK SUCCESS ###################################
+
+        # With this set up below, I intended to add in a check in without calling the create_checkin_view because the create checkin view
+        # is what is calling update_user_streaks, so if I manually put something into the checkin table, this will not update the streak
+        # hence this is a set up to see if when I call the delete view, it does what is intended when updating a streak
+
+        # Retrieve a fresh user object from the database
+        user = User.objects.get(username='testuser1')
+
+        # Add in yesterdays checkin to add a checkin between today and 2 days ago, which I created in the setup method above
+        checkin_1_days_ago = Checkin.objects.create(
+            user_id=user, #use the user object
+            date=dt.combine(dt.now().date() - timedelta(days=1), tm(12, 0)), # Again, the checkin view is not called because I cannot manipulate the date there
+            moment_number=1,
+            content_type='text',
+            text_entry="Check-in yesterday"
+        )
+        logging.info(f"Created check-in: {checkin_1_days_ago.date}, {checkin_1_days_ago.text_entry}")
+
+        ####################################### DELETING IN UPDATE STREAK SUCCESS ###################################
+        
+        logging.info("------------Printing the Checkin table BEFORE DELETING TODAY'S CHECKIN -----------------")
+        queryset = Checkin.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_CHECKIN_ID, obj.checkin_id)
+            logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
+            logging.info('')
+
+        # Delete todays checkin - calls the delete view
+        self.DELETE_CHECKIN_DATA_SUCCESS['checkin_id'] = self.checkin_id # Update the global checkin id in the data retrieved in the setup
+        self.client.post(reverse('delete_checkin_view'), data=json.dumps(self.DELETE_CHECKIN_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Retrieve a fresh user object from the database
+        user = User.objects.get(username='testuser1')
+        logging.info(f"User {user.username} - Current Streak: {user.current_streak}, Longest Streak: {user.longest_streak}")
+        
+        logging.info("------------Printing the Checkin table after DELETING TODAY'S CHECKIN-----------------")
+        queryset = Checkin.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_CHECKIN_ID, obj.checkin_id)
+            logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
+            logging.info('')
+
+        # Check current and longest streak (should be 2), because there is 2 days ago and 1 day ago, but not today (yet)
+        # because today was just deleted
+        user_initial = User.objects.get(username='testuser1')
+        self.assertEqual(user_initial.current_streak, 2, "Current streak should be 2")
+        self.assertEqual(user_initial.longest_streak, 2, "Current streak should be 2")
+
+
+        ####################################### CREATING IN UPDATE STREAK SUCCESS ###################################
+
+        # Adding back todays checkin- calls create checkin  
+        self.client.post(reverse('checkin_view'), data=json.dumps(self.CHECKIN_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        logging.info("------------Printing the Checkin table after CREATE CHECKIN FOR TODAY-----------------")
+        queryset = Checkin.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_CHECKIN_ID, obj.checkin_id)
+            logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
+            logging.info('')
+        
+        # Retrieve a fresh user object  from the database
+        user = User.objects.get(username='testuser1')
+        logging.info(f"User {user.username} - Current Streak: {user.current_streak}, Longest Streak: {user.longest_streak}")
+        
+        # Now the checkin for today was re-added, so both streaks update to 3
+        self.assertEqual(user.current_streak, 3, "Current streak should be 3")
+        self.assertEqual(user.longest_streak, 3, "Longest streak should be 3")
+
+        ####################################### DELETING TODAY AND YESTERDAY IN UPDATE STREAK SUCCESS ###################################
+
+        # Data to GET the checkin IDs for today and yesterday to delete them
+        get_data = {'username': 'testuser1'} 
+
+        # Send GET request to get_checkin_info_view
+        response = self.client.get(reverse('get_checkin_info_view'), data=get_data)
+        
+        # Load data retreived
+        response_data = json.loads(response.content)
+        logging.info("response_data: %s",response_data)
+
+        # A list is returned and [2] is today [1] is 1 day ago [0] is 2 days ago
+        checkin_id_today = response_data[2]['checkin_id']
+        checkin_id_yesterday = response_data[1]['checkin_id']
+        logging.info("checkin_id today: %s",checkin_id_today)
+        logging.info("checkin_id yesterday: %s",checkin_id_yesterday)
+
+        # Delete today's checkin 
+        self.DELETE_CHECKIN_DATA_SUCCESS['checkin_id'] = checkin_id_today
+        self.client.post(reverse('delete_checkin_view'), data=json.dumps(self.DELETE_CHECKIN_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
+       
+        # Delete yesterday's checkin
+        self.DELETE_CHECKIN_DATA_SUCCESS['checkin_id'] = checkin_id_yesterday
+        self.client.post(reverse('delete_checkin_view'), data=json.dumps(self.DELETE_CHECKIN_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        logging.info("------------Printing the Checkin table after DELETING TODAY AND YESTERDAY-----------------")
+        queryset = Checkin.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_CHECKIN_ID, obj.checkin_id)
+            logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
+            logging.info('')
+        
+        # Retrieve a fresh user object from the database
+        user = User.objects.get(username='testuser1')
+        logging.info(f"User {user.username} - Current Streak: {user.current_streak}, Longest Streak: {user.longest_streak}")
+        
+        # Longest streak remains 3 even though the chain of 3 was broken, and current streak becomes 0 since the 
+        # last checkin was 2 days ago
+        self.assertEqual(user.current_streak, 0, "Current streak should be 0")
+        self.assertEqual(user.longest_streak, 3, "Longest streak should be 3")
+
+
+
+    
+    
