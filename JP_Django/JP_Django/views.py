@@ -1933,24 +1933,38 @@ def delete_user_from_community_view(request):
         community_name = data["community_name"]
 
         try:
+
+            # Getting community and user object to find the user within a specfic community
             community = Community.objects.get(community_name=community_name)
             user = User.objects.get(username=username)
 
-            if not CommunityUser.objects.filter(communityuser_id=user.pk, community_id=community.community_id).exists():
-                logging.info("delete_user_from_community_view(): User not found")
-                return HttpResponse("User not found", status=400)
-            
-            if community.owner_id == user:
-                logging.info("delete_user_from_community_view(): Owner deletion attemp failed...")
+            # Attempt to get the CommunityUser object directly not using filter
+            community_user = CommunityUser.objects.get(user_id=user, community_id=community)
+
+            # This is just how owner id is defined in the community table
+            if community.owner_id_id == user.pk:
+                logging.info("delete_user_from_community_view(): Owner deletion attempt failed...")
                 return HttpResponse("Please update owner status to member before leaving the community", status=400)
             
-            CommunityUser.objects.filter(communityuser_id=user.pk, community_id=community.community_id).delete()
+            # If found, delete the user from the community
+            community_user.delete()
             logging.info(f"{user.username} removed from community")
             return HttpResponse(f"{user.username} removed from community", status=200)
+
+        except Community.DoesNotExist:
+            logging.info("delete_user_from_community_view(): Community not found")
+            return HttpResponse("Community not found", status=400)
+        except User.DoesNotExist:
+            logging.info("delete_user_from_community_view(): User not found")
+            return HttpResponse("User not found", status=400)
+        except CommunityUser.DoesNotExist:
+            logging.info("delete_user_from_community_view(): User not in this community")
+            return HttpResponse("User not in this community", status=400)
         except Exception as e:
-            logging.info("delete_user_from_community_view(): ERROR in delete user in community: %s", e)
+            logging.error("delete_user_from_community_view(): Unexpected error %s", e)
             return HttpResponse("Delete user attempt failed", status=400)
+
     return HttpResponse("NOT A POST", status=400)
 
-    
+        
 
