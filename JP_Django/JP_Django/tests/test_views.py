@@ -2959,7 +2959,7 @@ class GetAllCommunityInfoViewTestCase(TestCase): # front end calls get and we re
         # Check if response status code is 200
         self.assertEqual(response.status_code, 200)
 
-class GetUserCommunityInfoViewTestCase(TestCase): # front end calls get and we return all public communities info
+class GetUserCommunityInfoViewTestCase(TestCase): # front end calls get and we return all user's communities info
 
       # Define constant user data
     USER1_DATA = {
@@ -2969,6 +2969,16 @@ class GetUserCommunityInfoViewTestCase(TestCase): # front end calls get and we r
         'firstname': 'Test',
         'lastname': 'User',
         'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+    USER2_DATA = {
+        'username': 'testuser2',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test2@example.com',
         'timezone': 'EST',
     }
 
@@ -2985,10 +2995,21 @@ class GetUserCommunityInfoViewTestCase(TestCase): # front end calls get and we r
         "community_photo": None,
         "community_description": "Test Description",
         "username": "testuser1", # username of the owner
+        "privacy": 'private',
+    }
+
+    GET_USER_COMMUNITIES_SUCCESS_3 = {
+        'community_name': "THIS IS MY ONLY COMMUNITY",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "testuser2", # username of the owner
         "privacy": 'public',
     }
 
-
+    PUBLIC_JOIN_POST_DATA = {
+        'community_name': "THIS IS MY ONLY COMMUNITY",
+        "username": "testuser1",
+    }
 
     def setUp(self):
         # Initialize the Django test client
@@ -2996,8 +3017,11 @@ class GetUserCommunityInfoViewTestCase(TestCase): # front end calls get and we r
 
         # Make instance of users and their communities
         client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)# make user
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER2_DATA), content_type=CONTENT_TYPE_JSON)# make user
         client.post(reverse('create_community_view'), data=json.dumps(self.GET_USER_COMMUNITIES_SUCCESS_1), content_type=CONTENT_TYPE_JSON) #make community
         client.post(reverse('create_community_view'), data=json.dumps(self.GET_USER_COMMUNITIES_SUCCESS_2), content_type=CONTENT_TYPE_JSON) #make community
+        client.post(reverse('create_community_view'), data=json.dumps(self.GET_USER_COMMUNITIES_SUCCESS_3), content_type=CONTENT_TYPE_JSON) #make community
+        client.post(reverse('request_to_join_community_view'), data=json.dumps(self.PUBLIC_JOIN_POST_DATA), content_type=CONTENT_TYPE_JSON) #testuser1 joins public community 3
 
 
 
@@ -3013,6 +3037,12 @@ class GetUserCommunityInfoViewTestCase(TestCase): # front end calls get and we r
 
         # Check if response status code is 200
         self.assertEqual(response.status_code, 200)
+
+        # Check that it returns communities 1,2,3
+        self.assertEqual(len(response_data), 3)
+        self.assertEqual(response_data[0]['community_name'], 'THIS IS MY FIRST COMMUNITY')
+        self.assertEqual(response_data[1]['community_name'], 'THIS IS MY SECOND COMMUNITY')
+        self.assertEqual(response_data[2]['community_name'], 'THIS IS MY ONLY COMMUNITY')
     
     def test_get_user_communities_fail(self):# Fails retrieves nonexistent user specific communities 
         logging.info("************TEST_get_user_communities_fail**************..........")
@@ -3024,6 +3054,95 @@ class GetUserCommunityInfoViewTestCase(TestCase): # front end calls get and we r
         # Check if response status code is 400 -- failing
         self.assertEqual(response.status_code, 400)
 
+class GetOwnerCommunityInfoViewTestCase(TestCase): # front end calls get and we return all communities the user owns
+
+    # Define constant user data
+    USER1_DATA = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+
+    USER2_DATA = {
+        'username': 'testuser2',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test2@example.com',
+        'timezone': 'EST',
+    }
+
+    GET_USER_COMMUNITIES_SUCCESS_1 = {
+        'community_name': "THIS IS MY FIRST COMMUNITY",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "testuser1", # username of the owner
+        "privacy": 'public',
+    }
+
+    GET_USER_COMMUNITIES_SUCCESS_2 = {
+        'community_name': "THIS IS MY SECOND COMMUNITY",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "testuser1", # username of the owner
+        "privacy": 'private',
+    }
+
+    GET_USER_COMMUNITIES_SUCCESS_3 = {
+        'community_name': "THIS IS MY ONLY COMMUNITY",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "testuser2", # username of the owner
+        "privacy": 'public',
+    }
+
+
+
+    def setUp(self):
+        # Initialize the Django test client
+        client = Client()
+
+        # Make instance of users and their communities
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON) # make user
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER2_DATA), content_type=CONTENT_TYPE_JSON) # make user
+        client.post(reverse('create_community_view'), data=json.dumps(self.GET_USER_COMMUNITIES_SUCCESS_1), content_type=CONTENT_TYPE_JSON) #make community
+        client.post(reverse('create_community_view'), data=json.dumps(self.GET_USER_COMMUNITIES_SUCCESS_2), content_type=CONTENT_TYPE_JSON) #make community
+        client.post(reverse('create_community_view'), data=json.dumps(self.GET_USER_COMMUNITIES_SUCCESS_3), content_type=CONTENT_TYPE_JSON) #make community
+
+
+
+    def test_get_owner_communities_success(self):# Successfully retrieves all user specific communities
+        logging.info("************TEST_get_owner_communities_success**************..........")
+        client = Client()
+
+        # Send GET request to get_owner_community_info_view
+        response = client.get(reverse('get_owner_community_info_view'), data={'username': 'testuser1'})
+
+        response_data = json.loads(response.content)
+        logging.info("response_data: %s", response_data)
+
+        # Check if response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+        # Check that it returns community 1+2, but not 3
+        self.assertEqual(len(response_data), 2)
+        self.assertEqual(response_data[0]['community_name'], 'THIS IS MY FIRST COMMUNITY')
+        self.assertEqual(response_data[1]['community_name'], 'THIS IS MY SECOND COMMUNITY')
+    
+    def test_get_owner_communities_fail(self):# Fails retrieves nonexistent user specific communities 
+        logging.info("************TEST_get_owner_communities_fail**************..........")
+        client = Client()
+
+        # Send GET request to get_owner_community_info_view
+        response = client.get(reverse('get_owner_community_info_view'), data={'username': 'doesnotexist'})
+
+        # Check if response status code is 400 -- failing
+        self.assertEqual(response.status_code, 400)
 
 class UpdateCommunityViewTestCase(TestCase): 
     
@@ -3075,46 +3194,55 @@ class UpdateCommunityViewTestCase(TestCase):
     
     UPDATE_COMMUNITY_NAME_SUCCESS = {
         'community_id' : community_id,
+        'username': "testuser1",
         'new_community_name': 'Updated name'
     }
 
     UPDATE_COMMUNITY_DESCRIPTION_SUCCESS = {
         'community_id' : community_id,
+        'username': "testuser1",
         "new_description": "UPDATED Test Description", 
     }
 
     UPDATE_COMMUNITY_OWNER_SUCCESS = {
         'community_id' : community_id,
+        'username': "testuser1",
         "new_owner": "testuser2", 
     }
 
     UPDATE_COMMUNITY_PHOTO_SUCCESS = {
         'community_id' : community_id,
+        'username': "testuser1",
         "new_photo": photo, 
     }
 
     UPDATE_COMMUNITY_PRIVACY_SUCCESS = {
         'community_id' : community_id,
+        'username': "testuser1",
         "new_privacy": "private", 
     }
 
     UPDATE_MULTIPLE_FIELDS = {
         'community_id' : community_id,
+        'username': "testuser1",
         "new_privacy": "private", 
         'new_community_name': 'Updated name again',
     }
 
     INVALID_COMMUNITY_ID = {
         'community_id' : -999,
+        'username': "testuser1",
     }
 
     INVALID_NEW_OWNER = {
         'community_id' : community_id,
+        'username': "testuser1",
         "new_owner": "DNE", 
     }
 
     INVALID_DUPLICATE_COMMUNITY_NAME = {
         'community_id' : community_id,
+        'username': "testuser1",
         "new_community_name": "taken", 
     }
 
@@ -3137,6 +3265,8 @@ class UpdateCommunityViewTestCase(TestCase):
         # Now you can access the dictionary returned by the view
         self.community_id = response_data['community_id']
         logging.info("community_id: %s",self.community_id)
+
+        
         
     #success cases
     def test_update_community_name_success(self):
@@ -3374,8 +3504,6 @@ class UpdateCommunityViewTestCase(TestCase):
 
         # Check if response status code is 400 -- failure
         self.assertEqual(response.status_code, 400)
-      
-    
 
 class DeleteCommunityViewTestCase(TestCase):  # To test deleting community
     
@@ -3857,7 +3985,6 @@ class GetUsersInCommunityViewTestCase(TestCase):
         # Log the response data for inspection
         response_data = json.loads(response.content)
         logging.info("Response data: %s", response_data)
-
 
 from datetime import datetime as dt, timedelta, time as tm #do not move this import just in case... please
 class UpdateStreakTestCase(TestCase):

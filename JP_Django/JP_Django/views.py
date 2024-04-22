@@ -1161,8 +1161,7 @@ def delete_friend_view(request):
             # Query an "or" since both columns since either column can have the usernames
             friendship = Friends.objects.filter(
                 (Q(user1=user1) & Q(user2=unfriend_user)) |
-                (Q(user1=unfriend_user) & Q(user2=user1)),
-                complete=True  # Ensure they are actually friends
+                (Q(user1=unfriend_user) & Q(user2=user1))
             )
 
             # Delete the friendship if it exists
@@ -1538,7 +1537,8 @@ def get_specific_community_info_view(request):
             return HttpResponse("No Name Provided", status=400)
     return HttpResponse(constNotGet)
 
-def get_all_community_info_view(request):
+#get all public communities to display to a user
+def get_all_community_info_view(request): 
     if request.method == "GET":
     
         try:
@@ -1565,7 +1565,52 @@ def get_all_community_info_view(request):
             return HttpResponse("Getting all communities error", status=400)
     return HttpResponse(constNotGet)
 
+# Get all the user's communities (not requests or invites)
 def get_user_community_info_view(request):
+    if request.method == "GET":
+        username = request.GET.get("username")
+
+        # Make sure the username is not empty
+        if username is not None:
+            try:
+                # Retrieve the user from the database by username
+                user = User.objects.get(username=username)
+
+                # retreieve the communities the user is in
+                community_relationships = CommunityUser.objects.filter(user_id=user, status=2)
+                communities = []
+                for relationship in community_relationships: #get associated community 
+                    communities.append(Community.objects.get(community_id=relationship.community_id.pk))
+
+                # Populate the list with dictionaries containing each community and their info
+                communities_list = []
+                for community in communities:
+                    communities_list.append({
+                        'community_id': community.community_id,
+                        'community_name': community.community_name,
+                        'community_description': community.community_description,
+                        'owner_id': community.owner_id.pk,
+                        'privacy': community.privacy,
+                        'date_created': community.date_created.strftime('%Y-%m-%d')
+                    })
+
+                    
+                # Log data and return as JSON response
+                logging.info("Community list:")
+                logging.info(communities_list)
+                return HttpResponse(json.dumps(communities_list), content_type='application/json')
+
+            except User.DoesNotExist:
+                return HttpResponse(constUserDNE, status=400)
+            except Exception as e:
+                logging.error(e)
+                return HttpResponse("An error occurred", status=400)
+        else:  # username was empty
+            return HttpResponse(constUNnotProvided, status=400)
+    return HttpResponse(constNotGet)
+
+# Get communities that the user owns
+def get_owner_community_info_view(request):
     if request.method == "GET":
         username = request.GET.get("username")
 
@@ -1621,6 +1666,13 @@ def update_community_view(request):
         community = Community.objects.get(community_id=community_id) # Retrieve the checkin from the database
         logging.info("COMMUNITY ID from post data: %s", community_id)
         logging.info("COMMUNITY object (name) retrieved from post data: %s", community.community_name)
+        
+        # Check that the user is the owner of the community
+        username = data["username"]
+        user = User.objects.get(username=username)
+        if user != community.owner_id:
+            return HttpResponse("User is not the owner of the community", status=400)
+
     except Exception as e:
         # Log the error and return an HTTP 400 response if the user cannot be retrieved
         logging.info("ERROR RETRIEVING COMMUNITY: %s", e)
@@ -1687,6 +1739,12 @@ def update_photo(community, new_photo):
 def update_privacy(community, new_privacy):
     logging.info("inside update community privacy method.... ")
     try:
+        # if going from private to public, all pending requests(0) should be accepted(2)
+        if new_privacy == "public":
+            community_users = CommunityUser.objects.filter(community_id=community, status=0) #get pending requests 
+            for user in community_users:
+                user.status = 2
+                user.save()
         community.privacy = new_privacy
         community.save()
         logging.info("SUCCESS! privacy has been updated!")
