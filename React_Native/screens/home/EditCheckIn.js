@@ -6,6 +6,7 @@ import {
   Button,
   Dimensions,
   KeyboardAvoidingView,
+  TouchableWithoutFeedback,
   TextInput,
   Text,
   InputAccessoryView,
@@ -34,7 +35,7 @@ import * as Storage from "../../AsyncStorage.js";
 import IP_ADDRESS from "../../ip.js";
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
-export default function EditCheckIn({ editModalVisible, setEditModalVisible, selectedEntry, modalVisible, closeModal }) {
+export default function EditCheckIn({ editModalVisible, setEditModalVisible, selectedEntry, navigation }) {
   const [checkin_id, setCheckin_id] = useState("");
   const [username, setUsername] = useState("");
   const [momentType, setMomentType] = useState(3);
@@ -42,12 +43,14 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
   const [mediaBox, setMediaBox] = useState(false);
   const [mediaType, setMediaType] = useState("text");
   const [base64Data, setBase64Data] = useState("");
-  const [journalText, setJournalText] = useState("");
+  const [checkInText, setCheckInText] = useState("");
   const [showMediaBar, setShowMediaBar] = useState(true);
   const [mediaChanged, setMediaChanged] = useState(false);
   const [selectedOption, setSelectedOption] = useState("");
   const [disableUpdate, setDisableUpdate] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [video, setVideo] = useState({});
+  const videoRefs = useRef({});
   const mediaAccessoryViewID = "MediaBar";
   const theme = makeThemeStyle();
   const now = new Date();
@@ -131,14 +134,52 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
     }
   };
 
-  const updateJournal = async () => {
-    console.log("updating journal entry");
-    let base64JournalText = "";
-    if (mediaType === "text") {
-      base64JournalText = textToBase64(journalText);
-      setBase64Data(base64JournalText);
+  const saveBase64Video = async (base64String, checkin_id ) => {
+    console.log("reached file function");
+    const filename = FileSystem.documentDirectory + checkin_id + "downloadedVideo.mp4";
+    await FileSystem.writeAsStringAsync(filename, base64String, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    return filename; // This is a URI that can be used in the app
+  };
+
+
+  const handleGetVideo = async (checkin_id) => {
+    console.log("getting video for check num:", checkin_id);
+    try {
+      const csrfToken = await getCsrfToken();
+      const response = await axios.get(`${API_URL}/get_video_info/`, {
+        params: {
+          checkin_id: checkin_id,
+        },
+      });
+      // console.log(response.data);
+      const videoUri = await saveBase64Video(response.data, checkin_id);
+      console.log("got video success:", videoUri);
+
+      setVideo((prevVideos) => ({
+        ...prevVideos,
+        [checkin_id]: videoUri,
+      }));
+      // setVideo(videoUri);
+      // videoUriRef.current = videoUri;
+      videoRefs.current[checkin_id] = videoUri;
+      console.log(videoRefs.current);
+      return response.data;
+    } catch (error) {
+      console.log("Error retrieving video:", error);
+      throw new Error("video retreival failed");
     }
-    console.log("check in type: ", mediaType);
+  };
+
+  const updateCheckIn = async () => {
+    console.log("updating checkIn entry");
+    let base64CheckInText = "";
+    if (mediaType === "text") {
+      base64CheckInText = textToBase64(checkInText);
+      setBase64Data(base64CheckInText);
+    }
+    console.log("Check-in type: ", mediaType);
     try {
       const csrfToken = await getCsrfToken();
       const response = await axios.post(
@@ -148,7 +189,7 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
           checkin_id: checkin_id,
           content: base64Data,
           content_type: mediaType,
-          text_entry: journalText,
+          text_entry: checkInText,
         },
         {
           headers: {
@@ -160,10 +201,11 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
       );
       console.log("check in response:", response.data);
       // Check for successful update and close modal
-      setEditModalVisible(false);
+      // setEditModalVisible(false);
+      navigation.goBack();
     } catch (error) {
       console.log(error);
-      console.error("Journal Error:", error.response.data);
+      console.error("CheckIn Error:", error.response.data);
     }
   };  
 
@@ -171,7 +213,7 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
     setMediaUri(null);
     setMediaBox(false);
     setMediaType("text");
-    setDisableUpdate(journalText.trim().length === 0);
+    setDisableUpdate(checkInText.trim().length === 1);
   };
 
   const handleRecordingComplete = async (uri) => {
@@ -182,7 +224,7 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
     // setDisableUpdate(true);
     const base64String = await readFileAsBase64(uri);
     setBase64Data(base64String);
-    setJournalText("");
+    setCheckInText("");
     setMediaBox(true);
     setMediaChanged(!mediaChanged);
     setDisableUpdate(false);
@@ -203,13 +245,13 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
   };
 
   const handleTextComplete = (text) => {
-    setJournalText(text);
-    console.log(text);
+    setCheckInText(text);
+    // console.log(text);
     setDisableUpdate(text.trim().length === 0);
   };
 
   const handleToggle = (toggle) => {
-    console.log("journal side:", toggle);
+    console.log("checkIn side:", toggle);
     setShowMediaBar(!toggle);
   };
 
@@ -252,20 +294,18 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
   };
 
   renderTextBasedOnType = () => {
-    switch (selectedEntry?.moment_number) {
+    switch (selectedEntry?.checkInType) {
       case 'ModehAni':
         return (
           <View style={styles.textContainer}>
             <Text style={{marginBottom: 10, }}>
-              מוֶֹד ה אֱ נָי לָ פָ נָיךָ, מ לָ ךְ חֶ י וְ קַ יָּם, שְׁ ה חֶ	 זַרַ תָּ  בָּ י נָשְׁ מ תֶ י בָּ חֶ מ לָ ה ,רַ בָּ ה אֱ	 מוּנָתֶ ךָ! 
+              !מוֹדֶה אֲנִי לְפָנֶיךָ, מֶלֶךְ חַי וְקַיָּם, שֶׁהֶחֱזַרְתָּ בִּי נִשְׁמָתִי בְּחֶמְלָה ,רַבָּה אֱמוּנָתֶךָ
             </Text>
             <Text style={{marginBottom: 10, fontStyle:"italic"}}>
-              Modeh ani l’fanecha, Melech chai v’kaya, she-hechezarta bi nishmati 
-              b’chemlah, rabbah emunatecha.
+              Modeh ani l’fanecha, Melech chai v’kaya, she-hechezarta bi nishmati b’chemlah, rabbah emunatecha.
             </Text>
             <Text style={{marginBottom: 20}}>
-              I give thanks to You, the Ever-Living Sovereign, that with compassion You 
-              have returned my soul to me, how great is Your faith!
+              I give thanks to You, the Ever-Living Sovereign, that with compassion You have returned my soul to me, how great is Your faith!
             </Text>
           </View>
         );
@@ -273,15 +313,16 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
         return (
           <View style={styles.textContainer}>
             <Text style={{marginBottom: 10, }}>
-              אֱ שְׁ רַ% י יוֹשְׁ בֵ% י בֵ% יתֶ ךָ עוֶֹד יה לָ לָוּךָ סֶּ לָ ה. אֱ שְׁ רַ% י ה ע ם שְׁ כָּ כָ ה לּוֹ אֱ שְׁ רַ% י ה ע ם שְׁ יה)וְ ה אֱ	 לֹה יוְ.           </Text>
+              .אַשְׁרֵי יוֹשְׁבֵי בֵיתֶךָ עוֹד יְהַלְלוּךָ סֶּלָה {"\n"}
+              .אַשְׁרֵי הָעָם שֶׁכָּכָה לּוֹ אַשְׁרֵי הָעָם שֶׁיֲהֹוָה אֱלֹהָיו
+            </Text>
             <Text style={{marginBottom: 10, fontStyle:"italic"}}>
-              Ashrei yoshvei veitecha, od y’hal’lucha selah.
+              Ashrei yoshvei veitecha, od y’hal’lucha selah. {"\n"}
               Ashrei haam shekachah lo, ashrei haam she-Adonai Elohav
             </Text>
             <Text style={{marginBottom: 20}}>
-              Happy are those who dwell in Your house, they shall praise you forever.
-              Happy are those for whom it is so, happy the people from whom Adonai is 
-              God.
+              Happy are those who dwell in Your house, they shall praise you forever. {"\n"}
+              Happy are those for whom it is so, happy the people from whom Adonai is God.
             </Text>
           </View>
         );
@@ -289,16 +330,16 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
         return (
           <View style={styles.textContainer}>
             <Text style={{marginBottom: 10, }}>
-            שְׁ מ ע יִשרַ אֱ% לָ יה)וְ ה אֱ	 לָה% ינָוּ יה)וְ ה אֱ חֶ ֶד: רַוּךְ שְׁ% ם כָּ בֵוְֶד מ לָ כָוּתֶוְ לָ עוְלָ ם וְ ע ֶד:
+              :שְׁמַע יִשרָאֵל יֲהֹוָה אֱלהֵינוּ יֲהֹוָה אֶחָד {"\n"}
+              :בָּרוּךְ שֵׁם כְּבוד מַלְכוּתו לְעולָם וָעֶד
             </Text>
             <Text style={{marginBottom: 10, fontStyle:"italic"}}>
-              Sh’ma Yisrael, Adonai Eloheinu, Adonai Echad!
+              Sh’ma Yisrael, Adonai Eloheinu, Adonai Echad! {"\n"}
               Baruch Shem k’vod malchuto l’olam va-ed.
             </Text>
             <Text style={{marginBottom: 20}}>
-              Hear O Israel, Adonai is our God, Adonai is one.
-              Blessed be the Name whose glorious sovereignty is forever and 
-              ever.
+              Hear O Israel, Adonai is our God, Adonai is one. {"\n"}
+              Blessed be the Name whose glorious sovereignty is forever and ever.
             </Text>
           </View>
         );
@@ -333,7 +374,7 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
                 <TouchableOpacity
                 disabled={disableUpdate}
                 style={styles.updateButton}
-                onPress={updateJournal}
+                onPress={updateCheckIn}
                 testID="updateButton"
                 >
                   <Ionicons name="checkmark-outline" 
@@ -375,51 +416,69 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
                 {mediaBox ? (
                 <View style={styles.mediaContainer}>
                     {mediaType === "image" ? (
+                      console.log("Viewing new image"),
                       <ImageViewer
                           source={mediaUri}
                           onDelete={deleteMedia}
-                          dimensions={{ height: 60, width: 60 }}
+                          style={{ height: 60, width: 60 }}
                           onMediaChange={mediaChanged}
                       />
                     ) : mediaType === "video" ? (
+                      console.log("Viewing new video"),
                       <VideoViewer
-                        mediaUri={mediaUri}
+                        source={mediaUri}
                         onDelete={deleteMedia}
-                        dimensions={{ height: 60, width: 60 }}
+                        style={{ height: 60, width: 60 }}
                       />
                     ) : mediaType === "recording" ? (
+                      console.log("Viewing new recording"),
                       <RecordingViewer
-                        uri={mediaUri}
+                        source={mediaUri}
                         onDelete={deleteMedia}
-                        dimensions={{ height: 60, width: 60 }}
+                        style={{ height: 60, width: 60 }}
                       />
                     ) : selectedEntry?.content_type === "image" ? (
+                      console.log("Viewing passed in image"),
                       <ImageViewer
                         source={mediaUri}
-                        style={[styles.JournalEntryModalImage,]}
+                        style={[styles.CheckInEntryModalImage,]}
                         onDelete={deleteMedia}
-                        // dimensions={{ height: 60, width: 60 }}
                         onMediaChange={mediaChanged}
                       />
                     ) : selectedEntry?.content_type === "video" ? (
-                      
-                      <Image
-                        source={{uri: `data:Image/mp4;base64,${selectedEntry?.content}`}}
-                        style={{ height: 60, width: 60 }}
-                      />
-                      // <VideoViewer
-                      //   source={mediaUri}
-                      //   onDelete={deleteMedia}
-                      //   style={{ height: 60, width: 60 }}
-                      //   // dimensions={{ height: 60, width: 60 }}
-                      // />
-                    ) : (
+                      console.log("Viewing passed in video"),
+                      <View style={styles.CheckInEntryModalImage}>
+                        {video[selectedEntry.checkin_id] ? (
+                          <TouchableWithoutFeedback onLongPress={() => deleteMedia(selectedEntry.checkin_id)}>
+                            <VideoViewer
+                              source={video[selectedEntry.checkin_id]}
+                              style={styles.CheckInEntryModalImage}
+                            />
+                          </TouchableWithoutFeedback>
+                        ) : (
+                          <TouchableOpacity
+                            onPress={() => {
+                            handleGetVideo(selectedEntry.checkin_id);
+                          }}
+                          >
+                          <Image
+                            source={{ uri: `data:Image/mp4;base64,${selectedEntry?.content}` }}
+                            style={styles.CheckInEntryModalImage}
+                          />
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    ) : selectedEntry?.content_type === "recording" ? (
+                      console.log("Viewing passed in recording"),
                       <RecordingViewer
                         source={mediaUri}
                         onDelete={deleteMedia}
                         style={{ height: 60, width: 60}}
                       />
-                    ) }
+                    ) : (
+                      // Render default media component or null if no media type
+                      null
+                    )}
                     <ProgressBar onMediaChange={mediaChanged} />
                 </View>
                 ) : null}
@@ -429,13 +488,13 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
                     {/* <Text style={[styles.boxDescriptor]}>Description</Text> */}
                     <ScrollView style={[styles.dropdownContainer, { height: 350 }]}>
                         <TextInput
-                        style={styles.journalInput}
+                        style={styles.checkInInput}
                         inputAccessoryViewID={mediaAccessoryViewID}
                         maxLength={10000}
                         onChangeText={handleTextComplete}
                         multiline
                         numberOfLines={4}
-                        testID="journalInput"
+                        testID="checkInInput"
                         >
                             {selectedEntry.text_entry}
                         </TextInput>
@@ -574,7 +633,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     // fontWeight: "bold",
   },
-  journalInput: {
+  checkInInput: {
     fontSize: 16,
   },
   scrollingInput: {
@@ -665,9 +724,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#ccc",
     marginTop: 15,
   },
-  JournalEntryModalImage: {
+  CheckInEntryModalImage: {
     width: "100%",
     aspectRatio: 1,
-    borderRadius: 5,
+    // borderRadius: 5,
+  },
+  textContainer: {
+    marginBottom: 15,
+    marginHorizontal: 10,
   },
 });

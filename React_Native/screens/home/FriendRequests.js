@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,8 @@ import {
   ActivityIndicator,
   SafeAreaView,
   Dimensions,
+  RefreshControl,
+  Animated
 } from "react-native";
 import { SearchBar } from "react-native-elements";
 import BottomTab from "../../navigations/BottomTabNavigator";
@@ -19,45 +21,90 @@ import makeThemeStyle from '../../tools/Theme.js';
 import * as Storage from "../../AsyncStorage.js";
 import IP_ADDRESS from "../../ip.js";
 import axios from 'axios';
-import ImageViewer from '../../tools/ImageViewer.js';
+import { Ionicons } from "@expo/vector-icons";
 const layout = Dimensions.get("window");
+import SpinningPen from "../greet/Pen.js";
 
 //import AddFriends from '../screens/home/AddFriends.js';
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
+
 const FriendRequests = ({navigation, onSwitch}) => {
   theme = makeThemeStyle();
   const [username, setUsername] = useState("");
   const [usernameSearch, setUsernameSearch] = useState("");
-  const [errorMessage, setErrorMessage] = useState(null);
   const [friends, setFriends] = useState([]);
-  const [filteredFriends, setFilteredFriends] = useState([]);
-  const [profilePics, setProfilePics] = useState([]);
-  const [profilePicMap, setProfilePicMap] = useState({});
-  const [search, setSearch] = useState("");
+  const [sentRequests, setSentRequests] = useState([]);
+  const [numSentRequests, setNumSentRequests] = useState(0);
+  const [receivedRequests, setReceivedRequests] = useState([]);
+  const [numReceivedRequests, setNumReceivedRequests] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const translateY = useRef(new Animated.Value(-layout.height)).current;
 
   useEffect(() => {
-    console.log('friends list initialize data');
+    if (isLoading === false) {
+      console.log("friends requests initialize data");
       initializeData();
-    }, []);
+    }
+  }, []);
 
-  const initializeData = async () => {
+  const onRefresh = async () => {
+    setRefreshing(true);
     const storedUsername = await Storage.getItem("@username");
     const retrievedFriends = await getFriends(storedUsername);
     const retrievedProfilepics = await fetchProfilePics(retrievedFriends);
+    const retrievedSent = await getSentRequests(storedUsername);
+    const retrievedSentProPics = await fetchProfilePics(retrievedSent);
+    const retrievedReceive = await getReceivedRequests(storedUsername);
+    const retrievedReceiveProPics = await fetchProfilePics(retrievedReceive);
 
-    setFriends(retrievedFriends);
-    setFilteredFriends(retrievedProfilepics);
-    //we want to set them all at the same time so theres not a bunch of rerenders
+    setFriends(retrievedProfilepics);
+    setSentRequests(retrievedSentProPics);
+    setReceivedRequests(retrievedReceiveProPics);
     setUsername(storedUsername || "No username");
-    // setProfilePics(retrievedFriends);
-    setProfilePicMap(map);
-
-
-    // console.log("profile pics:", retrievedFriends);
+    setRefreshing(false);
+    console.log("finished refreshing data.");
   };
 
+  const onReload = async () => {
+    const storedUsername = await Storage.getItem("@username");
+    const retrievedFriends = await getFriends(storedUsername);
+    const retrievedProfilepics = await fetchProfilePics(retrievedFriends);
+    const retrievedSent = await getSentRequests(storedUsername);
+    const retrievedSentProPics = await fetchProfilePics(retrievedSent);
+    const retrievedReceive = await getReceivedRequests(storedUsername);
+    const retrievedReceiveProPics = await fetchProfilePics(retrievedReceive);
+
+    setFriends(retrievedProfilepics);
+    setSentRequests(retrievedSentProPics);
+    setReceivedRequests(retrievedReceiveProPics);
+    setUsername(storedUsername || "No username");
+  }
+
+  const initializeData = async () => {
+    setIsLoading(true);
+    const storedUsername = await Storage.getItem("@username");
+    const retrievedFriends = await getFriends(storedUsername);
+    const retrievedProfilepics = await fetchProfilePics(retrievedFriends);
+    const retrievedSent = await getSentRequests(storedUsername);
+    const retrievedSentProPics = await fetchProfilePics(retrievedSent);
+    const retrievedReceive = await getReceivedRequests(storedUsername);
+    const retrievedReceiveProPics = await fetchProfilePics(retrievedReceive);
+
+    setFriends(retrievedProfilepics);
+    setUsername(storedUsername || "No username");
+    setSentRequests(retrievedSentProPics);
+    setReceivedRequests(retrievedReceiveProPics);
+    setIsLoading(false);
+    console.log("finished initializing data.");
+    Animated.spring(translateY, {
+      toValue: 0,
+      useNativeDriver: true,
+    }).start();
+  };
 
   const getCsrfToken = async () => {
     try {
@@ -81,10 +128,46 @@ const FriendRequests = ({navigation, onSwitch}) => {
       const friendsList = response.data
         .filter((item) => item.status === false)
         .map((item) => item.username);
-      console.log("friends list: ", friendsList);
+      //console.log("friends list: ", friendsList);
       return friendsList;
     } catch (error) {
       console.log("error fetching friends:", error);
+      return [];
+    }
+  };
+
+  const getSentRequests = async (usernameProp) => {
+    try{
+      const response = await axios.get(`${API_URL}/get_pending_requests_sent_friends`, {
+        params: {
+          username: usernameProp,
+        }
+      });
+      const sentList = response.data
+        .map((item) => item.username);
+      console.log("Sent list: ", sentList);
+      setNumSentRequests(sentList.length);
+      return sentList;
+    } catch(error) {
+      console.log("error fetching sent:", error);
+      return [];
+    }
+  };
+
+  const getReceivedRequests = async (usernameProp) => {
+    try{
+      const response = await axios.get(`${API_URL}/get_pending_requests_received_friends`, {
+        params: {
+          username: usernameProp,
+        }
+      });
+      const recievedList = response.data
+        .map((item) => item.username);
+      console.log("Recieved list: ", recievedList);
+      setNumReceivedRequests(recievedList.length);
+      return recievedList;
+    } catch(error) {
+      console.log("error fetching received:", error);
       return [];
     }
   };
@@ -107,7 +190,7 @@ const FriendRequests = ({navigation, onSwitch}) => {
       response.data.forEach((pic) => {
         map[pic.username] = pic.profile_picture;
       });
-      console.log("map reachec", typeof(response.data));
+      console.log("map reached", typeof response.data);
       return response.data;
     } catch (error) {
       console.log("Error retrieving profile pics:", error);
@@ -115,88 +198,80 @@ const FriendRequests = ({navigation, onSwitch}) => {
     }
   };
 
-  const deleteFriends = async () => {
-    console.log("Deleting Friend...");
-    try{
-      const csrfToken = await getCsrfToken();
-      const response = await axios.get(`${API_URL}/delete_friend/`, {
-        params: {
-          username: username,
-          unfriendusername: usernameSearch,
+  const handleDeclineRequest = async (friendUsername) => {
+    Alert.alert(
+      `Are you sure you want to delete your friend request to ${friendUsername}`,
+      `${friendUsername} will no longer see your friend request and will not be notified.`,
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: styles.alertCancelText,
         },
-      });
-      console.log("delete Response: ", response);
-    }
-    catch(error){
-      console.log("error deleting friend:", error);
-    }
-  };
-  
-  const handleFriends = async () => {
-    setErrorMessage(<ActivityIndicator />);
-    const getCsrfToken = async () => {
+        {
+          text: "Delete",
+          onPress: () => declineRequest(),
+          style: "destructive",
+        },
+      ]
+    );
+    const declineRequest = async () => {
+      console.log("Declining:", friendUsername);
+      console.log("From:", username);
       try {
-        const response = await axios.get(`${API_URL}/csrf-token/`);
-        return response.data.csrfToken;
+        const csrfToken = await getCsrfToken();
+        //need a new view that handles declining requests
+        const response = await axios.post(`${API_URL}/delete_friend/`, {
+            username: username,
+            unfriendusername: friendUsername,
+          },
+          {
+            headers: 
+            {
+                "X-CSRFToken": csrfToken,
+                "Content-Type": "application/json",
+            },
+            withCredentials: true,
+        }
+        );
+        console.log("delete Response: ", response);
+        onReload();
       } catch (error) {
-        console.error("Error retrieving CSRF token:", error);
-        throw new Error("CSRF token retrieval failed");
+        console.log("error deleting friend:", error);
       }
     };
+  };
+
+  const handleAcceptRequest = async (friendUsername) => {
+    console.log("Adding: ", friendUsername);
     try {
       const csrfToken = await getCsrfToken();
-      console.log("user1: " + username);
-      console.log("user2: " + usernameSearch);
-      const response = await axios.post(
-        `${API_URL}/add_friend/`,
+      const response = await axios.post(`${API_URL}/add_friend/`, {
+        user1: username,
+        user2: friendUsername,
+      },
+      {
+        headers:
         {
-          user1: username,
-          user2: usernameSearch,
+          "X-CSRFToken": csrfToken,
+          "Content-Type": "application/json",
         },
-        {
-          headers: {
-            "X-CSRFToken": csrfToken,
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
-      );
-      console.log("Friend response:", response.data);
-      setErrorMessage(
-        <View style={styles.errorMessageBoxSucceed}>
-          <Text style={styles.errorMessageTextSucceed}> </Text>
-        </View>
-      );
-    } catch (error) {
-      console.log(error);
-      setErrorMessage(
-        <View style={styles.errorMessageBox}>
-          <Text style={styles.errorMessageText}>{error.response.data}</Text>
-        </View>
-      );
+        withCredentials: true,
+      }
+    );
+    console.log("Add Response: ", response);
+    onReload();
+    } catch(error) {
+      console.log("error adding friend:", error);
     }
   };
 
-  useEffect(() => {
-    setFilteredFriends(
-      search.trim() === ""
-        ? friends
-        : friends.filter((friend) =>
-            friend.toLowerCase().includes(search.toLowerCase())
-          )
-    );
-  }, [search]);
-
-  const updateSearch = (search) => {
-    setSearch(search);
-    // fetchUserIDs(search);
-  };
-
-  const renderItem = ({ item, profilepicProp }) => {
+  const renderItem = ({ item, isRecieved }) => {
     // Check if the user is already a friend
-
+    //console.log("rendered item", item.item.username);
+    item = item.item
     return (
-      <TouchableOpacity>
+      <View>
         <View style={styles.row}>
           <View style={styles.pic}>
             {/* <SvgUri style={styles.pic} uri={item.profile_pic} /> */}
@@ -212,43 +287,103 @@ const FriendRequests = ({navigation, onSwitch}) => {
                 numberOfLines={1}
                 ellipsizeMode="tail"
               >
-                First Last
+                {item.username}
               </Text>
             </View>
             <View style={styles.msgContainer}>
               <Text style={styles.msgTxt}>@{item.username}</Text>
             </View>
           </View>
+          {isRecieved ? (
+            <View style={{ flexDirection: "row" }}>
+              <View style={styles.acceptRequestButton}>
+                <TouchableOpacity
+                  onPress={() => handleAcceptRequest(item.username)}
+                >
+                  <Text style={styles.acceptButtonText}>ADD</Text>
+                </TouchableOpacity>
+              </View>
+              <View>
+                <TouchableOpacity
+                  onPress={() => handleDeclineRequest(item.username)}
+                >
+                  <Ionicons name={"close"} size={20} color="#4A90E2" />
+                  {/* <Text>Reject</Text> */}
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : (
+              <View style={styles.acceptRequestButton}>
+                <TouchableOpacity
+                  onPress={() => handleDeclineRequest(item.username)}
+                >
+                  <Text style={styles.acceptButtonText}>CANCEL</Text>
+                </TouchableOpacity>
+            </View>
+          )}
         </View>
-      </TouchableOpacity>
+      </View>
     );
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* <SearchBar
-        placeholder="Search friends..."
-        onChangeText={updateSearch}
-        value={search}
-        // backgroundColor="blue"
-        lightTheme
-        searchIcon={{ color: "#0066cc" }}
-        clearIcon={{ color: "#0066cc" }}
-        // placeholderTextColor="#0066cc"
-        // showCancel={true}
-        cancelButtonTitle={"Cancel"}
-        // platform={"ios"}
-      /> */}
-      <View style={styles.container}>
-        <View style={[styles.body, { height: layout.height }]}>
-          <FlatList
-            enableEmptySections={true}
-            data={filteredFriends}
-            keyExtractor={(item) => item.username}
-            renderItem={(item) => renderItem(item, item.profilepic)}
-          />
+      {isLoading ? (
+        <View testID="loading-screen">
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Pending Requests (0)</Text>
+            <View style={styles.horizontalLine} />
+          </View>
+          <View style={styles.loadingStyle}>
+            <SpinningPen />
+          </View>
         </View>
-      </View>
+      ) : (
+        <Animated.View
+          style={{ ...styles.container, transform: [{ translateY }] }}
+        >
+          <View style={styles.container}>
+            <View style={styles.sectionContainer}>
+              <Text style={styles.sectionTitle}>
+                Received Requests ({numReceivedRequests})
+              </Text>
+              <View style={styles.horizontalLine} />
+            </View>
+            <View style={[styles.body, { height: layout.height }]}>
+              <FlatList
+                enableEmptySections={true}
+                data={receivedRequests}
+                keyExtractor={(item) => item.username}
+                renderItem={(item) => renderItem({ item, isRecieved: true })}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    testID="refresh-control"
+                  />
+                }
+              />
+            </View>
+          </View>
+          <View style={styles.container}>
+            <View style={styles.sectionContainer}>
+              <Text style={styles.sectionTitle}>
+                Sent Requests ({numSentRequests})
+              </Text>
+              <View style={styles.horizontalLine} />
+            </View>
+
+            <View style={[styles.body, { height: layout.height }]}>
+              <FlatList
+                enableEmptySections={true}
+                data={sentRequests}
+                keyExtractor={(item) => item.username}
+                renderItem={(item) => renderItem({ item, isRecieved: false })}
+              />
+            </View>
+          </View>
+        </Animated.View>
+      )}
     </SafeAreaView>
   );
 };
@@ -287,7 +422,7 @@ const styles = StyleSheet.create({
   nameTxt: {
     marginLeft: 15,
     fontWeight: "600",
-    color: "#0066cc",
+    color: "#4A90E2",
     fontSize: 14,
     width: 170,
   },
@@ -303,7 +438,7 @@ const styles = StyleSheet.create({
   },
   msgTxt: {
     fontWeight: "400",
-    color: "#0066cc",
+    color: "#4A90E2",
     fontSize: 12,
     marginLeft: 15,
   },
@@ -318,34 +453,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     borderWidth: 2,
-    borderColor: "#0066cc",
+    borderColor: "#4A90E2",
     marginLeft: 20,
   },
-  followButtonText: {
-    // backgroundColor: "blue",
-    color: "#0066cc",
-    fontSize: 12,
-    marginLeft: 5,
-    fontWeight: "bold",
-    // paddingRight: 16,
-    paddingTop: 2,
-  },
-  unfollowButton: {
-    backgroundColor: "#0066cc",
-    padding: 5,
-    borderRadius: 7,
-    flexDirection: "row",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: "#0066cc",
-  },
-  unfollowButtonText: {
+  acceptButtonText: {
     // backgroundColor: "blue",
     color: "white",
     fontSize: 12,
-    marginHorizontal: 5,
     fontWeight: "bold",
-    paddingTop: 2,
+    // paddingRight: 16,
+    marginHorizontal: 4,
   },
   container: {
     flex: 1,
@@ -354,12 +471,6 @@ const styles = StyleSheet.create({
     //justifyContent: "center",
     //alignItems: "center",
   },
-  // container: {
-  //     // paddingTop: 60,
-  //     paddingBottom: 100,
-  //     height: "100%",
-  //     // backgroundColor: "red",
-  //   },
   input: {
     width: "80%",
     height: 40,
@@ -464,6 +575,12 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     shadowOpacity: 0.16,
   },
+  acceptRequestButton: {
+    padding: 5,
+    borderRadius: 15,
+    backgroundColor: "#4A90E2",
+    marginRight: 15,
+  },
 
   friendText: {
     color: "white",
@@ -473,6 +590,28 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
+  },
+  sectionTitle: {
+    paddingVertical: 12,
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#9e9e9e",
+    textTransform: "uppercase",
+    letterSpacing: 1.1,
+  },
+  sectionContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    margin: 10,
+  },
+  horizontalLine: {
+    flex: 1,
+    height: 1.25,
+    backgroundColor: "#9e9e9e",
+    marginLeft: 8, // Adjust spacing between title and line
+  },
+  loadingStyle: {
+    marginTop: "30%",
   },
 });
 

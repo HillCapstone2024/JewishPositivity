@@ -76,7 +76,7 @@ export default function MediaAccessoryBar({ mediaProp, toggleRecording }) {
         mediaTypes: ImagePicker.MediaTypeOptions.All, // Allows both videos and images
         allowsEditing: true, // Only applies to images
         aspect: [4, 3],
-        quality: 1,
+        quality: 0,
         });
 
         if (!result.cancelled) {
@@ -98,7 +98,7 @@ export default function MediaAccessoryBar({ mediaProp, toggleRecording }) {
         mediaTypes: ImagePicker.MediaTypeOptions.All, // This will still default to capturing images
         allowsEditing: true, // Only applies to images
         aspect: [4, 3],
-        quality: 1,
+        quality: 0,
         });
 
         if (result && !result.cancelled) {

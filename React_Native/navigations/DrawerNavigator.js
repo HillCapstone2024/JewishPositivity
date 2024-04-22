@@ -37,6 +37,9 @@ import FriendTab from "./FriendTab.js";
 import * as Haptics from "expo-haptics";
 import ImageViewer from "../tools/ImageViewer.js";
 import FriendsParent from "../screens/home/FriendsParent.js";
+import { faUsersLine } from '@fortawesome/free-solid-svg-icons/faUsersLine';
+import { faSynagogue } from '@fortawesome/free-solid-svg-icons/faSynagogue';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 
 const Drawer = createDrawerNavigator();
 
@@ -169,6 +172,7 @@ const MyDrawer = ({ navigation }) => {
           width: "70%",
         },
         drawerLabelStyle: theme["color"],
+        // headerShown: false,
       }}
       drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
@@ -192,7 +196,7 @@ const MyDrawer = ({ navigation }) => {
         }}
       />
       <Drawer.Screen
-        name="Badges"
+        name="Awards"
         component={Badges}
         options={{
           drawerIcon: () => (
@@ -218,9 +222,15 @@ const MyDrawer = ({ navigation }) => {
         component={Communities}
         options={{
           drawerIcon: () => (
-            <Ionicons name="people" size={22} color={theme["color"]["color"]} />
+            // <Ionicons name="people" size={22} color={theme["color"]["color"]} />
+            <FontAwesomeIcon icon={faSynagogue} 
+            // <FontAwesomeIcon icon={faUsersLine}
+            size = {28}
+            color={"black"}
+          />
           ),
         }}
+        
       />
 
       <Drawer.Screen
@@ -229,7 +239,7 @@ const MyDrawer = ({ navigation }) => {
         options={{
           drawerIcon: () => (
             <Ionicons
-              name="settings"
+              name="information-circle"
               size={22}
               color={theme["color"]["color"]}
             />

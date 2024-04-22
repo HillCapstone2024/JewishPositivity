@@ -1,23 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TextInput, ScrollView, Image,ImageViewer, Modal, Pressable } from "react-native";
+import { View, Text, StyleSheet, TextInput, ScrollView, Image, ImageViewer, Modal, Pressable, Alert, ActivityIndicator, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform, SafeAreaView } from "react-native";
 import * as Storage from "../../AsyncStorage.js";
-import { createAvatar } from "@dicebear/core";
 import axios from "axios";
-import { micah } from "@dicebear/collection";
 import { SvgXml } from "react-native-svg";
-import * as ImagePicker from "expo-image-picker"; 
+import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import IP_ADDRESS from "../../ip.js";
-import { Alert } from "react-native";
-import { KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform, SafeAreaView } from "react-native";
-import { ActivityIndicator } from "react-native";
-import { xml } from "@dicebear/core/lib/utils/license.js";
 import * as FileSystem from "expo-file-system";
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
-const EditProfile = ({navigation, onSwitch}) => {
+const EditProfile = ({ navigation, onSwitch }) => {
   const [userInfo, setUserInfo] = useState({
     fname: "",
     lname: "",
@@ -73,11 +67,6 @@ const EditProfile = ({navigation, onSwitch}) => {
 
   const [updateProfilePicture, setUpdateProfilePicture] = useState(false);
 
-  const avatar = createAvatar(micah, {
-    seed: userInfo.originalUsername,
-    radius: 50,
-    mouth: ["smile", "smirk", "laughing"],
-  }).toString();
 
   async function readFileAsBase64(uri) {
     try {
@@ -105,7 +94,7 @@ const EditProfile = ({navigation, onSwitch}) => {
       { text: "Camera Roll", onPress: () => pickMedia() },
       { text: "Take Photo", onPress: () => takeMedia() },
       { text: "Cancel", style: "cancel" },
-    ]);    
+    ]);
   };
 
   const handleUpdateUser = async () => {
@@ -136,7 +125,7 @@ const EditProfile = ({navigation, onSwitch}) => {
       }
       const response = await axios.post(
         `${API_URL}/update_user_information/`,
-          requestData,
+        requestData,
         {
           headers: {
             "X-CSRFToken": csrfToken,
@@ -162,150 +151,146 @@ const EditProfile = ({navigation, onSwitch}) => {
 
   const pickMedia = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    allowsEditing: true,
-    aspect: [4, 3],
-    quality: 1,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
     });
 
-    if (!result.cancelled) {
+    if (!result.canceled) {
       setUpdateProfilePicture(true);
-      const base64String = await readFileAsBase64(result.assets[0].uri);    
+      const base64String = await readFileAsBase64(result.assets[0].uri);
       setUserInfo(prevUserInfo => ({
         ...prevUserInfo,
         profilePicture: base64String,
       }));
     }
-};
+  };
 
-const takeMedia = async () => {
+  const takeMedia = async () => {
     // Request camera and microphone permissions if not already granted
     const cameraPermission = await ImagePicker.requestCameraPermissionsAsync();
     if (!cameraPermission.granted) {
-        alert("Permissions to access camera and microphone are required!");
-        return;
+      alert("Permissions to access camera and microphone are required!");
+      return;
     }
 
     let result = await ImagePicker.launchCameraAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images, // This will still default to capturing images
-    allowsEditing: true, // Only applies to images
-    aspect: [4, 3],
-    quality: 1,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images, // This will still default to capturing images
+      allowsEditing: true, // Only applies to images
+      aspect: [4, 3],
+      quality: 1,
     });
 
     if (result && !result.cancelled) {
       setUpdateProfilePicture(true);
-      const base64String = await readFileAsBase64(result.assets[0].uri);    
-        setUserInfo(prevUserInfo => ({
-          ...prevUserInfo,
-          profilePicture: base64String,
-        }));
-        await Storage.setItem("@profilePicture", base64String);
+      const base64String = await readFileAsBase64(result.assets[0].uri);
+      setUserInfo(prevUserInfo => ({
+        ...prevUserInfo,
+        profilePicture: base64String,
+      }));
+      await Storage.setItem("@profilePicture", base64String);
     }
-};
+  };
 
   useEffect(() => {
     getUser();
   }, []);
- 
+
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={100}
-      style={[styles.container, theme["background"]]}>
-    <ScrollView 
-      horizontal={false} 
-      contentContainerStyle={styles.scrollViewContent}>
-    <View style={styles.container}>
-   <View style={styles.topBar}>
-        <View style={{ flexDirection: "row", width:"80%" }}>
-          <TouchableOpacity 
-          onPress={navigateProfileView}>
-            <View style={styles.buttonContent}>
-              <Ionicons name="caret-back" size={25} color="#4A90E2" />
-              <Text style={styles.cancelText}>Cancel</Text>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={100}
+          style={[styles.container, theme["background"]]}>
+          <ScrollView
+            horizontal={false}
+            contentContainerStyle={styles.scrollViewContent}>
+            <View style={styles.container}>
+              <View style={styles.topBar}>
+                <View style={{ flexDirection: "row", width: "80%" }}>
+                  <TouchableOpacity
+                    onPress={navigateProfileView}>
+                    <View style={styles.buttonContent}>
+                      <Ionicons name="caret-back" size={25} color="#4A90E2" />
+                      <Text style={styles.cancelText}>Cancel</Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+
+                {loadingSubmit ? (
+                  <View style={styles.ActivityIndicator}>
+                    <ActivityIndicator />
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    style={styles.submitButton}
+                    onPress={handleUpdateUser}
+                  >
+                    <Text
+                      style={styles.submitText}
+                    >
+                      Submit
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+              <TouchableOpacity onPress={handleEditProfilePicture} >
+                <View style={styles.profilePicContainer}>
+                  <Image //source={{ uri: userInfo.profilePicture }} />
+                    style={styles.profilePic}
+                    source={{ uri: `data:image/jpeg;base64,${userInfo?.profilePicture}`, }} />
+                  <View style={styles.cameraIcon}>
+                    <Ionicons name="camera" size={24} color="black" />
+                  </View>
+                </View>
+              </TouchableOpacity>
+              {<Text style={styles.attribute} >First Name:</Text>}
+              <TextInput
+                style={styles.info}
+                placeholder="First Name"
+                onChangeText={(text) => setUserInfo(prevUserInfo => ({
+                  ...prevUserInfo,
+                  fname: (text),
+                }))}
+
+              >{userInfo.fname}</TextInput>
+              {<Text style={styles.attribute} >Last Name:</Text>}
+              <TextInput
+                style={styles.info}
+                placeholder="Last Name"
+                onChangeText={(text) => setUserInfo(prevUserInfo => ({
+                  ...prevUserInfo,
+                  lname: (text),
+                }))}
+
+              >{userInfo.lname}</TextInput>
+              {<Text style={styles.attribute} >Username:</Text>}
+              <TextInput
+                style={styles.info}
+                placeholder="Username"
+                onChangeText={(text) => setUserInfo(prevUserInfo => ({
+                  ...prevUserInfo,
+                  username: (text),
+                }))}
+
+              >{userInfo.username}</TextInput>
+              {<Text style={styles.attribute} >Email:</Text>}
+              <TextInput
+                style={styles.info}
+                placeholder="Email"
+                onChangeText={(text) => setUserInfo(prevUserInfo => ({
+                  ...prevUserInfo,
+                  email: (text),
+                }))}
+
+              >{userInfo.email}</TextInput>
             </View>
-          </TouchableOpacity>
-        </View>
-
-        {loadingSubmit ? (
-          <View style={styles.ActivityIndicator}>
-            <ActivityIndicator />
-          </View>
-        ) : (
-          <TouchableOpacity
-            style={styles.submitButton}
-            onPress={handleUpdateUser}
-          >
-            <Text
-              style={styles.submitText}
-            >
-              Submit
-            </Text>
-          </TouchableOpacity>
-        )}
-    </View> 
-      <TouchableOpacity onPress={handleEditProfilePicture} >
-        <View style={styles.profilePicContainer}>
-        {userInfo.profilePicture && userInfo.profilePicture.trim() != "" ? (
-          <Image //source={{ uri: userInfo.profilePicture }} />
-            style={styles.profilePic}
-            source={{uri: `data:image/jpeg;base64,${userInfo?.profilePicture}`,}}/>
-        ) : (
-          <SvgXml xml={avatar} style={styles.profilePic} /> 
-        )}
-        <View style={styles.cameraIcon}>
-         <Ionicons name="camera" size={24} color="black" />
-        </View>
-      </View>
-      </TouchableOpacity>
-        {<Text style={styles.attribute} >First Name:</Text>}
-        <TextInput
-          style={styles.info}
-          placeholder="First Name"
-          onChangeText = {(text) =>   setUserInfo(prevUserInfo => ({
-                                      ...prevUserInfo,
-                                      fname: (text), 
-                                    }))}
-
-        >{userInfo.fname}</TextInput>
-        {<Text style={styles.attribute} >Last Name:</Text>}
-        <TextInput
-          style={styles.info}
-          placeholder="Last Name"
-          onChangeText = {(text) =>   setUserInfo(prevUserInfo => ({
-                                      ...prevUserInfo,
-                                      lname: (text), 
-                                    }))}
-
-        >{userInfo.lname}</TextInput>
-        {<Text style={styles.attribute} >Username:</Text>}
-        <TextInput
-          style={styles.info}
-          placeholder="Username"
-          onChangeText = {(text) =>   setUserInfo(prevUserInfo => ({
-                                      ...prevUserInfo,
-                                      username: (text), 
-                                    }))}
-
-        >{userInfo.username}</TextInput>
-        {<Text style={styles.attribute} >Email:</Text>}
-        <TextInput
-          style={styles.info}
-          placeholder="Email"
-          onChangeText = {(text) =>   setUserInfo(prevUserInfo => ({
-                                      ...prevUserInfo,
-                                      email: (text), 
-                                    }))}
-
-        >{userInfo.email}</TextInput>
-    </View>
-    </ScrollView>
-    </KeyboardAvoidingView>
-    </TouchableWithoutFeedback>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
     </SafeAreaView>
   );
 };
@@ -323,7 +308,7 @@ const styles = StyleSheet.create({
     borderRadius: 75,
     marginBottom: 20,
     borderWidth: 2,
-    borderColor: "#4A90E2", 
+    borderColor: "#4A90E2",
   },
   title: {
     fontSize: 20,
@@ -331,13 +316,13 @@ const styles = StyleSheet.create({
   },
   cameraIcon: {
     position: "absolute",
-    bottom: 10, 
-    right: 5, 
+    bottom: 10,
+    right: 5,
     backgroundColor: "rgba(255, 255, 255, 0.7)",
     padding: 4,
   },
   scrollViewContent: {
-    flexGrow: 1, 
+    flexGrow: 1,
     marginHorizontal: 1,
   },
   button: {
@@ -403,7 +388,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    backgroundColor: "#4A90E2", 
+    backgroundColor: "#4A90E2",
   },
   topBar: {
     flexDirection: "row",

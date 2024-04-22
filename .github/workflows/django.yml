@@ -46,6 +46,8 @@ jobs:
           python manage.py test JP_Django.tests.test_views.AddFriendViewTestCase
           python manage.py test JP_Django.tests.test_views.GetFriendsViewTestCase
           python manage.py test JP_Django.tests.test_views.DeleteFriendViewTestCase
+          python manage.py test JP_Django.tests.test_views.GetPendingFriendRequestsSentViewTestCase
+          python manage.py test JP_Django.tests.test_views.GetPendingFriendRequestsRecievedViewTestCase
           python manage.py test JP_Django.tests.test_views.DeleteUserViewTestCase
           python manage.py test JP_Django.tests.test_views.UpdateStreakTestCase
           python manage.py test JP_Django.tests.test_views.GetProfilePictureViewTestCase
@@ -53,5 +55,9 @@ jobs:
           python manage.py test JP_Django.tests.test_views.CreateCommunityViewTestCase
           python manage.py test JP_Django.tests.test_views.GetSpecificCommunityInfoViewTestCase
           python manage.py test JP_Django.tests.test_views.GetAllCommunityInfoViewTestCase
+          python manage.py test JP_Django.tests.test_views.GetUserCommunityInfoViewTestCase
           python manage.py test JP_Django.tests.test_views.UpdateCommunityViewTestCase
           python manage.py test JP_Django.tests.test_views.DeleteCommunityViewTestCase
+          python manage.py test JP_Django.tests.test_views.JoinCommunityViewTestCase
+          python manage.py test JP_Django.tests.test_views.InviteToJoinCommunityViewTestCase
+          python manage.py test JP_Django.tests.test_views.GetUsersInCommunityViewTestCase

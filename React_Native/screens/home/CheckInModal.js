@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 const windowHeight = Dimensions.get("window").height;
 
-const JournalModal = ({ onClose, visible, navigation }) => {
+const CheckInModal = ({ onClose, visible, navigation }) => {
   const [checkInType, setCheckInType] = useState("");
   const translateY = useRef(new Animated.Value(windowHeight)).current;
 
@@ -81,7 +81,7 @@ const JournalModal = ({ onClose, visible, navigation }) => {
               onPress={() => {
                 const type = "ModehAni";
                 setCheckInType(type);
-                console.log("JournalModal Passing:", type);
+                console.log("CheckInModal Passing:", type);
                 navigation.navigate('CheckIn', { checkInType: type });
                 onClose();
               }}
@@ -94,7 +94,7 @@ const JournalModal = ({ onClose, visible, navigation }) => {
               onPress={() => {
                 const type = "Ashrei";
                 setCheckInType(type);
-                console.log("JournalModal Passing:", type);
+                console.log("CheckInModal Passing:", type);
                 navigation.navigate('CheckIn', { checkInType: type }); 
                 onClose();
               }}
@@ -107,7 +107,7 @@ const JournalModal = ({ onClose, visible, navigation }) => {
               onPress={() => {
                 const type = "Shema";
                 setCheckInType(type);
-                console.log("JournalModal Passing:", type);
+                console.log("CheckInModal Passing:", type);
                 navigation.navigate('CheckIn', { checkInType: type });
                 onClose();
               }}
@@ -188,4 +188,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default JournalModal;
+export default CheckInModal;
