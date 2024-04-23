@@ -1,4 +1,4 @@
-import { Text, Modal, View, TouchableOpacity, Switch, TextInput, StyleSheet, Alert, Dimensions, Keyboard, FlatList, KeyboardAvoidingView, TouchableWithoutFeedback, Image, RefreshControl, Platform, ScrollView } from 'react-native'
+import { Text, Modal, View, TouchableOpacity, Switch, TextInput, Pressable, StyleSheet, Alert, Dimensions, Keyboard, FlatList, KeyboardAvoidingView, TouchableWithoutFeedback, Image, RefreshControl, Platform, ScrollView } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import * as FileSystem from "expo-file-system";
 import { Ionicons } from "@expo/vector-icons";
@@ -6,8 +6,6 @@ import axios from "axios";
 import IP_ADDRESS from "../../ip.js";
 import * as Storage from "../../AsyncStorage.js";
 import * as ImagePicker from "expo-image-picker";
-
-
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 
 const layout = Dimensions.get("window");
@@ -30,7 +28,7 @@ const BottomPopupJoin = ({ visible, onRequestClose }) => {
     const handleCommunityJoin = async () => {
         try {
             const response = await axios.post(
-                `${API_URL}/create_community/`,
+                `${API_URL}/request_community/`,
                 {
                     username: username,
                     community_name: communityName,
@@ -62,7 +60,7 @@ const BottomPopupJoin = ({ visible, onRequestClose }) => {
                 onGestureEvent={onGestureEvent}
                 onHandlerStateChange={onHandlerStateChange}
             >
-                <View style={styles.bottomView}>
+                <View style={[styles.bottomView, { marginTop: layout.height / 2.8 }]}>
                     <Text style={styles.joinHeader}>Join a Community</Text>
                     <TextInput placeholder='Community Name' onChangeText={(text) => setCommunityName(text)} style={styles.input} />
                     <TouchableOpacity style={styles.joinModal} onPress={handleCommunityJoin}>
@@ -94,7 +92,6 @@ const BottomPopupCreate = ({ visible, onRequestClose }) => {
     };
 
     const handleCommunityCreate = async () => {
-        console.log("Creating a community");
         const getCsrfToken = async () => {
             try {
                 const response = await axios.get(`${API_URL}/csrf-token/`);
@@ -106,9 +103,10 @@ const BottomPopupCreate = ({ visible, onRequestClose }) => {
         };
         try {
             const csrfToken = await getCsrfToken();
-            const response = await axios.post(
-                `${API_URL}/create_community/`,
-                {
+            console.log("Creating a community");
+            console.log(`${API_URL}/create_community/`)
+            const response = await axios.post(`${API_URL}/create_community/`,
+             {
                     username: username,
                     community_name: communityInfo.community_name,
                     community_photo: communityInfo.community_photo,
@@ -123,11 +121,11 @@ const BottomPopupCreate = ({ visible, onRequestClose }) => {
                     withCredentials: true,
                 }
             );
+            console.log("Created a community", response);
+
             console.log("create community response:", response.data);
         } catch (error) {
-            if (error.response.data) {
-                console.error("error creating community:", error.response.data);
-            }
+            console.error("error creating community:", error.response.data);
         }
     };
 
@@ -158,7 +156,7 @@ const BottomPopupCreate = ({ visible, onRequestClose }) => {
 
     //     let result = await ImagePicker.launchCameraAsync({
     //         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    //         allowsEditing: true, 
+    //         allowsEditing: true,
     //         aspect: [4, 3],
     //         quality: 1,
     //     });
@@ -181,6 +179,10 @@ const BottomPopupCreate = ({ visible, onRequestClose }) => {
         ]);
     };
 
+    const handlePrivacyAlert = () => {
+        Alert.alert("Privacy Setting", 'When the privacy setting is on, users are only able to join by request or invite.', [{ text: 'Ok', style: 'default' }])
+    }
+
     return (
         <Modal
             animationType="slide"
@@ -192,7 +194,7 @@ const BottomPopupCreate = ({ visible, onRequestClose }) => {
                 onGestureEvent={onGestureEvent}
                 onHandlerStateChange={onHandlerStateChange}
             >
-                <View style={styles.bottomView}>
+                <ScrollView style={[styles.bottomView, { marginTop: 120 }]}>
                     <Text style={styles.joinHeader}>Create a Community</Text>
                     <TouchableOpacity onPress={handleEditProfilePicture} >
                         <View style={styles.profilePicContainer}>
@@ -205,21 +207,28 @@ const BottomPopupCreate = ({ visible, onRequestClose }) => {
                             </View>
                         </View>
                     </TouchableOpacity>
-                    <TextInput placeholder='Community Name' style={styles.input} />
-                    <TextInput placeholder='Description' multiline={true} scrollEnabled={true} returnKeyType="default" style={styles.inputDesc} />
-                    <Switch
-                        trackColor={{ false: '#f2f2f2', true: '#4A90E2' }}
-                        thumbColor={'#f2f2f2'} 
-                        onValueChange={() => setCommunityInfo(prevCommunityInfo => ({ ...prevCommunityInfo, privacy: !communityInfo.privacy }))}
-                        value={communityInfo.privacy}
-                    />
+                    <TextInput placeholder='Community Name' onValueChange={(text) => setCommunityInfo(prevCommunityInfo => ({ ...prevCommunityInfo, community_name: (text) }))} style={styles.input} />
+                    <TextInput placeholder='Description' multiline={true} scrollEnabled={true} returnKeyType="default" onValueChange={(text) => setCommunityInfo(prevCommunityInfo => ({ ...prevCommunityInfo, community_description: (text) }))} style={styles.inputDesc} />
+                    <View style={styles.privacy}>
+                        <TouchableOpacity
+                            onPress={handlePrivacyAlert}
+                        >
+                            <Text style={styles.privacyText}>Privacy  </Text>
+                        </TouchableOpacity>
+                        <Switch
+                            trackColor={{ false: '#f2f2f2', true: '#4A90E2' }}
+                            thumbColor={'#f2f2f2'}
+                            onValueChange={() => setCommunityInfo(prevCommunityInfo => ({ ...prevCommunityInfo, privacy: prevCommunityInfo.privacy === "private" ? "public" : "private" }))}
+                            value={communityInfo.privacy === "private" ? true : false}
+                        />
+                    </View>
                     <TouchableOpacity style={styles.createModal} onPress={handleCommunityCreate}>
                         <Text style={styles.buttonText}>Create</Text>
                     </TouchableOpacity>
 
-                </View>
+                </ScrollView>
             </PanGestureHandler>
-        </Modal>
+        </Modal >
     );
 };
 
@@ -232,15 +241,17 @@ const Communities = ({ navigation }) => {
     const [communities, setCommunities] = useState([]);
     const [ownedCommunities, setOwnedCommunities] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
+    const [invites, setInvites] = useState([])
 
+    const getJoinedCommunities = () => {
 
+    }
 
     const onRefresh = () => {
         //refresh function here
     };
 
-    const renderItem = ({ item, profilepicProp }) => {
-
+    const renderCommunity = ({ item }) => {
         return (
             <TouchableOpacity onPress={() => { navigation.navigate("Community", { community: item }); }}>
                 <View style={styles.community}>
@@ -281,6 +292,49 @@ const Communities = ({ navigation }) => {
     };
 
 
+    const renderInvite = ({ item }) => {
+        return (
+            <View style={styles.community}>
+                <View style={styles.pic}>
+                    {/* <SvgUri style={styles.pic} uri={item.profile_pic} /> */}
+                    <Image
+                        source={{ uri: `data:Image/jpeg;base64,${item.profile_picture}` }}
+                        style={styles.avatar}
+                    />
+                </View>
+                <View style={styles.textContainer}>
+                    <View style={styles.nameContainer}>
+                        <Text
+                            style={styles.nameTxt}
+                            numberOfLines={1}
+                            ellipsizeMode="tail"
+                        >
+                            {item.name}
+                        </Text>
+                    </View>
+                    <View style={styles.msgContainer}>
+                        <Text style={styles.msgTxt}>Members: {Math.floor(item.members.length * Math.random() * 10)}</Text>
+                    </View>
+                </View>
+                <View>
+                    <TouchableOpacity
+                        style={styles.deleteCommunityButton}
+                        onPress={() => { handleAcceptInvite() }}>
+                        <Ionicons name="check" size={24} color="white" />
+                    </TouchableOpacity>
+                </View>
+                <View>
+                    <TouchableOpacity
+                        style={styles.deleteCommunityButton}
+                        onPress={() => { handleDeclineInvite() }}>
+                        <Ionicons name="x" size={24} color="white" />
+                    </TouchableOpacity>
+                </View>
+            </View>
+        );
+    };
+
+
 
     useEffect(() => {
         const loadUsernameToken = async () => {
@@ -296,6 +350,12 @@ const Communities = ({ navigation }) => {
             description: 'Community Description' + communities.length,
             members: ["sef", "dave", "bob", "joe", "jane"],
         },]);
+        setInvites(prevCommunities => [...prevCommunities, {
+            id: communities.length + 1,
+            name: 'New Community' + communities.length,
+            description: 'Community Description' + communities.length,
+            members: ["sef", "dave", "bob", "joe", "jane"],
+        },])
     }, []);
 
     return (
@@ -321,57 +381,81 @@ const Communities = ({ navigation }) => {
                     />
                 </View>
                 <View style={{ flex: 1 }}>
-                    <View style={styles.sectionContainer}>
-                        <Text style={styles.sectionTitle}> Your Communities</Text>
-                        <View style={styles.horizontalLine} />
-                    </View>
+                    {invites.length > 0 ? (
+                        <>
+                            <View style={styles.sectionContainer}>
+                                <Text style={styles.sectionTitle}>Invitations</Text>
+                                <View style={styles.horizontalLine} />
+                            </View>
+
+                            <View style={styles.container}>
+                                <View style={[styles.body, { flex: 1 }]}>
+                                    <FlatList
+                                        enableEmptySections={true}
+                                        data={communities}
+                                        keyExtractor={(item) => item.name}
+                                        renderItem={(item) => renderCommunity(item)}
+                                        refreshControl={
+                                            <RefreshControl
+                                                refreshing={refreshing}
+                                                onRefresh={onRefresh}
+                                                testID="refresh-control"
+                                            />
+                                        }
+                                    />
+                                </View>
+                            </View>
+                        </>
+                    ) : (null)}
                     {communities.length === 0 ? (
                         <Text style={styles.noCommunities}>
                             Join or create a community to get started!
                         </Text>) : (
-                        <View style={styles.container}>
-                            <View style={[styles.body, { flex: 1 }]}>
-                                <FlatList
-                                    enableEmptySections={true}
-                                    data={communities}
-                                    keyExtractor={(item) => item.name}
-                                    renderItem={(item) => renderItem(item)}
-                                    refreshControl={
-                                        <RefreshControl
-                                            refreshing={refreshing}
-                                            onRefresh={onRefresh}
-                                            testID="refresh-control"
-                                        />
-                                    }
-                                />
+                        <>
+                            <View style={styles.sectionContainer}>
+                                <Text style={styles.sectionTitle}>Your Communities</Text>
+                                <View style={styles.horizontalLine} />
                             </View>
-                        </View>
-                    )}
-                    <View style={styles.sectionContainer}>
-                        <Text style={styles.sectionTitle}>Communities you own</Text>
-                        <View style={styles.horizontalLine} />
-                    </View>
-                    {communities.length === 0 ? (
-                        <Text style={styles.noCommunities}>
-                            Join or create a community to get started!
-                        </Text>) : (
-                        <View style={styles.container}>
-                            <View style={[styles.body, { height: layout.height / 2 }]}>
-                                <FlatList
-                                    enableEmptySections={true}
-                                    data={communities}
-                                    keyExtractor={(item) => item.name}
-                                    renderItem={(item) => renderItem(item)}
-                                    refreshControl={
-                                        <RefreshControl
-                                            refreshing={refreshing}
-                                            onRefresh={onRefresh}
-                                            testID="refresh-control"
-                                        />
-                                    }
-                                />
+                            <View style={styles.container}>
+                                <View style={[styles.body, { flex: 1 }]}>
+                                    <FlatList
+                                        enableEmptySections={true}
+                                        data={communities}
+                                        keyExtractor={(item) => item.name}
+                                        renderItem={(item) => renderCommunity(item)}
+                                        refreshControl={
+                                            <RefreshControl
+                                                refreshing={refreshing}
+                                                onRefresh={onRefresh}
+                                                testID="refresh-control"
+                                            />
+                                        }
+                                    />
+                                </View>
                             </View>
-                        </View>
+                            <View style={styles.sectionContainer}>
+                                <Text style={styles.sectionTitle}>Communities you own</Text>
+                                <View style={styles.horizontalLine} />
+                            </View>
+                            <View style={styles.container}>
+                                <View style={[styles.body, { flex: 1 }]}>
+                                    <FlatList
+                                        enableEmptySections={true}
+                                        data={communities}
+                                        keyExtractor={(item) => item.name}
+                                        renderItem={(item) => renderCommunity(item)}
+                                        refreshControl={
+                                            <RefreshControl
+                                                refreshing={refreshing}
+                                                onRefresh={onRefresh}
+                                                testID="refresh-control"
+                                            />
+                                        }
+                                    />
+                                </View>
+                            </View>
+                        </>
+
                     )}
 
                 </View>
@@ -405,6 +489,11 @@ const styles = StyleSheet.create({
         fontSize: 20,
         paddingLeft: 5,
     },
+    privacy: {
+        justifyContent: 'space-between',
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
     picture: {
         marginRight: 5,
         fontSize: 20,
@@ -415,8 +504,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
     },
     bottomView: {
-        alignItems: "center",
-        marginTop: 120,
+        // alignItems: "center",
         flex: 1,
         backgroundColor: "white",
         borderTopRightRadius: 20,
@@ -511,6 +599,14 @@ const styles = StyleSheet.create({
         textTransform: "uppercase",
         letterSpacing: 1.1,
     },
+
+    privacyText: {
+        fontSize: 13,
+        fontWeight: "600",
+        color: "#4A90E2",
+        textTransform: "uppercase",
+        letterSpacing: 1.1,
+    },
     deleteCommunityButton: {
         backgroundColor: "#4A90E2",
         padding: 5,
@@ -531,6 +627,7 @@ const styles = StyleSheet.create({
     joinModal: {
         alignItems: "center",
         padding: 10,
+        paddingHorizontal: 20,
         margin: 10,
         backgroundColor: "#4A90E2",
         borderRadius: 10,

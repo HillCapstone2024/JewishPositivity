@@ -148,6 +148,7 @@ const SettingsScreen = ({ navigation }) => {
         }
       );
       console.log("Report sent");
+      return Alert.alert('Thank you for your feedback!')
     } catch (error) {
       console.log('report email failed')
       console.error(response.data);
