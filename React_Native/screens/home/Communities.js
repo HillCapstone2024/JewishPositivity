@@ -594,7 +594,7 @@ const styles = StyleSheet.create({
     community: {
         flexDirection: "row",
         alignItems: "center",
-        height: 50,
+        height: 70,
         backgroundColor: "#f2f2f2",
         borderRadius: 8,
         marginBottom: 12,
