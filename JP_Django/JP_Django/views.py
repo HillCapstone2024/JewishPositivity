@@ -1525,7 +1525,7 @@ def get_specific_community_info_view(request):
                 'community_id': community.community_id,
                 'community_name': community.community_name,
                 'community_description': community.community_description,
-                'owner_id': community.owner_id.pk,
+                'owner_id': community.owner_id.username,
                 'privacy': community.privacy,
                 'date_created': community.date_created.strftime('%Y-%m-%d')
             }
@@ -1553,7 +1553,7 @@ def get_all_community_info_view(request):
                     'community_id': community.community_id,
                     'community_name': community.community_name,
                     'community_description': community.community_description,
-                    'owner_id': community.owner_id.pk,
+                    'owner_id': community.owner_id.username,
                     'privacy': community.privacy,
                     'date_created': community.date_created.strftime('%Y-%m-%d')
                 })
@@ -1597,7 +1597,7 @@ def get_user_community_info_view(request):
                         'community_name': community.community_name,
                         'community_description': community.community_description,
                         'community_photo': profile_picture_encoded,
-                        'owner_id': community.owner_id.pk,
+                        'owner_id': community.owner_id.username,
                         'privacy': community.privacy,
                         'date_created': community.date_created.strftime('%Y-%m-%d')
                     })
@@ -1645,7 +1645,7 @@ def get_owner_community_info_view(request):
                         'community_name': community.community_name,
                         'community_description': community.community_description,
                         'community_photo': profile_picture_encoded,
-                        'owner_id': community.owner_id.pk,
+                        'owner_id': community.owner_id.username,
                         'privacy': community.privacy,
                         'date_created': community.date_created.strftime('%Y-%m-%d')
                     })
@@ -1707,7 +1707,7 @@ def get_communities_not_owned_info_view(request):
                         'community_name': community.community_name,
                         'community_description': community.community_description,
                         'community_photo': profile_picture_encoded,
-                        'owner_id': community.owner_id.pk,
+                        'owner_id': community.owner_id.username,
                         'privacy': community.privacy,
                         'date_created': community.date_created.strftime('%Y-%m-%d')
                     })
@@ -1838,7 +1838,6 @@ def update_description(community, new_description):
         logging.info("ERROR IN CHANGING description: %s", e)
         return HttpResponse("Error in updating description", status=400)
 
-
 def delete_community_view(request):
     logging.info('in delete community view')
     if request.method == "POST":
@@ -1863,7 +1862,6 @@ def delete_community_view(request):
 
     return HttpResponse(constInvalidReq, status=400)
 
-   
 def request_to_join_community_view(request):
     # Check if the request method is POST
     if request.method != "POST":
@@ -2000,7 +1998,6 @@ def get_users_in_community_view(request):
     
     # Return constNotGet for any method other than GET
     return HttpResponse(constNotGet)
-
 
 def get_pending_requests_to_community_view(request):
     if request.method == "GET":

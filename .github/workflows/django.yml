@@ -57,6 +57,8 @@ jobs:
           python manage.py test JP_Django.tests.test_views.GetAllCommunityInfoViewTestCase
           python manage.py test JP_Django.tests.test_views.GetUserCommunityInfoViewTestCase
           python manage.py test JP_Django.tests.test_views.GetOwnerCommunityInfoViewTestCase
+          python manage.py test JP_Django.tests.test_views.GetPendingRequestsToCommunityViewTestCase 
+          python manage.py test JP_Django.tests.test_views.GetPendingInvitesToCommunityViewTestCase 
           python manage.py test JP_Django.tests.test_views.UpdateCommunityViewTestCase
           python manage.py test JP_Django.tests.test_views.DeleteCommunityViewTestCase
           python manage.py test JP_Django.tests.test_views.JoinCommunityViewTestCase
