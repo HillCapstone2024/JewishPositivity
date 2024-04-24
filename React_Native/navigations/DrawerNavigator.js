@@ -235,22 +235,6 @@ const MyDrawer = ({ navigation }) => {
       />
 
       <Drawer.Screen
-        name="ViewCommunityTemp"
-        component={ViewCommunity}
-        options={{
-          drawerIcon: () => (
-            // <Ionicons name="people" size={22} color={theme["color"]["color"]} />
-            <FontAwesomeIcon
-              icon={faSynagogue}
-              // <FontAwesomeIcon icon={faUsersLine}
-              size={28}
-              color={"black"}
-            />
-          ),
-        }}
-      />
-
-      <Drawer.Screen
         name="About"
         component={AboutPage}
         options={{
