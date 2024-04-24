@@ -159,7 +159,7 @@ const AddFriends = ({navigation, onSwitch}) => {
         <ExpandingSearchBar onSearch={handleSearch} />
         {isLoading ? (
           <View style={styles.loadingStyle}>
-            <SpinningPen />
+            <SpinningPen loadingText='Loading Users'/>
           </View>
         ) : (
           <Animated.View
@@ -344,7 +344,7 @@ const styles = StyleSheet.create({
   },
   loadingStyle: {
     marginTop: 150,
-    backgroundColor: "red",
+    // backgroundColor: "red",
   },
   noUsers: {
     justifyContent: "center",

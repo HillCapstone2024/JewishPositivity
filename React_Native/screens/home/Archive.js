@@ -27,6 +27,7 @@ import { Ionicons } from "@expo/vector-icons";
 import moment from 'moment';
 import * as FileSystem from "expo-file-system";
 import LoadingScreen from "../greet/Loading.js";
+import SpinningPen from "../greet/Pen.js";
 import VideoViewer from "../../tools/VideoViewer.js";
 import RecordingViewer from "../../tools/RecordingViewer.js";
 
@@ -334,7 +335,8 @@ export default function Archive({ navigation }) {
       {isLoading ? (
         // <ActivityIndicator style={{ height: 100, width: 100 }} />
         <View testID="loading-screen" style={styles.loadingStyle}>
-          <LoadingScreen />
+          {/* <LoadingScreen /> */}
+          <SpinningPen loadingText="Getting Past Entries"/>
         </View>
       ) : (
         <View>
@@ -721,6 +723,7 @@ const styles = StyleSheet.create({
     // height: 20,
     // alignContent: "center",
     marginTop: 200,
-    backgroundColor: "red",
+    // backgroundColor: "red",
+    justifyContent: "center",
   },
 });

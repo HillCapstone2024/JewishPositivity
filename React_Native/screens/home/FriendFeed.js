@@ -21,6 +21,7 @@ import * as Storage from "../../AsyncStorage.js";
 import RecordingViewer from "../../tools/RecordingViewer.js";
 import ViewCheckIn from "./ViewCheckIn.js";
 import LoadingScreen from "../greet/Loading.js";
+import SpinningPen from "../greet/Pen.js";
 import * as FileSystem from "expo-file-system";
 
 const FriendFeed = () => {
@@ -398,7 +399,8 @@ const FriendFeed = () => {
       {isLoading && contentLoading ? (
         // <ActivityIndicator style={{ height: 100, width: 100 }} />
         <View testID="loading-screen" style={styles.loadingStyle}>
-          <LoadingScreen />
+          {/* <LoadingScreen /> */}
+          <SpinningPen loadingText="Loading Todays Posts"/>
         </View>
       ) : (
         <View>
@@ -469,7 +471,8 @@ const styles = StyleSheet.create({
     // height: 20,
     // alignContent: "center",
     marginTop: 200,
-    backgroundColor: "red"
+    // backgroundColor: "red",
+    justifyContent: "center"
   },
   scrollViewContent: {
     paddingBottom: "20%",

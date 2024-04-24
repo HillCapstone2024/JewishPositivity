@@ -335,7 +335,7 @@ const FriendRequests = ({navigation, onSwitch}) => {
             <View style={styles.horizontalLine} />
           </View>
           <View style={styles.loadingStyle}>
-            <SpinningPen />
+            <SpinningPen loadingText='Loading Requests'/>
           </View>
         </View>
       ) : (

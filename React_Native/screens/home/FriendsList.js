@@ -237,7 +237,7 @@ const FriendsList = ({ navigation, onSwitch }) => {
             <View style={styles.horizontalLine} />
           </View>
           <View style={styles.loadingStyle}>
-            <SpinningPen />
+            <SpinningPen loadingText="Loading Friends"/>
           </View>
         </View>
       ) : (
@@ -274,7 +274,7 @@ const FriendsList = ({ navigation, onSwitch }) => {
 const styles = StyleSheet.create({
   loadingStyle: {
     marginTop: 150,
-    backgroundColor: "red",
+    // backgroundColor: "red",
   },
   sectionTitle: {
     paddingVertical: 12,
