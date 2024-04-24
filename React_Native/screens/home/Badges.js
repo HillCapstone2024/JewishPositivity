@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Pressable, Modal, Alert, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Pressable, Modal, Alert } from 'react-native';
 import makeThemeStyle from '../../tools/Theme.js';
 import axios from "axios";
 import IP_ADDRESS from "../../ip.js";
@@ -7,6 +7,7 @@ import * as Storage from "../../AsyncStorage.js";
 
 export default function Badges({}) {
     theme = makeThemeStyle();
+    
 
     const API_URL = "http://" + IP_ADDRESS + ":8000";
     const [username, setUsername] = useState("");
@@ -24,6 +25,7 @@ export default function Badges({}) {
         getBadgeStreakInfo();
       }, [username]);
 
+    
     const getCsrfToken = async () => {
         try {
           const response = await axios.get(`${API_URL}/csrf-token/`);
@@ -76,10 +78,17 @@ export default function Badges({}) {
 
           console.log('Current response:', currentStreakResponse.data);
           console.log('Longest response:', longestStreakResponse.data);
-          setIsDayBadgeUnlocked(badgeResponse.data.one_day);
-          setIsWeekBadgeUnlocked(badgeResponse.data.one_week);
-          setIsMonthBadgeUnlocked(badgeResponse.data.one_month);
-          setIsYearBadgeUnlocked(badgeResponse.data.one_year);
+
+
+          if(badgeResponse.data.one_day) {
+            setDayBadgeIcon(require('../../assets/images/badges/starDay.png')) }
+          if(badgeResponse.data.one_week) {
+            setWeekBadgeIcon(require('../../assets/images/badges/starWeek.png')) }
+          if(badgeResponse.data.one_month) {
+            setMonthBadgeIcon(require('../../assets/images/badges/starMonth.png')) }
+          if(badgeResponse.data.year) {
+            setYearBadgeIcon(require('../../assets/images/badges/starYear.png')) }
+
           setCurrentStreak(currentStreakResponse.data);
           setLongestStreak(longestStreakResponse.data);
           
@@ -108,39 +117,39 @@ export default function Badges({}) {
    const [isYearBadgeUnlocked, setIsYearBadgeUnlocked] = useState(false);
     
    //Determines which trophy icon is used
-   const [dayBadgeIcon, setDayBadgeIcon] = useState(require('../../assets/images/starDayGrey.png'));
-   const [weekBadgeIcon, setWeekBadgeIcon] = useState(require('../../assets/images/starWeekGrey.png'));
-   const [monthBadgeIcon, setMonthBadgeIcon] = useState(require('../../assets/images/starMonthGrey.png'));
-   const [yearBadgeIcon, setYearBadgeIcon] = useState(require('../../assets/images/starYearGrey.png'));
+   const [dayBadgeIcon, setDayBadgeIcon] = useState(require('../../assets/images/badges/starDayGrey.png'));
+   const [weekBadgeIcon, setWeekBadgeIcon] = useState(require('../../assets/images/badges/starWeekGrey.png'));
+   const [monthBadgeIcon, setMonthBadgeIcon] = useState(require('../../assets/images/badges/starMonthGrey.png'));
+   const [yearBadgeIcon, setYearBadgeIcon] = useState(require('../../assets/images/badges/starYearGrey.png'));
 
-    
-    //Changes icon depending on lock status
-    function checkLock() {
-    if (isDayBadgeUnlocked == true){
-        setDayBadgeIcon(require('../../assets/images/starDay.png'));
-    }if (isWeekBadgeUnlocked == true){
-        setWeekBadgeIcon(require('../../assets/images/starWeek.png'));
-    }if (isMonthBadgeUnlocked == true){
-        setMonthBadgeIcon(require('../../assets/images/starMonth.png'));
-    }if (isYearBadgeUnlocked == true){
-        setYearBadgeIcon(require('../../assets/images/starYear.png'));
-    } }
-    
+  
+    // //Changes icon depending on lock status
+    // function checkLock() {
+    // if (isDayBadgeUnlocked == true){
+    //     setDayBadgeIcon(require('../../assets/images/badges/starDay.png'));
+    // }if (isWeekBadgeUnlocked == true){
+    //     setWeekBadgeIcon(require('../../assets/images/badges/starWeek.png'));
+    // }if (isMonthBadgeUnlocked == true){
+    //     setMonthBadgeIcon(require('../../assets/images/badges/starMonth.png'));
+    // }if (isYearBadgeUnlocked == true){
+    //     setYearBadgeIcon(require('../../assets/images/badges/starYear.png'));
+    // } }
+
     const handleModalDay = () => {
         setIsModalVisibleDay(!isModalVisibleDay)
-        checkLock()
+        //checkLock()
     };
     const handleModalWeek = () => {
         setIsModalVisibleWeek(!isModalVisibleWeek)
-        checkLock()
+        //checkLock()
     };
     const handleModalMonth = () => {
         setIsModalVisibleMonth(!isModalVisibleMonth)
-        checkLock()
+        //checkLock()
     };
     const handleModalYear = () => {
         setIsModalVisibleYear(!isModalVisibleYear)
-        checkLock()
+        //checkLock()
     };
     const handleModalCurrent = () => {
         setIsModalVisibleCurrent(!isModalVisibleCurrent)
@@ -149,6 +158,7 @@ export default function Badges({}) {
         setIsModalVisibleLongest(!isModalVisibleLongest)
     };
 
+   
 
     return(
         <ScrollView contentContainerStyle={styles.container}>

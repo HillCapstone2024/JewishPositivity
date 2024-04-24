@@ -9,6 +9,7 @@ import {
 import IP_ADDRESS from "../../ip.js";
 import makeThemeStyle from '../../tools/Theme.js';
 import * as Storage from "../../AsyncStorage.js";
+import axios from "axios";
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
@@ -23,7 +24,10 @@ const csrf = async () => {
     }
   };
   const csrfToken = await getCsrfToken();
-  await Storage.setItem('@CSRF', csrfToken);
+  await Storage.setItem("@CSRF", csrfToken);
+  console.log("stored token: ", csrfToken);
+  // const csrfToken1 = await Storage.getItem("@CSRF");
+  // console.log("stored token1: ", csrfToken1);
 };
 
 const LoadingScreen = ({ width = 180, height = 204 }) => {
@@ -92,6 +96,8 @@ const LoadingScreen = ({ width = 180, height = 204 }) => {
       wobble.start();
       float.start();
     });
+
+    csrf()
   }, [floatAnim, spinValue, wobbleAnim]);
 
   const wobble = wobbleAnim.interpolate({

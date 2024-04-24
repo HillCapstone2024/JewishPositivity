@@ -53,6 +53,7 @@ export default function CheckIn({ navigation, route }) {
   const theme = makeThemeStyle();
   const now = new Date();
   const options = {
+    timeZone: 'America/New_York',
     weekday: "long",
     year: "numeric",
     month: "long",
@@ -226,7 +227,7 @@ export default function CheckIn({ navigation, route }) {
         return (
           <View style={styles.textContainer}>
             <Text style={{marginBottom: 10, textAlign: 'right'}}>
-              !מוֹדֶה אֲנִי לְפָנֶיךָ, מֶלֶךְ חַי וְקַיָּם, שֶׁהֶחֱזַרְתָּ בִּי נִשְׁמָתִי בְּחֶמְלָה ,רַבָּה אֱמוּנָתֶךָ
+              מוֹדֶה אֲנִי לְפָנֶיךָ, מֶלֶךְ חַי וְקַיָּם, שֶׁהֶחֱזַרְתָּ בִּי נִשְׁמָתִי בְּחֶמְלָה ,רַבָּה אֱמוּנָתֶךָ!
             </Text>
             <Text style={{marginBottom: 10, fontStyle:"italic"}}>
               Modeh ani l’fanecha, Melech chai v’kaya, she-hechezarta bi nishmati b’chemlah, rabbah emunatecha.
@@ -240,8 +241,8 @@ export default function CheckIn({ navigation, route }) {
         return (
           <View style={styles.textContainer}>
             <Text style={{marginBottom: 10, textAlign: 'right'}}>
-              .אַשְׁרֵי יוֹשְׁבֵי בֵיתֶךָ עוֹד יְהַלְלוּךָ סֶּלָה {"\n"}
-              .אַשְׁרֵי הָעָם שֶׁכָּכָה לּוֹ אַשְׁרֵי הָעָם שֶׁיֲהֹוָה אֱלֹהָיו
+              אַשְׁרֵי יוֹשְׁבֵי בֵיתֶךָ עוֹד יְהַלְלוּךָ סֶּלָה.{"\n"}
+              אַשְׁרֵי הָעָם שֶׁכָּכָה לּוֹ אַשְׁרֵי הָעָם שֶׁיֲהֹוָה אֱלֹהָיו.
             </Text>
             <Text style={{marginBottom: 10, fontStyle:"italic"}}>
               Ashrei yoshvei veitecha, od y’hal’lucha selah. {"\n"}
@@ -257,8 +258,8 @@ export default function CheckIn({ navigation, route }) {
         return (
           <View style={styles.textContainer}>
             <Text style={{marginBottom: 10, textAlign: 'right'}}>
-              :שְׁמַע יִשרָאֵל יֲהֹוָה אֱלהֵינוּ יֲהֹוָה אֶחָד {"\n"}
-              :בָּרוּךְ שֵׁם כְּבוד מַלְכוּתו לְעולָם וָעֶד
+              שְׁמַע יִשרָאֵל יֲהֹוָה אֱלהֵינוּ יֲהֹוָה אֶחָד: {"\n"}
+              בָּרוּךְ שֵׁם כְּבוד מַלְכוּתו לְעולָם וָעֶד:
             </Text>
             <Text style={{marginBottom: 10, fontStyle:"italic"}}>
               Sh’ma Yisrael, Adonai Eloheinu, Adonai Echad! {"\n"}
@@ -272,6 +273,44 @@ export default function CheckIn({ navigation, route }) {
         );
     }
   };
+
+  renderDescriptiveText = () => {
+    switch (checkInType) {
+      case 'ModehAni':
+        return (
+          <View>
+            <Text style={styles.descriptionTitle}>
+              A Modeh Ani Moment: Time for Gratitude
+            </Text>
+            <Text style={styles.descriptionText}>
+              We begin our day by thanking God for the gift of our souls. As today begins, what are the things that you are grateful for this morning?
+            </Text>
+          </View>
+        );
+      case 'Ashrei':
+        return (
+          <View>
+            <Text style={styles.descriptionTitle}>
+              Ashrei in the Afternoon: Time for Happiness
+            </Text>
+            <Text style={styles.descriptionText}>
+              The afternoon prayer of Ashrei is all about being happy. Take a few minutes now to do something that will make you happy or to reflect on something that is making you happy.
+            </Text>
+          </View>
+        );
+      default:
+        return (
+          <View>
+            <Text style={styles.descriptionTitle}>
+              Time for a Shema Reflection
+            </Text>
+            <Text style={styles.descriptionText}>
+              The Shema is a prayer traditionally recited at bedtime. The prayer begins with the instruction to “Hear,” so at the end of the day, we consider what we heard or experienced that brought us joy or meaning. Think about what you want to hold onto from today into tomorrow.
+            </Text>
+          </View>
+        );
+    }
+  }; 
 
   const handleAccordianToggle = () => {
     setIsExpanded(!isExpanded); // Toggle the state variable
@@ -366,6 +405,8 @@ export default function CheckIn({ navigation, route }) {
               />
             </ScrollView>
           </View>
+
+          {renderDescriptiveText()}
         </ScrollView>
 
         {/* View for cancel and submit buttons */}
@@ -648,5 +689,17 @@ const styles = StyleSheet.create({
     height: 2,
     backgroundColor: "#ccc",
     // marginTop: 15,
+  },
+
+  // Check-in reminder text section
+  descriptionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  descriptionText: {
+    fontSize: 14,
+    lineHeight: 22,
   },
 });

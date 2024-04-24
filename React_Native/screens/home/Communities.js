@@ -31,17 +31,7 @@ const BottomPopupJoin = ({ visible, onRequestClose, username }) => {
         setActivity(
             <ActivityIndicator />
         )
-        const getCsrfToken = async () => {
-            try {
-                const response = await axios.get(`${API_URL}/csrf-token/`);
-                return response.data.csrfToken;
-            } catch (error) {
-                console.error("Error retrieving CSRF token:", error);
-                throw new Error("CSRF token retrieval failed");
-            }
-        };
         try {
-            const csrfToken = await getCsrfToken();
             console.log(`Joining community ${communityName}`);
             const response = await axios.post(
                 `${API_URL}/request_community/`,
@@ -51,7 +41,7 @@ const BottomPopupJoin = ({ visible, onRequestClose, username }) => {
                 },
                 {
                     headers: {
-                        "X-CSRFToken": csrfToken,
+                        "X-CSRFToken": CSRF,
                         "Content-Type": "application/json",
                     },
                     withCredentials: true,
@@ -120,17 +110,7 @@ const BottomPopupCreate = ({ visible, onRequestClose, username }) => {
         setActivity(
             <ActivityIndicator />
         )
-        const getCsrfToken = async () => {
-            try {
-                const response = await axios.get(`${API_URL}/csrf-token/`);
-                return response.data.csrfToken;
-            } catch (error) {
-                console.error("Error retrieving CSRF token:", error);
-                throw new Error("CSRF token retrieval failed");
-            }
-        };
         try {
-            const csrfToken = await getCsrfToken();
             console.log("Creating a community");
             const response = await axios.post(`${API_URL}/create_community/`,
                 {
@@ -142,7 +122,7 @@ const BottomPopupCreate = ({ visible, onRequestClose, username }) => {
                 },
                 {
                     headers: {
-                        "X-CSRFToken": csrfToken,
+                        "X-CSRFToken": CSRF,
                         "Content-Type": "application/json",
                     },
                     withCredentials: true,
@@ -295,31 +275,25 @@ const Communities = ({ navigation }) => {
     const [search, setSearch] = useState("");
     const [communities, setCommunities] = useState([]);
     const [ownedCommunities, setOwnedCommunities] = useState([]);
-    const [refreshing, setRefreshing] = useState(false);
+    const [refreshingJoined, setRefreshingJoined] = useState(false);
+    const [refreshingOwned, setRefreshingOwned] = useState(false);
+    const [refreshingInvites, setRefreshingInvites] = useState(false);
     const [invites, setInvites] = useState([])
 
-    const getJoinedCommunities = async () => {
-        const getCsrfToken = async () => {
-            try {
-                const response = await axios.get(`${API_URL}/csrf-token/`);
-                return response.data.csrfToken;
-            } catch (error) {
-                console.error("Error retrieving CSRF token:", error);
-                throw new Error("CSRF token retrieval failed");
-            }
-        };
+    const getJoinedCommunities = async (storedUsername) => {
+        setRefreshingJoined(true);
         try {
-            const csrfToken = await getCsrfToken();
-            console.log(`getting joined communities`);
+            console.log(`getting communities ${storedUsername} is apart of`)
             const response = await axios.get(
                 `${API_URL}/get_user_community_info/`,
                 {
                     params: {
-                        username: username,
+                        username: storedUsername,
                     }
                 }
             );
             setCommunities(response.data);
+            setRefreshingJoined(false);
             console.log("Succesfully retrieved communities user is apart of");
         } catch (error) {
             if (error.response.data) {
@@ -328,26 +302,18 @@ const Communities = ({ navigation }) => {
         }
     }
 
-    const getOwnedCommunities = async () => {
-        const getCsrfToken = async () => {
-            try {
-                const response = await axios.get(`${API_URL}/csrf-token/`);
-                return response.data.csrfToken;
-            } catch (error) {
-                console.error("Error retrieving CSRF token:", error);
-                throw new Error("CSRF token retrieval failed");
-            }
-        };
+    const getOwnedCommunities = async (storedUsername) => {
+        setRefreshingOwned(true);
         try {
-            const csrfToken = await getCsrfToken();
-            console.log(`getting owned communities for ${username}`);
+            console.log(`getting owned communities for ${storedUsername}`);
             const response = await axios.get(
                 `${API_URL}/get_owner_community_info/`,
                 {
-                    params: { username: username }
+                    params: { username: storedUsername }
                 }
             );
             setOwnedCommunities(response.data);
+            setRefreshingOwned(false);
             console.log("Succesfully retrieved communities user owns");
         } catch (error) {
             if (error.response.data) {
@@ -359,13 +325,13 @@ const Communities = ({ navigation }) => {
 
     const renderCommunity = ({ item }) => {
         return (
-            <TouchableOpacity onPress={() => { navigation.navigate("Community", { community: item }); }}>
+            <TouchableOpacity onPress={() => { navigation.navigate("ViewCommunity", { community: item }); }}>
                 <View style={styles.community}>
                     <View style={styles.pic}>
                         {/* <SvgUri style={styles.pic} uri={item.profile_pic} /> */}
                         <Image
                             source={{ uri: `data:Image/jpeg;base64,${item.community_photo}` }}
-                            style={styles.avatar}
+                            style={styles.pic}
                         />
                     </View>
                     <View style={styles.textContainer}>
@@ -382,16 +348,7 @@ const Communities = ({ navigation }) => {
                             <Text style={styles.msgTxt}>Members: 10</Text>
                         </View>
                     </View>
-                    {/* <View>
-                        <TouchableOpacity
-                            style={styles.deleteCommunityButton}
-                            onPress={() => {
-                                
-                            }}
-                        >
-                            <Ionicons name="trash" size={24} color="white" />
-                        </TouchableOpacity>
-                    </View> */}
+
                 </View>
             </TouchableOpacity>
         );
@@ -404,8 +361,8 @@ const Communities = ({ navigation }) => {
                 <View style={styles.pic}>
                     {/* <SvgUri style={styles.pic} uri={item.profile_pic} /> */}
                     <Image
-                        source={{ uri: `data:Image/jpeg;base64,${item.profile_picture}` }}
-                        style={styles.avatar}
+                        source={{ uri: `data:Image/jpeg;base64,${item.community_photo}` }}
+                        style={styles.pic}
                     />
                 </View>
                 <View style={styles.textContainer}>
@@ -415,11 +372,8 @@ const Communities = ({ navigation }) => {
                             numberOfLines={1}
                             ellipsizeMode="tail"
                         >
-                            {item.name}
+                            {item.community_name}
                         </Text>
-                    </View>
-                    <View style={styles.msgContainer}>
-                        <Text style={styles.msgTxt}>Members: {Math.floor(item.members.length * Math.random() * 10)}</Text>
                     </View>
                 </View>
                 <View>
@@ -440,25 +394,27 @@ const Communities = ({ navigation }) => {
         );
     };
 
-    const refreshAll = () => {
-        setRefreshing(true);
-        // getInvitations();
-        getJoinedCommunities();
-        getOwnedCommunities();
-        setRefreshing(false);
+    async function refreshAll() {
+        // getInvitations(username);
+        getJoinedCommunities(username);
+        getOwnedCommunities(username);
+    }
+
+    const initializeData = async () => {
+        console.log(`initializing community data`)
+        const storedUsername = await Storage.getItem("@username");
+        setUsername(storedUsername)
+        const storedCSRF = await Storage.getItem("@CSRF");
+        setCSRF(storedCSRF);
+        console.log(`username: ${storedUsername}`);
+        console.log(`CSRF: ${storedCSRF}`);
+        getJoinedCommunities(storedUsername);
+        getOwnedCommunities(storedUsername);
     }
 
     useEffect(() => {
-        const loadUsernameToken = async () => {
-            const storedUsername = await Storage.getItem("@username");
-            const storedCSRFToken = await Storage.getItem("@CSRF");
-            setUsername(storedUsername || "No username");
-            setCSRF(storedCSRFToken || "No CSRF");
-        };
-        loadUsernameToken();
-        refreshAll();
+        initializeData();
     }, []);
-
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -501,7 +457,7 @@ const Communities = ({ navigation }) => {
                                         renderItem={(item) => renderInvite(item)}
                                         refreshControl={
                                             <RefreshControl
-                                                refreshing={refreshing}
+                                                refreshing={refreshingInvites}
                                                 onRefresh={getInvitations}
                                                 testID="refresh-control"
                                             />
@@ -536,8 +492,8 @@ const Communities = ({ navigation }) => {
                                         renderItem={(item) => renderCommunity(item)}
                                         refreshControl={
                                             <RefreshControl
-                                                refreshing={refreshing}
-                                                onRefresh={getJoinedCommunities}
+                                                refreshing={refreshingJoined}
+                                                onRefresh={() => getJoinedCommunities(username)}
                                                 testID="refresh-control"
                                             />
                                         }
@@ -552,13 +508,13 @@ const Communities = ({ navigation }) => {
                                 <View style={[styles.body, { flex: 1 }]}>
                                     <FlatList
                                         enableEmptySections={true}
-                                        data={communities}
+                                        data={ownedCommunities}
                                         keyExtractor={(item) => item.name}
                                         renderItem={(item) => renderCommunity(item)}
                                         refreshControl={
                                             <RefreshControl
-                                                refreshing={refreshing}
-                                                onRefresh={getOwnedCommunities}
+                                                refreshing={refreshingOwned}
+                                                onRefresh={() => getOwnedCommunities(username)}
                                                 testID="refresh-control"
                                             />
                                         }
@@ -812,7 +768,15 @@ const styles = StyleSheet.create({
     },
     createContainer: {
         flex: 1,
-    }
+    },
+    pic: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        overflow: "hidden",
+        alignItems: "center",
+        justifyContent: "center",
+    },
 });
 
 export default Communities;
