@@ -16,6 +16,7 @@ import {
   Platform,
   Animated,
   Modal,
+  ActivityIndicator,
 } from "react-native";
 import axios from "axios";
 import RecordingAccessoryBar from "../../tools/RecordingBar.js";
@@ -49,6 +50,7 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
   const [selectedOption, setSelectedOption] = useState("");
   const [disableUpdate, setDisableUpdate] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [updating, setUpdating] = useState(false);
   const [video, setVideo] = useState({});
   const videoRefs = useRef({});
   const mediaAccessoryViewID = "MediaBar";
@@ -88,16 +90,19 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
     if(selectedEntry?.content_type === "image")
     {
       setMediaUri(`data:image/jpeg;base64,${selectedEntry?.content}`);
+      setMediaType("image");
       console.log("set mediaUri to passed in image");
     }
     if(selectedEntry?.content_type === "video")
     {
       setMediaUri(`data:video/mp4;base64,${selectedEntry?.content}`);
+      setMediaType("video");
       console.log("set mediaUri to passed in video");
     }
     if(selectedEntry?.content_type === "recording")
     {
       setMediaUri(`data:audio/mp3;base64,${selectedEntry?.content}`);
+      setMediaType("recording");
       console.log("set mediaUri to passed in audio");
     }
   }, []);
@@ -174,6 +179,7 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
 
   const updateCheckIn = async () => {
     console.log("updating checkIn entry");
+    setUpdating(true);
     let base64CheckInText = "";
     if (mediaType === "text") {
       base64CheckInText = textToBase64(checkInText);
@@ -210,6 +216,7 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
   };  
 
   const deleteMedia = () => {
+    console.log("Deleting Check-in Media")
     setMediaUri(null);
     setMediaBox(false);
     setMediaType("text");
@@ -298,7 +305,7 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
       case 'ModehAni':
         return (
           <View style={styles.textContainer}>
-            <Text style={{marginBottom: 10, }}>
+            <Text style={{marginBottom: 10, textAlign: 'right'}}>
               !מוֹדֶה אֲנִי לְפָנֶיךָ, מֶלֶךְ חַי וְקַיָּם, שֶׁהֶחֱזַרְתָּ בִּי נִשְׁמָתִי בְּחֶמְלָה ,רַבָּה אֱמוּנָתֶךָ
             </Text>
             <Text style={{marginBottom: 10, fontStyle:"italic"}}>
@@ -312,7 +319,7 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
       case 'Ashrei':
         return (
           <View style={styles.textContainer}>
-            <Text style={{marginBottom: 10, }}>
+            <Text style={{marginBottom: 10, textAlign: 'right'}}>
               .אַשְׁרֵי יוֹשְׁבֵי בֵיתֶךָ עוֹד יְהַלְלוּךָ סֶּלָה {"\n"}
               .אַשְׁרֵי הָעָם שֶׁכָּכָה לּוֹ אַשְׁרֵי הָעָם שֶׁיֲהֹוָה אֱלֹהָיו
             </Text>
@@ -329,7 +336,7 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
       default:
         return (
           <View style={styles.textContainer}>
-            <Text style={{marginBottom: 10, }}>
+            <Text style={{marginBottom: 10, textAlign: 'right'}}>
               :שְׁמַע יִשרָאֵל יֲהֹוָה אֱלהֵינוּ יֲהֹוָה אֶחָד {"\n"}
               :בָּרוּךְ שֵׁם כְּבוד מַלְכוּתו לְעולָם וָעֶד
             </Text>
@@ -377,11 +384,15 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
                 onPress={updateCheckIn}
                 testID="updateButton"
                 >
-                  <Ionicons name="checkmark-outline" 
-                    style={
-                    disableUpdate ? styles.updateTextDisabled : styles.updateText
-                    }
-                  />
+                  {updating ? ( // Render activity indicator when updating
+                    <ActivityIndicator color="white" />
+                  ) : (
+                    <Ionicons name="checkmark-outline" 
+                      style={
+                        disableUpdate ? styles.updateTextDisabled : styles.updateText
+                      }
+                    />
+                  )}
                 </TouchableOpacity>
             </View>
             <View style={styles.horizontalBar} />
@@ -449,22 +460,21 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
                       console.log("Viewing passed in video"),
                       <View style={styles.CheckInEntryModalImage}>
                         {video[selectedEntry.checkin_id] ? (
-                          <TouchableWithoutFeedback onLongPress={() => deleteMedia(selectedEntry.checkin_id)}>
-                            <VideoViewer
-                              source={video[selectedEntry.checkin_id]}
-                              style={styles.CheckInEntryModalImage}
-                            />
-                          </TouchableWithoutFeedback>
+                          <VideoViewer
+                            source={video[selectedEntry.checkin_id]}
+                            onDelete={deleteMedia}
+                            style={styles.CheckInEntryModalImage}
+                          />
                         ) : (
                           <TouchableOpacity
                             onPress={() => {
                             handleGetVideo(selectedEntry.checkin_id);
                           }}
                           >
-                          <Image
-                            source={{ uri: `data:Image/mp4;base64,${selectedEntry?.content}` }}
-                            style={styles.CheckInEntryModalImage}
-                          />
+                            <Image
+                              source={{ uri: `data:Image/mp4;base64,${selectedEntry?.content}` }}
+                              style={styles.CheckInEntryModalImage}
+                            />
                           </TouchableOpacity>
                         )}
                       </View>

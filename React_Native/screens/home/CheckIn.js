@@ -225,7 +225,7 @@ export default function CheckIn({ navigation, route }) {
       case 'ModehAni':
         return (
           <View style={styles.textContainer}>
-            <Text style={{marginBottom: 10, }}>
+            <Text style={{marginBottom: 10, textAlign: 'right'}}>
               !מוֹדֶה אֲנִי לְפָנֶיךָ, מֶלֶךְ חַי וְקַיָּם, שֶׁהֶחֱזַרְתָּ בִּי נִשְׁמָתִי בְּחֶמְלָה ,רַבָּה אֱמוּנָתֶךָ
             </Text>
             <Text style={{marginBottom: 10, fontStyle:"italic"}}>
@@ -239,7 +239,7 @@ export default function CheckIn({ navigation, route }) {
       case 'Ashrei':
         return (
           <View style={styles.textContainer}>
-            <Text style={{marginBottom: 10, }}>
+            <Text style={{marginBottom: 10, textAlign: 'right'}}>
               .אַשְׁרֵי יוֹשְׁבֵי בֵיתֶךָ עוֹד יְהַלְלוּךָ סֶּלָה {"\n"}
               .אַשְׁרֵי הָעָם שֶׁכָּכָה לּוֹ אַשְׁרֵי הָעָם שֶׁיֲהֹוָה אֱלֹהָיו
             </Text>
@@ -256,7 +256,7 @@ export default function CheckIn({ navigation, route }) {
       default:
         return (
           <View style={styles.textContainer}>
-            <Text style={{marginBottom: 10, }}>
+            <Text style={{marginBottom: 10, textAlign: 'right'}}>
               :שְׁמַע יִשרָאֵל יֲהֹוָה אֱלהֵינוּ יֲהֹוָה אֶחָד {"\n"}
               :בָּרוּךְ שֵׁם כְּבוד מַלְכוּתו לְעולָם וָעֶד
             </Text>

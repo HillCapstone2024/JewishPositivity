@@ -409,7 +409,7 @@ export default function Archive({ navigation }) {
           >
             <View
               style={[
-                { alignItems: "center", justifyContent: "center" },
+                { flex: 1,},
                 theme["background"],
               ]}
             >
@@ -467,8 +467,10 @@ return width - 25;
   
 const styles = StyleSheet.create({
   scrollViewContent: {
-    flexGrow: 1,
-    // height: 500,
+    // flex: 1,
+    // height: "89%",
+    // backgroundColor: "blue",
+    paddingBottom: "14%",
   },
   contentContainer: {
     minHeight: 100,

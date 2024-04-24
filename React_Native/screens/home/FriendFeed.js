@@ -388,7 +388,13 @@ const FriendFeed = () => {
   // }
 
   return (
-    <View style={styles.container}>
+    <View 
+      style={[
+        styles.container,
+        paddingBottom=300,
+        theme["background"],
+      ]}
+      > 
       {isLoading && contentLoading ? (
         // <ActivityIndicator style={{ height: 100, width: 100 }} />
         <View testID="loading-screen" style={styles.loadingStyle}>
@@ -417,34 +423,40 @@ const FriendFeed = () => {
               </View>
             </Animated.ScrollView>
           </View>
-          {noFriends && (
-            <View>
-              <Text style={styles.Message}>Add friends to see their posts!</Text>
-            </View>
-          )}
-          {noPosts && (
-            <View>
-              <Text style={styles.Message}>Be the first to post!</Text>
-            </View>
-          )}
-          <Animated.FlatList
-            testID={"flat-list"}
-            data={posts}
-            ref={flatListRef}
-            contentContainerStyle={styles.postListContainer}
-            keyExtractor={(post) => post.checkin_id.toString()}
-            renderItem={({ item }) => <PostCard post={item} />}
+          
+          <ScrollView 
+            contentContainerStyle={styles.scrollViewContent}
             refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                testID="refresh-control"
-              />
-            }
-            style={{
-              transform: [{ translateY: slideAnimFlatList }],
-            }}
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  testID="refresh-control"
+                />
+              }>
+            {noFriends && (
+              <View>
+                <Text style={styles.Message}>Add friends to see their posts!</Text>
+              </View>
+            )}
+            {noPosts && (
+              <View>
+                <Text style={styles.Message}>Be the first to post!</Text>
+              </View>
+            )}
+            <Animated.FlatList
+              testID={"flat-list"}
+              data={posts}
+              ref={flatListRef}
+              contentContainerStyle={styles.postListContainer}
+              keyExtractor={(post) => post.checkin_id.toString()}
+              renderItem={({ item }) => <PostCard post={item} />}
+              
+              style={{
+                transform: [{ translateY: slideAnimFlatList }],
+              }}
           />
+          </ScrollView>
+            
         </View>
       )}
     </View>
@@ -459,9 +471,13 @@ const styles = StyleSheet.create({
     marginTop: 200,
     backgroundColor: "red"
   },
+  scrollViewContent: {
+    paddingBottom: "20%",
+  },
   container: {
+    // flex: 1,
     // paddingTop: 60,
-    paddingBottom: 100,
+    paddingBottom: "25%",
     height: "100%",
     // backgroundColor: "red",
   },
@@ -502,7 +518,8 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     // marginTop: 30,
     paddingHorizontal: 15,
-    // height: "100%"
+    height: "87%",
+    // backgroundColor: "red",
   },
   postCard: {
     marginBottom: 10,
