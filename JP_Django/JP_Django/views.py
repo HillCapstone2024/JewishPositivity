@@ -43,6 +43,7 @@ constNotPost = "Not a POST request!"
 constNotGet = "Not a GET request"
 constUserDNE = "User does not exist"
 constUNnotProvided= "Username not provided"
+constCNnotProvided= "Community name not provided"
 constFriendExists = "Friendship already exists"
 constAppJson = "application/json"
 constInvalidReq = "Invalid request method"
@@ -1651,7 +1652,68 @@ def get_owner_community_info_view(request):
 
                     
                 # Log data and return as JSON response
-                logging.info("Community list:")
+                logging.info("Communities owned list:")
+                logging.info(communities_list)
+                return HttpResponse(json.dumps(communities_list), content_type='application/json')
+
+            except User.DoesNotExist:
+                return HttpResponse(constUserDNE, status=400)
+            except Exception as e:
+                logging.error(e)
+                return HttpResponse("An error occurred", status=400)
+        else:  # username was empty
+            return HttpResponse(constUNnotProvided, status=400)
+    return HttpResponse(constNotGet)
+
+# Get communities that the user owns
+def get_communities_not_owned_info_view(request):
+    if request.method == "GET":
+        username = request.GET.get("username")
+
+        # Make sure the username is not empty
+        if username is not None:
+            try:
+                # Retrieve the user from the database by username
+                user = User.objects.get(username=username)
+
+                # retreieve the communities grouped by owner ID
+                logging.info("before communities")
+                communities = CommunityUser.objects.filter(user_id=user) #gets all communities they are part of even ones they own
+                all_communities=[] # list of community objects a user is a part of
+                for community in communities: 
+                    all_communities.append(community.community_id.pk)
+
+                logging.info("before communities_owned")
+                communities_owned = Community.objects.filter(owner_id= user) #get all communities user owns 
+                all_communities_owned=[] # list of community objects a user owns
+                for community in communities_owned: 
+                    all_communities_owned.append(community.community_id)
+
+                difference = set(all_communities).difference(set(all_communities_owned))
+                
+                logging.info("building list")
+                communities_list = []
+                for id in difference:
+                    community = Community.objects.get(community_id=id)
+                    # Populate the list with dictionaries containing each community and their info  
+
+                    if community.community_photo:
+                        profile_picture_encoded = base64.b64encode(community.community_photo).decode('utf-8')
+                    else:
+                        profile_picture_encoded = None  
+
+                    communities_list.append({
+                        'community_id': community.community_id,
+                        'community_name': community.community_name,
+                        'community_description': community.community_description,
+                        'community_photo': profile_picture_encoded,
+                        'owner_id': community.owner_id.pk,
+                        'privacy': community.privacy,
+                        'date_created': community.date_created.strftime('%Y-%m-%d')
+                    })
+
+                # Log data and return as JSON response
+                logging.info("Communities not owned list:")
                 logging.info(communities_list)
                 return HttpResponse(json.dumps(communities_list), content_type='application/json')
 
@@ -1939,6 +2001,64 @@ def get_users_in_community_view(request):
     # Return constNotGet for any method other than GET
     return HttpResponse(constNotGet)
 
+
+def get_pending_requests_to_community_view(request):
+    if request.method == "GET":
+        community_name = request.GET.get("community_name")
+
+        # Make sure the username is not empty
+        if community_name is not None:
+            try:
+                # Get the community object from the DB
+                community_id= Community.objects.get(community_name=community_name).pk
+                # Retrieve the user from the database by username
+                pending_requests = CommunityUser.objects.filter(community_id=community_id, status= 0)
+                
+                pending_requests_list = []
+                for request in pending_requests:
+                    # Append users that have requested to join the community                 
+                    pending_requests_list.append({
+                        'user_id': request.user_id.pk,
+                    })
+
+                logging.info("pending_requests_list: %s", pending_requests_list)
+                return HttpResponse(json.dumps(pending_requests_list), content_type='application/json')
+            except Exception as e:
+                logging.error(e)
+                return HttpResponse("An error occurred", status=400)
+        else:  # community_name was empty
+            return HttpResponse(constCNnotProvided, status=400)
+    return HttpResponse(constNotGet)
+
+def get_pending_invites_to_community_view(request):
+    if request.method == "GET":
+        community_name = request.GET.get("community_name")
+
+        # Make sure the username is not empty
+        if community_name is not None:
+            try:
+                # Get the community object from the DB
+                community_id= Community.objects.get(community_name=community_name).pk
+                # Retrieve the user from the database by username
+                pending_invites = CommunityUser.objects.filter(community_id=community_id, status= 1)
+                
+                pending_invites_list = []
+                for request in pending_invites:
+                    # Append users that have requested to join the community                 
+                    pending_invites_list.append({
+                        'user_id': request.user_id.pk,
+                    })
+
+                logging.info("pending_requests_list: %s", pending_invites_list)
+                return HttpResponse(json.dumps(pending_invites_list), content_type='application/json')
+            except Exception as e:
+                logging.error(e)
+                return HttpResponse("An error occurred", status=400)
+        else:  # community_name was empty
+            return HttpResponse(constCNnotProvided, status=400)
+    return HttpResponse(constNotGet)
+
+
 def delete_user_from_community_view(request):
     if request.method == "POST":
         # Retrieve user ID and community ID from POST request
@@ -1979,6 +2099,3 @@ def delete_user_from_community_view(request):
             return HttpResponse("Delete user attempt failed", status=400)
 
     return HttpResponse("NOT A POST", status=400)
-
-        
-
