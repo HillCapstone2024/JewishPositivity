@@ -40,6 +40,7 @@ import FriendsParent from "../screens/home/FriendsParent.js";
 import { faUsersLine } from '@fortawesome/free-solid-svg-icons/faUsersLine';
 import { faSynagogue } from '@fortawesome/free-solid-svg-icons/faSynagogue';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import ViewCommunity from "../screens/home/ViewCommunity.js";
 
 const Drawer = createDrawerNavigator();
 
@@ -223,14 +224,30 @@ const MyDrawer = ({ navigation }) => {
         options={{
           drawerIcon: () => (
             // <Ionicons name="people" size={22} color={theme["color"]["color"]} />
-            <FontAwesomeIcon icon={faSynagogue} 
-            // <FontAwesomeIcon icon={faUsersLine}
-            size = {28}
-            color={"black"}
-          />
+            <FontAwesomeIcon
+              icon={faSynagogue}
+              // <FontAwesomeIcon icon={faUsersLine}
+              size={28}
+              color={"black"}
+            />
           ),
         }}
-        
+      />
+
+      <Drawer.Screen
+        name="ViewCommunityTemp"
+        component={ViewCommunity}
+        options={{
+          drawerIcon: () => (
+            // <Ionicons name="people" size={22} color={theme["color"]["color"]} />
+            <FontAwesomeIcon
+              icon={faSynagogue}
+              // <FontAwesomeIcon icon={faUsersLine}
+              size={28}
+              color={"black"}
+            />
+          ),
+        }}
       />
 
       <Drawer.Screen
