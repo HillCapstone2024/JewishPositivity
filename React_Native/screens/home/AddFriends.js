@@ -32,17 +32,10 @@ const AddFriends = ({navigation, onSwitch}) => {
     const [errorMessage, setErrorMessage] = useState(null);
     const [users, setUsers] = useState([]);
     const [isLoading, setIsLoading] =  useState(false);
+    const [profilePics, setProfilePics] = useState();
 
     const translateY = useRef(new Animated.Value(-layout.height)).current;
 
-
-    const navigateFriendList = () => {
-        console.log(onSwitch);
-        if (onSwitch) {
-          onSwitch();
-        }
-    };
-    
     useEffect(() => {
         const loadUsername = async() => {
             const storedUsername = await Storage.getItem("@username");
@@ -101,10 +94,36 @@ const AddFriends = ({navigation, onSwitch}) => {
       }
     };
 
+    const fetchProfilePics = async (users) => {
+      if (users.length < 1) {
+        return {};
+      }
+      //This just works now and I don't know why
+      try {
+        const response = await axios.get(`${API_URL}/profile_pictures_view/`, {
+          params: {
+            username_list: users,
+          },
+        });
+        console.log("got profile pic success! in Add Friends");
+        const map = {};
+        response.data.forEach((pic) => {
+          map[pic.username] = pic.profile_picture;
+        });
+        console.log("map reached", typeof response.data);
+        setProfilePics(response.data);
+        return response.data;
+      } catch (error) {
+        console.log("Error retrieving profile pics:", error);
+        throw new Error("profile pic retreival failed");
+      }
+    };
+
     const handleSearch = async (searchText) => {
       setIsLoading(true);
       const foundUsers = await searchUsers(searchText);
       translateY.setValue(1000);
+      fetchProfilePics(foundUsers);
       setUsers(foundUsers);
       setIsLoading(false);
       Animated.spring(translateY, {
@@ -123,9 +142,7 @@ const AddFriends = ({navigation, onSwitch}) => {
             <View style={styles.pic}>
               {/* <SvgUri style={styles.pic} uri={item.profile_pic} /> */}
               <Image
-                source={{
-                  uri: `data:Image/jpeg;base64,${item.profile_picture}`,
-                }}
+                source={{uri: `data:Image/jpeg;base64,${item.profile_picture}` }}
                 style={styles.avatar}
               />
               {/* <Text>{item.profile_picture}</Text> */}
@@ -189,6 +206,11 @@ const styles = StyleSheet.create({
     margin: 10,
     justifyContent: "sapce-between",
     // alignItems: "center",
+  },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
   },
   row: {
     flexDirection: "row",
