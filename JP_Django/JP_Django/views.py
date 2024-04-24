@@ -1585,10 +1585,17 @@ def get_user_community_info_view(request):
                 # Populate the list with dictionaries containing each community and their info
                 communities_list = []
                 for community in communities:
+                    community_picture = community.community_photo
+                    if community_picture:
+                        profile_picture_encoded = base64.b64encode(community_picture).decode('utf-8')
+                    else:
+                        profile_picture_encoded = None  
+
                     communities_list.append({
                         'community_id': community.community_id,
                         'community_name': community.community_name,
                         'community_description': community.community_description,
+                        'community_photo': profile_picture_encoded,
                         'owner_id': community.owner_id.pk,
                         'privacy': community.privacy,
                         'date_created': community.date_created.strftime('%Y-%m-%d')
@@ -1604,7 +1611,7 @@ def get_user_community_info_view(request):
                 return HttpResponse(constUserDNE, status=400)
             except Exception as e:
                 logging.error(e)
-                return HttpResponse("An error occurred", status=400)
+                return HttpResponse(e, status=400)
         else:  # username was empty
             return HttpResponse(constUNnotProvided, status=400)
     return HttpResponse(constNotGet)
@@ -1626,10 +1633,17 @@ def get_owner_community_info_view(request):
                 # Populate the list with dictionaries containing each community and their info
                 communities_list = []
                 for community in communities:
+                    community_picture = community.community_photo
+                    if community_picture:
+                        profile_picture_encoded = base64.b64encode(community_picture).decode('utf-8')
+                    else:
+                        profile_picture_encoded = None  
+                        
                     communities_list.append({
                         'community_id': community.community_id,
                         'community_name': community.community_name,
                         'community_description': community.community_description,
+                        'community_photo': profile_picture_encoded,
                         'owner_id': community.owner_id.pk,
                         'privacy': community.privacy,
                         'date_created': community.date_created.strftime('%Y-%m-%d')

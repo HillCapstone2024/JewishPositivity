@@ -1,4 +1,4 @@
-import { Text, Modal, View, TouchableOpacity, Switch, TextInput, Pressable, StyleSheet, Alert, Dimensions, Keyboard, FlatList, KeyboardAvoidingView, TouchableWithoutFeedback, Image, RefreshControl, Platform, ScrollView } from 'react-native'
+import { Text, Modal, View, TouchableOpacity, Switch, TextInput, Pressable, ActivityIndicator, StyleSheet, Alert, Dimensions, Keyboard, FlatList, KeyboardAvoidingView, TouchableWithoutFeedback, Image, RefreshControl, Platform, ScrollView } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import * as FileSystem from "expo-file-system";
 import { Ionicons } from "@expo/vector-icons";
@@ -11,8 +11,10 @@ import { PanGestureHandler, State } from 'react-native-gesture-handler';
 const layout = Dimensions.get("window");
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
-const BottomPopupJoin = ({ visible, onRequestClose }) => {
+const BottomPopupJoin = ({ visible, onRequestClose, username }) => {
     const [communityName, setCommunityName] = useState("")
+    const [activity, setActivity] = useState(null)
+
     const onGestureEvent = (event) => {
         if (event.nativeEvent.translationY > 100) {
             onRequestClose();
@@ -26,12 +28,26 @@ const BottomPopupJoin = ({ visible, onRequestClose }) => {
     };
 
     const handleCommunityJoin = async () => {
+        setActivity(
+            <ActivityIndicator />
+        )
+        const getCsrfToken = async () => {
+            try {
+                const response = await axios.get(`${API_URL}/csrf-token/`);
+                return response.data.csrfToken;
+            } catch (error) {
+                console.error("Error retrieving CSRF token:", error);
+                throw new Error("CSRF token retrieval failed");
+            }
+        };
         try {
+            const csrfToken = await getCsrfToken();
+            console.log(`Joining community ${communityName}`);
             const response = await axios.post(
                 `${API_URL}/request_community/`,
                 {
                     username: username,
-                    community_name: communityName,
+                    community_name: communityName.trim(),
                 },
                 {
                     headers: {
@@ -42,9 +58,14 @@ const BottomPopupJoin = ({ visible, onRequestClose }) => {
                 }
             );
             console.log("Join Community Response:", response.data);
+            onRequestClose();
+            setActivity(null);
+            return Alert.alert(`You're now apart of the ${communityName} community!`);
         } catch (error) {
             if (error.response.data) {
                 console.error("Error Joining Community:", error.response.data);
+                onRequestClose();
+                return Alert.alert(error.response.data);
             }
         }
     }
@@ -61,8 +82,12 @@ const BottomPopupJoin = ({ visible, onRequestClose }) => {
                 onHandlerStateChange={onHandlerStateChange}
             >
                 <View style={[styles.bottomView, { marginTop: layout.height / 2.8 }]}>
+
+                    <View style={styles.dragIndicatorJoin}>
+                        <View style={styles.dragIndicatorInner} />
+                    </View>
                     <Text style={styles.joinHeader}>Join a Community</Text>
-                    <TextInput placeholder='Community Name' onChangeText={(text) => setCommunityName(text)} style={styles.input} />
+                    <TextInput placeholder='Community Name' placeholderTextColor={'#858585'} onChangeText={(text) => setCommunityName(text)} style={styles.input} />
                     <TouchableOpacity style={styles.joinModal} onPress={handleCommunityJoin}>
                         <Text style={styles.buttonText}>Join</Text>
                     </TouchableOpacity>
@@ -72,13 +97,13 @@ const BottomPopupJoin = ({ visible, onRequestClose }) => {
     );
 };
 
-const BottomPopupCreate = ({ visible, onRequestClose }) => {
-    const [communityInfo, setCommunityInfo] = useState({
-        community_name: "",
-        community_description: "",
-        community_photo: "",
-        privacy: "",
-    });
+const BottomPopupCreate = ({ visible, onRequestClose, username }) => {
+    const [communityName, setCommunityName] = useState('');
+    const [communityDescription, setCommunityDescription] = useState('');
+    const [communityPhoto, setCommunityPhoto] = useState('');
+    const [privacy, setPrivacy] = useState('public');
+    const [activity, setActivity] = useState(null)
+
     const onGestureEvent = (event) => {
         if (event.nativeEvent.translationY > 100) {
             onRequestClose();
@@ -92,6 +117,9 @@ const BottomPopupCreate = ({ visible, onRequestClose }) => {
     };
 
     const handleCommunityCreate = async () => {
+        setActivity(
+            <ActivityIndicator />
+        )
         const getCsrfToken = async () => {
             try {
                 const response = await axios.get(`${API_URL}/csrf-token/`);
@@ -104,14 +132,13 @@ const BottomPopupCreate = ({ visible, onRequestClose }) => {
         try {
             const csrfToken = await getCsrfToken();
             console.log("Creating a community");
-            console.log(`${API_URL}/create_community/`)
             const response = await axios.post(`${API_URL}/create_community/`,
-             {
+                {
                     username: username,
-                    community_name: communityInfo.community_name,
-                    community_photo: communityInfo.community_photo,
-                    community_description: communityInfo.community_description,
-                    privacy: communityInfo.privacy,
+                    community_name: communityName,
+                    community_photo: communityPhoto,
+                    community_description: communityDescription,
+                    privacy: privacy,
                 },
                 {
                     headers: {
@@ -121,55 +148,65 @@ const BottomPopupCreate = ({ visible, onRequestClose }) => {
                     withCredentials: true,
                 }
             );
-            console.log("Created a community", response);
-
             console.log("create community response:", response.data);
+            onRequestClose();
+            setActivity(null);
+            setCommunityName('');
+            setCommunityDescription('');
+            setCommunityPhoto('');
+            setPrivacy('public');
+            return Alert.alert(`The ${communityName} community has been created!`)
         } catch (error) {
             console.error("error creating community:", error.response.data);
         }
     };
 
-    // const pickMedia = async () => {
-    //     let result = await ImagePicker.launchImageLibraryAsync({
-    //         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    //         allowsEditing: true,
-    //         aspect: [4, 3],
-    //         quality: 1,
-    //     });
 
-    //     if (!result.cancelled) {
-    //         setUpdateProfilePicture(true);
-    //         const base64String = await readFileAsBase64(result.assets[0].uri);
-    //         setUserInfo(prevUserInfo => ({
-    //             ...prevUserInfo,
-    //             profilePicture: base64String,
-    //         }));
-    //     }
-    // };
+    async function readFileAsBase64(uri) {
+        try {
+            const base64Content = await FileSystem.readAsStringAsync(uri, {
+                encoding: FileSystem.EncodingType.Base64,
+            });
+            return base64Content;
+        } catch (error) {
+            console.error("Failed to read file as base64", error);
+            return null;
+        }
+    }
 
-    // const takeMedia = async () => {
-    //     const cameraPermission = await ImagePicker.requestCameraPermissionsAsync();
-    //     if (!cameraPermission.granted) {
-    //         alert("Permissions to access camera and microphone are required!");
-    //         return;
-    //     }
+    const pickMedia = async () => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        });
 
-    //     let result = await ImagePicker.launchCameraAsync({
-    //         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    //         allowsEditing: true,
-    //         aspect: [4, 3],
-    //         quality: 1,
-    //     });
+        if (!result.canceled) {
+            const base64String = await readFileAsBase64(result.assets[0].uri);
+            setCommunityPhoto(base64String);
+        }
+    };
 
-    //     if (result && !result.canceled) {
-    //         setUpdateProfilePicture(true);
-    //         const base64String = await readFileAsBase64(result.assets[0].uri);
-    //         setUserInfo(prevUserInfo => ({
-    //             ...prevUserInfo,
-    //             profilePicture: base64String,
-    //         }));
-    //     }
-    // };
+    const takeMedia = async () => {
+        const cameraPermission = await ImagePicker.requestCameraPermissionsAsync();
+        if (!cameraPermission.granted) {
+            alert("Permissions to access camera and microphone are required!");
+            return;
+        }
+
+        let result = await ImagePicker.launchCameraAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        });
+
+        if (result && !result.canceled) {
+            const base64String = await readFileAsBase64(result.assets[0].uri);
+            setCommunityPhoto(base64String);
+        }
+    };
 
     const handleEditProfilePicture = () => {
         Alert.alert("Media Type", "", [
@@ -180,7 +217,7 @@ const BottomPopupCreate = ({ visible, onRequestClose }) => {
     };
 
     const handlePrivacyAlert = () => {
-        Alert.alert("Privacy Setting", 'When the privacy setting is on, users are only able to join by request or invite.', [{ text: 'Ok', style: 'default' }])
+        Alert.alert("Privacy Setting", 'When the privacy setting is set to on, users may only join via request or invite.', [{ text: 'Ok', style: 'default' }])
     }
 
     return (
@@ -194,39 +231,57 @@ const BottomPopupCreate = ({ visible, onRequestClose }) => {
                 onGestureEvent={onGestureEvent}
                 onHandlerStateChange={onHandlerStateChange}
             >
-                <ScrollView style={[styles.bottomView, { marginTop: 120 }]}>
-                    <Text style={styles.joinHeader}>Create a Community</Text>
-                    <TouchableOpacity onPress={handleEditProfilePicture} >
-                        <View style={styles.profilePicContainer}>
-                            <Image
-                                style={styles.profilePic}
-                            // source={{ uri: `data:image/jpeg;base64,${userInfo?.profilePicture}`, }} 
-                            />
-                            <View style={styles.cameraIcon}>
-                                <Ionicons name="camera" size={24} color="black" />
-                            </View>
-                        </View>
-                    </TouchableOpacity>
-                    <TextInput placeholder='Community Name' onValueChange={(text) => setCommunityInfo(prevCommunityInfo => ({ ...prevCommunityInfo, community_name: (text) }))} style={styles.input} />
-                    <TextInput placeholder='Description' multiline={true} scrollEnabled={true} returnKeyType="default" onValueChange={(text) => setCommunityInfo(prevCommunityInfo => ({ ...prevCommunityInfo, community_description: (text) }))} style={styles.inputDesc} />
-                    <View style={styles.privacy}>
-                        <TouchableOpacity
-                            onPress={handlePrivacyAlert}
-                        >
-                            <Text style={styles.privacyText}>Privacy  </Text>
-                        </TouchableOpacity>
-                        <Switch
-                            trackColor={{ false: '#f2f2f2', true: '#4A90E2' }}
-                            thumbColor={'#f2f2f2'}
-                            onValueChange={() => setCommunityInfo(prevCommunityInfo => ({ ...prevCommunityInfo, privacy: prevCommunityInfo.privacy === "private" ? "public" : "private" }))}
-                            value={communityInfo.privacy === "private" ? true : false}
-                        />
+                <View style={styles.createContainer}>
+                    <View style={styles.dragIndicatorCreate}>
+                        <View style={styles.dragIndicatorInner} />
                     </View>
-                    <TouchableOpacity style={styles.createModal} onPress={handleCommunityCreate}>
-                        <Text style={styles.buttonText}>Create</Text>
-                    </TouchableOpacity>
+                    <ScrollView keyboardDismissMode={'interactive'} style={[styles.bottomView, { marginTop: 100 }]}>
+                        <Text style={styles.joinHeader}>Create a Community</Text>
+                        <TouchableOpacity onPress={handleEditProfilePicture} >
+                            <View style={styles.profilePicContainer}>
+                                <Image
+                                    style={styles.profilePic}
+                                    source={{ uri: `data:image/jpeg;base64,${communityPhoto}`, }}
+                                />
+                                <View style={styles.cameraIcon}>
+                                    <Ionicons name="camera" size={24} color="black" />
+                                </View>
+                            </View>
+                        </TouchableOpacity>
+                        <TextInput
+                            placeholder='Community Name'
+                            onChangeText={(text) => setCommunityName(text)}
+                            value={communityName}
+                            style={styles.input}
+                        />
+                        <TextInput
+                            placeholder='Description'
+                            multiline={true}
+                            returnKeyType="default"
+                            onChangeText={(text) => setCommunityDescription(text)}
+                            value={communityDescription}
+                            style={styles.inputDesc}
+                        />
+                        <View style={styles.privacy}>
+                            <TouchableOpacity
+                                onPress={handlePrivacyAlert}
+                            >
+                                <Text style={styles.privacyText}>Privacy</Text>
+                            </TouchableOpacity>
+                            <Switch
+                                trackColor={{ false: '#f2f2f2', true: '#4A90E2' }}
+                                thumbColor={'#f2f2f2'}
+                                onValueChange={() => setPrivacy(privacy === "private" ? "public" : "private")}
+                                value={privacy === "private" ? true : false}
+                            />
+                        </View>
+                        {activity}
+                        <TouchableOpacity style={styles.createModal} onPress={handleCommunityCreate}>
+                            <Text style={styles.buttonText}>Create</Text>
+                        </TouchableOpacity>
 
-                </ScrollView>
+                    </ScrollView>
+                </View>
             </PanGestureHandler>
         </Modal >
     );
@@ -243,13 +298,64 @@ const Communities = ({ navigation }) => {
     const [refreshing, setRefreshing] = useState(false);
     const [invites, setInvites] = useState([])
 
-    const getJoinedCommunities = () => {
-
+    const getJoinedCommunities = async () => {
+        const getCsrfToken = async () => {
+            try {
+                const response = await axios.get(`${API_URL}/csrf-token/`);
+                return response.data.csrfToken;
+            } catch (error) {
+                console.error("Error retrieving CSRF token:", error);
+                throw new Error("CSRF token retrieval failed");
+            }
+        };
+        try {
+            const csrfToken = await getCsrfToken();
+            console.log(`getting joined communities`);
+            const response = await axios.get(
+                `${API_URL}/get_user_community_info/`,
+                {
+                    params: {
+                        username: username,
+                    }
+                }
+            );
+            setCommunities(response.data);
+            console.log("Succesfully retrieved communities user is apart of");
+        } catch (error) {
+            if (error.response.data) {
+                console.error("Error Getting Communities that user is apart of:", error.response.data);
+            }
+        }
     }
 
-    const onRefresh = () => {
-        //refresh function here
-    };
+    const getOwnedCommunities = async () => {
+        const getCsrfToken = async () => {
+            try {
+                const response = await axios.get(`${API_URL}/csrf-token/`);
+                return response.data.csrfToken;
+            } catch (error) {
+                console.error("Error retrieving CSRF token:", error);
+                throw new Error("CSRF token retrieval failed");
+            }
+        };
+        try {
+            const csrfToken = await getCsrfToken();
+            console.log(`getting owned communities for ${username}`);
+            const response = await axios.get(
+                `${API_URL}/get_owner_community_info/`,
+                {
+                    params: { username: username }
+                }
+            );
+            setOwnedCommunities(response.data);
+            console.log("Succesfully retrieved communities user owns");
+        } catch (error) {
+            if (error.response.data) {
+                console.error("Error Getting Communities that user owns:", error.response.data);
+            }
+        }
+    }
+
 
     const renderCommunity = ({ item }) => {
         return (
@@ -258,7 +364,7 @@ const Communities = ({ navigation }) => {
                     <View style={styles.pic}>
                         {/* <SvgUri style={styles.pic} uri={item.profile_pic} /> */}
                         <Image
-                            source={{ uri: `data:Image/jpeg;base64,${item.profile_picture}` }}
+                            source={{ uri: `data:Image/jpeg;base64,${item.community_photo}` }}
                             style={styles.avatar}
                         />
                     </View>
@@ -269,11 +375,11 @@ const Communities = ({ navigation }) => {
                                 numberOfLines={1}
                                 ellipsizeMode="tail"
                             >
-                                {item.name}
+                                {item.community_name}
                             </Text>
                         </View>
                         <View style={styles.msgContainer}>
-                            <Text style={styles.msgTxt}>Members: {Math.floor(item.members.length * Math.random() * 10)}</Text>
+                            <Text style={styles.msgTxt}>Members: 10</Text>
                         </View>
                     </View>
                     {/* <View>
@@ -319,22 +425,28 @@ const Communities = ({ navigation }) => {
                 <View>
                     <TouchableOpacity
                         style={styles.deleteCommunityButton}
-                        onPress={() => { handleAcceptInvite() }}>
-                        <Ionicons name="check" size={24} color="white" />
+                        onPress={() => { handleAcceptInvite }}>
+                        <Ionicons name="checkmark" size={24} color="white" />
                     </TouchableOpacity>
                 </View>
                 <View>
                     <TouchableOpacity
                         style={styles.deleteCommunityButton}
-                        onPress={() => { handleDeclineInvite() }}>
-                        <Ionicons name="x" size={24} color="white" />
+                        onPress={() => { handleDeclineInvite }}>
+                        <Ionicons name="close" size={24} color="white" />
                     </TouchableOpacity>
                 </View>
             </View>
         );
     };
 
-
+    const refreshAll = () => {
+        setRefreshing(true);
+        // getInvitations();
+        getJoinedCommunities();
+        getOwnedCommunities();
+        setRefreshing(false);
+    }
 
     useEffect(() => {
         const loadUsernameToken = async () => {
@@ -344,19 +456,9 @@ const Communities = ({ navigation }) => {
             setCSRF(storedCSRFToken || "No CSRF");
         };
         loadUsernameToken();
-        setCommunities(prevCommunities => [...prevCommunities, {
-            id: communities.length + 1,
-            name: 'New Community' + communities.length,
-            description: 'Community Description' + communities.length,
-            members: ["sef", "dave", "bob", "joe", "jane"],
-        },]);
-        setInvites(prevCommunities => [...prevCommunities, {
-            id: communities.length + 1,
-            name: 'New Community' + communities.length,
-            description: 'Community Description' + communities.length,
-            members: ["sef", "dave", "bob", "joe", "jane"],
-        },])
+        refreshAll();
     }, []);
+
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -374,10 +476,12 @@ const Communities = ({ navigation }) => {
                     <BottomPopupJoin
                         visible={joinModalVisible}
                         onRequestClose={() => setJoinModalVisible(false)}
+                        username={username}
                     />
                     <BottomPopupCreate
                         visible={createModalVisible}
                         onRequestClose={() => setCreateModalVisible(false)}
+                        username={username}
                     />
                 </View>
                 <View style={{ flex: 1 }}>
@@ -394,11 +498,11 @@ const Communities = ({ navigation }) => {
                                         enableEmptySections={true}
                                         data={communities}
                                         keyExtractor={(item) => item.name}
-                                        renderItem={(item) => renderCommunity(item)}
+                                        renderItem={(item) => renderInvite(item)}
                                         refreshControl={
                                             <RefreshControl
                                                 refreshing={refreshing}
-                                                onRefresh={onRefresh}
+                                                onRefresh={getInvitations}
                                                 testID="refresh-control"
                                             />
                                         }
@@ -408,9 +512,16 @@ const Communities = ({ navigation }) => {
                         </>
                     ) : (null)}
                     {communities.length === 0 ? (
-                        <Text style={styles.noCommunities}>
-                            Join or create a community to get started!
-                        </Text>) : (
+                        <>
+                            <Text style={styles.noCommunities}>
+                                Join or create a community to get started!
+                            </Text>
+                            <TouchableOpacity onPress={refreshAll} style={styles.refresh}>
+                                <Text style={styles.buttonText}>Check for communities</Text>
+                                <Text >This is a temp button in case the communities aren't properly retrieved at first</Text>
+                            </TouchableOpacity>
+                        </>
+                    ) : (
                         <>
                             <View style={styles.sectionContainer}>
                                 <Text style={styles.sectionTitle}>Your Communities</Text>
@@ -426,7 +537,7 @@ const Communities = ({ navigation }) => {
                                         refreshControl={
                                             <RefreshControl
                                                 refreshing={refreshing}
-                                                onRefresh={onRefresh}
+                                                onRefresh={getJoinedCommunities}
                                                 testID="refresh-control"
                                             />
                                         }
@@ -447,7 +558,7 @@ const Communities = ({ navigation }) => {
                                         refreshControl={
                                             <RefreshControl
                                                 refreshing={refreshing}
-                                                onRefresh={onRefresh}
+                                                onRefresh={getOwnedCommunities}
                                                 testID="refresh-control"
                                             />
                                         }
@@ -477,6 +588,13 @@ const styles = StyleSheet.create({
         backgroundColor: "#4A90E2",
         borderRadius: 10,
     },
+    refresh: {
+        alignItems: "center",
+        padding: 10,
+        margin: 10,
+        backgroundColor: "#4A90E2",
+        borderRadius: 10,
+    },
     create: {
         flex: 1,
         alignItems: "center",
@@ -493,6 +611,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         flexDirection: 'row',
         alignItems: 'center',
+        paddingBottom: 10,
     },
     picture: {
         marginRight: 5,
@@ -502,6 +621,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         color: "white",
         fontSize: 20,
+
     },
     bottomView: {
         // alignItems: "center",
@@ -573,7 +693,6 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: "#4A90E2",
     },
-
     cameraIcon: {
         position: "absolute",
         bottom: 10,
@@ -591,7 +710,6 @@ const styles = StyleSheet.create({
         backgroundColor: "#9e9e9e",
         marginLeft: 8, // Adjust spacing between title and line
     },
-
     sectionTitle: {
         fontSize: 12,
         fontWeight: "600",
@@ -599,7 +717,6 @@ const styles = StyleSheet.create({
         textTransform: "uppercase",
         letterSpacing: 1.1,
     },
-
     privacyText: {
         fontSize: 13,
         fontWeight: "600",
@@ -649,6 +766,7 @@ const styles = StyleSheet.create({
         margin: 10,
         backgroundColor: "gold",
         borderRadius: 10,
+        marginBottom: 100,
     },
     noCommunities: {
         fontSize: 30,
@@ -672,6 +790,29 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         paddingHorizontal: 10,
     },
+    dragIndicatorJoin: {
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 5,
+        borderTopColor: "#ccc",
+    },
+    dragIndicatorCreate: {
+        top: 137,
+        height: 30,
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 5,
+        borderTopColor: "#ccc",
+    },
+    dragIndicatorInner: {
+        width: 50,
+        height: 5,
+        backgroundColor: "#ccc",
+        borderRadius: 5,
+    },
+    createContainer: {
+        flex: 1,
+    }
 });
 
 export default Communities;
