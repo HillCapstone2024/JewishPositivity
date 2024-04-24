@@ -301,12 +301,12 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
   };
 
   renderTextBasedOnType = () => {
-    switch (selectedEntry?.checkInType) {
+    switch (checkInType) {
       case 'ModehAni':
         return (
           <View style={styles.textContainer}>
             <Text style={{marginBottom: 10, textAlign: 'right'}}>
-              !מוֹדֶה אֲנִי לְפָנֶיךָ, מֶלֶךְ חַי וְקַיָּם, שֶׁהֶחֱזַרְתָּ בִּי נִשְׁמָתִי בְּחֶמְלָה ,רַבָּה אֱמוּנָתֶךָ
+              מוֹדֶה אֲנִי לְפָנֶיךָ, מֶלֶךְ חַי וְקַיָּם, שֶׁהֶחֱזַרְתָּ בִּי נִשְׁמָתִי בְּחֶמְלָה ,רַבָּה אֱמוּנָתֶךָ!
             </Text>
             <Text style={{marginBottom: 10, fontStyle:"italic"}}>
               Modeh ani l’fanecha, Melech chai v’kaya, she-hechezarta bi nishmati b’chemlah, rabbah emunatecha.
@@ -320,8 +320,8 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
         return (
           <View style={styles.textContainer}>
             <Text style={{marginBottom: 10, textAlign: 'right'}}>
-              .אַשְׁרֵי יוֹשְׁבֵי בֵיתֶךָ עוֹד יְהַלְלוּךָ סֶּלָה {"\n"}
-              .אַשְׁרֵי הָעָם שֶׁכָּכָה לּוֹ אַשְׁרֵי הָעָם שֶׁיֲהֹוָה אֱלֹהָיו
+              אַשְׁרֵי יוֹשְׁבֵי בֵיתֶךָ עוֹד יְהַלְלוּךָ סֶּלָה.{"\n"}
+              אַשְׁרֵי הָעָם שֶׁכָּכָה לּוֹ אַשְׁרֵי הָעָם שֶׁיֲהֹוָה אֱלֹהָיו.
             </Text>
             <Text style={{marginBottom: 10, fontStyle:"italic"}}>
               Ashrei yoshvei veitecha, od y’hal’lucha selah. {"\n"}
@@ -337,8 +337,8 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
         return (
           <View style={styles.textContainer}>
             <Text style={{marginBottom: 10, textAlign: 'right'}}>
-              :שְׁמַע יִשרָאֵל יֲהֹוָה אֱלהֵינוּ יֲהֹוָה אֶחָד {"\n"}
-              :בָּרוּךְ שֵׁם כְּבוד מַלְכוּתו לְעולָם וָעֶד
+              שְׁמַע יִשרָאֵל יֲהֹוָה אֱלהֵינוּ יֲהֹוָה אֶחָד: {"\n"}
+              בָּרוּךְ שֵׁם כְּבוד מַלְכוּתו לְעולָם וָעֶד:
             </Text>
             <Text style={{marginBottom: 10, fontStyle:"italic"}}>
               Sh’ma Yisrael, Adonai Eloheinu, Adonai Echad! {"\n"}

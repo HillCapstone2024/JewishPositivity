@@ -16,6 +16,7 @@ import TermsofUse from '../screens/home/TermsofUse';
 import CheckInEntryDetailsScreen from "../screens/home/CheckInEntryDetailsScreen.js";
 import CheckIn from "../screens/home/CheckIn.js";
 import Community from "../screens/home/Community.js";
+import ViewCommunity from "../screens/home/ViewCommunity.js";
 
 // OneSignal.Debug.setLogLevel(LogLevel.Verbose);
 // OneSignal.initialize(Constants.expoConfig.extra.oneSignalAppId);
@@ -48,24 +49,58 @@ export default function AuthNavigator() {
   } 
   
   return (
-      <Stack.Navigator initialRouteName={initialRouteName}
-        screenOptions={{
-            headerTintColor: "#FFFFFF",
-            headerBackTitleVisible: false,
-            headerStyle: {
-                backgroundColor: "#4A90E2"
-            }
-        }}
-      >
-        <Stack.Screen name="Landing" component={Landing} options={{headerShown: false}}/>
-        <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="Signup" component={Signup} options={{headerTitle: "Sign up"}}/>
-        <Stack.Screen name="ForgotPassword" component={ForgotPassword} options={{headerTitle: "Forgot Password?"}}/>
-        <Stack.Screen name="Drawer" component={MyDrawer} options={{headerShown: false}}/>
-        <Stack.Screen name="Terms of Use" component={TermsofUse} />
-        <Stack.Screen name="CheckIn" component={CheckIn} options={{headerTitle: "Check-in"}}/>
-        <Stack.Screen name="CheckInEntryDetails" component={CheckInEntryDetailsScreen} options={{headerTitle: "Check-in Details"}}/>
-        <Stack.Screen name="Community" component={Community} options={{headerTitle: "Community"}}/>
-      </Stack.Navigator>
+    <Stack.Navigator
+      initialRouteName={initialRouteName}
+      screenOptions={{
+        headerTintColor: "#FFFFFF",
+        headerBackTitleVisible: false,
+        headerStyle: {
+          backgroundColor: "#4A90E2",
+        },
+      }}
+    >
+      <Stack.Screen
+        name="Landing"
+        component={Landing}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen name="Login" component={Login} />
+      <Stack.Screen
+        name="Signup"
+        component={Signup}
+        options={{ headerTitle: "Sign up" }}
+      />
+      <Stack.Screen
+        name="ForgotPassword"
+        component={ForgotPassword}
+        options={{ headerTitle: "Forgot Password?" }}
+      />
+      <Stack.Screen
+        name="Drawer"
+        component={MyDrawer}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen name="Terms of Use" component={TermsofUse} />
+      <Stack.Screen
+        name="CheckIn"
+        component={CheckIn}
+        options={{ headerTitle: "Check-in" }}
+      />
+      <Stack.Screen
+        name="CheckInEntryDetails"
+        component={CheckInEntryDetailsScreen}
+        options={{ headerTitle: "Check-in Details" }}
+      />
+      <Stack.Screen
+        name="Community"
+        component={Community}
+        options={{ headerTitle: "Community" }}
+      />
+      <Stack.Screen
+        name="ViewCommunity"
+        component={ViewCommunity}
+        options={{ headerTitle: "Community" }}
+      />
+    </Stack.Navigator>
   );
 }

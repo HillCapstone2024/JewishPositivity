@@ -359,7 +359,7 @@ const Communities = ({ navigation }) => {
 
     const renderCommunity = ({ item }) => {
         return (
-            <TouchableOpacity onPress={() => { navigation.navigate("Community", { community: item }); }}>
+            <TouchableOpacity onPress={() => { navigation.navigate("ViewCommunity", { community: item }); }}>
                 <View style={styles.community}>
                     <View style={styles.pic}>
                         {/* <SvgUri style={styles.pic} uri={item.profile_pic} /> */}
