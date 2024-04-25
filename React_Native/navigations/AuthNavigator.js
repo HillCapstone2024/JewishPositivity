@@ -17,6 +17,7 @@ import CheckInEntryDetailsScreen from "../screens/home/CheckInEntryDetailsScreen
 import CheckIn from "../screens/home/CheckIn.js";
 import Community from "../screens/home/Community.js";
 import ViewCommunity from "../screens/home/ViewCommunity.js";
+import ViewOwnedCommunity from "../screens/home/ViewOwnedCommunity.js";
 
 // OneSignal.Debug.setLogLevel(LogLevel.Verbose);
 // OneSignal.initialize(Constants.expoConfig.extra.oneSignalAppId);
@@ -99,6 +100,11 @@ export default function AuthNavigator() {
       <Stack.Screen
         name="ViewCommunity"
         component={ViewCommunity}
+        options={{ headerTitle: "Community" }}
+      />
+      <Stack.Screen
+        name="ViewOwnedCommunity"
+        component={ViewOwnedCommunity}
         options={{ headerTitle: "Community" }}
       />
     </Stack.Navigator>
