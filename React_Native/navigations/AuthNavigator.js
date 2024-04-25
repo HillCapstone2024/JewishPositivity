@@ -15,7 +15,6 @@ import Landing from "../screens/greet/Landing.js";
 import TermsofUse from '../screens/home/TermsofUse';
 import CheckInEntryDetailsScreen from "../screens/home/CheckInEntryDetailsScreen.js";
 import CheckIn from "../screens/home/CheckIn.js";
-import Community from "../screens/home/Community.js";
 import ViewCommunity from "../screens/home/ViewCommunity.js";
 import ViewOwnedCommunity from "../screens/home/ViewOwnedCommunity.js";
 
@@ -47,8 +46,8 @@ export default function AuthNavigator() {
 
   if (isLoading) {
     return <LoadingScreen />;
-  } 
-  
+  }
+
   return (
     <Stack.Navigator
       initialRouteName={initialRouteName}
@@ -91,11 +90,6 @@ export default function AuthNavigator() {
         name="CheckInEntryDetails"
         component={CheckInEntryDetailsScreen}
         options={{ headerTitle: "Check-in Details" }}
-      />
-      <Stack.Screen
-        name="Community"
-        component={Community}
-        options={{ headerTitle: "Community" }}
       />
       <Stack.Screen
         name="ViewCommunity"

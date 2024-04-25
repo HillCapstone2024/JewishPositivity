@@ -74,7 +74,6 @@ const BottomPopupJoin = ({ visible, onRequestClose, username, CSRF, initializeDa
                 onHandlerStateChange={onHandlerStateChange}
             >
                 <View style={[styles.bottomView, { marginTop: layout.height / 2.8 }]}>
-
                     <View style={styles.dragIndicatorJoin}>
                         <View style={styles.dragIndicatorInner} />
                     </View>
@@ -380,7 +379,6 @@ const Communities = ({ navigation }) => {
             <TouchableOpacity onPress={() => { navigation.navigate("ViewOwnedCommunity", { community: item }); }}>
                 <View style={styles.community}>
                     <View style={styles.pic}>
-                        {/* <SvgUri style={styles.pic} uri={item.profile_pic} /> */}
                         <Image
                             source={{ uri: `data:Image/jpeg;base64,${item.community_photo}` }}
                             style={styles.pic}
@@ -528,10 +526,10 @@ const Communities = ({ navigation }) => {
                             <Text style={styles.noCommunities}>
                                 Join or create a community to get started!
                             </Text>
-                            <TouchableOpacity onPress={refreshAll} style={styles.refresh}>
+                            {/* <TouchableOpacity onPress={refreshAll} style={styles.refresh}>
                                 <Text style={styles.buttonText}>Check for communities</Text>
                                 <Text >This is a temp button in case the communities aren't properly retrieved at first</Text>
-                            </TouchableOpacity>
+                            </TouchableOpacity> */}
                         </>
                     ) : (
                         <>
@@ -643,7 +641,7 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 20,
         padding: 35,
         shadowColor: "#000",
-        shadowOpacity: 0.25,
+        shadowOpacity: 0.1,
         shadowRadius: 3.84,
         elevation: 5,
     },
@@ -823,6 +821,10 @@ const styles = StyleSheet.create({
     },
     createContainer: {
         flex: 1,
+        shadowColor: "#000",
+        shadowOpacity: 0.1,
+        shadowRadius: 3.84,
+        elevation: 5,
     },
     pic: {
         width: 50,
