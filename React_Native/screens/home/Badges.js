@@ -81,13 +81,13 @@ export default function Badges({}) {
 
 
           if(badgeResponse.data.one_day) {
-            setDayBadgeIcon(require('../../assets/images/starDay.png')) }
+            setDayBadgeIcon(require('../../assets/images/badges/starDay.png')) }
           if(badgeResponse.data.one_week) {
-            setWeekBadgeIcon(require('../../assets/images/starWeek.png')) }
+            setWeekBadgeIcon(require('../../assets/images/badges/starWeek.png')) }
           if(badgeResponse.data.one_month) {
-            setMonthBadgeIcon(require('../../assets/images/starMonth.png')) }
+            setMonthBadgeIcon(require('../../assets/images/badges/starMonth.png')) }
           if(badgeResponse.data.year) {
-            setYearBadgeIcon(require('../../assets/images/starYear.png')) }
+            setYearBadgeIcon(require('../../assets/images/badges/starYear.png')) }
 
           setCurrentStreak(currentStreakResponse.data);
           setLongestStreak(longestStreakResponse.data);
@@ -109,31 +109,13 @@ export default function Badges({}) {
     //Stores longest and current streaks
     const [currentStreak, setCurrentStreak] = useState(0);
     const [longestStreak, setLongestStreak] = useState(0);
-
-    
-   const [isDayBadgeUnlocked, setIsDayBadgeUnlocked] = useState(false);
-   const [isWeekBadgeUnlocked, setIsWeekBadgeUnlocked] = useState(false);
-   const [isMonthBadgeUnlocked, setIsMonthBadgeUnlocked] = useState(false);
-   const [isYearBadgeUnlocked, setIsYearBadgeUnlocked] = useState(false);
     
    //Determines which trophy icon is used
-   const [dayBadgeIcon, setDayBadgeIcon] = useState(require('../../assets/images/starDayGrey.png'));
-   const [weekBadgeIcon, setWeekBadgeIcon] = useState(require('../../assets/images/starWeekGrey.png'));
-   const [monthBadgeIcon, setMonthBadgeIcon] = useState(require('../../assets/images/starMonthGrey.png'));
-   const [yearBadgeIcon, setYearBadgeIcon] = useState(require('../../assets/images/starYearGrey.png'));
+   const [dayBadgeIcon, setDayBadgeIcon] = useState(require('../../assets/images/badges/starDayGrey.png'));
+   const [weekBadgeIcon, setWeekBadgeIcon] = useState(require('../../assets/images/badges/starWeekGrey.png'));
+   const [monthBadgeIcon, setMonthBadgeIcon] = useState(require('../../assets/images/badges/starMonthGrey.png'));
+   const [yearBadgeIcon, setYearBadgeIcon] = useState(require('../../assets/images/badges/starYearGrey.png'));
 
-  
-    // //Changes icon depending on lock status
-    // function checkLock() {
-    // if (isDayBadgeUnlocked == true){
-    //     setDayBadgeIcon(require('../../assets/images/starDay.png'));
-    // }if (isWeekBadgeUnlocked == true){
-    //     setWeekBadgeIcon(require('../../assets/images/starWeek.png'));
-    // }if (isMonthBadgeUnlocked == true){
-    //     setMonthBadgeIcon(require('../../assets/images/starMonth.png'));
-    // }if (isYearBadgeUnlocked == true){
-    //     setYearBadgeIcon(require('../../assets/images/starYear.png'));
-    // } }
 
     const handleModalDay = () => {
         setIsModalVisibleDay(!isModalVisibleDay)
