@@ -26,6 +26,10 @@ import ExpandingSearchBar from '../../tools/ExpandingSearchBar.js';
 const layout = Dimensions.get("window");
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
+//things to do:
+//remove current user from returned list
+//only display add button for unadded friends
+
 const AddFriends = ({navigation, onSwitch}) => {
     theme = makeThemeStyle();
     const [username, setUsername] = useState("");
@@ -33,16 +37,84 @@ const AddFriends = ({navigation, onSwitch}) => {
     const [users, setUsers] = useState([]);
     const [isLoading, setIsLoading] =  useState(false);
     const [profilePics, setProfilePics] = useState();
+    const [requestedUsers, setRequestedUsers] = useState([]);
+    const [friends, setFriends] = useState([]);
 
     const translateY = useRef(new Animated.Value(-layout.height)).current;
 
     useEffect(() => {
-        const loadUsername = async() => {
-            const storedUsername = await Storage.getItem("@username");
-            setUsername(storedUsername || "No username");
-        };
-        loadUsername();
+      initializeData();
     }, []);
+
+    const initializeData = async () => {
+      const storedUsername = await Storage.getItem("@username");
+      const sentRequests = await getSentRequests(storedUsername);
+      const recievedRequests = await getReceivedRequests(storedUsername);
+      const friends = await getFriends(storedUsername);
+      const combinedRequsets = sentRequests.concat(recievedRequests);
+      setUsername(storedUsername || "No username");
+      setRequestedUsers(combinedRequsets);
+      setFriends(friends);
+      console.log('friends: ', friends);
+      console.log("non add users: ", combinedRequsets);
+    }
+
+    const getFriends = async (usernameProp) => {
+      try {
+        const csrfToken = await getCsrfToken();
+        const response = await axios.get(`${API_URL}/get_friend_info/`, {
+          params: {
+            username: usernameProp,
+          },
+        });
+        // console.log("response of friends:", response);
+        const friendsList = response.data
+          .filter((item) => item.status === true)
+          .map((item) => item.username);
+        return friendsList;
+      } catch (error) {
+        console.log("error fetching friends:", error);
+        return [];
+      }
+    };
+
+    const getSentRequests = async (usernameProp) => {
+      try {
+        const response = await axios.get(
+          `${API_URL}/get_pending_requests_sent_friends`,
+          {
+            params: {
+              username: usernameProp,
+            },
+          }
+        );
+        const sentList = response.data.map((item) => item.username);
+        // console.log("Sent list: ", sentList);
+        return sentList;
+      } catch (error) {
+        console.log("error fetching sent:", error);
+        return [];
+      }
+    };
+
+    const getReceivedRequests = async (usernameProp) => {
+      try {
+        const response = await axios.get(
+          `${API_URL}/get_pending_requests_received_friends`,
+          {
+            params: {
+              username: usernameProp,
+            },
+          }
+        );
+        const recievedList = response.data.map((item) => item.username);
+        // console.log("Recieved list: ", recievedList);
+        return recievedList;
+      } catch (error) {
+        console.log("error fetching received:", error);
+        return [];
+      }
+    };
 
     const getCsrfToken = async () => {
       try {
@@ -87,7 +159,8 @@ const AddFriends = ({navigation, onSwitch}) => {
           withCredentials: true,
         }
       );
-      console.log("Add Response: ", response);
+      console.log("Add Response: ", response.data);
+      initializeData();
 
       } catch(error) {
         console.log("error adding friend:", error);
@@ -121,7 +194,11 @@ const AddFriends = ({navigation, onSwitch}) => {
 
     const handleSearch = async (searchText) => {
       setIsLoading(true);
-      const foundUsers = await searchUsers(searchText);
+      let foundUsers = await searchUsers(searchText);
+      console.log('filtering out : ', username);
+      foundUsers = foundUsers.filter(item => item.username !== username);
+      console.log('found users:', foundUsers);
+      //filter out member
       translateY.setValue(1000);
       fetchProfilePics(foundUsers);
       setUsers(foundUsers);
@@ -135,6 +212,8 @@ const AddFriends = ({navigation, onSwitch}) => {
 
     const renderItem = ({ item }) => {
       // Check if the user is already a friend
+      let isRequested = requestedUsers.includes(item.username);
+      let isFriend = friends.includes(item.username);
 
       return (
         <TouchableOpacity>
@@ -142,7 +221,9 @@ const AddFriends = ({navigation, onSwitch}) => {
             <View style={styles.pic}>
               {/* <SvgUri style={styles.pic} uri={item.profile_pic} /> */}
               <Image
-                source={{uri: `data:Image/jpeg;base64,${item.profile_picture}` }}
+                source={{
+                  uri: `data:Image/jpeg;base64,${item.profile_picture}`,
+                }}
                 style={styles.avatar}
               />
               {/* <Text>{item.profile_picture}</Text> */}
@@ -161,11 +242,19 @@ const AddFriends = ({navigation, onSwitch}) => {
                 <Text style={styles.msgTxt}>@{item.username}</Text>
               </View>
             </View>
-            <View style={styles.acceptRequestButton}>
-              <TouchableOpacity onPress={() => handleAddFriend(item.username)}>
-                <Text style={styles.acceptButtonText}>ADD</Text>
-              </TouchableOpacity>
-            </View>
+            {isRequested ? (
+              <Text style={styles.sectionTitle}>PENDING</Text>
+            ) : isFriend ? (
+              <Text style={styles.sectionTitle}>FRIENDS</Text>
+            ) : (
+              <View style={styles.acceptRequestButton}>
+                <TouchableOpacity
+                  onPress={() => handleAddFriend(item.username)}
+                >
+                  <Text style={styles.acceptButtonText}>ADD</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         </TouchableOpacity>
       );
@@ -355,6 +444,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     backgroundColor: "#4A90E2",
     // marginRight: 15,
+    marginLeft: 10,
   },
   acceptButtonText: {
     // backgroundColor: "blue",
