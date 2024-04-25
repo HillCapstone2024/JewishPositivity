@@ -12,7 +12,7 @@ import { PanGestureHandler, State } from 'react-native-gesture-handler';
 const layout = Dimensions.get("window");
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
-const BottomPopupJoin = ({ visible, onRequestClose, username, CSRF }) => {
+const BottomPopupJoin = ({ visible, onRequestClose, username, CSRF, initializeData }) => {
     const [communityName, setCommunityName] = useState("")
     const [activity, setActivity] = useState(null)
 
@@ -50,6 +50,7 @@ const BottomPopupJoin = ({ visible, onRequestClose, username, CSRF }) => {
             console.log("Join Community Response:", response.data);
             onRequestClose();
             setActivity(null);
+            initializeData();
             return Alert.alert(`You're now apart of the ${communityName} community!`);
         } catch (error) {
             setActivity(null);
@@ -89,7 +90,7 @@ const BottomPopupJoin = ({ visible, onRequestClose, username, CSRF }) => {
     );
 };
 
-const BottomPopupCreate = ({ visible, onRequestClose, username, CSRF }) => {
+const BottomPopupCreate = ({ visible, onRequestClose, username, CSRF, initializeData }) => {
     const [communityName, setCommunityName] = useState('');
     const [communityDescription, setCommunityDescription] = useState('');
     const [communityPhoto, setCommunityPhoto] = useState('');
@@ -137,6 +138,7 @@ const BottomPopupCreate = ({ visible, onRequestClose, username, CSRF }) => {
             setCommunityDescription('');
             setCommunityPhoto('');
             setPrivacy('public');
+            initializeData();
             return Alert.alert(`The ${communityName} community has been created!`)
         } catch (error) {
             console.error("error creating community:", error.response.data);
@@ -428,6 +430,7 @@ const Communities = ({ navigation }) => {
         console.log(`username: ${storedUsername}`);
         console.log(`CSRF: ${storedCSRF}`);
         await Storage.setItem("@CommunitiesJoined", "")
+        // getInvitations(username);
         getJoinedCommunities(storedUsername);
         getOwnedCommunities(storedUsername);
     }
@@ -454,12 +457,14 @@ const Communities = ({ navigation }) => {
                         onRequestClose={() => setJoinModalVisible(false)}
                         username={username}
                         CSRF={CSRF}
+                        initializeData={() => initializeData()}
                     />
                     <BottomPopupCreate
                         visible={createModalVisible}
                         onRequestClose={() => setCreateModalVisible(false)}
                         username={username}
                         CSRF={CSRF}
+                        initializeData={() => initializeData()}
                     />
                 </View>
                 <View style={{ flex: 1 }}>

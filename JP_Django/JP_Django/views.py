@@ -1644,7 +1644,7 @@ def get_owner_community_info_view(request):
                         'community_id': community.community_id,
                         'community_name': community.community_name,
                         'community_description': community.community_description,
-                        # 'community_photo': profile_picture_encoded,
+                        'community_photo': profile_picture_encoded,
                         'owner_id': community.owner_id.username,
                         'privacy': community.privacy,
                         'date_created': community.date_created.strftime('%Y-%m-%d')
