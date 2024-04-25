@@ -25,6 +25,7 @@ from django.db.models import Q
 import os
 from dotenv import load_dotenv
 from django.conf import settings
+from django.db.models import Count
 load_dotenv()
 
 # ########## Configuration & Constants ##########
@@ -1629,7 +1630,8 @@ def get_owner_community_info_view(request):
                 user = User.objects.get(username=username)
 
                 # retreieve the communities grouped by owner ID
-                communities = Community.objects.filter(owner_id=user)
+                communities = (Community.objects.filter(owner_id=user)
+                               .annotate(user_count=Count('communityuser')))
 
                 # Populate the list with dictionaries containing each community and their info
                 communities_list = []
@@ -1647,7 +1649,8 @@ def get_owner_community_info_view(request):
                         'community_photo': profile_picture_encoded,
                         'owner_id': community.owner_id.username,
                         'privacy': community.privacy,
-                        'date_created': community.date_created.strftime('%Y-%m-%d')
+                        'date_created': community.date_created.strftime('%Y-%m-%d'),
+                        'user_count': community.user_count
                     })
 
                     
@@ -1697,6 +1700,8 @@ def get_communities_not_owned_info_view(request):
                     community = Community.objects.get(community_id=id)
                     # Populate the list with dictionaries containing each community and their info  
 
+                    user_count = CommunityUser.objects.filter(community_id=community).count()
+
                     if community.community_photo:
                         profile_picture_encoded = base64.b64encode(community.community_photo).decode('utf-8')
                     else:
@@ -1709,7 +1714,8 @@ def get_communities_not_owned_info_view(request):
                         'community_photo': profile_picture_encoded,
                         'owner_id': community.owner_id.username,
                         'privacy': community.privacy,
-                        'date_created': community.date_created.strftime('%Y-%m-%d')
+                        'date_created': community.date_created.strftime('%Y-%m-%d'),
+                        'user_count': user_count
                     })
 
                 # Log data and return as JSON response
@@ -1910,7 +1916,7 @@ def request_to_join_community_view(request):
                 return HttpResponse("Invalid privacy value", status=400)
     except Exception as e:
         logging.info("ERROR in joining community: %s", e)
-        return HttpResponse("Error in joining community", status=400)
+        return HttpResponse("Community does not exist", status=400)
     
 def invite_to_join_community_view(request):
     # Check if the request method is POST

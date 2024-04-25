@@ -8,10 +8,11 @@ import * as Storage from "../../AsyncStorage.js";
 import * as ImagePicker from "expo-image-picker";
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 
+
 const layout = Dimensions.get("window");
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
-const BottomPopupJoin = ({ visible, onRequestClose, username }) => {
+const BottomPopupJoin = ({ visible, onRequestClose, username, CSRF, initializeData }) => {
     const [communityName, setCommunityName] = useState("")
     const [activity, setActivity] = useState(null)
 
@@ -32,7 +33,6 @@ const BottomPopupJoin = ({ visible, onRequestClose, username }) => {
             <ActivityIndicator />
         )
         try {
-            console.log(`Joining community ${communityName}`);
             const response = await axios.post(
                 `${API_URL}/request_community/`,
                 {
@@ -50,8 +50,10 @@ const BottomPopupJoin = ({ visible, onRequestClose, username }) => {
             console.log("Join Community Response:", response.data);
             onRequestClose();
             setActivity(null);
+            initializeData();
             return Alert.alert(`You're now apart of the ${communityName} community!`);
         } catch (error) {
+            setActivity(null);
             if (error.response.data) {
                 console.error("Error Joining Community:", error.response.data);
                 onRequestClose();
@@ -72,12 +74,12 @@ const BottomPopupJoin = ({ visible, onRequestClose, username }) => {
                 onHandlerStateChange={onHandlerStateChange}
             >
                 <View style={[styles.bottomView, { marginTop: layout.height / 2.8 }]}>
-
                     <View style={styles.dragIndicatorJoin}>
                         <View style={styles.dragIndicatorInner} />
                     </View>
                     <Text style={styles.joinHeader}>Join a Community</Text>
                     <TextInput placeholder='Community Name' placeholderTextColor={'#858585'} onChangeText={(text) => setCommunityName(text)} style={styles.input} />
+                    {activity}
                     <TouchableOpacity style={styles.joinModal} onPress={handleCommunityJoin}>
                         <Text style={styles.buttonText}>Join</Text>
                     </TouchableOpacity>
@@ -87,7 +89,7 @@ const BottomPopupJoin = ({ visible, onRequestClose, username }) => {
     );
 };
 
-const BottomPopupCreate = ({ visible, onRequestClose, username }) => {
+const BottomPopupCreate = ({ visible, onRequestClose, username, CSRF, initializeData }) => {
     const [communityName, setCommunityName] = useState('');
     const [communityDescription, setCommunityDescription] = useState('');
     const [communityPhoto, setCommunityPhoto] = useState('');
@@ -135,6 +137,7 @@ const BottomPopupCreate = ({ visible, onRequestClose, username }) => {
             setCommunityDescription('');
             setCommunityPhoto('');
             setPrivacy('public');
+            initializeData();
             return Alert.alert(`The ${communityName} community has been created!`)
         } catch (error) {
             console.error("error creating community:", error.response.data);
@@ -282,20 +285,29 @@ const Communities = ({ navigation }) => {
 
     const getJoinedCommunities = async (storedUsername) => {
         setRefreshingJoined(true);
+        let CommunitiesJoinedRetrieved = await Storage.getItem("@CommunitiesJoined")
+        if (CommunitiesJoinedRetrieved !== null) {
+            CommunitiesJoinedRetrieved = await JSON.parse(CommunitiesJoinedRetrieved);
+            setCommunities(CommunitiesJoinedRetrieved);
+        }
         try {
             console.log(`getting communities ${storedUsername} is apart of`)
             const response = await axios.get(
-                `${API_URL}/get_user_community_info/`,
+                `${API_URL}/get_communities_not_owned_info/`,
                 {
                     params: {
                         username: storedUsername,
                     }
                 }
             );
-            setCommunities(response.data);
+            if (CommunitiesJoinedRetrieved != response.data) {
+                await Storage.setItem("@CommunitiesJoined", JSON.stringify(response.data));
+                setCommunities(response.data);
+            }
             setRefreshingJoined(false);
             console.log("Succesfully retrieved communities user is apart of");
         } catch (error) {
+            setRefreshingJoined(false);
             if (error.response.data) {
                 console.error("Error Getting Communities that user is apart of:", error.response.data);
             }
@@ -304,6 +316,11 @@ const Communities = ({ navigation }) => {
 
     const getOwnedCommunities = async (storedUsername) => {
         setRefreshingOwned(true);
+        let CommunitiesOwnedRetrieved = await Storage.getItem("@CommunitiesOwned");
+        if (CommunitiesOwnedRetrieved !== null) {
+            CommunitiesOwnedRetrieved = await JSON.parse(CommunitiesOwnedRetrieved);
+            setOwnedCommunities(CommunitiesOwnedRetrieved);
+        }
         try {
             console.log(`getting owned communities for ${storedUsername}`);
             const response = await axios.get(
@@ -312,7 +329,10 @@ const Communities = ({ navigation }) => {
                     params: { username: storedUsername }
                 }
             );
-            setOwnedCommunities(response.data);
+            if (CommunitiesOwnedRetrieved !== response.data) {
+                await Storage.setItem("@CommunitiesOwned", JSON.stringify(response.data));
+                setOwnedCommunities(response.data);
+            }
             setRefreshingOwned(false);
             console.log("Succesfully retrieved communities user owns");
         } catch (error) {
@@ -345,7 +365,37 @@ const Communities = ({ navigation }) => {
                             </Text>
                         </View>
                         <View style={styles.msgContainer}>
-                            <Text style={styles.msgTxt}>Members: 10</Text>
+                            <Text style={styles.msgTxt}>Members: {item.user_count}</Text>
+                        </View>
+                    </View>
+
+                </View>
+            </TouchableOpacity>
+        );
+    };
+
+    const renderOwnedCommunity = ({ item }) => {
+        return (
+            <TouchableOpacity onPress={() => { navigation.navigate("ViewOwnedCommunity", { community: item }); }}>
+                <View style={styles.community}>
+                    <View style={styles.pic}>
+                        <Image
+                            source={{ uri: `data:Image/jpeg;base64,${item.community_photo}` }}
+                            style={styles.pic}
+                        />
+                    </View>
+                    <View style={styles.textContainer}>
+                        <View style={styles.nameContainer}>
+                            <Text
+                                style={styles.nameTxt}
+                                numberOfLines={1}
+                                ellipsizeMode="tail"
+                            >
+                                {item.community_name}
+                            </Text>
+                        </View>
+                        <View style={styles.msgContainer}>
+                            <Text style={styles.msgTxt}>Members: {item.user_count}</Text>
                         </View>
                     </View>
 
@@ -359,7 +409,6 @@ const Communities = ({ navigation }) => {
         return (
             <View style={styles.community}>
                 <View style={styles.pic}>
-                    {/* <SvgUri style={styles.pic} uri={item.profile_pic} /> */}
                     <Image
                         source={{ uri: `data:Image/jpeg;base64,${item.community_photo}` }}
                         style={styles.pic}
@@ -408,6 +457,7 @@ const Communities = ({ navigation }) => {
         setCSRF(storedCSRF);
         console.log(`username: ${storedUsername}`);
         console.log(`CSRF: ${storedCSRF}`);
+        // getInvitations(username);
         getJoinedCommunities(storedUsername);
         getOwnedCommunities(storedUsername);
     }
@@ -433,11 +483,15 @@ const Communities = ({ navigation }) => {
                         visible={joinModalVisible}
                         onRequestClose={() => setJoinModalVisible(false)}
                         username={username}
+                        CSRF={CSRF}
+                        initializeData={() => initializeData()}
                     />
                     <BottomPopupCreate
                         visible={createModalVisible}
                         onRequestClose={() => setCreateModalVisible(false)}
                         username={username}
+                        CSRF={CSRF}
+                        initializeData={() => initializeData()}
                     />
                 </View>
                 <View style={{ flex: 1 }}>
@@ -472,10 +526,10 @@ const Communities = ({ navigation }) => {
                             <Text style={styles.noCommunities}>
                                 Join or create a community to get started!
                             </Text>
-                            <TouchableOpacity onPress={refreshAll} style={styles.refresh}>
+                            {/* <TouchableOpacity onPress={refreshAll} style={styles.refresh}>
                                 <Text style={styles.buttonText}>Check for communities</Text>
                                 <Text >This is a temp button in case the communities aren't properly retrieved at first</Text>
-                            </TouchableOpacity>
+                            </TouchableOpacity> */}
                         </>
                     ) : (
                         <>
@@ -510,7 +564,7 @@ const Communities = ({ navigation }) => {
                                         enableEmptySections={true}
                                         data={ownedCommunities}
                                         keyExtractor={(item) => item.name}
-                                        renderItem={(item) => renderCommunity(item)}
+                                        renderItem={(item) => renderOwnedCommunity(item)}
                                         refreshControl={
                                             <RefreshControl
                                                 refreshing={refreshingOwned}
@@ -587,7 +641,7 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 20,
         padding: 35,
         shadowColor: "#000",
-        shadowOpacity: 0.25,
+        shadowOpacity: 0.1,
         shadowRadius: 3.84,
         elevation: 5,
     },
@@ -629,7 +683,6 @@ const styles = StyleSheet.create({
         fontWeight: "400",
         color: "#4A90E2",
         fontSize: 12,
-        marginLeft: 15,
     },
     input: {
         width: "80%",
@@ -768,6 +821,10 @@ const styles = StyleSheet.create({
     },
     createContainer: {
         flex: 1,
+        shadowColor: "#000",
+        shadowOpacity: 0.1,
+        shadowRadius: 3.84,
+        elevation: 5,
     },
     pic: {
         width: 50,
@@ -776,6 +833,9 @@ const styles = StyleSheet.create({
         overflow: "hidden",
         alignItems: "center",
         justifyContent: "center",
+    },
+    textContainer: {
+        left: 10
     },
 });
 

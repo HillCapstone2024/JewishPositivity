@@ -15,9 +15,9 @@ import Landing from "../screens/greet/Landing.js";
 import TermsofUse from '../screens/home/TermsofUse';
 import CheckInEntryDetailsScreen from "../screens/home/CheckInEntryDetailsScreen.js";
 import CheckIn from "../screens/home/CheckIn.js";
-import Community from "../screens/home/Community.js";
 import ViewCommunity from "../screens/home/ViewCommunity.js";
 import EditCommunity from "../screens/home/EditCommunity.js";
+import ViewOwnedCommunity from "../screens/home/ViewOwnedCommunity.js";
 
 // OneSignal.Debug.setLogLevel(LogLevel.Verbose);
 // OneSignal.initialize(Constants.expoConfig.extra.oneSignalAppId);
@@ -47,8 +47,8 @@ export default function AuthNavigator() {
 
   if (isLoading) {
     return <LoadingScreen />;
-  } 
-  
+  }
+
   return (
     <Stack.Navigator
       initialRouteName={initialRouteName}
@@ -93,13 +93,13 @@ export default function AuthNavigator() {
         options={{ headerTitle: "Check-in Details" }}
       />
       <Stack.Screen
-        name="Community"
-        component={Community}
+        name="ViewCommunity"
+        component={ViewCommunity}
         options={{ headerTitle: "Community" }}
       />
       <Stack.Screen
-        name="ViewCommunity"
-        component={ViewCommunity}
+        name="ViewOwnedCommunity"
+        component={ViewOwnedCommunity}
         options={{ headerTitle: "Community" }}
       />
        <Stack.Screen
