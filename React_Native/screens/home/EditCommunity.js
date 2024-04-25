@@ -14,17 +14,23 @@ import {
   Pressable,
   TouchableWithoutFeedback,
   RefreshControl,
-  FlatList
+  FlatList,
+  Switch
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 import IP_ADDRESS from "../../ip.js";
 import * as Storage from "../../AsyncStorage.js";
 import SpinningPen from "../greet/Pen.js";
 import { Ionicons } from "@expo/vector-icons";
+import * as FileSystem from "expo-file-system";
 import { TextInput } from "react-native-gesture-handler";
+import { userEvent } from "@testing-library/react-native";
 
 export default function EditCommunity({ route, navigation }) {
+  const [errorMessage, setErrorMessage] = useState(null);
+
     const [communityInfo, setCommunityInfo] = useState({});
     const [username, setUsername] = useState("");
     const [members, setMembers] = useState([]);
@@ -32,10 +38,21 @@ export default function EditCommunity({ route, navigation }) {
     const [expanded, setExpanded] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const { community } = route.params;
-    const community_name = community.community_name;
-    const origingal_community_name = community.community_name; //store name before user changes
-    const community_desc = community.community_description;
-    const community_photo = community.community_photo;
+    //const community_name = community.community_name;
+    const [community_name, setCommunityName] = useState(community.community_name);
+
+    const original_community_name = community.community_name; //store name before user changes
+
+    //const community_desc = community.community_description;
+    const [community_desc, setCommunityDesc] = useState(community.community_description);
+
+    //const community_photo = community.community_photo;
+    const [community_photo, setCommunityPhoto] = useState(community.community_photo);
+
+    const [community_privacy, setCommunityPrivacy] = useState(community.community_privacy);
+
+    const [updateCommunityPicture, setUpdateCommunityPicture] = useState(false);
+
     const owner = community.owner_id;
     const date_created = community.date_created;
     const [loadingSubmit, setLoadingSubmit] = useState(false);
@@ -66,16 +83,78 @@ const initializeData = async () => {
     setIsLoading(false);
 };
 
+async function readFileAsBase64(uri) {
+  try {
+    const base64Content = await FileSystem.readAsStringAsync(uri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    return base64Content;
+  } catch (error) {
+    console.error("Failed to read file as base64", error);
+    return null;
+  }
+}
+
 const deleteCommunity = async () => {
     //pass in community Id
     //view 'delete_community/'
 };
 
 const handleUpdateCommunity = async () => {
-    setLoadingSubmit(true);
-    //update community logic here
+  setLoadingSubmit(true);
+  console.log("og name", original_community_name);
+  console.log("new name", community_name);
+  console.log("priv", community_privacy);
+  console.log("id", community.community_id);
+  console.log("new desc", community_desc);
+  setErrorMessage(<ActivityIndicator />);
+  const getCsrfToken = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/csrf-token/`);
+      return response.data.csrfToken;
+    } catch (error) {
+      console.error("Error retrieving CSRF token:", error);
+      throw new Error("CSRF token retrieval failed");
+    }
+  };
+
+  try {
+    const csrfToken = await getCsrfToken();
+    const requestData = {
+      username: owner,
+      new_community_name: community_name,
+      community_id: community.community_id,
+      community_name: original_community_name,
+      //new_privacy: community_privacy,
+      new_description: community_desc,
+    };
+    //include community picture if it exists
+    if (updateCommunityPicture) {
+      requestData.new_photo = community_photo ? community_photo : undefined;
+    }
+    const response = await axios.post(
+      `${API_URL}/update_community/`,
+      requestData,
+      {
+        headers: {
+          "X-CSRFToken": csrfToken,
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      }
+    );
+    console.log("update community response:", response.data);
     setLoadingSubmit(false);
     navigateManageView();
+    } catch (error) {
+    console.log(error)
+    setErrorMessage(
+      <View style={styles.errorMessageBox}>
+        <Text style={styles.errorMessageText}>{error.response.data}</Text>
+      </View>
+    );
+    console.error("Update Community error:", error.response.data);
+  }
 };
 
 
@@ -140,7 +219,53 @@ const getCommunityMembers = async () => {
         throw new Error("CSRF token retrieval failed");
     }
     };
+    const handleUpdateCommunityPhoto = () => {
+      Alert.alert("Media Type", "", [
+        { text: "Camera Roll", onPress: () => pickMedia() },
+        { text: "Take Photo", onPress: () => takeMedia() },
+        { text: "Cancel", style: "cancel" },
+      ]);
+    };
 
+    const takeMedia = async () => {
+      // Request camera and microphone permissions if not already granted
+      const cameraPermission = await ImagePicker.requestCameraPermissionsAsync();
+      if (!cameraPermission.granted) {
+        alert("Permissions to access camera and microphone are required!");
+        return;
+      }
+  
+      let result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images, // This will still default to capturing images
+        allowsEditing: true, // Only applies to images
+        aspect: [4, 3],
+        quality: 1,
+      });
+  
+      if (result && !result.cancelled) {
+        setUpdateCommunityPicture(true);
+        const base64String = await readFileAsBase64(result.assets[0].uri);
+        setCommunityPhoto(base64String);
+      }
+    };
+    
+  const pickMedia = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setUpdateCommunityPicture(true);
+      const base64String = await readFileAsBase64(result.assets[0].uri);
+      setCommunityPhoto(base64String);
+    }
+  };
+  const handlePrivacyAlert = () => {
+    Alert.alert("Privacy Setting", 'When the privacy setting is set to on, users may only join via request or invite.', [{ text: 'Ok', style: 'default' }])
+}
     
   const renderItem = ({ item }) => {
     // Check if the user is already a friend
@@ -222,6 +347,7 @@ return (
     <View style={styles.container}>
       {/* displaying community info */}
       <View style={styles.communityInfoSection}>
+      <TouchableOpacity onPress={handleUpdateCommunityPhoto} >
         <Image
           source={{ uri: `data:Image/jpeg;base64,${community_photo}` }}
           style={styles.communityPicture}
@@ -229,6 +355,7 @@ return (
         <View style={styles.cameraIcon}>
             <Ionicons name="camera" size={24} color="black" />
         </View>
+        </TouchableOpacity>
         <View style={styles.belowPicture}>
         <View style={styles.topBar}>
             <View style={{ flexDirection: "row", width: "80%" }}>
@@ -259,7 +386,10 @@ return (
             )}
             </View>
           <View style={styles.community_nameContainer}>
-            <TextInput style={styles.community_name}>{community_name}</TextInput>
+            <TextInput style={styles.community_name}
+                placeholder="Community Name"
+                onChangeText={(text) => setCommunityName(text)}
+            >{community_name}</TextInput>
           </View>
           <View style={styles.communityInfo}>
             <Text style={styles.communityInfoText}>Owner: {owner}</Text>
@@ -267,15 +397,32 @@ return (
               Since: {formattedDate}
             </Text>
           </View>
+          <View style={styles.communityPrivacy}> 
+            <View style={styles.privacy}>
+                <TouchableOpacity
+                    onPress={handlePrivacyAlert}
+                >
+                    <Text style={styles.privacyText}>Privacy</Text>
+                </TouchableOpacity>
+                <Switch
+                    trackColor={{ false: '#f2f2f2', true: '#4A90E2' }}
+                    thumbColor={'#f2f2f2'}
+                    onValueChange={() => setCommunityPrivacy(community_privacy === "private" ? "public" : "private")}
+                    value={community_privacy === "private" ? true : false}
+                />
+            </View>
+            </View>
           <View style={styles.communityInfoBio}>
-            <TextInput style={styles.communityInfoText}>About:</TextInput>
+            <Text style={styles.communityInfoText}>About:</Text>
             <TouchableOpacity onPress={handlePressBio}>
-              <Text
+              <TextInput
                 style={styles.communityInfoText}
+                placeholder="Community Description"
                 numberOfLines={expanded ? undefined : 2}
+                onChangeText={(text) => setCommunityDesc(text)}
               >
                 {community_desc}
-              </Text>
+              </TextInput>
             </TouchableOpacity>
           </View>
           {/* members list */}
@@ -329,6 +476,19 @@ const styles = StyleSheet.create({
         backgroundColor: "rgba(255, 255, 255, 0.7)",
         padding: 4,
       },
+      privacy: {
+        justifyContent: 'space-between',
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingBottom: 10,
+    },
+    privacyText: {
+      fontSize: 13,
+      fontWeight: "600",
+      color: "#4A90E2",
+      textTransform: "uppercase",
+      letterSpacing: 1.1,
+  },
       buttonContent: {
         flexDirection: "row",
         alignItems: "center",
@@ -380,6 +540,14 @@ const styles = StyleSheet.create({
         alignItems: "center",
         // backgroundColor: "white"
         // zIndex: 1,
+      },
+      communityPrivacy: {
+        justifyContent: "left",
+        alignContent: "center",
+        alignItems: "center",
+        width: "100%",
+        flexDirection: "row",
+        margin: 10,
       },
       communityInfo: {
         flexDirection: "row",

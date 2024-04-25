@@ -164,6 +164,7 @@ const EditProfile = ({ navigation, onSwitch }) => {
         ...prevUserInfo,
         profilePicture: base64String,
       }));
+      await Storage.setItem("@profilePicture", base64String);
     }
   };
 
