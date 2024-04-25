@@ -38,9 +38,50 @@ const deleteCommunity = async () => {
     //view 'delete_community/'
 };
 
-const deleteUserFromCommunity = async () => {
+const deleteUserFromCommunity = async (deleteUser) => {
     //pass in username, and community name
     //view ''delete_user_from_community/'
+    Alert.alert(
+        `Are you sure you want to delete ${deleteUser} from this community?`,
+        `${deleteUser}'s reflections will no longer be viewable in the community tab and they may need an invite to rejoin.`,
+        [
+            {
+                text: "Cancel",
+                onPress: () => console.log("Cancel Pressed"),
+                style: styles.alertCancelText,
+            },
+            {
+                text: "Delete",
+                onPress: () => deleteMember(),
+                style: styles.alertDeleteText,
+            }
+        ]
+    );
+
+
+    const deleteMember = async () => {
+        console.log("deleting:", deleteUser);
+        try {
+            //get csrf token
+            const response = await axios.post(`${API_URL}/delete_user_from_community/`, 
+            {
+                username: deleteUser,
+                community_name: communityName,
+            },
+            {
+                headers:
+                {
+                    "X-CSRFToken": csrfToken,
+                    "Content-Type": "application/json",
+                },
+                withCredentials: true,
+            });
+            console.log("response:", response);
+            //reload the page
+        } catch(error) {
+            console.log("error deleting community", error);
+        }
+    }
 };
 return (
      <TouchableOpacity style={styles.button}>
