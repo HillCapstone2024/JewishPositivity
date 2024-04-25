@@ -15,6 +15,7 @@ import {
   Platform,
   Animated,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import axios from "axios";
 import RecordingAccessoryBar from "../../tools/RecordingBar.js";
@@ -144,7 +145,14 @@ export default function CheckIn({ navigation, route }) {
       navigation.goBack();
     } catch (error) {
       console.log(error);
-      console.error("CheckIn Error:", error.response.data);
+      console.log("CheckIn Error:", error.response.data);
+      if (error.response.data === "Error: Duplicate Moment Today") {
+        Alert.alert(
+          "Duplicate Check-in Type Recieved",
+          "You have already submitted a check-in of this type for today. Please select a different check-in type or try again tomorrow.",
+          [{ text: "OK", onPress: () => console.log("Alert Closed") }]
+        );
+      }
     }
     setLoadingSubmit(false);
   };

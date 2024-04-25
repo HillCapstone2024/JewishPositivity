@@ -336,7 +336,7 @@ export default function Archive({ navigation }) {
         // <ActivityIndicator style={{ height: 100, width: 100 }} />
         <View testID="loading-screen" style={styles.loadingStyle}>
           {/* <LoadingScreen /> */}
-          <SpinningPen loadingText="Getting Past Entries"/>
+          <SpinningPen loadingText="Fetching Check-in Entries"/>
         </View>
       ) : (
         <View>

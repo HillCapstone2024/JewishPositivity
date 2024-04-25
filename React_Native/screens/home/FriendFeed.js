@@ -41,9 +41,6 @@ const FriendFeed = () => {
   const slideAnimFlatList = useRef(new Animated.Value(-800)).current; // Initial position for FlatList
   const slideAnimScrollView = useRef(new Animated.Value(-800)).current; // Initial position for ScrollView
 
-  const openModal = () => setShowViewCheckIn(true);
-  const closeModal = () => setShowViewCheckIn(false);
-
   const saveBase64Video = async (base64String, checkin_id) => {
     console.log("reached file function");
     const filename = FileSystem.documentDirectory + checkin_id + "downloadedVideo.mp4";
@@ -241,11 +238,11 @@ const FriendFeed = () => {
 
   const Moment = ({ moment_number }) => {
     if (moment_number === 1) {
-      return <Text>Modeh Ani</Text>;
+      return <Text style={styles.postMomentType}>Modeh Ani - Gratitude: </Text>;
     } else if (moment_number === 2) {
-      return <Text>Ashrei</Text>;
+      return <Text style={styles.postMomentType}>Ashrei - Happiness: </Text>;
     } else if (moment_number === 3) {
-      return <Text>Shema</Text>;
+      return <Text style={styles.postMomentType}>Shema - Reflection: </Text>;
     }
   };
 
@@ -291,7 +288,7 @@ const FriendFeed = () => {
           >
             <Image
               source={{ uri: `data:Image/mp4;base64,${post?.content}` }}
-              style={styles.JournalEntryModalImage}
+              style={styles.postImage}
             />
             {/* <Text>load video</Text> */}
           </TouchableOpacity>
@@ -300,7 +297,7 @@ const FriendFeed = () => {
     );
   }, (prevProps, nextProps) => {
     return prevProps.video === nextProps.video && prevProps.post.checkin_id === nextProps.post.checkin_id;
-});
+  });
 
   const PostCard = ({ post }) => {
     const truncateText = (text, maxLength) => {
@@ -311,7 +308,7 @@ const FriendFeed = () => {
     };
     return (
       <View>
-        <TouchableOpacity style={styles.postCard} onPress={openModal}>
+        <View style={styles.postCard}>
           <View style={styles.postHeaderBar}>
             {/* note profile picture would replace logo image below */}
             <Image
@@ -321,30 +318,29 @@ const FriendFeed = () => {
             <Text style={styles.postUsername}>{post.username}</Text>
             <Text style={styles.postDate}>{post.date}</Text>
           </View>
-          <Moment moment_number={post.moment_number} />
-          <Text style={styles.postHeader}>{post.header}</Text>
+
           {post.content_type === "image" && (
             <View
-              style={[styles.JournalEntryModalImage, { marginBottom: 20 }]}
+              style={[styles.postImage, { marginBottom: 10 }]}
               testID={`image-${post.checkin_id}`}
               key={`image-${post.checkin_id}`}
             >
-              <ImageViewer
-                source={`data:Image/mp4;base64,${post?.content}`}
-                style={styles.JournalEntryModalImage}
+              <Image
+                source={{ uri: `data:image/jpeg;base64,${post?.content}` }}
+                style={styles.postImage}
               />
             </View>
           )}
           {post.content_type === "video" && (
             <View
-              style={[styles.video, { marginBottom: 20 }]}
+              style={[styles.video, { marginBottom: 10 }]}
               testID={`video-${post.checkin_id}`}
               key={`video-${post.checkin_id}`}
             >
               {video[post.checkin_id] ? (
                 <VideoViewer
                   source={video[post.checkin_id]}
-                  style={{ height: 100, width: 100, borderRadius: 5 }}
+                  style={{ aspectRatio: 1, width: "100%"}}
                 />
               ) : (
                 <TouchableOpacity
@@ -354,7 +350,7 @@ const FriendFeed = () => {
                 >
                   <Image
                     source={{ uri: `data:Image/mp4;base64,${post?.content}` }}
-                    style={styles.JournalEntryModalImage}
+                    style={styles.postImage}
                   />
                 </TouchableOpacity>
               )}
@@ -373,13 +369,15 @@ const FriendFeed = () => {
               />
             </View>
           )}
-          {post.text_entry && <Text>{truncateText(post.text_entry, 100)}</Text>}
-        </TouchableOpacity>
-        {/* <ViewCheckIn
-          checkin={post}
-          modalVisible={showViewCheckIn}
-          onClose={closeModal}
-        /> */}
+          
+          {post.text_entry && 
+            <Text style={styles.postDescription}>
+              <Moment moment_number={post.moment_number}/>
+              {truncateText(post.text_entry, 100)}
+            </Text>
+          }
+
+        </View>
       </View>
     );
   };
@@ -400,7 +398,7 @@ const FriendFeed = () => {
         // <ActivityIndicator style={{ height: 100, width: 100 }} />
         <View testID="loading-screen" style={styles.loadingStyle}>
           {/* <LoadingScreen /> */}
-          <SpinningPen loadingText="Loading Todays Posts"/>
+          <SpinningPen loadingText="Loading Friend's Daily Check-ins"/>
         </View>
       ) : (
         <View>
@@ -518,22 +516,22 @@ const styles = StyleSheet.create({
     // borderColor: "black",
   },
   postListContainer: {
-    paddingTop: 20,
+    // paddingTop: 20,
     // marginTop: 30,
-    paddingHorizontal: 15,
+    // paddingHorizontal: 15,
     height: "87%",
     // backgroundColor: "red",
   },
   postCard: {
     marginBottom: 10,
-    padding: 10,
-    backgroundColor: "#fff",
-    borderRadius: 5,
+    paddingBottom: 10,
+    backgroundColor: "#f2f2f2",
+    // borderRadius: 5,
   },
   postHeaderBar: {
+    padding: 10,
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 5,
   },
   postAvatar: {
     width: 30,
@@ -549,15 +547,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#4A90E2",
   },
-  postHeader: {
+  postDescription: {
+    paddingHorizontal: 10,
+  },
+  postMomentType: {
+    paddingTop: 10,
     fontSize: 16,
-    // color: "#00008B",
     fontWeight: "bold",
   },
   postImage: {
-    marginTop: 10,
     width: "100%",
-    height: 200,
+    aspectRatio: 1,
   },
   postFooter: {
     flexDirection: "row",
@@ -569,15 +569,8 @@ const styles = StyleSheet.create({
   postButtonText: {
     color: "#808080",
   },
-  JournalEntryModalImage: {
-    // width: "100%",
-    width: 100,
-    aspectRatio: 1,
-    borderRadius: 5,
-    // borderWidth: 2,
-  },
   video: {
-    flexDirection: "row",
+    // flexDirection: "row",
   },
   Message: {
     fontSize: 24,
