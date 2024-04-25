@@ -95,6 +95,7 @@ const BottomPopupCreate = ({ visible, onRequestClose, username, CSRF, initialize
     const [communityPhoto, setCommunityPhoto] = useState('');
     const [privacy, setPrivacy] = useState('public');
     const [activity, setActivity] = useState(null)
+    const [alert, setAlert] = useState(null);
 
     const onGestureEvent = (event) => {
         if (event.nativeEvent.translationY > 100) {
@@ -109,6 +110,30 @@ const BottomPopupCreate = ({ visible, onRequestClose, username, CSRF, initialize
     };
 
     const handleCommunityCreate = async () => {
+        if (communityName === '') {
+            setAlert(
+                <View style={styles.errorMessageBox}>
+                    <Text style={styles.errorMessageText}>Community must be named</Text>
+                </View>
+            );
+            return
+        } else if (communityDescription === '') {
+            setAlert(
+                <View style={styles.errorMessageBox}>
+                    <Text style={styles.errorMessageText}>Community description cannot be blank</Text>
+                </View>
+            );
+            return
+        } else if (communityPhoto === '') {
+            setAlert(
+                <View style={styles.errorMessageBox}>
+                    <Text style={styles.errorMessageText}>Community photo cannot be empty</Text>
+                </View>
+            );
+            return
+        } else {
+            setAlert(null);
+        }
         setActivity(
             <ActivityIndicator />
         )
@@ -243,7 +268,7 @@ const BottomPopupCreate = ({ visible, onRequestClose, username, CSRF, initialize
                             returnKeyType="default"
                             onChangeText={(text) => setCommunityDescription(text)}
                             value={communityDescription}
-                            style={styles.inputDesc}
+                            style={[styles.inputDesc, { borderColor: "#e8bd25" }]}
                         />
                         <View style={styles.privacy}>
                             <TouchableOpacity
@@ -258,6 +283,7 @@ const BottomPopupCreate = ({ visible, onRequestClose, username, CSRF, initialize
                                 value={privacy === "private" ? true : false}
                             />
                         </View>
+                        {alert}
                         {activity}
                         <TouchableOpacity style={styles.createModal} onPress={handleCommunityCreate}>
                             <Text style={styles.buttonText}>Create</Text>
@@ -348,7 +374,6 @@ const Communities = ({ navigation }) => {
             <TouchableOpacity onPress={() => { navigation.navigate("ViewCommunity", { community: item }); }}>
                 <View style={styles.community}>
                     <View style={styles.pic}>
-                        {/* <SvgUri style={styles.pic} uri={item.profile_pic} /> */}
                         <Image
                             source={{ uri: `data:Image/jpeg;base64,${item.community_photo}` }}
                             style={styles.pic}
@@ -443,16 +468,10 @@ const Communities = ({ navigation }) => {
         );
     };
 
-    async function refreshAll() {
-        // getInvitations(username);
-        getJoinedCommunities(username);
-        getOwnedCommunities(username);
-    }
-
     const initializeData = async () => {
         console.log(`initializing community data`)
         const storedUsername = await Storage.getItem("@username");
-        setUsername(storedUsername)
+        setUsername(storedUsername);
         const storedCSRF = await Storage.getItem("@CSRF");
         setCSRF(storedCSRF);
         console.log(`username: ${storedUsername}`);
@@ -744,7 +763,6 @@ const styles = StyleSheet.create({
         width: "100%",
         minHeight: "10%",
         borderStyle: "solid",
-        borderColor: "#e8bd25",
         borderWidth: 2,
         borderRadius: 10,
         marginBottom: 20,
@@ -836,6 +854,25 @@ const styles = StyleSheet.create({
     },
     textContainer: {
         left: 10
+    },
+    errorMessageBox: {
+        textAlign: "center",
+        borderRadius: 6,
+        backgroundColor: "#ffc3c3",
+        paddingVertical: 10,
+        paddingHorizontal: 50,
+        marginTop: 5,
+        marginBottom: 10,
+        marginHorizontal: 5,
+        shadowColor: "black",
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 6,
+        shadowOpacity: 0.06,
+        width: "80%",
+    },
+    errorMessageText: {
+        textAlign: "center",
+        color: "#ff0000",
     },
 });
 
