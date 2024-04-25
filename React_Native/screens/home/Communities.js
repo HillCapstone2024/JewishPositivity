@@ -397,7 +397,7 @@ const Communities = ({ navigation }) => {
                             </Text>
                         </View>
                         <View style={styles.msgContainer}>
-                            <Text style={styles.msgTxt}>Members: 10</Text>
+                            <Text style={styles.msgTxt}>Members: {item.user_count}</Text>
                         </View>
                     </View>
 
@@ -411,7 +411,6 @@ const Communities = ({ navigation }) => {
         return (
             <View style={styles.community}>
                 <View style={styles.pic}>
-                    {/* <SvgUri style={styles.pic} uri={item.profile_pic} /> */}
                     <Image
                         source={{ uri: `data:Image/jpeg;base64,${item.community_photo}` }}
                         style={styles.pic}
