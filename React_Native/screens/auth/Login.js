@@ -39,6 +39,23 @@ const Login = ({ navigation }) => {
 
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
+  const csrf = async () => {
+    const getCsrfToken = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/csrf-token/`);
+        return response.data.csrfToken;
+      } catch (error) {
+        console.error("Error retrieving CSRF token:", error);
+        throw new Error("CSRF token retrieval failed");
+      }
+    };
+    const csrfToken = await getCsrfToken();
+    await Storage.setItem("@CSRF", csrfToken);
+    console.log("stored token: ", csrfToken);
+    // const csrfToken1 = await Storage.getItem("@CSRF");
+    // console.log("stored token1: ", csrfToken1);
+  };
+
   const saveUser = async () => {
     await Storage.setItem("@username", username);
 
@@ -69,7 +86,7 @@ const Login = ({ navigation }) => {
         await Storage.setItem("@email", response.data.email);
         await Storage.setItem("@password", response.data.password);
         await Storage.setItem("@profilePicture", response.data.profilepicture);
-
+        await csrf();
         handleUpdateTimeZone();
 
         console.log("successfully saved user")
