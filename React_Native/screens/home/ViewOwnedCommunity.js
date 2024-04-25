@@ -251,7 +251,7 @@ export default function ViewCommunity({ route, navigation }) {
               <Pressable
                 style={styles.leaveButton}
                 onPress={() => {
-                  handleLeave();
+                  navigation.navigate("EditCommunity", { community: community });
                 }}
               >
                 <Text style={styles.blueText}> Edit </Text>

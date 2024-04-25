@@ -163,7 +163,8 @@ const handlePressBio = () => {
 };
 
 const navigateManageView = () => {
-    navigation.navigate("Communities");
+    // navigation.navigate("Communities");
+    navigation.goBack();
 }
 
 
