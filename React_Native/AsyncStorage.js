@@ -13,9 +13,7 @@ export const setItem = async (key, value) => {
 export const getItem = async (key) => {
   try {
     const value = await AsyncStorage.getItem(key);
-    if (value !== null) {
-      return value;
-    }
+    return value;  
   } catch (error) {
     console.log(`Error retrieving ${key}:`, error);
   }

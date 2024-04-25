@@ -1644,7 +1644,7 @@ def get_owner_community_info_view(request):
                         'community_id': community.community_id,
                         'community_name': community.community_name,
                         'community_description': community.community_description,
-                        'community_photo': profile_picture_encoded,
+                        # 'community_photo': profile_picture_encoded,
                         'owner_id': community.owner_id.username,
                         'privacy': community.privacy,
                         'date_created': community.date_created.strftime('%Y-%m-%d')
@@ -1910,7 +1910,7 @@ def request_to_join_community_view(request):
                 return HttpResponse("Invalid privacy value", status=400)
     except Exception as e:
         logging.info("ERROR in joining community: %s", e)
-        return HttpResponse("Error in joining community", status=400)
+        return HttpResponse("Community does not exist", status=400)
     
 def invite_to_join_community_view(request):
     # Check if the request method is POST

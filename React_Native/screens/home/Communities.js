@@ -8,10 +8,11 @@ import * as Storage from "../../AsyncStorage.js";
 import * as ImagePicker from "expo-image-picker";
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 
+
 const layout = Dimensions.get("window");
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
-const BottomPopupJoin = ({ visible, onRequestClose, username }) => {
+const BottomPopupJoin = ({ visible, onRequestClose, username, CSRF }) => {
     const [communityName, setCommunityName] = useState("")
     const [activity, setActivity] = useState(null)
 
@@ -32,7 +33,6 @@ const BottomPopupJoin = ({ visible, onRequestClose, username }) => {
             <ActivityIndicator />
         )
         try {
-            console.log(`Joining community ${communityName}`);
             const response = await axios.post(
                 `${API_URL}/request_community/`,
                 {
@@ -52,6 +52,7 @@ const BottomPopupJoin = ({ visible, onRequestClose, username }) => {
             setActivity(null);
             return Alert.alert(`You're now apart of the ${communityName} community!`);
         } catch (error) {
+            setActivity(null);
             if (error.response.data) {
                 console.error("Error Joining Community:", error.response.data);
                 onRequestClose();
@@ -78,6 +79,7 @@ const BottomPopupJoin = ({ visible, onRequestClose, username }) => {
                     </View>
                     <Text style={styles.joinHeader}>Join a Community</Text>
                     <TextInput placeholder='Community Name' placeholderTextColor={'#858585'} onChangeText={(text) => setCommunityName(text)} style={styles.input} />
+                    {activity}
                     <TouchableOpacity style={styles.joinModal} onPress={handleCommunityJoin}>
                         <Text style={styles.buttonText}>Join</Text>
                     </TouchableOpacity>
@@ -87,7 +89,7 @@ const BottomPopupJoin = ({ visible, onRequestClose, username }) => {
     );
 };
 
-const BottomPopupCreate = ({ visible, onRequestClose, username }) => {
+const BottomPopupCreate = ({ visible, onRequestClose, username, CSRF }) => {
     const [communityName, setCommunityName] = useState('');
     const [communityDescription, setCommunityDescription] = useState('');
     const [communityPhoto, setCommunityPhoto] = useState('');
@@ -282,6 +284,11 @@ const Communities = ({ navigation }) => {
 
     const getJoinedCommunities = async (storedUsername) => {
         setRefreshingJoined(true);
+        let CommunitiesJoinedRetrieved = await Storage.getItem("@CommunitiesJoined")
+        if (CommunitiesJoinedRetrieved !== null) {
+            CommunitiesJoinedRetrieved = await JSON.parse(CommunitiesJoinedRetrieved);
+            setCommunities(CommunitiesJoinedRetrieved);
+        }
         try {
             console.log(`getting communities ${storedUsername} is apart of`)
             const response = await axios.get(
@@ -292,10 +299,14 @@ const Communities = ({ navigation }) => {
                     }
                 }
             );
-            setCommunities(response.data);
+            if (CommunitiesJoinedRetrieved != response.data) {
+                await Storage.setItem("@CommunitiesJoined", JSON.stringify(response.data));
+                setCommunities(response.data);
+            }
             setRefreshingJoined(false);
             console.log("Succesfully retrieved communities user is apart of");
         } catch (error) {
+            setRefreshingJoined(false);
             if (error.response.data) {
                 console.error("Error Getting Communities that user is apart of:", error.response.data);
             }
@@ -304,6 +315,11 @@ const Communities = ({ navigation }) => {
 
     const getOwnedCommunities = async (storedUsername) => {
         setRefreshingOwned(true);
+        let CommunitiesOwnedRetrieved = await Storage.getItem("@CommunitiesOwned");
+        if (CommunitiesOwnedRetrieved !== null) {
+            CommunitiesOwnedRetrieved = await JSON.parse(CommunitiesOwnedRetrieved);
+            setOwnedCommunities(CommunitiesOwnedRetrieved);
+        }
         try {
             console.log(`getting owned communities for ${storedUsername}`);
             const response = await axios.get(
@@ -312,7 +328,10 @@ const Communities = ({ navigation }) => {
                     params: { username: storedUsername }
                 }
             );
-            setOwnedCommunities(response.data);
+            if (CommunitiesOwnedRetrieved !== response.data) {
+                await Storage.setItem("@CommunitiesOwned", JSON.stringify(response.data));
+                setOwnedCommunities(response.data);
+            }
             setRefreshingOwned(false);
             console.log("Succesfully retrieved communities user owns");
         } catch (error) {
@@ -408,6 +427,7 @@ const Communities = ({ navigation }) => {
         setCSRF(storedCSRF);
         console.log(`username: ${storedUsername}`);
         console.log(`CSRF: ${storedCSRF}`);
+        await Storage.setItem("@CommunitiesJoined", "")
         getJoinedCommunities(storedUsername);
         getOwnedCommunities(storedUsername);
     }
@@ -433,11 +453,13 @@ const Communities = ({ navigation }) => {
                         visible={joinModalVisible}
                         onRequestClose={() => setJoinModalVisible(false)}
                         username={username}
+                        CSRF={CSRF}
                     />
                     <BottomPopupCreate
                         visible={createModalVisible}
                         onRequestClose={() => setCreateModalVisible(false)}
                         username={username}
+                        CSRF={CSRF}
                     />
                 </View>
                 <View style={{ flex: 1 }}>
