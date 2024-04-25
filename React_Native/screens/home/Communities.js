@@ -294,7 +294,7 @@ const Communities = ({ navigation }) => {
         try {
             console.log(`getting communities ${storedUsername} is apart of`)
             const response = await axios.get(
-                `${API_URL}/get_user_community_info/`,
+                `${API_URL}/get_communities_not_owned_info/`,
                 {
                     params: {
                         username: storedUsername,
@@ -366,7 +366,7 @@ const Communities = ({ navigation }) => {
                             </Text>
                         </View>
                         <View style={styles.msgContainer}>
-                            <Text style={styles.msgTxt}>Members: 10</Text>
+                            <Text style={styles.msgTxt}>Members: {item.user_count}</Text>
                         </View>
                     </View>
 
@@ -429,7 +429,6 @@ const Communities = ({ navigation }) => {
         setCSRF(storedCSRF);
         console.log(`username: ${storedUsername}`);
         console.log(`CSRF: ${storedCSRF}`);
-        await Storage.setItem("@CommunitiesJoined", "")
         // getInvitations(username);
         getJoinedCommunities(storedUsername);
         getOwnedCommunities(storedUsername);
@@ -656,7 +655,6 @@ const styles = StyleSheet.create({
         fontWeight: "400",
         color: "#4A90E2",
         fontSize: 12,
-        marginLeft: 15,
     },
     input: {
         width: "80%",
@@ -803,6 +801,9 @@ const styles = StyleSheet.create({
         overflow: "hidden",
         alignItems: "center",
         justifyContent: "center",
+    },
+    textContainer: {
+        left: 10
     },
 });
 
