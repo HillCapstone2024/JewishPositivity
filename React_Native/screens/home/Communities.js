@@ -375,6 +375,37 @@ const Communities = ({ navigation }) => {
         );
     };
 
+    const renderOwnedCommunity = ({ item }) => {
+        return (
+            <TouchableOpacity onPress={() => { navigation.navigate("ViewOwnedCommunity", { community: item }); }}>
+                <View style={styles.community}>
+                    <View style={styles.pic}>
+                        {/* <SvgUri style={styles.pic} uri={item.profile_pic} /> */}
+                        <Image
+                            source={{ uri: `data:Image/jpeg;base64,${item.community_photo}` }}
+                            style={styles.pic}
+                        />
+                    </View>
+                    <View style={styles.textContainer}>
+                        <View style={styles.nameContainer}>
+                            <Text
+                                style={styles.nameTxt}
+                                numberOfLines={1}
+                                ellipsizeMode="tail"
+                            >
+                                {item.community_name}
+                            </Text>
+                        </View>
+                        <View style={styles.msgContainer}>
+                            <Text style={styles.msgTxt}>Members: 10</Text>
+                        </View>
+                    </View>
+
+                </View>
+            </TouchableOpacity>
+        );
+    };
+
 
     const renderInvite = ({ item }) => {
         return (
@@ -536,7 +567,7 @@ const Communities = ({ navigation }) => {
                                         enableEmptySections={true}
                                         data={ownedCommunities}
                                         keyExtractor={(item) => item.name}
-                                        renderItem={(item) => renderCommunity(item)}
+                                        renderItem={(item) => renderOwnedCommunity(item)}
                                         refreshControl={
                                             <RefreshControl
                                                 refreshing={refreshingOwned}
