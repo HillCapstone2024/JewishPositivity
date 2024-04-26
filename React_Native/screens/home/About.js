@@ -11,6 +11,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faPen } from '@fortawesome/free-solid-svg-icons/faPen';
 import { faBoxArchive } from '@fortawesome/free-solid-svg-icons/faBoxArchive';
 import { faUsersLine } from '@fortawesome/free-solid-svg-icons/faUsersLine';
+import { faSynagogue } from '@fortawesome/free-solid-svg-icons/faSynagogue';
 
 import makeThemeStyle from '../../tools/Theme.js';
 import Times from "./Times.js";
@@ -30,9 +31,13 @@ const About = ({ navigation }) => {
         <View style={styles.horizontalLine} />
       </View>
 
-      <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}> About Check-ins</Text>
-        <View style={styles.horizontalLine} />
+      <View>
+        <Text style={styles.aboutText}>Positive Psychology is the scientific study of the strengths that enable individuals and communities to thrive. There are a variety of practices recommended throughout the day and a person’s life that support people in pursuing a happier and more meaningful life. Judaism is a religion that is thousands of years old; as a monotheistic religion it encourages a relationship with God (however one might believe that) through a variety of commandments, rituals, and practices that have been handed down through the generations.</Text>
+        <Text style={styles.aboutText}>Traditionally Jews pray three times a day. Using that model of three moments of reflection or check-in this app is seeking to find a way to encourage people to connect with themselves, their Judaism, and positive psychology at three points every day. In the morning with a moment of gratitude, in the afternoon with an opportunity for happiness, and in the evening with a chance to reflect on the day.</Text>
+        <Text style={styles.aboutText}>“A Modeh Ani Moment: Time for Gratitude”: We  begin our day by thanking God for our souls, as today begins what other things do you want to thank God for?</Text>
+        <Text style={styles.aboutText}>“Ashrei in the Afternoon: Time for Happiness”: The afternoon prayer of Ashrei is all about being happy. Take a few minutes now to do something that will make you happy or focus on something that is making you happy.</Text>
+        <Text style={styles.aboutText}>"Time for a Shema Reflection”: The Shema is a prayer traditionally recited at bedtime. The prayer begins with the instruction to “hear” and so at the end of the day we consider what we heard or experienced during our day that brought us joy. And to begin thinking about what we will do tomorrow. It will be a chance to reflect.</Text>
+        <Text style={styles.aboutText}>We are grateful to the students of Stonehill College for developing this app for Temple Shir Tikva.</Text>
       </View>
 
       <View style={styles.sectionContainer}>
@@ -92,7 +97,7 @@ const About = ({ navigation }) => {
 
       <View style={styles.topContainter}>
         <View style={styles.mediaContainter}>
-          <FontAwesomeIcon icon={faUsersLine}
+          <FontAwesomeIcon icon={faSynagogue}
             size = {28}
             color={"#4A90E2"}
           />
@@ -197,6 +202,11 @@ const styles = StyleSheet.create({
     // marginLeft: "5%",
     justifyContent: 'center',
     // alignContent: 'center',
+  },
+  aboutText: {
+
+    fontSize: 15,
+    justifyContent: 'center',
   },
 });
 
