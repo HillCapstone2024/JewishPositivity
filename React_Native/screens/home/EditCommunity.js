@@ -83,6 +83,16 @@ const initializeData = async () => {
     setIsLoading(false);
 };
 
+const reloadData = async () => {
+  setIsLoading(true);
+  let membersList = await getCommunityMembers();
+  membersList = membersList.map((user) => user.username);
+  const retrievedProfilepics = await fetchProfilePics(membersList);
+  setMembers(retrievedProfilepics);
+  setNumMembers(membersList.length);
+  setIsLoading(false);
+};
+
 async function readFileAsBase64(uri) {
   try {
     const base64Content = await FileSystem.readAsStringAsync(uri, {
@@ -267,36 +277,6 @@ const getCommunityMembers = async () => {
   const handlePrivacyAlert = () => {
     Alert.alert("Privacy Setting", 'When the privacy setting is set to on, users may only join via request or invite.', [{ text: 'Ok', style: 'default' }])
 }
-    
-  const renderItem = ({ item }) => {
-    // Check if the user is already a friend
-
-    return (
-      <TouchableOpacity>
-        <View style={styles.row}>
-          <View style={styles.pic}>
-            {/* <SvgUri style={styles.pic} uri={item.profile_pic} /> */}
-            <Image
-              source={{ uri: `data:Image/jpeg;base64,${item.profile_picture}` }}
-              style={styles.pic}
-            />
-          </View>
-          <View style={styles.textContainer}>
-            <View style={styles.nameContainer}>
-              <Text
-                style={styles.nameTxt}
-                numberOfLines={1}
-                ellipsizeMode="tail"
-              >
-                {item.username}
-              </Text>
-            </View>
-          </View>
-        </View>
-      </TouchableOpacity>
-    );
-  };
-
 
 const deleteUserFromCommunity = async (deleteUser) => {
     //pass in username, and community name
@@ -322,7 +302,7 @@ const deleteUserFromCommunity = async (deleteUser) => {
     const deleteMember = async () => {
         console.log("deleting:", deleteUser);
         try {
-            //get csrf token
+            const csrfToken = await getCsrfToken();
             const response = await axios.post(`${API_URL}/delete_user_from_community/`, 
             {
                 username: deleteUser,
@@ -337,11 +317,45 @@ const deleteUserFromCommunity = async (deleteUser) => {
                 withCredentials: true,
             });
             console.log("response:", response);
-            //reload the page
+            reloadData()
         } catch(error) {
             console.log("error deleting community", error);
         }
     }
+};
+
+const renderItem = ({ item }) => {
+  // Check if the user is already a friend
+
+  return (
+    <TouchableOpacity>
+      <View style={styles.row}>
+        <View style={styles.pic}>
+          {/* <SvgUri style={styles.pic} uri={item.profile_pic} /> */}
+          <Image
+            source={{ uri: `data:Image/jpeg;base64,${item.profile_picture}` }}
+            style={styles.pic}
+          />
+        </View>
+        <View style={styles.textContainer}>
+          <View style={styles.nameContainer}>
+            <Text
+              style={styles.nameTxt}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {item.username}
+            </Text>
+          </View>
+          <View>
+              <TouchableOpacity onPress={() => deleteUserFromCommunity(item.username)}>
+                <Ionicons name={"close"} size={20} color="#4A90E2" />
+              </TouchableOpacity>
+            </View>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
 };
 
 return (
