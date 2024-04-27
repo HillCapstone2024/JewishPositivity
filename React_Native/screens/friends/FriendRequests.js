@@ -16,7 +16,7 @@ import {
   Animated
 } from "react-native";
 import { SearchBar } from "react-native-elements";
-import BottomTab from "../../navigations/BottomTabNavigator";
+import BottomTab from "../../navigations/BottomTabNavigator.js";
 import makeThemeStyle from '../../tools/Theme.js';
 import * as Storage from "../../AsyncStorage.js";
 import IP_ADDRESS from "../../ip.js";

@@ -12,7 +12,7 @@ import { faPen } from '@fortawesome/free-solid-svg-icons/faPen';
 import { faBoxArchive } from '@fortawesome/free-solid-svg-icons/faBoxArchive';
 import { faUsersLine } from '@fortawesome/free-solid-svg-icons/faUsersLine';
 
-import FriendFeed from "../screens/home/FriendFeed";
+import FriendFeed from "../screens/friends/FriendFeed";
 import Archive from "../screens/home/Archive";
 import CheckInModal from "../screens/home/CheckInModal";
 import CheckIn from "../screens/home/CheckIn";

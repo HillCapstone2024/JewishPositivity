@@ -14,7 +14,7 @@ import { faUsersLine } from '@fortawesome/free-solid-svg-icons/faUsersLine';
 import { faSynagogue } from '@fortawesome/free-solid-svg-icons/faSynagogue';
 
 import makeThemeStyle from '../../tools/Theme.js';
-import Times from "./Times.js";
+import Times from "../settings/Times.js";
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 

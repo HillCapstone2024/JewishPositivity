@@ -19,7 +19,7 @@ const API_URL = "http://" + IP_ADDRESS + ":8000";
 import IP_ADDRESS from "../../ip.js";
 import * as Storage from "../../AsyncStorage.js";
 import RecordingViewer from "../../tools/RecordingViewer.js";
-import ViewCheckIn from "./ViewCheckIn.js";
+import ViewCheckIn from "../home/ViewCheckIn.js";
 import LoadingScreen from "../greet/Loading.js";
 import SpinningPen from "../greet/Pen.js";
 import * as FileSystem from "expo-file-system";

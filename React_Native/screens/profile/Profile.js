@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, Platform, StyleSheet, Image} from "react-native";
-import BottomTab from "../../navigations/BottomTabNavigator";
+import BottomTab from "../../navigations/BottomTabNavigator.js";
 import * as Storage from "../../AsyncStorage.js";
 import axios from "axios";
 import { SvgXml } from "react-native-svg";

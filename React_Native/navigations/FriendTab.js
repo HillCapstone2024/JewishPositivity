@@ -3,9 +3,9 @@ import { View, Animated, StyleSheet, useWindowDimensions } from "react-native";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import { Ionicons } from "@expo/vector-icons";
 
-import Friends from "../screens/home/FriendsList";
-import AddFriends from "../screens/home/AddFriends";
-import FriendRequests from "../screens/home/FriendRequests";
+import Friends from "../screens/friends/FriendsList";
+import AddFriends from "../screens/friends/AddFriends";
+import FriendRequests from "../screens/friends/FriendRequests";
 
 const renderScene = SceneMap({
   first: Friends,

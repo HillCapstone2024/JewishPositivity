@@ -26,21 +26,21 @@ import { micah } from "@dicebear/collection";
 import { SvgXml } from "react-native-svg";
 import BottomTabNavigator from "./BottomTabNavigator.js";
 import makeThemeStyle from "../tools/Theme.js";
-import ParentProfile from "../screens/home/ProfileParent.js";
-import SettingsPage from "../screens/home/Settings.js";
+import ParentProfile from "../screens/profile/ProfileParent.js";
+import SettingsPage from "../screens/settings/Settings.js";
 import AboutPage from "../screens/home/About.js";
-import Communities from "../screens/home/Communities.js";
+import Communities from "../screens/communities/Communities.js";
 import Badges from "../screens/home/Badges.js";
-import Friends from "../screens/home/FriendsList.js";
-import FriendFeed from "../screens/home/FriendFeed.js";
+import Friends from "../screens/friends/FriendsList.js";
+import FriendFeed from "../screens/friends/FriendFeed.js";
 import FriendTab from "./FriendTab.js";
 import * as Haptics from "expo-haptics";
 import ImageViewer from "../tools/ImageViewer.js";
-import FriendsParent from "../screens/home/FriendsParent.js";
+import FriendsParent from "../screens/friends/FriendsParent.js";
 import { faUsersLine } from '@fortawesome/free-solid-svg-icons/faUsersLine';
 import { faSynagogue } from '@fortawesome/free-solid-svg-icons/faSynagogue';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import ViewCommunity from "../screens/home/ViewCommunity.js";
+import ViewCommunity from "../screens/communities/ViewCommunity.js";
 
 const Drawer = createDrawerNavigator();
 

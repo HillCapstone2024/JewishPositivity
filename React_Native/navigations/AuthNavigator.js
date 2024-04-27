@@ -12,12 +12,12 @@ import ForgotPassword from "../screens/auth/ForgotPassword.js";
 import LoadingScreen from "../screens/greet/Loading.js";
 import MyDrawer from "./DrawerNavigator.js";
 import Landing from "../screens/greet/Landing.js";
-import TermsofUse from '../screens/home/TermsofUse';
+import TermsofUse from '../screens/settings/TermsofUse';
 import CheckInEntryDetailsScreen from "../screens/home/CheckInEntryDetailsScreen.js";
 import CheckIn from "../screens/home/CheckIn.js";
-import ViewCommunity from "../screens/home/ViewCommunity.js";
-import EditCommunity from "../screens/home/EditCommunity.js";
-import ViewOwnedCommunity from "../screens/home/ViewOwnedCommunity.js";
+import ViewCommunity from "../screens/communities/ViewCommunity.js";
+import EditCommunity from "../screens/communities/EditCommunity.js";
+import ViewOwnedCommunity from "../screens/communities/ViewOwnedCommunity.js";
 
 // OneSignal.Debug.setLogLevel(LogLevel.Verbose);
 // OneSignal.initialize(Constants.expoConfig.extra.oneSignalAppId);
