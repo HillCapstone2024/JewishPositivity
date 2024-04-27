@@ -26,6 +26,8 @@ import os
 from dotenv import load_dotenv
 from django.conf import settings
 from django.db.models import Count
+from django.http import FileResponse
+from .settings import BASE_DIR
 load_dotenv()
 
 # ########## Configuration & Constants ##########
@@ -2102,3 +2104,7 @@ def delete_user_from_community_view(request):
             return HttpResponse("Delete user attempt failed", status=400)
 
     return HttpResponse("NOT A POST", status=400)
+
+def serve_apple_site_association(request):
+    filepath = os.path.join(BASE_DIR, 'apple-app-site-association')
+    return FileResponse(open(filepath, 'rb'), as_attachment=True, content_type='application/json')
