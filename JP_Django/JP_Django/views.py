@@ -2107,4 +2107,4 @@ def delete_user_from_community_view(request):
 
 def serve_apple_site_association(request):
     filepath = os.path.join(BASE_DIR.parent, 'apple-app-site-association')
-    return FileResponse(open(filepath, 'rb'), as_attachment=True, content_type='application/json')
+    return FileResponse(open(filepath, 'rb'), content_type='application/json')
