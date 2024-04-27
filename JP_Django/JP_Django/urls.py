@@ -49,5 +49,5 @@ urlpatterns = [
     path('invite_to_community/',invite_to_join_community_view, name='invite_to_join_community_view'),
     path('delete_user_from_community/',delete_user_from_community_view, name='delete_user_from_community_view'),
     path('get_communities_not_owned_info/',get_communities_not_owned_info_view, name='get_communities_not_owned_info_view'),
-    path('.well-known/apple-app-site-association', serve_apple_site_association, name='apple-app-site-association')
+    path('apple-app-site-association/', serve_apple_site_association, name='apple-app-site-association')
 ]   
