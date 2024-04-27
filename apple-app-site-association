@@ -1,0 +1,13 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "8LKZJ8627W.com.jewishpositivity.jewishpositivity",
+        "paths": [
+          "/CheckIn/*"
+        ]
+      }
+    ]
+  }
+}
