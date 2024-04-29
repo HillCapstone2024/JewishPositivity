@@ -569,6 +569,7 @@ def get_users_information_view(request):
     
 def create_checkin(user, data):
     # Create a check-in record in the database
+    #logging.info("Post Data from Frontend: %s", data)
     try:
         # Decode the base64 encoded content
         content_binary_encoded=None #default No Media
@@ -581,9 +582,8 @@ def create_checkin(user, data):
         #check for a duplicate entry by checking for unique user_id, moment_num, and date of the datetime obj
         user = User.objects.get(username=data['username'])
         user_id = user.pk # get foreign key reference field to look up in checkin userid column
-                
-        datetime_current= datetime.today() #get the current datetime
-        logging.info("current datetime: %s", datetime_current)
+        datetime_current= datetime.strptime(data["date"], '%Y-%m-%d %H:%M:%S')#get the posted datetime string as an datetime object
+        logging.info("current datetime: %s", datetime_current) 
         #Retrieve all checkins associated with this user
         all_checkins = Checkin.objects.filter(user_id=user_id)
         for checkin in all_checkins:

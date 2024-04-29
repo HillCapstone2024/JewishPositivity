@@ -967,6 +967,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'content_type': None,
         'content': None,
         'text_entry': "This is a sample checkin text",
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
     }
 
     PHOTO_DATA_SUCCESS = {
@@ -975,6 +976,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'content_type': 'photo',
         'content': photo, 
         'text_entry': None,
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
     }
 
     AUDIO_DATA_SUCCESS = {
@@ -983,7 +985,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'content_type': 'audio',
         'content': audio, 
         'text_entry': None,
-
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
     }
 
     VIDEO_DATA_SUCCESS = {
@@ -992,6 +994,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'content_type': 'video',
         'content': video, 
         'text_entry': None,
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
     }
 
     MISSING_USERNAME = {
@@ -1000,6 +1003,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'content_type': None,
         'content': None,
         'text_entry': 'This is a sample checkin text',
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
     }
 
     MISSING_MOMENT_NUMBER = {
@@ -1008,6 +1012,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'content_type': None,
         'content': None, 
         'text_entry': "This is a sample checkin text",
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
     }
 
     MISSING_CONTENT_TYPE = { 
@@ -1016,6 +1021,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'content_type': '',
         'content': photo, 
         'text_entry': "This is a sample checkin text",
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
     }
         
     MISSING_CONTENT_AND_TEXT = {
@@ -1024,6 +1030,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'content_type': None,
         'content': None,
         'text_entry': None,
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
     }
 
     INVALID_USERID = { 
@@ -1032,6 +1039,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'content_type': None,
         'content': None,
         'text_entry': "This is a sample checkin text",
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
     }
 
     DUPLICATE_MOMENT = {
@@ -1040,6 +1048,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'content_type': 'photo',
         'content': photo,
         'text_entry': "This is a sample checkin text",
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
     }
 
     # Set up method to create a test user
