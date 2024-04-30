@@ -1921,6 +1921,7 @@ def request_to_join_community_view(request):
         return HttpResponse("Community does not exist", status=400)
     
 def invite_to_join_community_view(request):
+    logging.info("***IN invite_to_join_community_view ***")
     # Check if the request method is POST
     if request.method != "POST":
         # Return an HTTP 400 response if the method is not POST
@@ -1939,20 +1940,20 @@ def invite_to_join_community_view(request):
     try:
         # Get the community object
         community = Community.objects.get(community_name=community_name)
-        logging.info("COMMUNITY OBJECT: %s", community)
+        #logging.info("COMMUNITY OBJECT: %s", community)
         # Get the owner user object
         owner_user = User.objects.get(username=owner_username)
-        logging.info("OWNER OBJECT: %s", owner_user)
+        #logging.info("OWNER OBJECT: %s", owner_user)
         # Check if the owner is the actual owner of the community
         if community.owner_id != owner_user:
             return HttpResponse("You are not the owner of this community", status=400)
         # Get the invited user object
         invited_user = User.objects.get(username=invited_username)
-        logging.info("USER OBJECT: %s", invited_user)
+        #logging.info("USER OBJECT: %s", invited_user)
 
         # Check for an existing relationship between the invited user and the community
         relationship = CommunityUser.objects.filter(user_id=invited_user.pk, community_id=community.pk).first()
-        logging.info("RELATIONSHIP OBJECT: %s", relationship)
+        #logging.info("RELATIONSHIP OBJECT: %s", relationship)
 
         if relationship != None:
             logging.info("Relationship Status: %s", relationship.status)
@@ -2051,7 +2052,7 @@ def get_pending_invites_to_community_view(request):
                 for request in pending_invites:
                     # Append users that have requested to join the community                 
                     pending_invites_list.append({
-                        'user_id': request.user_id.pk,
+                        'username': request.user_id.username,
                     })
 
                 logging.info("pending_requests_list: %s", pending_invites_list)
@@ -2062,6 +2063,38 @@ def get_pending_invites_to_community_view(request):
         else:  # community_name was empty
             return HttpResponse(constCNnotProvided, status=400)
     return HttpResponse(constNotGet)
+
+def get_users_pending_invites_to_community_view(request): # to pending the pending invites to communities for a specific user
+    if request.method == "GET":
+        logging.info("IN VIEW: get_users_pending_invites_to_community_view")
+        username = request.GET.get("username")
+
+        # Make sure the username is not empty
+        if username is not None:
+            try:
+                # Get the community object from the DB
+                user= User.objects.get(username=username)
+                logging.info("retrieved userid in view: %s", user.pk)
+
+                # Retrieve the users invites from the database by userid
+                pending_invites = CommunityUser.objects.filter(user_id=user, status= 1)
+                
+                pending_invites_list = []
+                for request in pending_invites:
+                    # Append users that have requested to join the community                 
+                    pending_invites_list.append({
+                        'community_name': request.community_id.community_name,
+                    })
+
+                logging.info("pending_requests from these communities for %s: %s",user.username ,pending_invites_list)
+                return HttpResponse(json.dumps(pending_invites_list), content_type='application/json')
+            except Exception as e:
+                logging.error(e)
+                return HttpResponse("An error occurred", status=400)
+        else:  # community_name was empty
+            return HttpResponse(constCNnotProvided, status=400)
+    return HttpResponse(constNotGet)
+
 
 
 def delete_user_from_community_view(request):

@@ -1364,6 +1364,7 @@ class UpdateCheckinsViewTestCase(TestCase):
         'content_type': None,
         'content': None, #fill in with example entry
         'text_entry': "This is a sample checkin text",
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
     }
 
     
@@ -1387,7 +1388,8 @@ class UpdateCheckinsViewTestCase(TestCase):
         'checkin_id' : check_id,
         'content_type': None, 
         'content': None, 
-        'text_entry': None
+        'text_entry': None,
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
     }
 
     
@@ -1546,6 +1548,7 @@ class DeleteCheckinViewTestCase(TestCase):  # To test deleting checkins account 
         'content_type': None,
         'content': None, #fill in with example entry
         'text_entry': "This is a sample checkin text",
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
     }
 
     PHOTO_DATA_SUCCESS = {
@@ -1554,6 +1557,7 @@ class DeleteCheckinViewTestCase(TestCase):  # To test deleting checkins account 
         'content_type': 'photo',
         'content': photo, 
         'text_entry': None,
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
     }
 
     check_id = -1 #default, will change in test
@@ -1652,6 +1656,7 @@ class GetCheckinVideoViewTestCase(TestCase): # to test retreving a video checkin
         'content_type': 'video',
         'content': video, 
         'text_entry': None,
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
     }
 
     video_check_id= -1 #makes this global to access in test methods
@@ -1750,6 +1755,7 @@ class GetTodaysCheckinsViewTestCase(TestCase): # to test retreving todays checki
         'content_type': 'text',
         'content': None, #fill in with example entry
         'text_entry': "This is a sample checkin text",
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
     }
 
     PHOTO_DATA_SUCCESS = {
@@ -1758,6 +1764,7 @@ class GetTodaysCheckinsViewTestCase(TestCase): # to test retreving todays checki
         'content_type': 'photo',
         'content': photo, 
         'text_entry': None,
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
     }
 
     AUDIO_DATA_SUCCESS = {
@@ -1766,6 +1773,7 @@ class GetTodaysCheckinsViewTestCase(TestCase): # to test retreving todays checki
         'content_type': 'audio',
         'content': audio, 
         'text_entry': None,
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
     }
 
     VIDEO_DATA_SUCCESS = {
@@ -1774,6 +1782,7 @@ class GetTodaysCheckinsViewTestCase(TestCase): # to test retreving todays checki
         'content_type': 'video',
         'content': video, 
         'text_entry': None,
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
     }
 
     BOTH_TEXT_AND_MEDIA_SUCCESS = {
@@ -1782,6 +1791,7 @@ class GetTodaysCheckinsViewTestCase(TestCase): # to test retreving todays checki
         'content_type': 'video',
         'content': photo, 
         'text_entry': "text sample to get",
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
     }
 
     def setUp(self):
@@ -3993,6 +4003,7 @@ class UpdateStreakTestCase(TestCase):
         'content_type': 'text',
         'content': None, #fill in with example entry
         'text_entry': "This is a sample checkin text",
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
     }
     
     checkin_id=-1
@@ -4551,6 +4562,128 @@ class GetPendingInvitesToCommunityViewTestCase(TestCase): # front end calls get 
         response = client.get(reverse('get_pending_invites_to_community_view'), data={'community_name': 'DOES NOT EXIST'})
         self.assertEqual(response.status_code, 400)
     
+
+class GetUsersPendingInvitesToCommunityViewTestCase(TestCase): # front end calls get and we return all public communities info
+
+      # Define constant user data
+    USER1_DATA = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+    USER2_DATA = {
+        'username': 'testuser2',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test2@example.com',
+        'timezone': 'EST',
+    }
+    USER3_DATA = {
+        'username': 'PRIVACYUSERNAME',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'PP@example.com',
+        'timezone': 'EST',
+    }
+
+    COMMUNITY_SUCCESS_1 = {
+        'community_name': "Name of Community",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "testuser1", # username of the owner
+        "privacy": 'private',
+    }
+
+    COMMUNITY_SUCCESS_2 = {
+        'community_name': "THIS IS MY SECOND COMMUNITY",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "PRIVACYUSERNAME", # username of the owner
+        "privacy": 'private',
+    }
+
+    COMMUNITY_SUCCESS_3 = {
+        'community_name': "THIS IS MY THIRD COMMUNITY",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "PRIVACYUSERNAME", # username of the owner
+        "privacy": 'private',
+    }
+
+    #test user 2 is invited to join 2nd and third community
+    REQUEST_POST_DATA1 = {
+        "invited_username": "testuser2",
+        "community_name": "THIS IS MY THIRD COMMUNITY",
+        "owner_username": "PRIVACYUSERNAME"
+    }
+
+    REQUEST_POST_DATA2 = {
+        "invited_username": "testuser2",
+        "community_name": "THIS IS MY SECOND COMMUNITY",
+        "owner_username": "PRIVACYUSERNAME"
+    }
+
+    def setUp(self):
+        # Initialize the Django test client
+        logging.info("In SETUP*****************************************")
+        client = Client()
+
+        # Make instance of users and their communities
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)# make user
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER2_DATA), content_type=CONTENT_TYPE_JSON)# make user
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER3_DATA), content_type=CONTENT_TYPE_JSON)# make user
+        client.post(reverse('create_community_view'), data=json.dumps(self.COMMUNITY_SUCCESS_1), content_type=CONTENT_TYPE_JSON) #make community
+        client.post(reverse('create_community_view'), data=json.dumps(self.COMMUNITY_SUCCESS_2), content_type=CONTENT_TYPE_JSON) #make community
+        client.post(reverse('create_community_view'), data=json.dumps(self.COMMUNITY_SUCCESS_3), content_type=CONTENT_TYPE_JSON) #make community
+        logging.info("LEAVING   SETUP*****************************************") 
+
+
+    def test_get_all_community_invites_success(self):# Successfully retrieves all public communities
+        logging.info("************TEST_Get_Pending_Invites_To_Community_success**************..........")
+        client = Client()
+
+        # Send POST requests to join private communities
+        response1 = client.post(reverse('invite_to_join_community_view'), data=json.dumps(self.REQUEST_POST_DATA1), content_type=CONTENT_TYPE_JSON)
+        response2 = client.post(reverse('invite_to_join_community_view'), data=json.dumps(self.REQUEST_POST_DATA2), content_type=CONTENT_TYPE_JSON)
+       
+        # Check if response status codes are 200
+        self.assertEqual(response1.status_code, 200)
+        self.assertEqual(response2.status_code, 200)
+       
+        response = client.get(reverse('get_users_pending_invites_to_community_view'), data={'username': 'testuser2'})
+        self.assertEqual(response.status_code, 200)
+
+        # Check that it got the correct information
+        response_data = json.loads(response.content)
+        # Log information from response
+        logging.info("response_data: %s", response_data)
+        logging.info('response data length: %s', len(response_data))
+        # Check that the length is correct, should be 2 requests
+        self.assertEqual(len(response_data), 2)
+
+    def test_get_all_community_requests_fail_DNE(self):# Successfully retrieves all public communities
+        logging.info("************TEST_Get_Pending_Invites_To_Community_fail_DNE**************..........")
+        client = Client()
+
+        # Send POST requests to join private communities
+        response1 = client.post(reverse('invite_to_join_community_view'), data=json.dumps(self.REQUEST_POST_DATA1), content_type=CONTENT_TYPE_JSON)
+        response2 = client.post(reverse('invite_to_join_community_view'), data=json.dumps(self.REQUEST_POST_DATA2), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status codes are 200
+        self.assertEqual(response1.status_code, 200)
+        self.assertEqual(response2.status_code, 200)
+
+        response = client.get(reverse('get_users_pending_invites_to_community_view'), data={'username': 'DOES NOT EXIST'})
+        self.assertEqual(response.status_code, 400)
+     
 
 class GetCommunitesNotOwnedInfoViewTestCase(TestCase): # front end calls get and we return all communities the user owns
 
