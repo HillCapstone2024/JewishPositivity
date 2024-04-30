@@ -1862,7 +1862,6 @@ def delete_community_view(request):
             logging.info('attempting to delete community.....')
             community.delete()
             logging.info('deleted.....')
-            # communityuser= CommunityUser.objects.filter(community_id=community_id).delete()
             return HttpResponse("Community deleted successfully", status=200)
             
         except Exception as e:
@@ -2028,6 +2027,37 @@ def get_pending_requests_to_community_view(request):
                     })
 
                 logging.info("pending_requests_list: %s", pending_requests_list)
+                return HttpResponse(json.dumps(pending_requests_list), content_type='application/json')
+            except Exception as e:
+                logging.error(e)
+                return HttpResponse("An error occurred", status=400)
+        else:  # community_name was empty
+            return HttpResponse(constCNnotProvided, status=400)
+    return HttpResponse(constNotGet)
+
+def get_users_pending_requests_to_community_view(request): # to pending the pending requests to communities for a specific user
+    if request.method == "GET":
+        logging.info("IN VIEW: get_users_pending_requests_to_community_view")
+        username = request.GET.get("username")
+
+        # Make sure the username is not empty
+        if username is not None:
+            try:
+                # Get the community object from the DB
+                user= User.objects.get(username=username)
+                logging.info("retrieved userid in view: %s", user.pk)
+
+                # Retrieve the users invites from the database by userid
+                pending_requests = CommunityUser.objects.filter(user_id=user, status= 0)
+                
+                pending_requests_list = []
+                for request in pending_requests:
+                    # Append users that have requested to join the community                 
+                    pending_requests_list.append({
+                        'community_name': request.community_id.community_name,
+                    })
+
+                logging.info("pending_requests to these communities for %s: %s",user.username , pending_requests_list)
                 return HttpResponse(json.dumps(pending_requests_list), content_type='application/json')
             except Exception as e:
                 logging.error(e)

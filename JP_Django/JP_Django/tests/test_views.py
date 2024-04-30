@@ -4325,8 +4325,7 @@ class DeleteUserFromCommunityViewTestCase(TestCase):
         self.assertEqual(response.status_code, 400)
 
 class GetPendingRequestsToCommunityViewTestCase(TestCase): # front end calls get and we return all public communities info
-
-      # Define constant user data
+    # Define constant user data
     USER1_DATA = {
         'username': 'testuser1',
         'password': 'testpassword',
@@ -4401,7 +4400,7 @@ class GetPendingRequestsToCommunityViewTestCase(TestCase): # front end calls get
         client.post(reverse('create_community_view'), data=json.dumps(self.COMMUNITY_SUCCESS_2), content_type=CONTENT_TYPE_JSON) #make community
         client.post(reverse('create_community_view'), data=json.dumps(self.COMMUNITY_SUCCESS_3), content_type=CONTENT_TYPE_JSON) #make community
 
-
+    
 
     def test_get_all_community_requests_success(self):# Successfully retrieves all public communities
         logging.info("************TEST_Get_Pending_Requests_To_Community_success**************..........")
@@ -4442,6 +4441,124 @@ class GetPendingRequestsToCommunityViewTestCase(TestCase): # front end calls get
         response = client.get(reverse('get_pending_requests_to_community_view'), data={'community_name': 'DOES NOT EXIST'})
         self.assertEqual(response.status_code, 400)
     
+
+class GetUsersPendingRequestsToCommunityViewTestCase(TestCase): # front end calls get and we return all public communities info
+    # Define constant user data
+    USER1_DATA = {
+        'username': 'testuser1',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test@example.com',
+        'timezone': 'EST',
+    }
+    USER2_DATA = {
+        'username': 'testuser2',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'test2@example.com',
+        'timezone': 'EST',
+    }
+    USER3_DATA = {
+        'username': 'PRIVACYUSERNAME',
+        'password': 'testpassword',
+        'reentered_password': 'testpassword',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'email': 'PP@example.com',
+        'timezone': 'EST',
+    }
+
+    COMMUNITY_SUCCESS_1 = {
+        'community_name': "Name of Community",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "testuser1", # username of the owner
+        "privacy": 'private',
+    }
+
+    COMMUNITY_SUCCESS_2 = {
+        'community_name': "THIS IS MY SECOND COMMUNITY",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "testuser1", # username of the owner
+        "privacy": 'private',
+    }
+
+    COMMUNITY_SUCCESS_3 = {
+        'community_name': "THIS IS MY THIRD COMMUNITY",
+        "community_photo": None,
+        "community_description": "Test Description",
+        "username": "PRIVACYUSERNAME", # username of the owner
+        "privacy": 'private',
+    }
+
+    #test user 2 requests to join community 2 and 3
+    REQUEST_POST_DATA1 = {
+        "username": "testuser2",
+        "community_name": "THIS IS MY THIRD COMMUNITY"
+    }
+
+    REQUEST_POST_DATA2 = {
+        "username": "testuser2",
+        "community_name": "THIS IS MY SECOND COMMUNITY"
+    }
+
+    def setUp(self):
+        # Initialize the Django test client
+        client = Client()
+
+        # Make instance of users and their communities
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER1_DATA), content_type=CONTENT_TYPE_JSON)# make user
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER2_DATA), content_type=CONTENT_TYPE_JSON)# make user
+        client.post(reverse('create_user_view'), data=json.dumps(self.USER3_DATA), content_type=CONTENT_TYPE_JSON)# make user
+        client.post(reverse('create_community_view'), data=json.dumps(self.COMMUNITY_SUCCESS_1), content_type=CONTENT_TYPE_JSON) #make community
+        client.post(reverse('create_community_view'), data=json.dumps(self.COMMUNITY_SUCCESS_2), content_type=CONTENT_TYPE_JSON) #make community
+        client.post(reverse('create_community_view'), data=json.dumps(self.COMMUNITY_SUCCESS_3), content_type=CONTENT_TYPE_JSON) #make community
+
+    
+
+    def test_get_all_community_requests_success(self):# Successfully retrieves all public communities
+        logging.info("************TEST_Get_Users_Pending_Requests_To_Communities_success**************..........")
+        client = Client()
+
+        # Send POST requests to join private communities
+        response1 = client.post(reverse('request_to_join_community_view'), data=json.dumps(self.REQUEST_POST_DATA1), content_type=CONTENT_TYPE_JSON)
+        response2 = client.post(reverse('request_to_join_community_view'), data=json.dumps(self.REQUEST_POST_DATA2), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status codes are 200
+        self.assertEqual(response1.status_code, 200)
+        self.assertEqual(response2.status_code, 200)
+
+        response = client.get(reverse('get_users_pending_requests_to_community_view'), data={'username': 'testuser2'})
+        self.assertEqual(response.status_code, 200)
+
+        # Check that it got the correct information
+        response_data = json.loads(response.content)
+        # Log information from response
+        logging.info("response_data: %s", response_data)
+        logging.info('response data length: %s', len(response_data))
+        # Check that the length is correct, should be 2 requests
+        self.assertEqual(len(response_data), 2)
+
+
+    def test_get_all_community_requests_fail_DNE(self):# Successfully retrieves all public communities
+        logging.info("************TEST_Get_Pending_Requests_To_Community_fail_DNE**************..........")
+        client = Client()
+
+        # Send POST requests to join private communities
+        response1 = client.post(reverse('request_to_join_community_view'), data=json.dumps(self.REQUEST_POST_DATA1), content_type=CONTENT_TYPE_JSON)
+        response2 = client.post(reverse('request_to_join_community_view'), data=json.dumps(self.REQUEST_POST_DATA2), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status codes are 200
+        self.assertEqual(response1.status_code, 200)
+        self.assertEqual(response2.status_code, 200)
+
+        response = client.get(reverse('get_pending_requests_to_community_view'), data={'community_name': 'DOES NOT EXIST'})
+        self.assertEqual(response.status_code, 400)
 
 class GetPendingInvitesToCommunityViewTestCase(TestCase): # front end calls get and we return all public communities info
 
