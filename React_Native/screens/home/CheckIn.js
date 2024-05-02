@@ -65,8 +65,46 @@ export default function CheckIn({ navigation, route }) {
   const formattedDateTime = new Intl.DateTimeFormat("en-US", options).format(
     now
   );
-  // const [sound, setSound] = useState();
-  const videoRef = useRef(null);
+
+function parseAndFormatDate(dateStr) {
+  const regex =
+    /^(\w+),\s+(\w+)\s+(\d+),\s+(\d+)\s+at\s+(\d+):(\d+)\s+(AM|PM)$/;
+  const match = dateStr.match(regex);
+
+  if (!match) {
+    return "Invalid date format";
+  }
+
+  const [, , month, day, year, hour, minute, period] = match;
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  const monthNumber = monthNames.indexOf(month) + 1;
+
+  let hourNumber = parseInt(hour, 10);
+  if (period === "PM" && hourNumber !== 12) {
+    hourNumber += 12;
+  } else if (period === "AM" && hourNumber === 12) {
+    hourNumber = 0;
+  }
+  const pad = (num) => (num < 10 ? "0" + num : num);
+  const formattedDate = `${year}-${pad(monthNumber)}-${pad(day)} ${pad(
+    hourNumber
+  )}:${pad(minute)}:00`;
+
+  return formattedDate;
+}
 
   useEffect(() => {
     console.log("CheckIn Recieved:",checkInType)
@@ -113,6 +151,9 @@ export default function CheckIn({ navigation, route }) {
   };
 
   const submitCheckIn = async () => {
+    console.log('formatted date: ',formattedDateTime);
+    console.log("new date:", parseAndFormatDate(formattedDateTime));
+    const parsedDate = parseAndFormatDate(formattedDateTime);
     setLoadingSubmit(true);
     let base64CheckInText = "";
     if (mediaType === "text") {
@@ -130,7 +171,7 @@ export default function CheckIn({ navigation, route }) {
           content: base64Data,
           content_type: mediaType,
           text_entry: CheckInText,
-          date: formattedDateTime,
+          date: parsedDate,
         },
         {
           headers: {
