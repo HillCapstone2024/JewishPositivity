@@ -81,13 +81,13 @@ def update_user_streaks():
     
     # Comment these lines to NOT finalize the calulations and update them officically
     # # Update the database with the current streak values
-    for user_id, streak in current_streaks.items():
-        update_sql = "UPDATE JP_Django_user SET current_streak = %s WHERE id = %s;"
-        cursor.execute(update_sql, (streak, user_id))
+    # for user_id, streak in current_streaks.items():
+    #     update_sql = "UPDATE JP_Django_user SET current_streak = %s WHERE id = %s;"
+    #     cursor.execute(update_sql, (streak, user_id))
 
     # Uncomment these these to print the results to the terminal
-    # for user_id, streak in current_streaks.items():
-    #     print(f"User ID: {user_id}, Current Streak: {streak}")
+    for user_id, streak in current_streaks.items():
+        print(f"User ID: {user_id}, Current Streak: {streak}")
 
     
     connection.commit()
