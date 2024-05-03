@@ -25,37 +25,29 @@ const FriendTab = () => {
 
   const position = React.useRef(new Animated.Value(0)).current; // Use useRef to persist the animated value
 
-  const renderIcon = ({ route, focused }) => {
-    const color = position.interpolate({
-      inputRange: routes.map((_, i) => i),
-      outputRange: routes.map((_, i) => (i === index ? "white" : "#0066cc")),
-    });
+  const renderIcon = ({ route, focused }) => (
+    <Ionicons
+      name={route.icon}
+      size={24}
+      color={focused ? "white" : "#4A90E2"}
+    />
+  );
 
-    return (
-      <Animated.Text style={{ color }}>
-        <Ionicons
-          name={route.icon}
-          size={24}
-          color={focused ? "white" : "#4A90E2"}
-        />
-      </Animated.Text>
-    );
-  };
 
   const renderIndicator = (props) => {
-    const width = layout.width / routes.length;
-    const translateX = position.interpolate({
-      inputRange: [0, 1, 2], // Assuming you have three tabs
-      outputRange: [0, width - 25, 2 * width - 25], // Move between multiples of tab width
-    });
+    const { position, navigationState, getTabWidth } = props;
+    const width = layout.width / navigationState.routes.length;
+
+    const translateX = Animated.multiply(position, width - width/7);
 
     return (
       <Animated.View
         style={{
           position: "absolute",
-          width: width,
-          height: "100%",
-          borderRadius: 10,
+          // padding: "10%",
+          width: width, // Circle's width as a third of each tab's width
+          height: "100%", // Circle's height
+          borderRadius: 10, // Half of height to make it a perfect circle
           backgroundColor: "#4A90E2",
           transform: [{ translateX }],
           shadowColor: "#000",
@@ -96,9 +88,9 @@ const FriendTab = () => {
       onIndexChange={(i) => {
         Animated.spring(position, {
           toValue: i,
-          useNativeDriver: true, // Ensure you use the native driver for better performance
-          speed: 15, // Control the speed of the animation
-          bounciness: 8, // This prop will add a bounce effect to the sliding animation
+          useNativeDriver: true,
+          speed: 15,
+          bounciness: 80,
         }).start();
         setIndex(i);
       }}

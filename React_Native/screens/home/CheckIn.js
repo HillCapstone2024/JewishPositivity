@@ -67,14 +67,14 @@ export default function CheckIn({ navigation, route }) {
   );
 
 function parseAndFormatDate(dateStr) {
+  //reg expression to match normal and military phone settings
   const regex =
-    /^(\w+),\s+(\w+)\s+(\d+),\s+(\d+)\s+at\s+(\d+):(\d+)\s+(AM|PM)$/;
+    /^(\w+),\s+(\w+)\s+(\d+),\s+(\d+)\s+at\s+(\d+):(\d+)(?:\s*(AM|PM)?)$/;
   const match = dateStr.match(regex);
 
   if (!match) {
     return "Invalid date format";
   }
-
   const [, , month, day, year, hour, minute, period] = match;
   const monthNames = [
     "January",
