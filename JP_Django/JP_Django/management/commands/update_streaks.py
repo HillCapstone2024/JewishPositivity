@@ -1,7 +1,9 @@
 import mysql.connector
 from datetime import datetime, timedelta
 import pytz
-
+#
+# IN ORDER TO RUN THIS SCRIPT YOU MUST pip install mysql-connector-python
+#
 def update_user_streaks():    
     # Connection
     connection = mysql.connector.connect(user="admin", password="Capstone2024admin",
