@@ -31,6 +31,7 @@ def update_user_streaks():
     last_dates = {}
     current_streaks = {}
 
+    incrementer = 1
     # for each row in results ...
     for user_id, local_date, timezone_str in results:
         local_tz = pytz.timezone(timezone_str) #retreive everything in UTC
@@ -38,8 +39,10 @@ def update_user_streaks():
         local_today = local_now.date()
         local_yesterday = local_today - timedelta(days=1)
 
+        print(f"------------------------------------------------------------------------------------")
         print(f"Processing User ID: {user_id}, Local Date: {local_date}, Time Zone: {timezone_str}")
-        print(f"Local Now: {local_now}, Local Today: {local_today}, Local Yesterday: {local_yesterday}")
+        print(f"UTC Now: {local_now}, UTC Today: {local_today}, UTC Yesterday: {local_yesterday}")
+        print("")
 
         # If user id (key) is not in last dates --> this just gets the first entry for a user that hasnt been looked at yet
         if user_id not in last_dates:
@@ -53,26 +56,39 @@ def update_user_streaks():
             else:
                 current_streaks[user_id] = 0  # No check-in today or yesterday, streak is zero
                 print(f"User {user_id} has no recent check-in, streak set to 0")
+            incrementer = 1
         else: # Else the user is currently being recorded
-            # Continue streak count if dates are consecutive --> the current day is equal to the previous entry - a day
-            if local_date == last_dates[user_id] - timedelta(days=1):
+            # Continue streak count if dates are consecutive --> the current day is equal to the previous entry - a day AND the UTC is today or yeserday matching down the line
+            if local_date == last_dates[user_id] - timedelta(days=1) and (local_date == local_today - timedelta(days=incrementer) or local_date == local_today - timedelta(days=incrementer-1)):
+                print(f"Compared local date:{local_date} and last_dates[user_id] - timedelta(days=1): {last_dates[user_id] - timedelta(days=1)}")
+                print(f"Compared {local_date} and {local_today - timedelta(days=incrementer)}")
+                print(f"INCREMANNOR DAY: {local_today - timedelta(days=incrementer)}")
+                print(f"INCREMANNOR DAY 1 extra: {local_today - timedelta(days=incrementer+1)}")
                 current_streaks[user_id] += 1 
                 print(f"User {user_id} streak incremented to {current_streaks[user_id]}")
             else:
                 # Break found, stop updating streak for this user but continue with others
+                print(f"Compared local date:{local_date} and last_dates[user_id] - timedelta(days=1): {last_dates[user_id] - timedelta(days=1)}")
+                print(f"Compared {local_date} and {local_today - timedelta(days=incrementer)}")
                 print(f"User {user_id} streak break found. Last date: {last_dates[user_id]}, current date: {local_date}")
+                print(f"INCREMANNOR DAY {local_today - timedelta(days=incrementer)}")
+                print(f"INCREMANNOR DAY 1 extra: {local_today - timedelta(days=incrementer+1)}")
                 continue  # Proper usage to skip to the next iteration in the loop
         last_dates[user_id] = local_date # Update next day for next loop iteration
-
+        incrementer += 1
+    
+    # Comment these lines to NOT finalize the calulations and update them officically
     # # Update the database with the current streak values
-    # for user_id, streak in current_streaks.items():
-    #     update_sql = "UPDATE JP_Django_user SET current_streak = %s WHERE id = %s;"
-    #     cursor.execute(update_sql, (streak, user_id))
-
     for user_id, streak in current_streaks.items():
-        print(f"User ID: {user_id}, Current Streak: {streak}")
+        update_sql = "UPDATE JP_Django_user SET current_streak = %s WHERE id = %s;"
+        cursor.execute(update_sql, (streak, user_id))
 
-    #connection.commit()
+    # Uncomment these these to print the results to the terminal
+    # for user_id, streak in current_streaks.items():
+    #     print(f"User ID: {user_id}, Current Streak: {streak}")
+
+    
+    connection.commit()
     cursor.close()
     connection.close()
 
