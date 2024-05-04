@@ -50,6 +50,12 @@ constCNnotProvided= "Community name not provided"
 constFriendExists = "Friendship already exists"
 constAppJson = "application/json"
 constInvalidReq = "Invalid request method"
+constJSONParsed = "Parsed JSON data: %s"
+constChangesSuccess = "Changes Successful!"
+constNoContent = "No content in checkin!"
+constErrorOccured = "An error occurred"
+constFriendStatus = "Friendship status data:"
+constPostData = "DATA from post: %s"
 
 
 # ########## Helper Functions ##########
@@ -115,7 +121,7 @@ def login_view(request):
     if request.method == "POST":
         # Load POST data
         data = json.loads(request.body)
-        logging.info("Parsed JSON data: %s", data)
+        logging.info(constJSONParsed, data)
         missing_keys = [
             key for key, value in data.items() if value is None or value.strip() == ""
         ]
@@ -156,7 +162,7 @@ def create_user_view(request):
     # Parse the JSON body of the request
     data = json.loads(request.body)
     logging.info("IN CREATE_USER_VIEW....")
-    logging.info("Parsed JSON data: %s", data)
+    logging.info(constJSONParsed, data)
 
     # Check for missing keys and return an error response if any are found
     error_response = check_missing_keys(data)
@@ -233,7 +239,7 @@ def update_user_information_view(request):
     # Check if the request method is POST
     if request.method != "POST":
         # Return an HTTP 400 response if the method is not POST
-        return HttpResponse("Not a POST request", status=400)
+        return HttpResponse(constNotPost, status=400)
 
     # Parse the JSON data from the request body
     data = json.loads(request.body)
@@ -273,7 +279,7 @@ def update_user_information_view(request):
                 return error_response
 
     # Return an HTTP 200 response indicating that the updates were successful
-    return HttpResponse("Changes Successful!")
+    return HttpResponse(constChangesSuccess)
 
 def update_username(user, new_username):
     try:
@@ -522,31 +528,12 @@ def get_users_information_view(request):
             try:
                 user_info_list = []
                 for username in usernames:
-                    # Retrieve the user from the database by username
-                    user = User.objects.get(username=username)
-
-                    profile_picture_data = user.profile_picture
-                    if profile_picture_data:
-                        profile_picture_encoded = base64.b64encode(profile_picture_data).decode('utf-8')
-                    else:
-                        profile_picture_encoded = None  # a default image or keep it empty
-
-                    # get all of the information for the user
-                    user_info = {
-                        "id": user.pk,
-                        "username": user.username,
-                        "password": user.password,
-                        "email": user.email,
-                        "first_name": user.first_name,
-                        "last_name": user.last_name,
-                        "profilepicture": profile_picture_encoded,
-                        "timezone": user.timezone
-                    }
+                    user_info = get_user_info(username)
                     user_info_list.append(user_info)
 
                 logging.info("get data:")
                 logging.info(user_info_list)
-                return HttpResponse(json.dumps(user_info_list), content_type='application/json')
+                return HttpResponse(json.dumps(user_info_list), content_type=constAppJson)
             except User.DoesNotExist:
                 return HttpResponse("User does not exist", status=400)
             except Exception as e:
@@ -555,6 +542,28 @@ def get_users_information_view(request):
         else:  # usernames were empty
             return HttpResponse("Usernames not provided", status=400)
     return HttpResponse("This endpoint only accepts GET requests", status=400)
+
+def get_user_info(username):
+    user = User.objects.get(username=username)
+
+    profile_picture_data = user.profile_picture
+    if profile_picture_data:
+        profile_picture_encoded = base64.b64encode(profile_picture_data).decode('utf-8')
+    else:
+        profile_picture_encoded = None  # a default image or keep it empty
+
+    # get all of the information for the user
+    user_info = {
+        "id": user.pk,
+        "username": user.username,
+        "password": user.password,
+        "email": user.email,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "profilepicture": profile_picture_encoded,
+        "timezone": user.timezone
+    }
+    return user_info
 
 
 
@@ -567,7 +576,7 @@ def get_users_information_view(request):
 
 # ########## Check-in Management ##########
     
-def create_checkin(user, data):
+def create_checkin(data):
     # Create a check-in record in the database
     #logging.info("Post Data from Frontend: %s", data)
     try:
@@ -630,19 +639,19 @@ def checkin_view(request):
         return error_response
 
     # Retrieve the user associated with the check-in
-    user, error_response = get_user(data["username"])
+    _, error_response = get_user(data["username"])
     if error_response:
         return error_response
     logging.info("Retrieved user in checkin view")
 
     # Create the check-in record
-    return create_checkin(user, data)
+    return create_checkin(data)
 
 def update_checkin_info_view(request):
     # Check if the request method is POST
     if request.method != "POST":
         # Return an HTTP 400 response if the method is not POST
-        return HttpResponse("Not a POST request", status=400)
+        return HttpResponse(constNotPost, status=400)
 
     # Parse the JSON data from the request body
     data = json.loads(request.body)
@@ -657,29 +666,37 @@ def update_checkin_info_view(request):
         logging.info("RECEIVED CHECKINID %s", checkin_id)
         return HttpResponse("Checkin_id is in invalid format or does not exist", status=400)
     
-    #verify content and text entry both are not None before updating
-    if 'text_entry' in data and 'content' in data: #content and text entry in post
-        logging.info('Text and content posted')
-        if data["text_entry"] is None and data["content"] is None:
-            logging.info('Both None')
-            return HttpResponse('No content in checkin!', status=400)
-    elif 'text_entry' in data: # just text entry in post, no content
-        logging.info('Text posted, no content')
-        if data["text_entry"] is None: 
-            if checkin.content is None:
-                logging.info('Both None')
-                return HttpResponse('No content in checkin!', status=400)
-    elif 'content' in data: # just content in post, no text
-        logging.info('content posted, no text')
-        if data["content"] is None: 
-            if checkin.text_entry is None:
-                logging.info('Both None')
-                return HttpResponse('No content in checkin!', status=400)
-    
+    # Verify content and text entry both are not None before updating
+    if not validate_content_and_text_entry(data, checkin):
+        return HttpResponse(constNoContent, status=400)
+
+    # Validate the POST data
     error_response = validate_data(data) #allows content and text entry to be none type and pass through without error
     if error_response:
         return error_response
 
+    # Update the check-in fields
+    update_checkin_fields(checkin, data)
+
+    # Return an HTTP 200 response indicating that the updates were successful
+    return HttpResponse(constChangesSuccess)
+
+def validate_content_and_text_entry(data, checkin):
+    if 'text_entry' in data and 'content' in data: #content and text entry in post
+        logging.info('Text and content posted')
+        if data["text_entry"] is None and data["content"] is None:            
+            return False
+    elif 'text_entry' in data: # just text entry in post, no content
+        logging.info('Text posted, no content')
+        if data["text_entry"] is None and checkin.content is None:                
+            return False
+    elif 'content' in data: # just content in post, no text
+        logging.info('content posted, no text')
+        if data["content"] is None and checkin.text_entry is None:
+            return False
+    return True
+
+def update_checkin_fields(checkin, data):
     # Define a dictionary mapping POST data keys to their respective update functions and expected values
     update_actions = {
         'text_entry': (update_text_entry, data.get("text_entry")),
@@ -693,9 +710,6 @@ def update_checkin_info_view(request):
             error_response = update_func(checkin, value) # Call the respective update function with the user object and the value from the POST data
             if error_response: # If the update function returns an error response, return it immediately
                 return error_response
-
-    # Return an HTTP 200 response indicating that the updates were successful
-    return HttpResponse("Changes Successful!")
 
 def update_text_entry(checkin, new_text_entry):
     try:
@@ -769,29 +783,8 @@ def get_checkin_info_view(request):
                 #Retrieve all checkins associated with this user
                 all_checkins = Checkin.objects.filter(user_id=user_id) # filter returns all matching objects, GET returns only if one matching object
 
-                response_data=[] #List of dictionaries holding all checkin moments of the user
+                response_data = format_checkin_data(all_checkins)  # Extracted helper function to format checkin data
 
-                for checkin in all_checkins: # looping through checkins for user specified
-                    obj_content= None #default if empty
-                    
-                    if checkin.content is not None and checkin.content_type != "video": #get content if not None and if not video
-                        obj_content= base64.b64encode(checkin.content).decode('utf-8')
-                    
-                    if checkin.content_type == "video": #get thumbnail if video to pass as content
-                        obj_content = videothumb #image of play video screen as base 64 from file- global var above view
-
-                    current_checkin = { # dictionary to append to list
-                        "checkin_id": checkin.checkin_id,
-                        "content_type": checkin.content_type,
-                        "moment_number": checkin.moment_number,
-                        "content": obj_content,  #content converted from binary to base64 then to a base 64 string, or None, or thumbnail image
-                        "text_entry": checkin.text_entry,
-                        "user_id": checkin.user_id.id,
-                        "date": checkin.date.strftime('%Y-%m-%d'), # Convert date to string to be JSON serializable
-                        "time": checkin.date.strftime('%H:%M:%S'),
-                    }
-                    response_data.append(current_checkin) #add checkin to the list to be returned
-  
                 logging.info(response_data)
                 return HttpResponse(json.dumps(response_data), content_type= constAppJson)  # returning a LIST of DICTIONARIES where each dictionary is a checkin moment of the user specified - do not change
             except Exception as e:
@@ -800,6 +793,32 @@ def get_checkin_info_view(request):
         else:  # username was empty
             return HttpResponse(constUNnotProvided, status=400)
     return HttpResponse(constNotGet)
+
+def format_checkin_data(checkins):
+    response_data = []  # List of dictionaries holding all checkin moments of the user
+
+    for checkin in checkins:  # looping through checkins for user specified
+        obj_content = None  # default if empty
+
+        if checkin.content is not None and checkin.content_type != "video":  # get content if not None and if not video
+            obj_content = base64.b64encode(checkin.content).decode('utf-8')
+
+        if checkin.content_type == "video":  # get thumbnail if video to pass as content
+            obj_content = videothumb  # image of play video screen as base 64 from file- global var above view
+
+        current_checkin = {  # dictionary to append to list
+            "checkin_id": checkin.checkin_id,
+            "content_type": checkin.content_type,
+            "moment_number": checkin.moment_number,
+            "content": obj_content,  # content converted from binary to base64 then to a base 64 string, or None, or thumbnail image
+            "text_entry": checkin.text_entry,
+            "user_id": checkin.user_id.id,
+            "date": checkin.date.strftime('%Y-%m-%d'),  # Convert date to string to be JSON serializable
+            "time": checkin.date.strftime('%H:%M:%S'),
+        }
+        response_data.append(current_checkin)  # add checkin to the list to be returned
+
+    return response_data
 
 def update_user_streaks(username=None): # This is the MAIN method which will do the actual update for user streaks
     logging.info("Updating user streaks")
@@ -936,49 +955,46 @@ def get_todays_checkin_info_view(request):
         logging.info("Usernames: %s", usernames)
 
         # Make sure the get data is not empty
-        if len(usernames)>=1: #username(s) were passed
+        if len(usernames) >= 1:  # username(s) were passed
             try:
-                response_data=[] #List of dictionaries holding all checkin moments of the users to return
+                response_data = []  # List of dictionaries holding all checkin moments of the users to return
                 # Retrieve the users from the database by username
-                for username in usernames: # for each name passed
+                for username in usernames:  # for each name passed
                     user = User.objects.get(username=username)
-                    user_id = user.pk # get foreign key reference field to look up in checkin userid column
-                    
-                    #Retrieve all checkins associated with this user from TODAY
+                    user_id = user.pk  # get foreign key reference field to look up in checkin userid column
+
+                    # Retrieve all checkins associated with this user from TODAY
                     today = date.today()
 
                     # Assuming 'user_id' is already defined
-                    all_checkins = Checkin.objects.filter(user_id=user_id, date__date=today)
+                    all_checkins = get_user_checkins(user_id, today)
 
-                    for checkin in all_checkins: # looping through checkins for user specified
-                        obj_content= None #default if empty
-                        
-                        if checkin.content is not None and checkin.content_type != "video": #get content if not None and if not video
-                            obj_content= base64.b64encode(checkin.content).decode('utf-8')
-                            
-                        if checkin.content_type == "video": #get thumbnail if video to pass as content
-                            obj_content = videothumb #image of play video screen as base 64 from file- global var above view
-                        
-                        current_checkin = { # dictionary to append to list
+                    response_data.extend([
+                        {
                             "username": username,
                             "checkin_id": checkin.checkin_id,
                             "content_type": checkin.content_type,
                             "moment_number": checkin.moment_number,
-                            "content": obj_content,  #content converted from binary to base64 then to a base 64 string, or None
+                            "content": base64.b64encode(checkin.content).decode('utf-8') if checkin.content is not None and checkin.content_type != "video" else videothumb,
                             "text_entry": checkin.text_entry,
                             "user_id": checkin.user_id.id,
-                            "date": checkin.date.strftime('%Y-%m-%d'), # Convert date to string to be JSON serializable
+                            "date": checkin.date.strftime('%Y-%m-%d'),
                         }
-                        response_data.append(current_checkin) #add checkin to the list to be returned
-    
+                        for checkin in all_checkins
+                    ])
+
                 logging.info(response_data)
-                return HttpResponse(json.dumps(response_data), content_type= constAppJson)  # returning a LIST of DICTIONARIES where each dictionary is a checkin moment of the user specified - do not change
+                return HttpResponse(json.dumps(response_data), content_type=constAppJson)
             except Exception as e:
                 logging.info(e)
                 return HttpResponse(constUserDNE, status=400)
         else:  # username was empty
             return HttpResponse(constUNnotProvided, status=400)
     return HttpResponse(constNotGet)
+
+
+def get_user_checkins(user_id, today):
+    return Checkin.objects.filter(user_id=user_id, date__date=today)
 
 
 # ########## Utility Views ##########
@@ -1108,31 +1124,13 @@ def add_friend_view(request):
 
             # Check if a connection already exists
             logging.info("Checking for existing connection")
-            outgoing = Friends.objects.filter(user1=user1_id, user2=user2_id) # outgoing friend request
-            incoming = Friends.objects.filter(user1=user2_id, user2=user1_id) # incoming friend request
-            if outgoing.exists():
-                # Already friends
-                if outgoing[0].complete:
-                    logging.info(constFriendExists)
-                    return HttpResponse(constFriendExists, status=400)
-                # Already sent a friend request
-                else:
-                    logging.info("Friend request already sent")
-                    return HttpResponse("Friend request already sent", status=400)
-            if incoming.exists():
-                # Already friends
-                if incoming[0].complete:
-                    logging.info(constFriendExists)
-                    return HttpResponse(constFriendExists, status=400)
-                # Accept the friend request
-                else:
-                    logging.info("Accepting friend request")
-                    # Make new object to update Friends successfully
-                    friend_request = incoming[0]
-                    friend_request.complete = True
-                    friend_request.save()
-                    response_data = {"message": "Success! Friend request accepted!"}
-                    return HttpResponse(json.dumps(response_data), content_type= constAppJson)
+
+            exists, message, status = check_connection(user1_id, user2_id)
+            # If a connection is found, return the message and status
+            if exists:
+                logging.info("Connection already exists")
+                return HttpResponse(message, status=status)
+
             logging.info("No existing connection found")
             # If no previous history with user2, create brand new friendship
             friends = Friends.objects.create(
@@ -1149,6 +1147,34 @@ def add_friend_view(request):
         except Exception as e:
             return HttpResponse("Adding friend failed: " + str(e), status=400)
     return HttpResponse(constNotPost)
+
+def check_connection(user1_id, user2_id):
+    outgoing = Friends.objects.filter(user1=user1_id, user2=user2_id) # outgoing friend request
+    incoming = Friends.objects.filter(user1=user2_id, user2=user1_id) # incoming friend request
+    if outgoing.exists():
+        # Already friends
+        if outgoing[0].complete:
+            logging.info(constFriendExists)
+            return True, constFriendExists, 400
+        # Already sent a friend request
+        else:
+            logging.info("Friend request already sent")
+            return True, "Friend request already sent", 400
+    if incoming.exists():
+        # Already friends
+        if incoming[0].complete:
+            logging.info(constFriendExists)
+            return True, constFriendExists, 400
+        # Accept the friend request
+        else:
+            logging.info("Accepting friend request")
+            # Make new object to update Friends successfully
+            friend_request = incoming[0]
+            friend_request.complete = True
+            friend_request.save()
+            return True, "Success! Friend request accepted!", 200
+                
+    return False, "No connection yet", 000
 
 def delete_friend_view(request):
     if request.method == "POST":
@@ -1195,26 +1221,11 @@ def get_friends_view(request):
                 # Get friendships where the given user is either user1 or user2
                 friendships = Friends.objects.filter(user1_id=user.id) | Friends.objects.filter(user2_id=user.id)
 
-                # List to store friend usernames and the friendship status
-                friendship_data = []
-
-                # Populate the list with dictionaries containing usernames and friendship status
-                for friendship in friendships:
-                    if friendship.user1_id == user.id:
-                        friend_id = friendship.user2_id
-                    else:
-                        friend_id = friendship.user1_id
-
-                    # Get the username of the friend
-                    friend_username = User.objects.get(id=friend_id).username
-
-                    friendship_data.append({
-                        'username': friend_username,
-                        'status': friendship.complete
-                    })
+                # Get the friend usernames and friendship status
+                friendship_data = get_friendship_data(user, friendships)
 
                 # Log data and return as JSON response
-                logging.info("Friendship status data:")
+                logging.info(constFriendStatus)
                 logging.info(friendship_data)
                 return JsonResponse(friendship_data, safe=False)
 
@@ -1222,10 +1233,31 @@ def get_friends_view(request):
                 return HttpResponse(constUserDNE, status=400)
             except Exception as e:
                 logging.error(e)
-                return HttpResponse("An error occurred", status=400)
+                return HttpResponse(constErrorOccured, status=400)
         else:  # username was empty
             return HttpResponse(constUNnotProvided, status=400)
     return HttpResponse(constNotGet)
+
+def get_friendship_data(user, friendships):
+    # List to store friend usernames and the friendship status
+    friendship_data = []
+
+    # Populate the list with dictionaries containing usernames and friendship status
+    for friendship in friendships:
+        if friendship.user1_id == user.id:
+            friend_id = friendship.user2_id
+        else:
+            friend_id = friendship.user1_id
+
+        # Get the username of the friend
+        friend_username = User.objects.get(id=friend_id).username
+
+        friendship_data.append({
+            'username': friend_username,
+            'status': friendship.complete
+        })
+
+    return friendship_data
 
 
 def get_pending_requests_sent_friends_view(request):
@@ -1256,7 +1288,7 @@ def get_pending_requests_sent_friends_view(request):
                     })
 
                 # Log data and return as JSON response
-                logging.info("Friendship status data:")
+                logging.info(constFriendStatus)
                 logging.info(friendship_data)
                 return JsonResponse(friendship_data, safe=False)
 
@@ -1264,7 +1296,7 @@ def get_pending_requests_sent_friends_view(request):
                 return HttpResponse(constUserDNE, status=400)
             except Exception as e:
                 logging.error(e)
-                return HttpResponse("An error occurred", status=400)
+                return HttpResponse(constErrorOccured, status=400)
         else:  # username was empty
             return HttpResponse(constUNnotProvided, status=400)
     return HttpResponse(constNotGet)
@@ -1298,7 +1330,7 @@ def get_pending_requests_received_friends_view(request):
                     })
 
                 # Log data and return as JSON response
-                logging.info("Friendship status data:")
+                logging.info(constFriendStatus)
                 logging.info(friendship_data)
                 return JsonResponse(friendship_data, safe=False)
 
@@ -1306,7 +1338,7 @@ def get_pending_requests_received_friends_view(request):
                 return HttpResponse(constUserDNE, status=400)
             except Exception as e:
                 logging.error(e)
-                return HttpResponse("An error occurred", status=400)
+                return HttpResponse(constErrorOccured, status=400)
         else:  # username was empty
             return HttpResponse(constUNnotProvided, status=400)
     return HttpResponse(constNotGet)
@@ -1345,7 +1377,7 @@ def get_badges_view(request):
             true_badges = {k: v for k, v in response_data.items() if v is True}
 
             logging.info(true_badges)
-            return HttpResponse(json.dumps(true_badges), content_type="application/json")
+            return HttpResponse(json.dumps(true_badges), content_type=constAppJson)
         except Badges.DoesNotExist:
             logging.info(f"No badges found for user {user_id}")
             return HttpResponse(f"No badges found for user {user_id}", status=404)
@@ -1372,7 +1404,7 @@ def get_current_streak_view(request):
                 current_streak = user.current_streak
 
                 logging.info(current_streak)
-                return HttpResponse(json.dumps(current_streak), content_type='application/json')
+                return HttpResponse(json.dumps(current_streak), content_type=constAppJson)
             except User.DoesNotExist:
                 return HttpResponse(constUserDNE, status=400)
         else:
@@ -1397,7 +1429,7 @@ def get_longest_streak_view(request):
                 longest_streak = user.longest_streak
 
                 logging.info(longest_streak)
-                return HttpResponse(json.dumps(longest_streak), content_type='application/json')
+                return HttpResponse(json.dumps(longest_streak), content_type=constAppJson)
             except User.DoesNotExist:
                 return HttpResponse(constUserDNE, status=400)
         else:
@@ -1411,27 +1443,7 @@ def get_profile_pictures_view(request):
         # Make sure the username list is not empty
         if username_list is not None:
             try:
-                profile_pic_list = []
-                for username in username_list:
-
-                    user = User.objects.get(username=username)
-                    user_id = user.pk
-                    
-                    #Retrieve the profile picture associated with this user
-                    users_list = User.objects.filter(id=user_id) # filter returns all matching objects, GET returns only if one matching object
-                    
-                    for listed_user in users_list: # looping through checkins for user specified
-                        obj_content= None #default if empty
-
-
-                        if listed_user.profile_picture is not None: #get content if not None and if not video
-                            obj_content= base64.b64encode(listed_user.profile_picture).decode('utf-8')                    
-
-                        current_user = { # dictionary to append to list
-                            "username": username,
-                            "profile_picture": obj_content,  #content converted from binary to base64 then to a base 64 string, or None
-                        }
-                        profile_pic_list.append(current_user) #add checkin to the list to be returne
+                profile_pic_list = get_pictures(username_list)
 
                 # Log data and return as JSON response
                 logging.info(profile_pic_list)
@@ -1441,10 +1453,33 @@ def get_profile_pictures_view(request):
                 return HttpResponse(constUserDNE, status=400)
             except Exception as e:
                 logging.error(e)
-                return HttpResponse("An error occurred", status=400)
+                return HttpResponse(constErrorOccured, status=400)
         else:  # username was empty
             return HttpResponse(constUNnotProvided, status=400)
     return HttpResponse(constNotGet)
+
+def get_pictures(username_list):
+    profile_pic_list = []
+    for username in username_list:
+        user = User.objects.get(username=username)
+        user_id = user.pk
+        
+        #Retrieve the profile picture associated with this user
+        users_list = User.objects.filter(id=user_id) # filter returns all matching objects, GET returns only if one matching object
+        
+        for listed_user in users_list: # looping through checkins for user specified
+            obj_content= None #default if empty
+
+
+            if listed_user.profile_picture is not None: #get content if not None and if not video
+                obj_content= base64.b64encode(listed_user.profile_picture).decode('utf-8')                    
+
+            current_user = { # dictionary to append to list
+                "username": username,
+                "profile_picture": obj_content,  #content converted from binary to base64 then to a base 64 string, or None
+            }
+            profile_pic_list.append(current_user) #add checkin to the list to be returned
+    return profile_pic_list
 
 
 # ############ Community Management ###########
@@ -1456,7 +1491,7 @@ def create_community_view(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         logging.info("IN create_community_view....")
-        logging.info("Parsed JSON data: %s", data)
+        logging.info(constJSONParsed, data)
 
         # Check for missing keys and return an error response if any are found
         error_response = validate_data(data)
@@ -1533,10 +1568,10 @@ def get_specific_community_info_view(request):
                 'date_created': community.date_created.strftime('%Y-%m-%d')
             }
                 logging.info(response_data)
-                return HttpResponse(json.dumps(response_data), content_type='application/json')
+                return HttpResponse(json.dumps(response_data), content_type=constAppJson)
             except Exception as e:
                 logging.error("GET SPECIFIC COMMUNITY ERROR: %s",e)
-                return HttpResponse("An error occurred", status=400)
+                return HttpResponse(constErrorOccured, status=400)
         else:  # name  was empty
             return HttpResponse("No Name Provided", status=400)
     return HttpResponse(constNotGet)
@@ -1562,7 +1597,7 @@ def get_all_community_info_view(request):
                 })
                 
             logging.info("SPECIFIC COMMUNITY INFO: %s", communities_list)
-            return HttpResponse(json.dumps(communities_list), content_type='application/json')
+            return HttpResponse(json.dumps(communities_list), content_type=constAppJson)
         
         except Exception as e:
             logging.error("GETTING ALL COMMUNITIES ERROR: %s",e)
@@ -1580,15 +1615,37 @@ def get_user_community_info_view(request):
                 # Retrieve the user from the database by username
                 user = User.objects.get(username=username)
 
-                # retreieve the communities the user is in
-                community_relationships = CommunityUser.objects.filter(user_id=user, status=2)
-                communities = []
-                for relationship in community_relationships: #get associated community 
-                    communities.append(Community.objects.get(community_id=relationship.community_id.pk))
+                # Retrieve the communities the user is in
+                communities = get_user_communities(user)
 
                 # Populate the list with dictionaries containing each community and their info
-                communities_list = []
-                for community in communities:
+                communities_list = get_communities_list(communities)
+
+                # Log data and return as JSON response
+                logging.info("Community list:")
+                logging.info(communities_list)
+                return HttpResponse(json.dumps(communities_list), content_type='application/json')
+
+            except User.DoesNotExist:
+                return HttpResponse(constUserDNE, status=400)
+            except Exception as e:
+                logging.error(e)
+                return HttpResponse(e, status=400)
+        else:  # username was empty
+            return HttpResponse(constUNnotProvided, status=400)
+    return HttpResponse(constNotGet)
+
+def get_user_communities(user):
+    # Retrieve the communities the user is in
+    community_relationships = CommunityUser.objects.filter(user_id=user, status=2)
+    communities = []
+    for relationship in community_relationships: #get associated community 
+        communities.append(Community.objects.get(community_id=relationship.community_id.pk))
+    return communities
+
+def get_communities_list(communities):
+    communities_list = []
+    for community in communities:
                     community_picture = community.community_photo
                     if community_picture:
                         profile_picture_encoded = base64.b64encode(community_picture).decode('utf-8')
@@ -1604,21 +1661,7 @@ def get_user_community_info_view(request):
                         'privacy': community.privacy,
                         'date_created': community.date_created.strftime('%Y-%m-%d')
                     })
-
-                    
-                # Log data and return as JSON response
-                logging.info("Community list:")
-                logging.info(communities_list)
-                return HttpResponse(json.dumps(communities_list), content_type='application/json')
-
-            except User.DoesNotExist:
-                return HttpResponse(constUserDNE, status=400)
-            except Exception as e:
-                logging.error(e)
-                return HttpResponse(e, status=400)
-        else:  # username was empty
-            return HttpResponse(constUNnotProvided, status=400)
-    return HttpResponse(constNotGet)
+    return communities_list
 
 # Get communities that the user owns
 def get_owner_community_info_view(request):
@@ -1631,46 +1674,49 @@ def get_owner_community_info_view(request):
                 # Retrieve the user from the database by username
                 user = User.objects.get(username=username)
 
-                # retreieve the communities grouped by owner ID
+                # Retrieve the communities owned by the user
                 communities = (Community.objects.filter(owner_id=user)
                                .annotate(user_count=Count('communityuser')))
 
                 # Populate the list with dictionaries containing each community and their info
-                communities_list = []
-                for community in communities:
-                    community_picture = community.community_photo
-                    if community_picture:
-                        profile_picture_encoded = base64.b64encode(community_picture).decode('utf-8')
-                    else:
-                        profile_picture_encoded = None  
-                        
-                    communities_list.append({
-                        'community_id': community.community_id,
-                        'community_name': community.community_name,
-                        'community_description': community.community_description,
-                        'community_photo': profile_picture_encoded,
-                        'owner_id': community.owner_id.username,
-                        'privacy': community.privacy,
-                        'date_created': community.date_created.strftime('%Y-%m-%d'),
-                        'user_count': community.user_count
-                    })
-
+                communities_list = populate_communities_list(communities)
                     
                 # Log data and return as JSON response
                 logging.info("Communities owned list:")
                 logging.info(communities_list)
-                return HttpResponse(json.dumps(communities_list), content_type='application/json')
+                return HttpResponse(json.dumps(communities_list), content_type=constAppJson)
 
             except User.DoesNotExist:
                 return HttpResponse(constUserDNE, status=400)
             except Exception as e:
                 logging.error(e)
-                return HttpResponse("An error occurred", status=400)
+                return HttpResponse(constErrorOccured, status=400)
         else:  # username was empty
             return HttpResponse(constUNnotProvided, status=400)
     return HttpResponse(constNotGet)
 
-# Get communities that the user owns
+def populate_communities_list(communities):
+    communities_list = []
+    for community in communities:
+        community_picture = community.community_photo
+        if community_picture:
+            profile_picture_encoded = base64.b64encode(community_picture).decode('utf-8')
+        else:
+            profile_picture_encoded = None  
+                        
+        communities_list.append({
+            'community_id': community.community_id,
+            'community_name': community.community_name,
+            'community_description': community.community_description,
+            'community_photo': profile_picture_encoded,
+            'owner_id': community.owner_id.username,
+            'privacy': community.privacy,
+            'date_created': community.date_created.strftime('%Y-%m-%d'),
+            'user_count': community.user_count
+        })
+    return communities_list
+
+# Get communities that the user doesn't own
 def get_communities_not_owned_info_view(request):
     if request.method == "GET":
         username = request.GET.get("username")
@@ -1681,68 +1727,67 @@ def get_communities_not_owned_info_view(request):
                 # Retrieve the user from the database by username
                 user = User.objects.get(username=username)
 
-                # retreieve the communities grouped by owner ID
-                logging.info("before communities")
-                communities = CommunityUser.objects.filter(user_id=user) #gets all communities they are part of even ones they own
-                all_communities=[] # list of community objects a user is a part of
-                for community in communities: 
-                    all_communities.append(community.community_id.pk)
+                # Retrieve the communities not owned by the user
+                communities = get_communities_not_owned(user)
 
-                logging.info("before communities_owned")
-                communities_owned = Community.objects.filter(owner_id= user) #get all communities user owns 
-                all_communities_owned=[] # list of community objects a user owns
-                for community in communities_owned: 
-                    all_communities_owned.append(community.community_id)
-
-                difference = set(all_communities).difference(set(all_communities_owned))
-                
-                logging.info("building list")
-                communities_list = []
-                for id in difference:
-                    community = Community.objects.get(community_id=id)
-                    # Populate the list with dictionaries containing each community and their info  
-
-                    user_count = CommunityUser.objects.filter(community_id=community).count()
-
-                    if community.community_photo:
-                        profile_picture_encoded = base64.b64encode(community.community_photo).decode('utf-8')
-                    else:
-                        profile_picture_encoded = None  
-
-                    communities_list.append({
-                        'community_id': community.community_id,
-                        'community_name': community.community_name,
-                        'community_description': community.community_description,
-                        'community_photo': profile_picture_encoded,
-                        'owner_id': community.owner_id.username,
-                        'privacy': community.privacy,
-                        'date_created': community.date_created.strftime('%Y-%m-%d'),
-                        'user_count': user_count
-                    })
+                # Build the communities list
+                communities_list = build_communities_list(communities)
 
                 # Log data and return as JSON response
                 logging.info("Communities not owned list:")
                 logging.info(communities_list)
-                return HttpResponse(json.dumps(communities_list), content_type='application/json')
+                return HttpResponse(json.dumps(communities_list), content_type=constAppJson)
 
             except User.DoesNotExist:
                 return HttpResponse(constUserDNE, status=400)
             except Exception as e:
                 logging.error(e)
-                return HttpResponse("An error occurred", status=400)
+                return HttpResponse(constErrorOccured, status=400)
         else:  # username was empty
             return HttpResponse(constUNnotProvided, status=400)
     return HttpResponse(constNotGet)
+
+def get_communities_not_owned(user):
+    # Retrieve the communities the user is in
+    community_relationships = CommunityUser.objects.filter(user_id=user)
+    communities = []
+    for relationship in community_relationships:
+        communities.append(relationship.community_id.pk)
+    communities_owned = Community.objects.filter(owner_id=user)
+    all_communities_owned = [community.community_id for community in communities_owned]
+    difference = set(communities).difference(set(all_communities_owned))
+    return difference
+
+def build_communities_list(communities):
+    communities_list = []
+    for id in communities:
+        community = Community.objects.get(community_id=id)
+        user_count = CommunityUser.objects.filter(community_id=community).count()
+        if community.community_photo:
+            profile_picture_encoded = base64.b64encode(community.community_photo).decode('utf-8')
+        else:
+            profile_picture_encoded = None  
+        communities_list.append({
+            'community_id': community.community_id,
+            'community_name': community.community_name,
+            'community_description': community.community_description,
+            'community_photo': profile_picture_encoded,
+            'owner_id': community.owner_id.username,
+            'privacy': community.privacy,
+            'date_created': community.date_created.strftime('%Y-%m-%d'),
+            'user_count': user_count
+        })
+    return communities_list
 
 def update_community_view(request):
     # Check if the request method is POST
     if request.method != "POST":
         # Return an HTTP 400 response if the method is not POST
-        return HttpResponse("Not a POST request", status=400)
+        return HttpResponse(constNotPost, status=400)
 
     # Parse the JSON data from the request body
     data = json.loads(request.body)
-    logging.info("DATA from post: %s", data)
+    logging.info(constPostData, data)
 
     # Attempt to retrieve the community object based on the commnity id provided in the POST data
     try:
@@ -1785,7 +1830,7 @@ def update_community_view(request):
                 return error_response
 
     # Return an HTTP 200 response indicating that the updates were successful
-    return HttpResponse("Changes Successful!")
+    return HttpResponse(constChangesSuccess)
 
 def update_community_name(community, new_community_name):
     logging.info("inside update_community_name method.... ")
@@ -1873,11 +1918,11 @@ def request_to_join_community_view(request):
     # Check if the request method is POST
     if request.method != "POST":
         # Return an HTTP 400 response if the method is not POST
-        return HttpResponse("Not a POST request", status=400)
+        return HttpResponse(constNotPost, status=400)
 
     # Parse the JSON data from the request body
     data = json.loads(request.body)
-    logging.info("DATA from post: %s", data)
+    logging.info(constPostData, data)
 
     # variables from the post data
     username = data["username"]
@@ -1924,11 +1969,11 @@ def invite_to_join_community_view(request):
     # Check if the request method is POST
     if request.method != "POST":
         # Return an HTTP 400 response if the method is not POST
-        return HttpResponse("Not a POST request", status=400)
+        return HttpResponse(constNotPost, status=400)
 
     # Parse the JSON data from the request body
     data = json.loads(request.body)
-    logging.info("DATA from post: %s", data)
+    logging.info(constPostData, data)
 
     # variables from the post data
     owner_username = data["owner_username"]
@@ -1998,7 +2043,7 @@ def get_users_in_community_view(request):
                     'username': user.username
                 })
             logging.info("Userlist sent to frontend: %s", users_list)    
-            return HttpResponse(json.dumps(users_list), content_type='application/json', status=200)
+            return HttpResponse(json.dumps(users_list), content_type=constAppJson, status=200)
         
         except Exception as e:
             logging.error("Error while retrieving users in the community: %s", e)
@@ -2027,10 +2072,10 @@ def get_pending_requests_to_community_view(request):
                     })
 
                 logging.info("pending_requests_list: %s", pending_requests_list)
-                return HttpResponse(json.dumps(pending_requests_list), content_type='application/json')
+                return HttpResponse(json.dumps(pending_requests_list), content_type=constAppJson)
             except Exception as e:
                 logging.error(e)
-                return HttpResponse("An error occurred", status=400)
+                return HttpResponse(constErrorOccured, status=400)
         else:  # community_name was empty
             return HttpResponse(constCNnotProvided, status=400)
     return HttpResponse(constNotGet)
@@ -2058,10 +2103,10 @@ def get_users_pending_requests_to_community_view(request): # to pending the pend
                     })
 
                 logging.info("pending_requests to these communities for %s: %s",user.username , pending_requests_list)
-                return HttpResponse(json.dumps(pending_requests_list), content_type='application/json')
+                return HttpResponse(json.dumps(pending_requests_list), content_type=constAppJson)
             except Exception as e:
                 logging.error(e)
-                return HttpResponse("An error occurred", status=400)
+                return HttpResponse(constErrorOccured, status=400)
         else:  # community_name was empty
             return HttpResponse(constCNnotProvided, status=400)
     return HttpResponse(constNotGet)
@@ -2086,10 +2131,10 @@ def get_pending_invites_to_community_view(request):
                     })
 
                 logging.info("pending_requests_list: %s", pending_invites_list)
-                return HttpResponse(json.dumps(pending_invites_list), content_type='application/json')
+                return HttpResponse(json.dumps(pending_invites_list), content_type=constAppJson)
             except Exception as e:
                 logging.error(e)
-                return HttpResponse("An error occurred", status=400)
+                return HttpResponse(constErrorOccured, status=400)
         else:  # community_name was empty
             return HttpResponse(constCNnotProvided, status=400)
     return HttpResponse(constNotGet)
@@ -2117,10 +2162,10 @@ def get_users_pending_invites_to_community_view(request): # to pending the pendi
                     })
 
                 logging.info("pending_requests from these communities for %s: %s",user.username ,pending_invites_list)
-                return HttpResponse(json.dumps(pending_invites_list), content_type='application/json')
+                return HttpResponse(json.dumps(pending_invites_list), content_type=constAppJson)
             except Exception as e:
                 logging.error(e)
-                return HttpResponse("An error occurred", status=400)
+                return HttpResponse(constErrorOccured, status=400)
         else:  # community_name was empty
             return HttpResponse(constCNnotProvided, status=400)
     return HttpResponse(constNotGet)
@@ -2168,6 +2213,6 @@ def delete_user_from_community_view(request):
 
     return HttpResponse("NOT A POST", status=400)
 
-def serve_apple_site_association(request):
+def serve_apple_site_association():
     filepath = os.path.join(BASE_DIR.parent, 'apple-app-site-association')
-    return FileResponse(open(filepath, 'rb'), content_type='application/json')
+    return FileResponse(open(filepath, 'rb'), content_type=constAppJson)
