@@ -74,17 +74,18 @@ const SettingsScreen = ({ navigation }) => {
   };
 
   const sendAccountDeletionRequest = async () => {
-    const getCsrfToken = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/csrf-token/`);
-        return response.data.csrfToken;
-      } catch (error) {
-        console.error("Error retrieving CSRF token:", error);
-        throw new Error("CSRF token retrieval failed");
-      }
-    };
+    // const getCsrfToken = async () => {
+    //   try {
+    //     const response = await axios.get(`${API_URL}/csrf-token/`);
+    //     return response.data.csrfToken;
+    //   } catch (error) {
+    //     console.error("Error retrieving CSRF token:", error);
+    //     throw new Error("CSRF token retrieval failed");
+    //   }
+    // };
     try {
-      const csrfToken = await getCsrfToken();
+      // const csrfToken = await getCsrfToken();
+      const csrfToken = await Storage.getItem("@CSRF");
       const response = await axios.post(
         `${API_URL}/delete_user/`,
         {
@@ -123,17 +124,18 @@ const SettingsScreen = ({ navigation }) => {
   };
 
   const handleReportEmail = async (message) => {
-    const getCsrfToken = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/csrf-token/`);
-        return response.data.csrfToken;
-      } catch (error) {
-        console.error("Error retrieving CSRF token:", error);
-        throw new Error("CSRF token retrieval failed");
-      }
-    };
+    // const getCsrfToken = async () => {
+    //   try {
+    //     const response = await axios.get(`${API_URL}/csrf-token/`);
+    //     return response.data.csrfToken;
+    //   } catch (error) {
+    //     console.error("Error retrieving CSRF token:", error);
+    //     throw new Error("CSRF token retrieval failed");
+    //   }
+    // };
     try {
-      const csrfToken = await getCsrfToken();
+      // const csrfToken = await getCsrfToken();
+      const csrfToken = await Storage.getItem("@CSRF");
       const response = await axios.post(`${API_URL}/send_report_email/`,
         {
           username: username,

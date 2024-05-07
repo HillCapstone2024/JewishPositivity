@@ -118,18 +118,19 @@ const handleUpdateCommunity = async () => {
   console.log("id", community.community_id);
   console.log("new desc", community_desc);
   setErrorMessage(<ActivityIndicator />);
-  const getCsrfToken = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/csrf-token/`);
-      return response.data.csrfToken;
-    } catch (error) {
-      console.error("Error retrieving CSRF token:", error);
-      throw new Error("CSRF token retrieval failed");
-    }
-  };
+  // const getCsrfToken = async () => {
+  //   try {
+  //     const response = await axios.get(`${API_URL}/csrf-token/`);
+  //     return response.data.csrfToken;
+  //   } catch (error) {
+  //     console.error("Error retrieving CSRF token:", error);
+  //     throw new Error("CSRF token retrieval failed");
+  //   }
+  // };
 
   try {
-    const csrfToken = await getCsrfToken();
+    // const csrfToken = await getCsrfToken();
+    const csrfToken = await Storage.getItem("@CSRF");
     const requestData = {
       username: owner,
       new_community_name: community_name,
@@ -180,7 +181,8 @@ const navigateManageView = () => {
 
 const getCommunityMembers = async () => {
     try {
-    const csrfToken = await getCsrfToken();
+    // const csrfToken = await getCsrfToken();
+    const csrfToken = await Storage.getItem("@CSRF");
     const response = await axios.get(
         `${API_URL}/get_users_in_community/`,
         {
@@ -204,7 +206,8 @@ const getCommunityMembers = async () => {
     }
     console.log("getting profile pics for ", friends);
     try {
-      const csrfToken = await getCsrfToken();
+      // const csrfToken = await getCsrfToken();
+      const csrfToken = await Storage.getItem("@CSRF");
       const response = await axios.get(
         `${API_URL}/profile_pictures_view/`,
         {
@@ -221,15 +224,15 @@ const getCommunityMembers = async () => {
     }
   };
 
-  const getCsrfToken = async () => {
-    try {
-        const response = await axios.get(`${API_URL}/csrf-token/`);
-        return response.data.csrfToken;
-    } catch (error) {
-        console.error("Error retrieving CSRF token:", error);
-        throw new Error("CSRF token retrieval failed");
-    }
-    };
+  // const getCsrfToken = async () => {
+  //   try {
+  //       const response = await axios.get(`${API_URL}/csrf-token/`);
+  //       return response.data.csrfToken;
+  //   } catch (error) {
+  //       console.error("Error retrieving CSRF token:", error);
+  //       throw new Error("CSRF token retrieval failed");
+  //   }
+  //   };
     const handleUpdateCommunityPhoto = () => {
       Alert.alert("Media Type", "", [
         { text: "Camera Roll", onPress: () => pickMedia() },
@@ -302,7 +305,8 @@ const deleteUserFromCommunity = async (deleteUser) => {
     const deleteMember = async () => {
         console.log("deleting:", deleteUser);
         try {
-            const csrfToken = await getCsrfToken();
+            // const csrfToken = await getCsrfToken();
+            const csrfToken = await Storage.getItem("@CSRF");
             const response = await axios.post(`${API_URL}/delete_user_from_community/`, 
             {
                 username: deleteUser,

@@ -48,20 +48,21 @@ export default function ViewCheckIn({ checkin, modalVisible, onClose }) {
     }
   };
 
-    const getCsrfToken = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/csrf-token/`);
-        return response.data.csrfToken;
-      } catch (error) {
-        console.error("Error retrieving CSRF token:", error);
-        throw new Error("CSRF token retrieval failed");
-      }
-    };
+    // const getCsrfToken = async () => {
+    //   try {
+    //     const response = await axios.get(`${API_URL}/csrf-token/`);
+    //     return response.data.csrfToken;
+    //   } catch (error) {
+    //     console.error("Error retrieving CSRF token:", error);
+    //     throw new Error("CSRF token retrieval failed");
+    //   }
+    // };
 
     const handleGetVideo = async (checkin_id) => {
       console.log("getting video for check num:", checkin_id);
       try {
-        const csrfToken = await getCsrfToken();
+        // const csrfToken = await getCsrfToken();
+        const csrfToken = await Storage.getItem("@CSRF");
         const response = await axios.get(`${API_URL}/get_video_info/`, {
           params: {
             checkin_id: checkin_id,

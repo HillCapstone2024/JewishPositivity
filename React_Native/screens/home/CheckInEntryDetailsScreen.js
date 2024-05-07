@@ -36,20 +36,21 @@ const CheckInEntryDetailsScreen = ({ route, navigation }) => {
     return filename; // This is a URI that can be used in the app
   };
 
-  const getCsrfToken = async () => {
-    try {
-    const response = await axios.get(`${API_URL}/csrf-token/`);
-    return response.data.csrfToken;
-    } catch (error) {
-    console.error("Error retrieving CSRF token:", error);
-    throw new Error("CSRF token retrieval failed");
-    }
-  };
+  // const getCsrfToken = async () => {
+  //   try {
+  //   const response = await axios.get(`${API_URL}/csrf-token/`);
+  //   return response.data.csrfToken;
+  //   } catch (error) {
+  //   console.error("Error retrieving CSRF token:", error);
+  //   throw new Error("CSRF token retrieval failed");
+  //   }
+  // };
 
   const handleGetVideo = async (checkin_id) => {
     console.log("getting video for check num:", checkin_id);
     try {
-      const csrfToken = await getCsrfToken();
+      // const csrfToken = await getCsrfToken();
+      const csrfToken = await Storage.getItem("@CSRF");
       const response = await axios.get(`${API_URL}/get_video_info/`, {
         params: {
           checkin_id: checkin_id,
@@ -82,17 +83,18 @@ const CheckInEntryDetailsScreen = ({ route, navigation }) => {
 
   const onDelete = async() => {
     console.log("Deleting CheckIn Entry:", checkin_id);
-    const getCsrfToken = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/csrf-token/`);
-        return response.data.csrfToken;
-      } catch (error) {
-        console.error("Error retrieving CSRF token:", error);
-        throw new Error("CSRF token retrieval failed");
-      }
-    };
+    // const getCsrfToken = async () => {
+    //   try {
+    //     const response = await axios.get(`${API_URL}/csrf-token/`);
+    //     return response.data.csrfToken;
+    //   } catch (error) {
+    //     console.error("Error retrieving CSRF token:", error);
+    //     throw new Error("CSRF token retrieval failed");
+    //   }
+    // };
     try {
-      const csrfToken = await getCsrfToken();
+      // const csrfToken = await getCsrfToken();
+      const csrfToken = await Storage.getItem("@CSRF");
       const response = await axios.post(
         `${API_URL}/delete_checkin/`,
         {
@@ -124,7 +126,8 @@ const CheckInEntryDetailsScreen = ({ route, navigation }) => {
   handleGetEntries = async () => {
     console.log("Fetching CheckIn Entries");
     try {
-      const csrfToken = await getCsrfToken();
+      // const csrfToken = await getCsrfToken();
+      const csrfToken = await Storage.getItem("@CSRF");
       const response = await axios.get(`${API_URL}/get_checkin_info/`, {
         params: {
           username: username

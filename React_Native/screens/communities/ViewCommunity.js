@@ -67,21 +67,22 @@ export default function ViewCommunity({ route, navigation }) {
         setIsLoading(false);
     };
 
-    const getCsrfToken = async () => {
-    try {
-        const response = await axios.get(`${API_URL}/csrf-token/`);
-        return response.data.csrfToken;
-    } catch (error) {
-        console.error("Error retrieving CSRF token:", error);
-        throw new Error("CSRF token retrieval failed");
-    }
-    };
+    // const getCsrfToken = async () => {
+    // try {
+    //     const response = await axios.get(`${API_URL}/csrf-token/`);
+    //     return response.data.csrfToken;
+    // } catch (error) {
+    //     console.error("Error retrieving CSRF token:", error);
+    //     throw new Error("CSRF token retrieval failed");
+    // }
+    // };
 
     const handleLeave = () => {
 
         const sendLeaveRequest = async () => {
             try {
-                const csrfToken = await getCsrfToken();
+                // const csrfToken = await getCsrfToken();
+                const csrfToken = await Storage.getItem("@CSRF");
                 const response = await axios.post(
                 `${API_URL}/delete_user_from_community/`,
                 {
@@ -120,7 +121,8 @@ export default function ViewCommunity({ route, navigation }) {
 
     const getCommunityMembers = async () => {
         try {
-            const csrfToken = await getCsrfToken();
+            // const csrfToken = await getCsrfToken();
+            const csrfToken = await Storage.getItem("@CSRF");
             const response = await axios.get(
               `${API_URL}/get_users_in_community/`,
               {
@@ -144,7 +146,8 @@ export default function ViewCommunity({ route, navigation }) {
         }
         console.log("getting profile pics for ", friends);
         try {
-          const csrfToken = await getCsrfToken();
+          // const csrfToken = await getCsrfToken();
+          const csrfToken = await Storage.getItem("@CSRF");
           const response = await axios.get(
             `${API_URL}/profile_pictures_view/`,
             {
