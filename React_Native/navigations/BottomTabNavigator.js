@@ -13,6 +13,7 @@ import { faBoxArchive } from '@fortawesome/free-solid-svg-icons/faBoxArchive';
 import { faUsersLine } from '@fortawesome/free-solid-svg-icons/faUsersLine';
 
 import FriendFeed from "../screens/friends/FriendFeed";
+import CommunityFeed from "../screens/communities/CommunityFeed";
 import Archive from "../screens/home/Archive";
 import CheckInModal from "../screens/home/CheckInModal";
 import CheckIn from "../screens/home/CheckIn";

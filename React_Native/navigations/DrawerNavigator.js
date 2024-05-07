@@ -34,6 +34,7 @@ import Badges from "../screens/home/Badges.js";
 import Friends from "../screens/friends/FriendsList.js";
 import FriendFeed from "../screens/friends/FriendFeed.js";
 import FriendTab from "./FriendTab.js";
+import FeedTab from "./FeedTab.js";
 import * as Haptics from "expo-haptics";
 import ImageViewer from "../tools/ImageViewer.js";
 import FriendsParent from "../screens/friends/FriendsParent.js";
