@@ -362,15 +362,13 @@ return (
     <View style={styles.container}>
       {/* displaying community info */}
       <View style={styles.communityInfoSection}>
-      <TouchableOpacity onPress={handleUpdateCommunityPhoto} >
+        <TouchableWithoutFeedback onPress={handleUpdateCommunityPhoto}>
         <Image
           source={{ uri: `data:Image/jpeg;base64,${community_photo}` }}
           style={styles.communityPicture}
         />
-        <View style={styles.cameraIcon}>
-            <Ionicons name="camera" size={24} color="black" />
-        </View>
-        </TouchableOpacity>
+        </TouchableWithoutFeedback>
+        
         <View style={styles.belowPicture}>
         <View style={styles.topBar}>
             <View style={{ flexDirection: "row", width: "80%" }}>
@@ -431,7 +429,7 @@ return (
             <Text style={styles.communityInfoText}>About:</Text>
             <TouchableOpacity onPress={handlePressBio}>
               <TextInput
-                style={styles.communityInfoText}
+                style={styles.input}
                 placeholder="Community Description"
                 numberOfLines={expanded ? undefined : 2}
                 onChangeText={(text) => setCommunityDesc(text)}
@@ -531,12 +529,17 @@ const styles = StyleSheet.create({
       community_nameContainer: {
         justifyContent: "center",
         alignItems: "center",
+        height: 40,
+        borderStyle: "solid",
+        paddingHorizontal: 10,
       },
       community_name: {
         fontSize: 16,
         fontWeight: "bold",
         marginTop: 10,
         color: "#4A90E2",
+        borderBottomColor: "#e8bd25",
+        borderBottomWidth: 2,
       },
       belowPicture: {
         backgroundColor: "#ececf6",
@@ -675,4 +678,13 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         zIndex: 1,
       },
+      input: {
+        //width: "100%",
+        height: 40,
+        borderStyle: "solid",
+        borderBottomColor: "#e8bd25",
+        borderBottomWidth: 2,
+        marginBottom: 20,
+        paddingHorizontal: 10,
+    },
 });
