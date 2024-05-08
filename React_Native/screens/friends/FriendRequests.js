@@ -106,19 +106,20 @@ const FriendRequests = ({navigation, onSwitch}) => {
     }).start();
   };
 
-  const getCsrfToken = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/csrf-token/`);
-      return response.data.csrfToken;
-    } catch (error) {
-      console.error("Error retrieving CSRF token:", error);
-      throw new Error("CSRF token retrieval failed");
-    }
-  };
+  // const getCsrfToken = async () => {
+  //   try {
+  //     const response = await axios.get(`${API_URL}/csrf-token/`);
+  //     return response.data.csrfToken;
+  //   } catch (error) {
+  //     console.error("Error retrieving CSRF token:", error);
+  //     throw new Error("CSRF token retrieval failed");
+  //   }
+  // };
 
   const getFriends = async (usernameProp) => {
     try {
-      const csrfToken = await getCsrfToken();
+      // const csrfToken = await getCsrfToken();
+      const csrfToken = await Storage.getItem("@CSRF");
       const response = await axios.get(`${API_URL}/get_friend_info/`, {
         params: {
           username: usernameProp,
@@ -178,7 +179,8 @@ const FriendRequests = ({navigation, onSwitch}) => {
     }
     // console.log("getting profile pics for ", friends);
     try {
-      const csrfToken = await getCsrfToken();
+      // const csrfToken = await getCsrfToken();
+      const csrfToken = await Storage.getItem("@CSRF");
       const response = await axios.get(`${API_URL}/profile_pictures_view/`, {
         params: {
           username_list: friends,
@@ -219,7 +221,8 @@ const FriendRequests = ({navigation, onSwitch}) => {
       console.log("Declining:", friendUsername);
       console.log("From:", username);
       try {
-        const csrfToken = await getCsrfToken();
+        // const csrfToken = await getCsrfToken();
+        const csrfToken = await Storage.getItem("@CSRF");
         //need a new view that handles declining requests
         const response = await axios.post(`${API_URL}/delete_friend/`, {
             username: username,
@@ -245,7 +248,8 @@ const FriendRequests = ({navigation, onSwitch}) => {
   const handleAcceptRequest = async (friendUsername) => {
     console.log("Adding: ", friendUsername);
     try {
-      const csrfToken = await getCsrfToken();
+      // const csrfToken = await getCsrfToken();
+      const csrfToken = await Storage.getItem("@CSRF");
       const response = await axios.post(`${API_URL}/add_friend/`, {
         user1: username,
         user2: friendUsername,

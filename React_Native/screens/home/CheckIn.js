@@ -140,15 +140,15 @@ function parseAndFormatDate(dateStr) {
     return Buffer.from(text, "utf8").toString("base64");
   };
 
-  const getCsrfToken = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/csrf-token/`);
-      return response.data.csrfToken;
-    } catch (error) {
-      console.error("Error retrieving CSRF token:", error);
-      throw new Error("CSRF token retrieval failed");
-    }
-  };
+  // const getCsrfToken = async () => {
+  //   try {
+  //     const response = await axios.get(`${API_URL}/csrf-token/`);
+  //     return response.data.csrfToken;
+  //   } catch (error) {
+  //     console.error("Error retrieving CSRF token:", error);
+  //     throw new Error("CSRF token retrieval failed");
+  //   }
+  // };
 
   const submitCheckIn = async () => {
     console.log('formatted date: ',formattedDateTime);
@@ -162,7 +162,8 @@ function parseAndFormatDate(dateStr) {
     }
     console.log("check in type: ", mediaType);
     try {
-      const csrfToken = await getCsrfToken();
+      // const csrfToken = await getCsrfToken();
+      const csrfToken = await Storage.getItem("@CSRF");
       const response = await axios.post(
         `${API_URL}/check-in/`,
         {

@@ -94,21 +94,22 @@ const Times = ({ navigation }) => {
     handleTimeChange(timeOne, timeTwo, time);
   }
 
-  const getCsrfToken = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/csrf-token/`);
-      return response.data.csrfToken;
-    } catch (error) {
-      console.error("Error retrieving CSRF token:", error);
-      throw new Error("CSRF token retrieval failed");
-    }
-  };
+  // const getCsrfToken = async () => {
+  //   try {
+  //     const response = await axios.get(`${API_URL}/csrf-token/`);
+  //     return response.data.csrfToken;
+  //   } catch (error) {
+  //     console.error("Error retrieving CSRF token:", error);
+  //     throw new Error("CSRF token retrieval failed");
+  //   }
+  // };
 
   //GET
   const getIntialTimes = async () => {
     console.log('username: ', username);
     try {
-      const csrfToken = await getCsrfToken();
+      // const csrfToken = await getCsrfToken();
+      const csrfToken = await Storage.getItem("@CSRF");
       const response = await axios.get(`${API_URL}/get_times/`, {
         params: {
           username: username,
@@ -136,7 +137,8 @@ const Times = ({ navigation }) => {
     //console.log("time1: " + timeOne.toTimeString().split(' ')[0] + " time2: " + timeTwo.toTimeString().split(' ')[0] + " time3: " + timeThree.toTimeString().split(' ')[0])
 
     try {
-      const csrfToken = await getCsrfToken();
+      // const csrfToken = await getCsrfToken();
+      const csrfToken = await Storage.getItem("@CSRF");
       const response = await axios.post(
         `${API_URL}/update-times/`,
         {

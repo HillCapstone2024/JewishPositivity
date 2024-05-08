@@ -83,15 +83,15 @@ export default function Archive({ navigation }) {
     }
   }, [refreshing]); // Ensure dependencies are correctly listed
 
-  const getCsrfToken = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/csrf-token/`);
-      return response.data.csrfToken;
-    } catch (error) {
-      console.error("Error retrieving CSRF token:", error);
-      throw new Error("CSRF token retrieval failed");
-    }
-  };
+  // const getCsrfToken = async () => {
+  //   try {
+  //     const response = await axios.get(`${API_URL}/csrf-token/`);
+  //     return response.data.csrfToken;
+  //   } catch (error) {
+  //     console.error("Error retrieving CSRF token:", error);
+  //     throw new Error("CSRF token retrieval failed");
+  //   }
+  // };
 
   const saveBase64Video = async (base64String, checkin_id) => {
     console.log("reached file function");
@@ -106,7 +106,8 @@ export default function Archive({ navigation }) {
   const handleGetVideo = async (checkin_id) => {
     console.log("getting video for check num:", checkin_id);
     try {
-      const csrfToken = await getCsrfToken();
+      // const csrfToken = await getCsrfToken();
+      const csrfToken = await Storage.getItem("@CSRF");
       const response = await axios.get(`${API_URL}/get_video_info/`, {
         params: {
           checkin_id: checkin_id,
@@ -184,7 +185,8 @@ export default function Archive({ navigation }) {
   const handleGetEntries = async (usernameProp) => {
     console.log("Fetching Check-in Moments");
     try {
-      const csrfToken = await getCsrfToken();
+      // const csrfToken = await getCsrfToken();
+      const csrfToken = await Storage.getItem("@CSRF");
       const response = await axios.get(`${API_URL}/get_checkin_info/`, {
         params: {
           username: usernameProp,

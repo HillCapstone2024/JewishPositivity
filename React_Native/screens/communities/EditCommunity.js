@@ -53,6 +53,8 @@ export default function EditCommunity({ route, navigation }) {
 
     const [updateCommunityPicture, setUpdateCommunityPicture] = useState(false);
 
+    const [membersToDelete, setMembersToDelete] = useState([]);
+
     const owner = community.owner_id;
     const date_created = community.date_created;
     const [loadingSubmit, setLoadingSubmit] = useState(false);
@@ -79,7 +81,7 @@ const initializeData = async () => {
     setMembers(retrievedProfilepics);
     setNumMembers(membersList.length);
     setUsername(storedUsername);
-    console.log('members', members.data);
+    //console.log('members', members.data);
     setIsLoading(false);
 };
 
@@ -118,18 +120,19 @@ const handleUpdateCommunity = async () => {
   console.log("id", community.community_id);
   console.log("new desc", community_desc);
   setErrorMessage(<ActivityIndicator />);
-  const getCsrfToken = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/csrf-token/`);
-      return response.data.csrfToken;
-    } catch (error) {
-      console.error("Error retrieving CSRF token:", error);
-      throw new Error("CSRF token retrieval failed");
-    }
-  };
+  // const getCsrfToken = async () => {
+  //   try {
+  //     const response = await axios.get(`${API_URL}/csrf-token/`);
+  //     return response.data.csrfToken;
+  //   } catch (error) {
+  //     console.error("Error retrieving CSRF token:", error);
+  //     throw new Error("CSRF token retrieval failed");
+  //   }
+  // };
 
   try {
-    const csrfToken = await getCsrfToken();
+    // const csrfToken = await getCsrfToken();
+    const csrfToken = await Storage.getItem("@CSRF");
     const requestData = {
       username: owner,
       new_community_name: community_name,
@@ -153,6 +156,11 @@ const handleUpdateCommunity = async () => {
         withCredentials: true,
       }
     );
+
+    for(let member of membersToDelete){
+      deleteUserFromCommunity(member);
+    }
+
     console.log("update community response:", response.data);
     setLoadingSubmit(false);
     navigateManageView();
@@ -180,7 +188,8 @@ const navigateManageView = () => {
 
 const getCommunityMembers = async () => {
     try {
-    const csrfToken = await getCsrfToken();
+    // const csrfToken = await getCsrfToken();
+    const csrfToken = await Storage.getItem("@CSRF");
     const response = await axios.get(
         `${API_URL}/get_users_in_community/`,
         {
@@ -204,7 +213,8 @@ const getCommunityMembers = async () => {
     }
     console.log("getting profile pics for ", friends);
     try {
-      const csrfToken = await getCsrfToken();
+      // const csrfToken = await getCsrfToken();
+      const csrfToken = await Storage.getItem("@CSRF");
       const response = await axios.get(
         `${API_URL}/profile_pictures_view/`,
         {
@@ -221,15 +231,15 @@ const getCommunityMembers = async () => {
     }
   };
 
-  const getCsrfToken = async () => {
-    try {
-        const response = await axios.get(`${API_URL}/csrf-token/`);
-        return response.data.csrfToken;
-    } catch (error) {
-        console.error("Error retrieving CSRF token:", error);
-        throw new Error("CSRF token retrieval failed");
-    }
-    };
+  // const getCsrfToken = async () => {
+  //   try {
+  //       const response = await axios.get(`${API_URL}/csrf-token/`);
+  //       return response.data.csrfToken;
+  //   } catch (error) {
+  //       console.error("Error retrieving CSRF token:", error);
+  //       throw new Error("CSRF token retrieval failed");
+  //   }
+  //   };
     const handleUpdateCommunityPhoto = () => {
       Alert.alert("Media Type", "", [
         { text: "Camera Roll", onPress: () => pickMedia() },
@@ -279,54 +289,60 @@ const getCommunityMembers = async () => {
 }
 
 const deleteUserFromCommunity = async (deleteUser) => {
-    //pass in username, and community name
+  console.log("deleting:", deleteUser);
+  try {
+      // const csrfToken = await getCsrfToken();
+            const csrfToken = await Storage.getItem("@CSRF");
+      const response = await axios.post(`${API_URL}/delete_user_from_community/`, 
+      {
+          username: deleteUser,
+          community_name: community_name,
+      },
+      {
+          headers:
+          {
+              "X-CSRFToken": csrfToken,
+              "Content-Type": "application/json",
+          },
+          withCredentials: true,
+      });
+      console.log("response:", response);
+      reloadData()
+  } catch(error) {
+      console.log("error deleting community", error);
+  }
+}
+
+const pressDeleteMember = async (deleteUser) => {
+  //pass in username, and community name
     //view ''delete_user_from_community/'
     Alert.alert(
-        `Are you sure you want to delete ${deleteUser} from this community?`,
-        `${deleteUser}'s reflections will no longer be viewable in the community tab and they may need an invite to rejoin.`,
-        [
-            {
-                text: "Cancel",
-                onPress: () => console.log("Cancel Pressed"),
-                style: styles.alertCancelText,
-            },
-            {
-                text: "Delete",
-                onPress: () => deleteMember(),
-                style: styles.alertDeleteText,
-            }
-        ]
-    );
+      `Are you sure you want to delete ${deleteUser} from this community?`,
+      `${deleteUser}'s reflections will no longer be viewable in the community tab and they may need an invite to rejoin.`,
+      [
+          {
+              text: "Cancel",
+              onPress: () => console.log("Cancel Pressed"),
+              style: styles.alertCancelText,
+          },
+          {
+              text: "Delete",
+              onPress: () => addDeleteMember(),
+              style: styles.alertDeleteText,
+          }
+      ]
+  );
 
-
-    const deleteMember = async () => {
-        console.log("deleting:", deleteUser);
-        try {
-            const csrfToken = await getCsrfToken();
-            const response = await axios.post(`${API_URL}/delete_user_from_community/`, 
-            {
-                username: deleteUser,
-                community_name: community_name,
-            },
-            {
-                headers:
-                {
-                    "X-CSRFToken": csrfToken,
-                    "Content-Type": "application/json",
-                },
-                withCredentials: true,
-            });
-            console.log("response:", response);
-            reloadData()
-        } catch(error) {
-            console.log("error deleting community", error);
-        }
-    }
-};
+  const addDeleteMember = () => {
+    var deleteMembers = membersToDelete;
+    deleteMembers.push(deleteUser);
+    setMembersToDelete(deleteMembers);
+  }
+}
 
 const renderItem = ({ item }) => {
   // Check if the user is already a friend
-
+  let isOwner = item.username == username;
   return (
     <TouchableOpacity>
       <View style={styles.row}>
@@ -347,12 +363,20 @@ const renderItem = ({ item }) => {
               {item.username}
             </Text>
           </View>
-          <View>
-              <TouchableOpacity onPress={() => deleteUserFromCommunity(item.username)}>
-                <Ionicons name={"close"} size={20} color="#4A90E2" />
-              </TouchableOpacity>
-            </View>
+          <View style={styles.msgContainer}>
+              <Text style={styles.msgTxt}>@{item.username}</Text>
+          </View>
         </View>
+        {isOwner ?(
+          <Text style={styles.sectionTitle}>Owner</Text>
+        ) : (
+        <View style={styles.deleteFriendButton}>
+          <TouchableOpacity onPress={() => pressDeleteMember(item.username)}>
+            <Ionicons name={"close"} size={20} color="#4A90E2" />
+          </TouchableOpacity>
+        </View>
+        )
+        }
       </View>
     </TouchableOpacity>
   );
@@ -362,15 +386,13 @@ return (
     <View style={styles.container}>
       {/* displaying community info */}
       <View style={styles.communityInfoSection}>
-      <TouchableOpacity onPress={handleUpdateCommunityPhoto} >
+        <TouchableWithoutFeedback onPress={handleUpdateCommunityPhoto}>
         <Image
           source={{ uri: `data:Image/jpeg;base64,${community_photo}` }}
           style={styles.communityPicture}
         />
-        <View style={styles.cameraIcon}>
-            <Ionicons name="camera" size={24} color="black" />
-        </View>
-        </TouchableOpacity>
+        </TouchableWithoutFeedback>
+        
         <View style={styles.belowPicture}>
         <View style={styles.topBar}>
             <View style={{ flexDirection: "row", width: "80%" }}>
@@ -431,7 +453,7 @@ return (
             <Text style={styles.communityInfoText}>About:</Text>
             <TouchableOpacity onPress={handlePressBio}>
               <TextInput
-                style={styles.communityInfoText}
+                style={styles.input}
                 placeholder="Community Description"
                 numberOfLines={expanded ? undefined : 2}
                 onChangeText={(text) => setCommunityDesc(text)}
@@ -531,12 +553,17 @@ const styles = StyleSheet.create({
       community_nameContainer: {
         justifyContent: "center",
         alignItems: "center",
+        height: 40,
+        borderStyle: "solid",
+        paddingHorizontal: 10,
       },
       community_name: {
         fontSize: 16,
         fontWeight: "bold",
         marginTop: 10,
         color: "#4A90E2",
+        borderBottomColor: "#e8bd25",
+        borderBottomWidth: 2,
       },
       belowPicture: {
         backgroundColor: "#ececf6",
@@ -674,5 +701,34 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         zIndex: 1,
+      },
+      input: {
+        //width: "100%",
+        height: 40,
+        borderStyle: "solid",
+        borderBottomColor: "#e8bd25",
+        borderBottomWidth: 2,
+        marginBottom: 20,
+        paddingHorizontal: 10,
+    },
+      deleteFriendButton: {
+        flexDirection: "row",
+        justifyContent: "center",
+        textAlign: "right",
+        marginLeft: 60,
+      },
+      msgContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        // backgroundColor: "red",
+      },
+      msgTxt: {
+        fontWeight: "400",
+        color: "#4A90E2",
+        fontSize: 12,
+        marginLeft: 15,
+      },
+      alertCancelText: {
+        color: "#4A90E2",
       },
 });

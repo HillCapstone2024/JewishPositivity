@@ -61,7 +61,8 @@ const AddFriends = ({navigation, onSwitch}) => {
 
     const getFriends = async (usernameProp) => {
       try {
-        const csrfToken = await getCsrfToken();
+        // const csrfToken = await getCsrfToken();
+        const csrfToken = await Storage.getItem("@CSRF");
         const response = await axios.get(`${API_URL}/get_friend_info/`, {
           params: {
             username: usernameProp,
@@ -116,15 +117,15 @@ const AddFriends = ({navigation, onSwitch}) => {
       }
     };
 
-    const getCsrfToken = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/csrf-token/`);
-        return response.data.csrfToken;
-      } catch (error) {
-        console.error("Error retrieving CSRF token:", error);
-        throw new Error("CSRF token retrieval failed");
-      }
-    };
+    // const getCsrfToken = async () => {
+    //   try {
+    //     const response = await axios.get(`${API_URL}/csrf-token/`);
+    //     return response.data.csrfToken;
+    //   } catch (error) {
+    //     console.error("Error retrieving CSRF token:", error);
+    //     throw new Error("CSRF token retrieval failed");
+    //   }
+    // };
 
     const searchUsers = async (searchText) => {
       console.log('searchig for ...', searchText)
@@ -145,7 +146,8 @@ const AddFriends = ({navigation, onSwitch}) => {
       //add friend logic below
       console.log("Adding: ", friendUsername);
       try {
-        const csrfToken = await getCsrfToken();
+        // const csrfToken = await getCsrfToken();
+        const csrfToken = await Storage.getItem("@CSRF");
         const response = await axios.post(`${API_URL}/add_friend/`, {
           user1: username,
           user2: friendUsername,

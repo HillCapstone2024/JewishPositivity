@@ -57,7 +57,8 @@ const FriendFeed = () => {
       setUsername(storedUsername);
       console.log('username is', storedUsername);
 
-      const csrfToken = await getCsrfToken();
+      // const csrfToken = await getCsrfToken();
+      const csrfToken = await Storage.getItem("@CSRF");
       const friendsList = await fetchFriendsList(storedUsername, csrfToken);
       console.log('friends list', friendsList);
       // if (friendsList.length > 0) {
@@ -131,19 +132,20 @@ const FriendFeed = () => {
     setUsername(storedUsername || "No username");
   };
 
-  const getCsrfToken = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/csrf-token/`);
-      return response.data.csrfToken;
-    } catch (error) {
-      console.error("Error retrieving CSRF token:", error);
-      throw new Error("CSRF token retrieval failed");
-    }
-  };
+  // const getCsrfToken = async () => {
+  //   try {
+  //     const response = await axios.get(`${API_URL}/csrf-token/`);
+  //     return response.data.csrfToken;
+  //   } catch (error) {
+  //     console.error("Error retrieving CSRF token:", error);
+  //     throw new Error("CSRF token retrieval failed");
+  //   }
+  // };
 
   const fetchFriendsList = async (username) => {
     try {
-      const csrfToken = await getCsrfToken();
+      // const csrfToken = await getCsrfToken();
+      const csrfToken = await Storage.getItem("@CSRF");
       const response = await axios.get(`${API_URL}/get_friend_info/`, {
         params: {
           username: username,
@@ -166,7 +168,8 @@ const FriendFeed = () => {
       return [];
     }
     try {
-      const csrfToken = await getCsrfToken();
+      // const csrfToken = await getCsrfToken();
+      const csrfToken = await Storage.getItem("@CSRF");
       const response = await axios.get(`${API_URL}/get_todays_checkin_info/`, {
         params: {
           username: friends,
@@ -185,7 +188,8 @@ const FriendFeed = () => {
   const handleGetVideo = async (checkin_id) => {
     console.log("getting video for check num:", checkin_id);
     try {
-      const csrfToken = await getCsrfToken();
+      // const csrfToken = await getCsrfToken();
+      const csrfToken = await Storage.getItem("@CSRF");
       const response = await axios.get(`${API_URL}/get_video_info/`, {
         params: {
           checkin_id: checkin_id,
@@ -216,7 +220,8 @@ const FriendFeed = () => {
     };
     console.log("getting profile pics for ", friends);
     try {
-      const csrfToken = await getCsrfToken();
+      // const csrfToken = await getCsrfToken();
+      const csrfToken = await Storage.getItem("@CSRF");
       const response = await axios.get(`${API_URL}/profile_pictures_view/`, {
         params: {
           username_list: friends,

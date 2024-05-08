@@ -100,18 +100,19 @@ const EditProfile = ({ navigation, onSwitch }) => {
   const handleUpdateUser = async () => {
     setLoadingSubmit(true);
     setErrorMessage(<ActivityIndicator />);
-    const getCsrfToken = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/csrf-token/`);
-        return response.data.csrfToken;
-      } catch (error) {
-        console.error("Error retrieving CSRF token:", error);
-        throw new Error("CSRF token retrieval failed");
-      }
-    };
+    // const getCsrfToken = async () => {
+    //   try {
+    //     const response = await axios.get(`${API_URL}/csrf-token/`);
+    //     return response.data.csrfToken;
+    //   } catch (error) {
+    //     console.error("Error retrieving CSRF token:", error);
+    //     throw new Error("CSRF token retrieval failed");
+    //   }
+    // };
 
     try {
-      const csrfToken = await getCsrfToken();
+      // const csrfToken = await getCsrfToken();
+      const csrfToken = await Storage.getItem("@CSRF");
       const requestData = {
         username: userInfo.originalUsername,
         newusername: userInfo.username,
