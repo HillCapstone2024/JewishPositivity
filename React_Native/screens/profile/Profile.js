@@ -9,8 +9,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import IP_ADDRESS from "../../ip.js";
 import makeThemeStyle from '../../tools/Theme.js';
+import Badges from "../home/Badges.js";
 
- 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
 
@@ -70,92 +70,84 @@ const UserProfile = ({ navigation, onSwitch }) => {
   }, []);
 
   return (
-    <View
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={[styles.container, theme["background"]]}
-    >
-     <View style={styles.topBar}>
-        <View style={styles.buttonContainer}>
-        <TouchableOpacity
-            style={styles.submitButton}
-            onPress={navigateEdit}
-        >
+    <View style={styles.overallContainer}>
+      <View style={styles.topBar}>
+        <TouchableOpacity style={styles.submitButton} onPress={navigateEdit}>
           <Text style={styles.submitText}>Edit Profile</Text>
-          </TouchableOpacity>
-        </View>
-  </View> 
-    <View style={styles.profilePicContainer}>
-      <Image 
-        style={styles.profilePic}
-        source={{uri: `data:image/jpeg;base64,${userInfo?.profilePicture}`,}}
-        />
-
+        </TouchableOpacity>
       </View>
-        {<Text style={styles.attribute} >First Name:</Text>}
-        {<Text style={[styles.info, theme["color"]]} testID="firstnameInput">{userInfo.fname} </Text>}
-        {<Text style={styles.attribute} >Last Name:</Text>}
-        {<Text style={[styles.info, theme["color"]]} testID="lastnameInput">{userInfo.lname} </Text>}
-        {<Text style={styles.attribute} >Username:</Text>}
-        {<Text style={[styles.info, theme["color"]]} testID="usernameInput">{userInfo.username}</Text>}
-        {<Text style={styles.attribute} >Email:</Text>}
-        {<Text style={[styles.info, theme["color"]]} testID="emailInput">{userInfo.email} </Text>}
-        {/* <TouchableOpacity style={styles.button} onPress={navigateEdit}>
-              <Text style={styles.buttonText}>Edit Profile</Text>
-        </TouchableOpacity> */}
+      <View style={styles.profilePicContainer}>
+        <Image
+          style={styles.profilePic}
+          source={{ uri: `data:image/jpeg;base64,${userInfo?.profilePicture}` }}
+        />
+      </View>
+      <View style={styles.userInfoContainer}>
+        <Text style={styles.info} testID="nameInput">
+          @{userInfo.username}
+        </Text>
+        <View style={styles.userInfoContainerLower}>
+          <View style={{ flexDirection: "row" }}>
+            <Text style={styles.sectionTitle}> name:</Text>
+            <Text style={styles.info} testID="usernameInput">
+              {userInfo.fname} {userInfo.lname}
+            </Text>
+          </View>
+          <View style={{ flexDirection: "row" }}>
+            <Text style={styles.sectionTitle}> email:</Text>
+            <Text style={styles.info} testID="usernameInput">
+              {userInfo.email}
+            </Text>
+          </View>
+          <Badges />
+        </View>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  overallContainer: {
     flex: 1,
     //justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    paddingTop: 20,
+    backgroundColor: "#4A90E2",
+    // position: "absolute",
+  },
+  userInfoContainer: {
+    marginTop: -80,
+    paddingTop: 90,
+    paddingHorizontal: 20,
+    backgroundColor: "#ececf6",
+    width: "100%",
+    // height: "100%",
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
+    alignItems: "center",
+    zIndex: -1,
+  },
+  userInfoContainerLower: {
+    marginTop: 20,
+    // backgroundColor: "white",
+    width: "100%",
+    height: "100%",
   },
   profilePic: {
     width: 150,
     height: 150,
     borderRadius: 75,
-    marginBottom: 20,
-    borderWidth: 2,
-    borderColor: "#4A90E2", 
-  },
-  attribute: {
-    fontSize: 16,
-    width: '80%',
+    // marginBottom: 20,
+    zIndex: 3,
+    elevation: 1,
+    // borderWidth: 2,
+    // borderColor: "#4A90E2",
   },
   info: {
     fontSize: 16,
-    //marginBottom: 10,
-    //shadowColor: 'rbga(3, 138, 255, 1)',
-    borderColor: '#4A90E2',
-    borderWidth: 2,
-    borderRadius: 15,
-    padding: 16,
-    fontSize: 16,
-    width: '80%',
-    // backgroundColor: '#f9f9f9',
-    // padding: 20,
-    margin: 10,
-    // shadowOpacity: 0.1,
-    // shadowRadius: 10,
-    // elevation: 5,
-    //borderColor: 'rbg(3, 138, 255)', 
+    // color: "#4A90E2",
   },
-  button: {
-    backgroundColor: '#4A90E2',
-    paddingVertical: 10,
-    paddingHorizontal: 50,
-    marginTop: 10,
-    marginHorizontal: 5,
-    borderRadius: 5,
-    shadowColor: "black",
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
-    shadowOpacity: 0.16,
-    alignItems: "center",
-  },
+
   buttonText: {
     color: "white",
     fontSize: 16,
@@ -163,33 +155,37 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    backgroundColor: "#4A90E2", 
+    backgroundColor: "#4A90E2",
   },
   topBar: {
-    flexDirection: "row",
-    marginTop: 5,
-    //marginRight: 15,
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    alignItems: 'flex-end',
-    flex: 1,
-  },
-  buttonContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    fontSize: 19,
+    alignItems: "flex-end",
+    width: "100%",
   },
   submitButton: {
     marginRight: 20,
-    justifyContent: 'flex-end',
+    justifyContent: "flex-end",
   },
   submitText: {
-    color: "#4A90E2",
+    color: "white",
     fontSize: 19,
+  },
+  sectionContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  sectionTitle: {
+    // paddingVertical: 12,
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#4A90E2",
+    textTransform: "uppercase",
+    letterSpacing: 1.1,
+  },
+  horizontalLine: {
+    flex: 1,
+    height: 1.25,
+    backgroundColor: "#9e9e9e",
+    marginLeft: 8, // Adjust spacing between title and line
   },
 });
 
