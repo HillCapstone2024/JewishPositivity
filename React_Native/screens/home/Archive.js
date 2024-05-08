@@ -342,7 +342,7 @@ export default function Archive({ navigation }) {
         </View>
       ) : (
         <View>
-          <View style={styles.searchBarContainer}>
+          {/* <View style={styles.searchBarContainer}>
             <SearchBar
               placeholder="Search..."
               inputStyle={{ backgroundColor: "#ffffff", color: "black" }}
@@ -373,12 +373,6 @@ export default function Archive({ navigation }) {
                   >
                     <Text>Sort by Oldest to Newest</Text>
                   </Pressable>
-                  {/* <Pressable onPress={() => applyFilter("Sort by Most Recent Moment Type")} style={styles.filterOption}>
-                <Text>Sort by Most Recent Moment Type</Text>
-              </Pressable>
-              <Pressable onPress={() => applyFilter("Sort by Least Recent Moment Type")} style={styles.filterOption}>
-                <Text>Sort by Least Recent Moment Type</Text>
-              </Pressable> */}
                 </View>
               </View>
             </Modal>
@@ -399,7 +393,7 @@ export default function Archive({ navigation }) {
                 style={styles.refreshIcon}
               />
             </TouchableOpacity>
-          </View>
+          </View> */}
 
           <ScrollView
             contentContainerStyle={styles.scrollViewContent}
