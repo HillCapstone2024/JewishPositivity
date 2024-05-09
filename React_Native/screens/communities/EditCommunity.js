@@ -40,6 +40,7 @@ export default function EditCommunity({ route, navigation }) {
     const { community } = route.params;
     //const community_name = community.community_name;
     const [community_name, setCommunityName] = useState(community.community_name);
+    const [refreshing, setRefreshing] = useState(false);
 
     const original_community_name = community.community_name; //store name before user changes
 
@@ -52,8 +53,6 @@ export default function EditCommunity({ route, navigation }) {
     const [community_privacy, setCommunityPrivacy] = useState(community.community_privacy);
 
     const [updateCommunityPicture, setUpdateCommunityPicture] = useState(false);
-
-    const [membersToDelete, setMembersToDelete] = useState([]);
 
     const owner = community.owner_id;
     const date_created = community.date_created;
@@ -86,13 +85,11 @@ const initializeData = async () => {
 };
 
 const reloadData = async () => {
-  setIsLoading(true);
   let membersList = await getCommunityMembers();
   membersList = membersList.map((user) => user.username);
   const retrievedProfilepics = await fetchProfilePics(membersList);
   setMembers(retrievedProfilepics);
   setNumMembers(membersList.length);
-  setIsLoading(false);
 };
 
 async function readFileAsBase64(uri) {
@@ -197,10 +194,6 @@ const handleUpdateCommunity = async () => {
         withCredentials: true,
       }
     );
-
-    for(let member of membersToDelete){
-      deleteUserFromCommunity(member);
-    }
 
     console.log("update community response:", response.data);
     setLoadingSubmit(false);
@@ -329,31 +322,6 @@ const getCommunityMembers = async () => {
     Alert.alert("Privacy Setting", 'When the privacy setting is set to on, users may only join via request or invite.', [{ text: 'Ok', style: 'default' }])
 }
 
-const deleteUserFromCommunity = async (deleteUser) => {
-  console.log("deleting:", deleteUser);
-  try {
-      // const csrfToken = await getCsrfToken();
-            const csrfToken = await Storage.getItem("@CSRF");
-      const response = await axios.post(`${API_URL}/delete_user_from_community/`, 
-      {
-          username: deleteUser,
-          community_name: community_name,
-      },
-      {
-          headers:
-          {
-              "X-CSRFToken": csrfToken,
-              "Content-Type": "application/json",
-          },
-          withCredentials: true,
-      });
-      console.log("response:", response);
-      reloadData()
-  } catch(error) {
-      console.log("error deleting community", error);
-  }
-}
-
 const pressDeleteMember = async (deleteUser) => {
   //pass in username, and community name
     //view ''delete_user_from_community/'
@@ -368,16 +336,35 @@ const pressDeleteMember = async (deleteUser) => {
           },
           {
               text: "Delete",
-              onPress: () => addDeleteMember(),
+              onPress: () => deleteUserFromCommunity(),
               style: styles.alertDeleteText,
           }
       ]
   );
 
-  const addDeleteMember = () => {
-    var deleteMembers = membersToDelete;
-    deleteMembers.push(deleteUser);
-    setMembersToDelete(deleteMembers);
+  const deleteUserFromCommunity = async () => {
+    console.log("deleting:", deleteUser);
+    try {
+        // const csrfToken = await getCsrfToken();
+        const csrfToken = await Storage.getItem("@CSRF");
+        const response = await axios.post(`${API_URL}/delete_user_from_community/`, 
+        {
+            username: deleteUser,
+            community_name: community_name,
+        },
+        {
+            headers:
+            {
+                "X-CSRFToken": csrfToken,
+                "Content-Type": "application/json",
+            },
+            withCredentials: true,
+        });
+        console.log("response:", response);
+        reloadData()
+    } catch(error) {
+        console.log("error deleting community", error);
+    }
   }
 }
 
@@ -416,8 +403,7 @@ const renderItem = ({ item }) => {
             <Ionicons name={"close"} size={20} color="#4A90E2" />
           </TouchableOpacity>
         </View>
-        )
-        }
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -770,5 +756,8 @@ const styles = StyleSheet.create({
       },
       alertCancelText: {
         color: "#4A90E2",
+      },
+      alertDeleteText: {
+        color: "red",
       },
 });

@@ -168,6 +168,8 @@ const EditProfile = ({ navigation, onSwitch }) => {
           <Text style={styles.errorMessageText}>{error.response.data}</Text>
         </View>
       );
+      Alert.alert("Error Updating Profile!", error.response.data, [{ text: "OK" }]);
+      setLoadingSubmit(false);
       console.error("Update Profile error:", error.response.data);
     }
   };
@@ -226,100 +228,6 @@ const EditProfile = ({ navigation, onSwitch }) => {
   }, []);
 
   return (
-    // <SafeAreaView style={{ flex: 1 }}>
-    //   <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-    //     <KeyboardAvoidingView
-    //       behavior={Platform.OS === "ios" ? "padding" : "height"}
-    //       keyboardVerticalOffset={100}
-    //       style={[styles.container, theme["background"]]}>
-    //       <ScrollView
-    //         horizontal={false}
-    //         contentContainerStyle={styles.scrollViewContent}>
-    //         <View style={styles.container}>
-    //           <View style={styles.topBar}>
-    //             <View style={{ flexDirection: "row", width: "80%" }}>
-    //               <TouchableOpacity
-    //                 onPress={navigateProfileView}>
-    //                 <View style={styles.buttonContent}>
-    //                   <Ionicons name="caret-back" size={25} color="#4A90E2" />
-    //                   <Text style={styles.cancelText}>Cancel</Text>
-    //                 </View>
-    //               </TouchableOpacity>
-    //             </View>
-
-    //             {loadingSubmit ? (
-    //               <View style={styles.ActivityIndicator}>
-    //                 <ActivityIndicator />
-    //               </View>
-    //             ) : (
-    //               <TouchableOpacity
-    //                 style={styles.submitButton}
-    //                 onPress={handleUpdateUser}
-    //               >
-    //                 <Text
-    //                   style={styles.submitText}
-    //                 >
-    //                   Submit
-    //                 </Text>
-    //               </TouchableOpacity>
-    //             )}
-    //           </View>
-    //           <TouchableOpacity onPress={handleEditProfilePicture} >
-    //             <View style={styles.profilePicContainer}>
-    //               <Image //source={{ uri: userInfo.profilePicture }} />
-    //                 style={styles.profilePic}
-    //                 source={{ uri: `data:image/jpeg;base64,${userInfo?.profilePicture}`, }} />
-    //               <View style={styles.cameraIcon}>
-    //                 <Ionicons name="camera" size={24} color="black" />
-    //               </View>
-    //             </View>
-    //           </TouchableOpacity>
-    //           {<Text style={styles.attribute} >First Name:</Text>}
-    //           <TextInput
-    //             style={styles.info}
-    //             placeholder="First Name"
-    //             onChangeText={(text) => setUserInfo(prevUserInfo => ({
-    //               ...prevUserInfo,
-    //               fname: (text),
-    //             }))}
-
-    //           >{userInfo.fname}</TextInput>
-    //           {<Text style={styles.attribute} >Last Name:</Text>}
-    //           <TextInput
-    //             style={styles.info}
-    //             placeholder="Last Name"
-    //             onChangeText={(text) => setUserInfo(prevUserInfo => ({
-    //               ...prevUserInfo,
-    //               lname: (text),
-    //             }))}
-
-    //           >{userInfo.lname}</TextInput>
-    //           {<Text style={styles.attribute} >Username:</Text>}
-    //           <TextInput
-    //             style={styles.info}
-    //             placeholder="Username"
-    //             onChangeText={(text) => setUserInfo(prevUserInfo => ({
-    //               ...prevUserInfo,
-    //               username: (text),
-    //             }))}
-
-    //           >{userInfo.username}</TextInput>
-    //           {<Text style={styles.attribute} >Email:</Text>}
-    //           <TextInput
-    //             style={styles.info}
-    //             placeholder="Email"
-    //             onChangeText={(text) => setUserInfo(prevUserInfo => ({
-    //               ...prevUserInfo,
-    //               email: (text),
-    //             }))}
-
-    //           >{userInfo.email}</TextInput>
-    //         </View>
-    //       </ScrollView>
-    //     </KeyboardAvoidingView>
-    //   </TouchableWithoutFeedback>
-    // </SafeAreaView>
-    // <View style={styles.overallContainer}>
     <Animated.View
       style={{ ...styles.overallContainer, transform: [{ translateX }] }}
     >
@@ -335,7 +243,7 @@ const EditProfile = ({ navigation, onSwitch }) => {
         </TouchableOpacity>
         {loadingSubmit ? (
           <View style={styles.ActivityIndicator}>
-            <ActivityIndicator />
+            <ActivityIndicator color={"white"} />
           </View>
         ) : (
           <TouchableOpacity
@@ -361,27 +269,88 @@ const EditProfile = ({ navigation, onSwitch }) => {
       </View>
       <View style={styles.userInfoContainer}>
         <Text style={styles.info} testID="nameInput">
-          {userInfo.fname} {userInfo.lname}
+          @{userInfo.username}
         </Text>
         <View style={styles.userInfoContainerLower}>
-          <View style={styles.textInput}>
-            <Ionicons name="create" size={25} color="#4A90E2" />
-            <TextInput
-              style={styles.info}
-              testID="usernameInput"
-              placeholder="First Name"
-              onChangeText={(text) =>
-                setUserInfo((prevUserInfo) => ({
-                  ...prevUserInfo,
-                  fname: text,
-                }))
-              }
-            >
-              @{userInfo.username}
-            </TextInput>
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}> Edit Account</Text>
+            <View style={styles.horizontalLine} />
           </View>
-          <Text style={styles.info}>Email: {userInfo.email}</Text>
-          <Text style={styles.info}>Since: example date</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              width: "100%",
+              paddingHorizontal: 5,
+            }}
+          >
+            <Ionicons name="create" size={25} color="#4A90E2" />
+            <View style={styles.textInput}>
+              <Text style={styles.inputLabel}>First Name:</Text>
+              <TextInput
+                style={styles.input}
+                testID="fnameInput"
+                placeholder="Type Here..."
+                onChangeText={(text) =>
+                  setUserInfo((prevUserInfo) => ({
+                    ...prevUserInfo,
+                    fname: text,
+                  }))
+                }
+              >
+                {userInfo.fname}
+              </TextInput>
+            </View>
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              width: "100%",
+              paddingHorizontal: 5,
+            }}
+          >
+            <Ionicons name="create" size={25} color="#4A90E2" />
+            <View style={styles.textInput}>
+              <Text style={styles.inputLabel}>Last Name:</Text>
+              <TextInput
+                style={styles.input}
+                testID="fnameInput"
+                placeholder="Type Here..."
+                onChangeText={(text) =>
+                  setUserInfo((prevUserInfo) => ({
+                    ...prevUserInfo,
+                    lname: text,
+                  }))
+                }
+              >
+                {userInfo.lname}
+              </TextInput>
+            </View>
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              width: "100%",
+              paddingHorizontal: 5,
+            }}
+          >
+            <Ionicons name="create" size={25} color="#4A90E2" />
+            <View style={styles.textInput}>
+              <Text style={styles.inputLabel}>Email:</Text>
+              <TextInput
+                style={styles.input}
+                testID="emailInput"
+                placeholder="Type Here..."
+                onChangeText={(text) =>
+                  setUserInfo((prevUserInfo) => ({
+                    ...prevUserInfo,
+                    email: text,
+                  }))
+                }
+              >
+                {userInfo.email}
+              </TextInput>
+            </View>
+          </View>
           {/* <Badges /> */}
         </View>
       </View>
@@ -389,154 +358,6 @@ const EditProfile = ({ navigation, onSwitch }) => {
   );
 };
 
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     //justifyContent: "center",
-//     alignItems: "center",
-//     padding: 20,
-//   },
-//   profilePic: {
-//     width: 150,
-//     height: 150,
-//     borderRadius: 75,
-//     marginBottom: 20,
-//     borderWidth: 2,
-//     borderColor: "#4A90E2",
-//   },
-//   title: {
-//     fontSize: 20,
-//     //fontWeight: "bold",
-//   },
-//   cameraIcon: {
-//     position: "absolute",
-//     bottom: 10,
-//     right: 5,
-//     backgroundColor: "rgba(255, 255, 255, 0.7)",
-//     padding: 4,
-//   },
-//   scrollViewContent: {
-//     flexGrow: 1,
-//     marginHorizontal: 1,
-//   },
-//   button: {
-//     backgroundColor: '#4A90E2',
-//     paddingVertical: 10,
-//     paddingHorizontal: 50,
-//     marginTop: 10,
-//     marginHorizontal: 5,
-//     borderRadius: 5,
-//     shadowColor: "black",
-//     shadowOffset: { width: 0, height: 2 },
-//     shadowRadius: 6,
-//     shadowOpacity: 0.16,
-//     alignItems: "center",
-//   },
-//   buttonText: {
-//     color: "white",
-//     fontSize: 16,
-//     fontWeight: "bold",
-//   },
-//   info: {
-//     fontSize: 16,
-//     //marginBottom: 10,
-//     //shadowColor: 'rbga(3, 138, 255, 1)',
-//     borderColor: '#4A90E2',
-//     borderWidth: 2,
-//     borderRadius: 15,
-//     padding: 16,
-//     fontSize: 16,
-//     width: '80%',
-//     // backgroundColor: '#f9f9f9',
-//     // padding: 20,
-//     margin: 10,
-//     // shadowOpacity: 0.1,
-//     // shadowRadius: 10,
-//     // elevation: 5,
-//     //borderColor: 'rbg(3, 138, 255)',
-//   },
-//   centeredView: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     marginTop: 22,
-//   },
-//   modalView: {
-//     margin: 20,
-//     backgroundColor: 'white',
-//     borderRadius: 20,
-//     padding: 35,
-//     alignItems: 'center',
-//     shadowColor: '#000',
-//     shadowOffset: {
-//       width: 0,
-//       height: 2,
-//     },
-//     shadowOpacity: 0.25,
-//     shadowRadius: 4,
-//     elevation: 5,
-//   },
-//   attribute: {
-//     fontSize: 16,
-//     width: '80%',
-//   },
-//   content: {
-//     flex: 1,
-//     backgroundColor: "#4A90E2",
-//   },
-//   topBar: {
-//     flexDirection: "row",
-//     marginTop: 5,
-//     marginRight: 15,
-//     justifyContent: "space-between",
-//     alignItems: "center",
-//   },
-//   buttonContainer: {
-//     flexDirection: "row",
-//     justifyContent: "space-between",
-//   },
-//   buttonContent: {
-//     flexDirection: "row",
-//     alignItems: "center",
-//     fontSize: 19,
-//   },
-//   cancelText: {
-//     fontSize: 19,
-//     color: "#4A90E2",
-//   },
-//   submitButton: {},
-//   ActivityIndicator: {
-//     marginRight: 20
-//   },
-//   submitText: {
-//     color: "#4A90E2",
-//     fontSize: 19,
-//   },
-//   errorMessageBox: {
-//     textAlign: "center",
-//     borderRadius: 6,
-//     backgroundColor: "#ffc3c3",
-//     paddingVertical: 10,
-//     paddingHorizontal: 50,
-//     marginTop: 5,
-//     marginBottom: 10,
-//     marginHorizontal: 5,
-//     shadowColor: "black",
-//     shadowOffset: { width: 0, height: 2 },
-//     shadowRadius: 6,
-//     shadowOpacity: 0.06,
-//     width: "80%",
-//   },
-//   errorMessageText: {
-//     textAlign: "center",
-//     color: "#ff0000",
-//   },
-//   horizontalBar: {
-//     height: 1,
-//     backgroundColor: "#ccc",
-//     marginTop: 15,
-//   },
-// });
 
 const styles = StyleSheet.create({
   overallContainer: {
@@ -554,8 +375,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#ececf6",
     width: "100%",
     // height: "100%",
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
+    borderTopLeftRadius: 65,
+    borderTopRightRadius: 65,
     alignItems: "center",
     zIndex: -2,
   },
@@ -585,7 +406,8 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   info: {
-    fontSize: 18,
+    fontSize: 16,
+    color:"#4A90E2",
   },
 
   buttonText: {
@@ -623,6 +445,44 @@ const styles = StyleSheet.create({
   },
   textInput: {
     flexDirection: "row",
+    // marginTop: 5,
+    borderStyle: "solid",
+    borderBottomColor: "#e8bd25",
+    borderBottomWidth: 2,
+    marginBottom: 20,
+    width: "90%",
+  },
+  inputLabel: {
+    // width: "30%",
+    // backgroundColor: "blue",
+    color: "#9e9e9e",
+    fontSize: 18,
+    // fontWeight: "bold",
+  },
+  input: {
+    width: "100%",
+    // backgroundColor: "red",
+    fontSize: 18,
+    color:"#4A90E2",
+  },
+  sectionContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    // paddingVertical: 12,
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#9e9e9e",
+    textTransform: "uppercase",
+    letterSpacing: 1.1,
+  },
+  horizontalLine: {
+    flex: 1,
+    height: 1.25,
+    backgroundColor: "#9e9e9e",
+    marginLeft: 8, // Adjust spacing between title and line
   },
 });
 

@@ -198,7 +198,7 @@ const MyDrawer = ({ navigation }) => {
           ),
         }}
       />
-      <Drawer.Screen
+      {/* <Drawer.Screen
         name="Awards"
         component={Badges}
         options={{
@@ -206,7 +206,7 @@ const MyDrawer = ({ navigation }) => {
             <Ionicons name="trophy" size={22} color={theme["color"]["color"]} />
           ),
         }}
-      />
+      /> */}
       <Drawer.Screen
         name="Friends"
         component={FriendTab}

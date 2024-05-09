@@ -9,14 +9,18 @@ import {
   Pressable,
   Modal,
   Alert,
+  Dimensions
 } from "react-native";
 import makeThemeStyle from "../../tools/Theme.js";
 import axios from "axios";
 import IP_ADDRESS from "../../ip.js";
 import * as Storage from "../../AsyncStorage.js";
 import { Ionicons } from "@expo/vector-icons";
+import ConfettiCannon from "react-native-confetti-cannon";
 
 export default function Badges({}) {
+    const layout = Dimensions.get("window");
+    const width = layout.width;
   theme = makeThemeStyle();
 
   const API_URL = "http://" + IP_ADDRESS + ":8000";
@@ -86,7 +90,7 @@ export default function Badges({}) {
           withCredentials: true,
         }
       );
-      console.log("num badges:", badgeResponse.data);
+      console.log("num badges:", Object.keys(badgeResponse.data).length);
       console.log("Day response:", badgeResponse.data.one_day);
       console.log("Week response:", badgeResponse.data.one_week);
       console.log("Month response:", badgeResponse.data.one_month);
@@ -110,6 +114,7 @@ export default function Badges({}) {
 
       setCurrentStreak(currentStreakResponse.data);
       setLongestStreak(longestStreakResponse.data);
+      setNumAwards(Object.keys(badgeResponse.data).length);
     } catch (error) {
       console.log("Error getting the info from database: ", error);
     }
@@ -178,31 +183,31 @@ export default function Badges({}) {
           {/*Current*/}
           <TouchableOpacity style={styles.button} onPress={handleModalCurrent}>
             <View style={{ flexDirection: "row" }}>
-              <Text style={styles.streakHeader}>
+              <Text style={styles.streakValue}>
                 {currentStreak} {currentStreak == 1 ? "Day" : "Days"}
               </Text>
               <Ionicons name="flame" size={16} color={"orange"} />
             </View>
-            <Text>Current Streak</Text>
+            <Text style={styles.streakHeader}>Current Streak</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.button} onPress={handleModalLongest}>
             <View style={{ flexDirection: "row" }}>
-              <Text style={styles.streakHeader}>
+              <Text style={styles.streakValue}>
                 {longestStreak} {longestStreak == 1 ? "Day" : "Days"}
               </Text>
               <Ionicons name="flame" size={16} color={"orange"} />
             </View>
-            <Text>Longest Streak</Text>
+            <Text style={styles.streakHeader}>Longest Streak</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={handleModalLongest}>
             <View style={{ flexDirection: "row" }}>
-              <Text style={styles.streakHeader}>
-                {numAwards} {numAwards == 1 ? "Award" : "Awards"}
+              <Text style={styles.streakValue}>
+                {numAwards} {numAwards == 1 ? "Trophy" : "Trophies"}
               </Text>
               <Ionicons name="trophy" size={16} color={"orange"} />
             </View>
-            <Text>Awarded Trophies</Text>
+            <Text style={styles.streakHeader}>Current Awards</Text>
           </TouchableOpacity>
         </View>
 
@@ -232,6 +237,13 @@ export default function Badges({}) {
             >
               <View style={styles.centeredView}>
                 <View style={styles.modalView}>
+                  <ConfettiCannon
+                    count={200}
+                    origin={{ x: width/2, y: 0 }}
+                    fadeOut={true}
+                    fallSpeed={2000}
+                    colors={["orange", "#4A90E2", "white"]}
+                  />
                   <Image source={dayBadgeIcon} style={styles.trophyButtonA} />
 
                   <Text style={styles.modalText}>
@@ -380,7 +392,8 @@ const styles = StyleSheet.create({
   badgeButton: {
     flexDirection: "row",
     alignItems: "center",
-    height: 60,
+    // height: 60,
+    height: "14%",
     width: "100%",
     backgroundColor: "#f2f2f2",
     borderRadius: 8,
@@ -436,10 +449,17 @@ const styles = StyleSheet.create({
     // backgroundColor: 'red',
     width: "100%",
   },
-  streakHeader: {
+  streakValue: {
     color: "black",
     fontSize: 14,
     fontWeight: "bold",
+    
+  },
+  streakHeader: {
+    color: "#9e9e9e",
+    fontSize: 12,
+    fontWeight: "bold",
+    
   },
   separator: {
     // marginVertical: 30,
