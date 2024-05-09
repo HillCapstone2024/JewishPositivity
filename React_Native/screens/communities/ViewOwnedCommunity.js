@@ -67,6 +67,14 @@ export default function ViewCommunity({ route, navigation }) {
         setIsLoading(false);
     };
 
+    const reloadData = async () => {
+      let membersList = await getCommunityMembers();
+      membersList = membersList.map((user) => user.username);
+      const retrievedProfilepics = await fetchProfilePics(membersList);
+      setMembers(retrievedProfilepics);
+      setNumMembers(membersList.length);
+    };
+
     // const getCsrfToken = async () => {
     // try {
     //     const response = await axios.get(`${API_URL}/csrf-token/`);
@@ -245,6 +253,12 @@ export default function ViewCommunity({ route, navigation }) {
                   data={members}
                   keyExtractor={(item) => item.username}
                   renderItem={(item) => renderItem(item)}
+                  refreshControl={
+                    <RefreshControl
+                      onRefresh={reloadData}
+                      testID="refresh-control"
+                    />
+                  }
                 />
               )}
             </View>
