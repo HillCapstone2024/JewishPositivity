@@ -108,8 +108,49 @@ async function readFileAsBase64(uri) {
 }
 
 const deleteCommunity = async () => {
-    //pass in community Id
-    //view 'delete_community/'
+  setLoadingSubmit(true);
+  console.log("id", community.community_id);
+  setErrorMessage(<ActivityIndicator />);
+  const getCsrfToken = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/csrf-token/`);
+      return response.data.csrfToken;
+    } catch (error) {
+      console.error("Error retrieving CSRF token:", error);
+      throw new Error("CSRF token retrieval failed");
+    }
+  };
+
+  try {
+    const csrfToken = await getCsrfToken();
+    const requestData = {
+      username: owner,
+      community_id: community.community_id
+    };
+    
+    const response = await axios.post(
+      `${API_URL}/delete_community/`,
+      requestData,
+      {
+        headers: {
+          "X-CSRFToken": csrfToken,
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      }
+    );
+    console.log("Delete community response:", response.data);
+    setLoadingSubmit(false);
+    navigateManageView();
+    } catch (error) {
+    console.log(error)
+    setErrorMessage(
+      <View style={styles.errorMessageBox}>
+        <Text style={styles.errorMessageText}>{error.response.data}</Text>
+      </View>
+    );
+    console.error("Delete Community error:", error.response.data);
+  }
 };
 
 const handleUpdateCommunity = async () => {
@@ -480,18 +521,17 @@ return (
                 renderItem={(item) => renderItem(item)}
               />
             )}
+              <Pressable
+                style={styles.leaveButton}
+                onPress={() => {
+                  deleteCommunity();
+                }}
+              >
+                <Text style={styles.redText}> Leave Community </Text>
+              </Pressable>
           </View>
           {/* delete button */}
-          <View>
-            <Pressable
-              style={styles.leaveButton}
-              onPress={() => {
-                deleteCommunity();
-              }}
-            >
-              <Text style={styles.redText}> Delete Community </Text>
-            </Pressable>
-          </View>
+
         </View>
       </View>
     </View>
