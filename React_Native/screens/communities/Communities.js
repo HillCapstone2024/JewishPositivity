@@ -486,122 +486,127 @@ const Communities = ({ navigation }) => {
     }, []);
 
     return (
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-            <KeyboardAvoidingView
-                // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={[styles.container, theme["background"]]}>
-                {/* <TextInput style={styles.search} placeholder='search...' onChangeText={(text) => setSearch(text)}></TextInput> */}
-                <View style={{ flexDirection: "row", paddingBottom: 10 }}>
-                    <TouchableOpacity style={styles.join} onPress={() => setJoinModalVisible(true)}>
-                        <Text style={styles.buttonText}>Join</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.create} onPress={() => setCreateModalVisible(true)}>
-                        <Text style={styles.buttonText}>Create</Text>
-                    </TouchableOpacity>
-                    <BottomPopupJoin
-                        visible={joinModalVisible}
-                        onRequestClose={() => setJoinModalVisible(false)}
-                        username={username}
-                        CSRF={CSRF}
-                        initializeData={() => initializeData()}
-                    />
-                    <BottomPopupCreate
-                        visible={createModalVisible}
-                        onRequestClose={() => setCreateModalVisible(false)}
-                        username={username}
-                        CSRF={CSRF}
-                        initializeData={() => initializeData()}
-                    />
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <KeyboardAvoidingView
+          // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={[styles.container, theme["background"]]}
+        >
+          {/* <TextInput style={styles.search} placeholder='search...' onChangeText={(text) => setSearch(text)}></TextInput> */}
+          <View style={{ flexDirection: "row", paddingBottom: 10 }}>
+            <TouchableOpacity
+              style={styles.join}
+              onPress={() => setJoinModalVisible(true)}
+            >
+              <Text style={styles.buttonText}>Join</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.create}
+              onPress={() => setCreateModalVisible(true)}
+            >
+              <Text style={styles.buttonText}>Create</Text>
+            </TouchableOpacity>
+            <BottomPopupJoin
+              visible={joinModalVisible}
+              onRequestClose={() => setJoinModalVisible(false)}
+              username={username}
+              CSRF={CSRF}
+              initializeData={() => initializeData()}
+            />
+            <BottomPopupCreate
+              visible={createModalVisible}
+              onRequestClose={() => setCreateModalVisible(false)}
+              username={username}
+              CSRF={CSRF}
+              initializeData={() => initializeData()}
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            {invites.length > 0 ? (
+              <>
+                <View style={styles.sectionContainer}>
+                  <Text style={styles.sectionTitle}>Invitations</Text>
+                  <View style={styles.horizontalLine} />
                 </View>
-                <View style={{ flex: 1 }}>
-                    {invites.length > 0 ? (
-                        <>
-                            <View style={styles.sectionContainer}>
-                                <Text style={styles.sectionTitle}>Invitations</Text>
-                                <View style={styles.horizontalLine} />
-                            </View>
 
-                            <View style={styles.container}>
-                                <View style={[styles.body, { flex: 1 }]}>
-                                    <FlatList
-                                        enableEmptySections={true}
-                                        data={communities}
-                                        keyExtractor={(item) => item.name}
-                                        renderItem={(item) => renderInvite(item)}
-                                        refreshControl={
-                                            <RefreshControl
-                                                refreshing={refreshingInvites}
-                                                onRefresh={getInvitations}
-                                                testID="refresh-control"
-                                            />
-                                        }
-                                    />
-                                </View>
-                            </View>
-                        </>
-                    ) : (null)}
-                    {communities.length === 0 ? (
-                        <>
-                            <Text style={styles.noCommunities}>
-                                Join or create a community to get started!
-                            </Text>
-                            {/* <TouchableOpacity onPress={refreshAll} style={styles.refresh}>
+                <View style={styles.container}>
+                  <View style={[styles.body, { flex: 1 }]}>
+                    <FlatList
+                      enableEmptySections={true}
+                      data={communities}
+                      keyExtractor={(item) => item.name}
+                      renderItem={(item) => renderInvite(item)}
+                      refreshControl={
+                        <RefreshControl
+                          refreshing={refreshingInvites}
+                          onRefresh={getInvitations}
+                          testID="refresh-control"
+                        />
+                      }
+                    />
+                  </View>
+                </View>
+              </>
+            ) : null}
+            {communities.length === 0 && ownedCommunities.length === 0 ? (
+              <>
+                <Text style={styles.noCommunities}>
+                  Join or create a community to get started!
+                </Text>
+                {/* <TouchableOpacity onPress={refreshAll} style={styles.refresh}>
                                 <Text style={styles.buttonText}>Check for communities</Text>
                                 <Text >This is a temp button in case the communities aren't properly retrieved at first</Text>
                             </TouchableOpacity> */}
-                        </>
-                    ) : (
-                        <>
-                            <View style={styles.sectionContainer}>
-                                <Text style={styles.sectionTitle}>Your Communities</Text>
-                                <View style={styles.horizontalLine} />
-                            </View>
-                            <View style={styles.container}>
-                                <View style={[styles.body, { flex: 1 }]}>
-                                    <FlatList
-                                        enableEmptySections={true}
-                                        data={communities}
-                                        keyExtractor={(item) => item.name}
-                                        renderItem={(item) => renderCommunity(item)}
-                                        refreshControl={
-                                            <RefreshControl
-                                                refreshing={refreshingJoined}
-                                                onRefresh={() => getJoinedCommunities(username)}
-                                                testID="refresh-control"
-                                            />
-                                        }
-                                    />
-                                </View>
-                            </View>
-                            <View style={styles.sectionContainer}>
-                                <Text style={styles.sectionTitle}>Communities you own</Text>
-                                <View style={styles.horizontalLine} />
-                            </View>
-                            <View style={styles.container}>
-                                <View style={[styles.body, { flex: 1 }]}>
-                                    <FlatList
-                                        enableEmptySections={true}
-                                        data={ownedCommunities}
-                                        keyExtractor={(item) => item.name}
-                                        renderItem={(item) => renderOwnedCommunity(item)}
-                                        refreshControl={
-                                            <RefreshControl
-                                                refreshing={refreshingOwned}
-                                                onRefresh={() => getOwnedCommunities(username)}
-                                                testID="refresh-control"
-                                            />
-                                        }
-                                    />
-                                </View>
-                            </View>
-                        </>
-
-                    )}
-
+              </>
+            ) : (
+              <>
+                <View style={styles.sectionContainer}>
+                  <Text style={styles.sectionTitle}>Your Communities</Text>
+                  <View style={styles.horizontalLine} />
                 </View>
-            </KeyboardAvoidingView>
-        </TouchableWithoutFeedback >
-    )
+                <View style={styles.container}>
+                  <View style={[styles.body, { flex: 1 }]}>
+                    <FlatList
+                      enableEmptySections={true}
+                      data={communities}
+                      keyExtractor={(item) => item.name}
+                      renderItem={(item) => renderCommunity(item)}
+                      refreshControl={
+                        <RefreshControl
+                          refreshing={refreshingJoined}
+                          onRefresh={() => getJoinedCommunities(username)}
+                          testID="refresh-control"
+                        />
+                      }
+                    />
+                  </View>
+                </View>
+                <View style={styles.sectionContainer}>
+                  <Text style={styles.sectionTitle}>Communities you own</Text>
+                  <View style={styles.horizontalLine} />
+                </View>
+                <View style={styles.container}>
+                  <View style={[styles.body, { flex: 1 }]}>
+                    <FlatList
+                      enableEmptySections={true}
+                      data={ownedCommunities}
+                      keyExtractor={(item) => item.name}
+                      renderItem={(item) => renderOwnedCommunity(item)}
+                      refreshControl={
+                        <RefreshControl
+                          refreshing={refreshingOwned}
+                          onRefresh={() => getOwnedCommunities(username)}
+                          testID="refresh-control"
+                        />
+                      }
+                    />
+                  </View>
+                </View>
+              </>
+            )}
+          </View>
+        </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
+    );
 };
 
 const styles = StyleSheet.create({
