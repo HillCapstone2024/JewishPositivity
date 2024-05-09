@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, Platform, StyleSheet, Image} from "react-native";
+import React, { useState, useEffect, useRef } from "react";
+import { View, Text, Platform, StyleSheet, Image, Dimensions, Animated} from "react-native";
 import BottomTab from "../../navigations/BottomTabNavigator.js";
 import * as Storage from "../../AsyncStorage.js";
 import axios from "axios";
@@ -29,6 +29,10 @@ const UserProfile = ({ navigation, onSwitch }) => {
 
   const [errorMessage, setErrorMessage] = useState(null);
   const theme = makeThemeStyle();
+
+  const layout = Dimensions.get("window");
+  const translateX = useRef(new Animated.Value(-layout.width)).current;
+
 
   const navigateEdit = () => {
     // navigation.navigate("EditProfile");
@@ -67,10 +71,16 @@ const UserProfile = ({ navigation, onSwitch }) => {
 
   useEffect(() => {
     getUser();
+    Animated.spring(translateX, {
+      toValue: 0,
+      useNativeDriver: true,
+    }).start();
   }, []);
 
   return (
-    <View style={styles.overallContainer}>
+    <Animated.View
+      style={{ ...styles.overallContainer, transform: [{ translateX }] }}
+    >
       <View style={styles.topBar}>
         <TouchableOpacity style={styles.submitButton} onPress={navigateEdit}>
           <Text style={styles.submitText}>Edit Profile</Text>
@@ -83,18 +93,18 @@ const UserProfile = ({ navigation, onSwitch }) => {
         />
       </View>
       <View style={styles.userInfoContainer}>
-        <Text style={styles.info} testID="nameInput">
+        <Text style={styles.username} testID="nameInput">
           @{userInfo.username}
         </Text>
         <View style={styles.userInfoContainerLower}>
-          <View style={{ flexDirection: "row" }}>
-            <Text style={styles.sectionTitle}> name:</Text>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Text style={styles.infoLabel}> NAME: </Text>
             <Text style={styles.info} testID="usernameInput">
               {userInfo.fname} {userInfo.lname}
             </Text>
           </View>
-          <View style={{ flexDirection: "row" }}>
-            <Text style={styles.sectionTitle}> email:</Text>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Text style={styles.infoLabel}> EMAIL: </Text>
             <Text style={styles.info} testID="usernameInput">
               {userInfo.email}
             </Text>
@@ -102,7 +112,7 @@ const UserProfile = ({ navigation, onSwitch }) => {
           <Badges />
         </View>
       </View>
-    </View>
+    </Animated.View>
   );
 };
 
@@ -122,8 +132,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#ececf6",
     width: "100%",
     // height: "100%",
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
+    borderTopLeftRadius: 65,
+    borderTopRightRadius: 65,
     alignItems: "center",
     zIndex: -1,
   },
@@ -143,9 +153,19 @@ const styles = StyleSheet.create({
     // borderWidth: 2,
     // borderColor: "#4A90E2",
   },
+  username: {
+    fontSize: 16,
+    color: "#4A90E2",
+  },
   info: {
     fontSize: 16,
-    // color: "#4A90E2",
+    color: "#4A90E2",
+    // fontWeight: "bold",
+  },
+  infoLabel: {
+    fontSize: 14,
+    color: "#9e9e9e",
+    fontWeight: "bold",
   },
 
   buttonText: {
