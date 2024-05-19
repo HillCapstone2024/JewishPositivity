@@ -8,7 +8,7 @@
 import React from "react";
 import { fireEvent, render, waitFor } from "@testing-library/react-native";
 import axios from "axios";
-import Profile from "../screens/home/Profile.js";
+import Profile from "../screens/profile/Profile.js";
 
 //mock axios call
 jest.mock("axios");
