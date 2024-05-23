@@ -17,8 +17,8 @@ const ParentProfile = () => {
   return (
     <View style={styles.container}>
       {editMode ?
-        <EditProfile onSwitch={switchEditMode} /> :
-        <UserProfile onSwitch={switchEditMode} />
+        <EditProfile onSwitch={switchEditMode} testID="editProfileComponent"/> :
+        <UserProfile onSwitch={switchEditMode} testID="userProfileComponent"/>
     }
     </View>
   );

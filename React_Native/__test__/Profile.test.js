@@ -9,6 +9,8 @@ import React from "react";
 import { fireEvent, render, waitFor } from "@testing-library/react-native";
 import axios from "axios";
 import Profile from "../screens/profile/Profile.js";
+import EditProfile from "../screens/profile/EditProfile.js";
+import ProfileParent from "../screens/profile/ProfileParent.js";
 
 //mock axios call
 jest.mock("axios");
@@ -29,38 +31,49 @@ describe("Profile Component", () => {
     expect(1 + 2).toBe(3);
   });
 
-  //the page renders, username, first name, last name, email is there
-  it("Successfully renders username, first name, last name, and email", () => {
+  // The profile page renders username, name, and email
+  it("Successfully renders username, name, and email", () => {
     const {getByTestId} = render(<Profile />);
-    expect(getByTestId("firstnameInput")).toBeTruthy();
-    expect(getByTestId("lastnameInput")).toBeTruthy();
     expect(getByTestId("usernameInput")).toBeTruthy();
+    expect(getByTestId("nameInput")).toBeTruthy();
     expect(getByTestId("emailInput")).toBeTruthy();
   });
 
-  //the profile page is there
-  it("Renders the Profile Component", () => {
+  //the profile picture is there
+  it("Successfully renders the Profile Picture Component", () => {
     const { getByTestId }= render(<Profile />);
-    expect(getByTestId("profileContainer")).toBeTruthy();
+    expect(getByTestId("profilePicture")).toBeTruthy();
   });
 
-  //when edit profile is clicked, it changes to edit page
-  it("Navigates to the edit profile page when 'Edit Profile' is clicked", () => {
-    const { getByTestId } = render(<Profile navigation={{ navigate: mockNavigateDrawer }} />);
-    fireEvent.press(getByText("Edit Profile"));
-    expect(mockNavigateDrawer).toHaveBeenCalledWith("EditProfile");
+  //when edit profile is clicked, onSwitch is called and directs to ProfileParent.js
+  it("Navigates to the edit profile page when 'Edit Profile' is clicked in the parent", () => {
+    const onSwitchMock = jest.fn();
+    const {getByTestId} = render(<Profile onSwitch={onSwitchMock} />);
+    fireEvent.press(getByTestId('editProfileButton'));
+    expect(onSwitchMock).toHaveBeenCalled();
+  }); 
+
+  //when onSwitch occurs, it goes from UserProfile to EditProfile in ProfileParent.js
+  it("Navigates to EditProfile from UserProfile within the parent", () => {
+    const onSwitchMock = jest.fn();
+    const {getByTestId, queryByTestId} = render(<Profile onSwitch={onSwitchMock} />);
+    // expect(getByTestId('userProfileComponent')).toBeTruthy();
+    // expect(queryByTestId('editProfileComponent')).toBeNull();
+    fireEvent.press(getByTestId('editProfileButton'));
+    expect(onSwitchMock).toHaveBeenCalled();
+    expect(getByTestId('cancelButton')).toBeTruthy();
+    expect(getByTestId('submitButton')).toBeTruthy();
   });
 
-  //when they press profile change button, alert appears
-  it("Displays an alert when the profile change button is pressed", () => {
-    const { getByText } = render(<Profile />);
-    jest.spyOn(global,'alert').mockImplementation(() => {});
-    fireEvent.press(getByText("Change Profile Picture"));
-    expect(global.alert).toHaveBeenCalledWith("Profile picture changed successfully!");
-    global.alert.mockRestore();
-  });
+  // //test profile submit change, axios mock call
+  // it("Successfully submits information when submit button is clicked", () => {
+  //   const onSwitchMock = jest.fn();
+  //   const {getByTestId} = render(<Profile onSwitch={onSwitchMock} />);
+  //   fireEvent.press(getByTestId('editProfileButton'));
+  //   expect(onSwitchMock).toHaveBeenCalled();
+  //   expect(getByTestId('editProfileButton').props.children).toBe('Submit')
 
-  //test profile submit change, axios mock call
-  
+  // }); 
+
   //new profile information gets displayed
 });

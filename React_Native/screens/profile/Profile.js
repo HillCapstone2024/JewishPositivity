@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { View, Text, Platform, StyleSheet, Image, Dimensions, Animated} from "react-native";
-import BottomTab from "../../navigations/BottomTabNavigator.js";
+// import BottomTab from "../../navigations/BottomTabNavigator.js";
 import * as Storage from "../../AsyncStorage.js";
 import axios from "axios";
 import { SvgXml } from "react-native-svg";
@@ -82,7 +82,7 @@ const UserProfile = ({ navigation, onSwitch }) => {
       style={{ ...styles.overallContainer, transform: [{ translateX }] }}
     >
       <View style={styles.topBar}>
-        <TouchableOpacity style={styles.submitButton} onPress={navigateEdit}>
+        <TouchableOpacity style={styles.submitButton} onPress={navigateEdit} testID="editProfileButton">
           <Text style={styles.submitText}>Edit Profile</Text>
         </TouchableOpacity>
       </View>
@@ -90,22 +90,23 @@ const UserProfile = ({ navigation, onSwitch }) => {
         <Image
           style={styles.profilePic}
           source={{ uri: `data:image/jpeg;base64,${userInfo?.profilePicture}` }}
+          testID = "profilePicture"
         />
       </View>
       <View style={styles.userInfoContainer}>
-        <Text style={styles.username} testID="nameInput">
+        <Text style={styles.username} testID="usernameInput">
           @{userInfo.username}
         </Text>
         <View style={styles.userInfoContainerLower}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Text style={styles.infoLabel}> NAME: </Text>
-            <Text style={styles.info} testID="usernameInput">
+            <Text style={styles.info} testID="nameInput">
               {userInfo.fname} {userInfo.lname}
             </Text>
           </View>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Text style={styles.infoLabel}> EMAIL: </Text>
-            <Text style={styles.info} testID="usernameInput">
+            <Text style={styles.info} testID="emailInput">
               {userInfo.email}
             </Text>
           </View>

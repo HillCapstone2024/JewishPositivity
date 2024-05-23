@@ -238,7 +238,7 @@ const EditProfile = ({ navigation, onSwitch }) => {
         >
           <View style={styles.buttonContent}>
             <Ionicons name="caret-back" size={25} color="white" />
-            <Text style={styles.submitText}>Cancel</Text>
+            <Text style={styles.submitText} testID="cancelButton">Cancel</Text>
           </View>
         </TouchableOpacity>
         {loadingSubmit ? (
@@ -250,7 +250,7 @@ const EditProfile = ({ navigation, onSwitch }) => {
             style={styles.submitButton}
             onPress={handleUpdateUser}
           >
-            <Text style={styles.submitText}>Submit</Text>
+            <Text style={styles.submitText} testID="submitButton">Submit</Text>
           </TouchableOpacity>
         )}
       </View>
