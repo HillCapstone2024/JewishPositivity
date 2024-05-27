@@ -164,7 +164,7 @@ const EditProfile = ({ navigation, onSwitch }) => {
     } catch (error) {
       console.log(error);
       setErrorMessage(
-        <View style={styles.errorMessageBox}>
+        <View style={styles.errorMessageBox} testID="errorMessage">
           <Text style={styles.errorMessageText}>{error.response.data}</Text>
         </View>
       );
@@ -268,7 +268,7 @@ const EditProfile = ({ navigation, onSwitch }) => {
         </TouchableOpacity>
       </View>
       <View style={styles.userInfoContainer}>
-        <Text style={styles.info} testID="nameInput">
+        <Text style={styles.info} testID="usernameInputEditProfile">
           @{userInfo.username}
         </Text>
         <View style={styles.userInfoContainerLower}>
@@ -285,7 +285,7 @@ const EditProfile = ({ navigation, onSwitch }) => {
           >
             <Ionicons name="create" size={25} color="#4A90E2" />
             <View style={styles.textInput}>
-              <Text style={styles.inputLabel}>First Name:</Text>
+              <Text style={styles.inputLabel} testID="firstnameInputEditProfile">First Name:</Text>
               <TextInput
                 style={styles.input}
                 testID="fnameInput"
@@ -310,7 +310,7 @@ const EditProfile = ({ navigation, onSwitch }) => {
           >
             <Ionicons name="create" size={25} color="#4A90E2" />
             <View style={styles.textInput}>
-              <Text style={styles.inputLabel}>Last Name:</Text>
+              <Text style={styles.inputLabel} testID="lastnameInputEditProfile">Last Name:</Text>
               <TextInput
                 style={styles.input}
                 testID="fnameInput"
@@ -335,7 +335,7 @@ const EditProfile = ({ navigation, onSwitch }) => {
           >
             <Ionicons name="create" size={25} color="#4A90E2" />
             <View style={styles.textInput}>
-              <Text style={styles.inputLabel}>Email:</Text>
+              <Text style={styles.inputLabel} testID="emailInputEditProfile">Email:</Text>
               <TextInput
                 style={styles.input}
                 testID="emailInput"

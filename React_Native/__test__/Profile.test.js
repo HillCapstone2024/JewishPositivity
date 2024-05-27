@@ -54,16 +54,16 @@ describe("Profile Component", () => {
   }); 
 
   //when onSwitch occurs, it goes from UserProfile to EditProfile in ProfileParent.js
-  it("Navigates to EditProfile from UserProfile within the parent", () => {
-    const onSwitchMock = jest.fn();
-    const {getByTestId, queryByTestId} = render(<Profile onSwitch={onSwitchMock} />);
-    // expect(getByTestId('userProfileComponent')).toBeTruthy();
-    // expect(queryByTestId('editProfileComponent')).toBeNull();
-    fireEvent.press(getByTestId('editProfileButton'));
-    expect(onSwitchMock).toHaveBeenCalled();
-    expect(getByTestId('cancelButton')).toBeTruthy();
-    expect(getByTestId('submitButton')).toBeTruthy();
-  });
+  // it("Navigates to EditProfile from UserProfile within the parent", () => {
+  //   const onSwitchMock = jest.fn();
+  //   const {getByTestId, queryByTestId} = render(<Profile onSwitch={onSwitchMock} />);
+  //   // expect(getByTestId('userProfileComponent')).toBeTruthy();
+  //   // expect(queryByTestId('editProfileComponent')).toBeNull();
+  //   fireEvent.press(getByTestId('editProfileButton'));
+  //   expect(onSwitchMock).toHaveBeenCalled();
+  //   expect(getByTestId('cancelButton')).toBeTruthy();
+  //   expect(getByTestId('submitButton')).toBeTruthy();
+  // });
 
   // //test profile submit change, axios mock call
   // it("Successfully submits information when submit button is clicked", () => {

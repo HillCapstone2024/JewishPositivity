@@ -1,6 +1,6 @@
 import React from "react";
 import { fireEvent, render, waitFor } from "@testing-library/react-native";
-import Settings from "../screens/home/Settings.js"; // Adjust the import path according to your file structure
+import Settings from "../screens/settings/Settings.js"; // Adjust the import path according to your file structure
 import * as Storage from "../AsyncStorage.js";
 import axios from "axios";
 import { Linking } from 'react-native';
