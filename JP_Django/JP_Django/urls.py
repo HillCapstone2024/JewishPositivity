@@ -15,7 +15,8 @@ urlpatterns = [
     path('change_password_view/', change_password_view, name='change_password_view'),
 
     # Basic App Actions
-    path('login/', login_view, name='login'), # Expects username and password. Returns success
+    path('login/', login_view, name='login_view'), # Expects username and password. Returns success
+    path('logout/', logout_view, name='logout_view'),
 
     # All CREATE Actions
     path('create_user/', create_user_view, name='create_user_view'), # Creates a user. Expects username, fname, lname, password, re-password, email

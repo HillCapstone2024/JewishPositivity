@@ -5,6 +5,7 @@ import json
 from JP_Django.models import User, Checkin, Friends, Badges, Community, CommunityUser #import model to access printing users in the test DB
 import logging
 import os
+from django.contrib.auth import get_user_model
 
 #a test for the create_user_view
 # use this command in terminal to run test: python manage.py test myapp.tests.test_views.CreateUserViewTestCase
@@ -49,6 +50,103 @@ LOG_COMMUNITY_DESCRIPTION= "Community Description"
 LOG_OWNER_ID= "Owner ID"
 LOG_PRIVACY= "Privacy"
 
+class LoginViewTestCase(TestCase):
+        
+    # Define constant post data
+    POST_DATA_SUCCESS = {
+        'username' : 'testuser',
+        'password' : 'testpassword'
+    }
+
+    POST_DATA_FAILURE_MISSING_KEYS = {
+        # Missing required fields
+        'username' : '',
+        'password' : ''
+    }
+
+    POST_DATA_FAILURE_INVALID_CREDENTIALS = {
+        'username' : 'wronguser',
+        'password' : 'wrongpassword'
+    }
+
+    POST_DATA_FAILURE_WHITESPACE_USERNAME = {
+        'username' : ' ',
+        'password' : 'testpassword'
+    }
+
+    POST_DATA_FAILURE_WHITESPACE_PASSWORD = {
+        'username' : 'testuser',
+        'password' : ' '
+    }
+
+    def setUp(self):
+        # create a user for the successful login test case
+        self.user = User.objects.create_user(username = 'testuser', password = 'testpassword', email = 'success@example.com')
+
+    def test_login_success(self):
+        # loggin the test we are in
+        logging.info("TESTING LOGIN_SUCCESS....")
+
+        # Simulate a client
+        client = Client()
+
+        # make a POST request to the login_view
+        response = client.post(reverse('login_view'), data=json.dumps(self.POST_DATA_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # check if the response status code is 200
+        self.assertEqual(response.status_code, 200)
+    
+    def test_login_failure_missing_keys(self):
+        # logging the test we are in
+        logging.info("TESTING LOGIN_FAILURE_MISSING_KEYS....")
+
+        # simulate the client
+        client = Client()
+
+        # make a POST request to the login_view with missing keys
+        response = client.post(reverse('login_view'), data=json.dumps(self.POST_DATA_FAILURE_MISSING_KEYS), content_type=CONTENT_TYPE_JSON)
+
+        # check if the response status is 400
+        self.assertEqual(response.status_code, 400)
+
+    def test_login_failure_invalid_credentials(self):
+        # logging the test we are in
+        logging.info("TESTING LOGIN_FAILURE_INVALID_CREDENTIALS....")
+
+        # simulate the client
+        client = Client()
+
+        # make a POST request to the login_view with missing keys
+        response = client.post(reverse('login_view'), data=json.dumps(self.POST_DATA_FAILURE_INVALID_CREDENTIALS), content_type=CONTENT_TYPE_JSON)
+
+        # check if the response status is 400
+        self.assertEqual(response.status_code, 400)
+    
+    def test_login_failure_whitespace_username(self):
+        # logging the test we are in
+        logging.info("TESTING LOGIN_FAILURE_WHITESPACE_USERNAME....")
+
+        # simulate the client
+        client = Client()
+
+        # make a POST request to the login_view with missing keys
+        response = client.post(reverse('login_view'), data=json.dumps(self.POST_DATA_FAILURE_WHITESPACE_USERNAME), content_type=CONTENT_TYPE_JSON)
+
+        # check if the response status is 400
+        self.assertEqual(response.status_code, 400)
+
+    def test_login_failure_whitespace_password(self):
+        # logging the test we are in
+        logging.info("TESTING LOGIN_FAILURE_WHITESPACE_PASSWORD....")
+
+        # simulate the client
+        client = Client()
+
+        # make a POST request to the login_view with missing keys
+        response = client.post(reverse('login_view'), data=json.dumps(self.POST_DATA_FAILURE_WHITESPACE_PASSWORD), content_type=CONTENT_TYPE_JSON)
+
+        # check if the response status is 400
+        self.assertEqual(response.status_code, 400)
 
 class CreateUserViewTestCase(TestCase):
     
@@ -345,6 +443,37 @@ class CreateUserViewTestCase(TestCase):
 
         # Check if the response status code is 400 for second user (duplicate user error)
         self.assertEqual(response2.status_code, 400)
+
+class LogoutViewTestCase(TestCase):
+    
+    # Define constant post data
+    POST_DATA_SUCCESS = {
+        'username' : 'testuser',
+        'password' : 'testpassword'
+    }
+
+    def setUp(self):
+        self.client = Client()
+        self.user_model = get_user_model()
+        self.user = self.user_model.objects.create_user(username = 'testuser', password = 'testpasssword', email = 'testuser@example.com')
+        self.login_url = reverse('login_view')
+        self.logout_url = reverse('logout_view')
+
+
+    def test_logout_success(self):
+        # loggin the test we are in
+        logging.info("TESTING LOGOUT_SUCCESS....")
+
+        self.client.login(username = 'testuser', password = 'testpassword')
+
+        # make a POST request to the login_view
+        response = self.client.post(self.logout_url, data=self.POST_DATA_SUCCESS)
+
+        # check if the response status code is 200
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, self.login_url)
+        self.assertNotIn('_auth_user_id', self.client.session)
+    
 
 class SetTimesViewTestCase(TestCase):
 

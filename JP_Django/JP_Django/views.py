@@ -218,12 +218,19 @@ def logout_view(request):
         username = request.POST.get("username")
         password = request.POST.get("password")
 
+        logging.info(f"Username: {username} and password: {password}")
         if not username or not password:
             raise ValueError("Username or password is missing")
+        logging.info("Passed first if")
 
         # Continue with login logic...
-
+        
+        logout(request)
+        logging.info("Logged out Successfully")
+        return redirect('login_view')
+    
     except Exception as e:
+        logging.info(f"You are in the logout view {e}")
         return HttpResponseServerError(
             f"Error: {e}", status=500
         )  # Redirect to login page after logout
