@@ -21,6 +21,7 @@ const SettingsScreen = ({ navigation }) => {
   const [storage_theme, setStorageTheme] = useState('system');
   themeStyle = makeThemeStyle();
 
+  useEffect(() => {
   const loadUsername = async () => {
     const storedUsername = await Storage.getItem("@username");
     setUsername(storedUsername || "No username");
@@ -62,7 +63,8 @@ const SettingsScreen = ({ navigation }) => {
       console.log(e);
     }
   };
-  getTheme()
+  getTheme();
+}, []);
 
   const setHapticFeedback = async (hapticFeedbackEnabled) => {
     try {
@@ -107,7 +109,7 @@ const SettingsScreen = ({ navigation }) => {
       });
       navigation.navigate("Landing");
     } catch (error) {
-      if (error.response.data) {
+      if (error.response) {
         console.error("error deleting account:", error.response.data);
       }
     }
@@ -171,9 +173,11 @@ const SettingsScreen = ({ navigation }) => {
           <Text style={styles.sectionTitle}> Preferences</Text>
           <View style={styles.horizontalLine} />
         </View>
-          <View style={styles.Prefsetting}>
+          {/* <View style={styles.Prefsetting} > */}
             <Text style={[styles.settingText]}>Theme</Text>
+            <View testID="theme-selector">
             <RNPickerSelect
+              testID="theme-selector"
               onValueChange={(value) => saveTheme(value)}
               items={[
                 { label: 'Dark', value: 'dark' },
@@ -201,11 +205,13 @@ const SettingsScreen = ({ navigation }) => {
                 },
               }}
             />
+            {/* </View> */}
           </View>
 
           <View style={styles.Prefsetting}>
             <Text style={styles.settingText}>Haptic Feedback</Text>
             <Switch
+              testID="haptic-feedback-switch"
               trackColor={{ false: '#f2f2f2', true: '#4A90E2' }} // Update the background color
               thumbColor={'#f2f2f2'} // Update the thumb color
               onValueChange={toggleHapticFeedback}
@@ -229,12 +235,12 @@ const SettingsScreen = ({ navigation }) => {
         </View>
           <View style={styles.contentContainer}>
 
-            <Pressable style={styles.setting} onPress={ () => { handleTermsofUse(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null;  }}>
+            <Pressable style={styles.setting} testID="terms-of-use-button" onPress={ () => { handleTermsofUse(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null;  }}>
               <Ionicons name="document-text" style={styles.icon}/>
               <Text style={styles.normalText}> Terms of Use </Text>
             </Pressable>
 
-            <Pressable style={styles.setting} onPress={ () => { handlePrivacyPolicy(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }}>
+            <Pressable style={styles.setting} testID="privacy-policy-button" onPress={ () => { handlePrivacyPolicy(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }}>
               <Ionicons name="shield-checkmark" style={styles.icon}/>
               <Text style={styles.normalText}> Privacy Policy </Text>
             </Pressable>
@@ -244,7 +250,7 @@ const SettingsScreen = ({ navigation }) => {
               <Text style={styles.normalText}> Report </Text>
             </Pressable>
 
-            <Pressable style={styles.setting} onPress={ () => { handleDeleteAccount(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }}>
+            <Pressable style={styles.setting} testID="delete-account-button" onPress={ () => { handleDeleteAccount(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }}>
               <Text style={styles.redText}> Delete Account </Text>
             </Pressable>
           </View>
