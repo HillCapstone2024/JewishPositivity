@@ -22,6 +22,7 @@ import IP_ADDRESS from "../../ip.js";
 import * as Storage from "../../AsyncStorage.js";
 import SpinningPen from "../greet/Pen.js";
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 
 export default function ViewCommunity({ route, navigation }) {
     const [communityInfo, setCommunityInfo] = useState({});
@@ -30,6 +31,7 @@ export default function ViewCommunity({ route, navigation }) {
     const [numMembers, setNumMembers] = useState(0);
     const [expanded, setExpanded] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [isHapticFeedbackEnabled, setIsHapticFeedbackEnabled] = useState(false);
     const { community } = route.params;
     const community_name = community.community_name;
     const community_desc = community.community_description;
@@ -76,6 +78,20 @@ export default function ViewCommunity({ route, navigation }) {
     //     throw new Error("CSRF token retrieval failed");
     // }
     // };
+
+    const getHapticFeedback = async () => {
+      try {
+        const hapticFeedbackEnabled = await Storage.getItem('@hapticFeedbackEnabled');
+        if (hapticFeedbackEnabled === 'true') {
+          setIsHapticFeedbackEnabled(true);
+        } else {
+          setIsHapticFeedbackEnabled(false);
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    getHapticFeedback();
 
     const handleLeave = () => {
 
@@ -252,9 +268,7 @@ export default function ViewCommunity({ route, navigation }) {
             <View>
               <Pressable
                 style={styles.leaveButton}
-                onPress={() => {
-                  handleLeave();
-                }}
+                onPress={ () => { handleLeave(); isHapticFeedbackEnabled ? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium) : null; }}
               >
                 <Text style={styles.redText}> Leave Community </Text>
               </Pressable>

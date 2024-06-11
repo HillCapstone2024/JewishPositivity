@@ -27,6 +27,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as FileSystem from "expo-file-system";
 import { TextInput } from "react-native-gesture-handler";
 import { userEvent } from "@testing-library/react-native";
+import * as Haptics from "expo-haptics";
 
 export default function EditCommunity({ route, navigation }) {
   const [errorMessage, setErrorMessage] = useState(null);
@@ -41,6 +42,7 @@ export default function EditCommunity({ route, navigation }) {
     //const community_name = community.community_name;
     const [community_name, setCommunityName] = useState(community.community_name);
     const [refreshing, setRefreshing] = useState(false);
+    const [isHapticFeedbackEnabled, setIsHapticFeedbackEnabled] = useState(false);
 
     const original_community_name = community.community_name; //store name before user changes
 
@@ -68,6 +70,20 @@ export default function EditCommunity({ route, navigation }) {
     useEffect(() => {
         initializeData();
     }, []);
+
+  const getHapticFeedback = async () => {
+    try {
+      const hapticFeedbackEnabled = await Storage.getItem('@hapticFeedbackEnabled');
+      if (hapticFeedbackEnabled === 'true') {
+        setIsHapticFeedbackEnabled(true);
+      } else {
+        setIsHapticFeedbackEnabled(false);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+  getHapticFeedback();
 
 const initializeData = async () => {
     setIsLoading(true);
@@ -509,11 +525,9 @@ return (
             )}
               <Pressable
                 style={styles.leaveButton}
-                onPress={() => {
-                  deleteCommunity();
-                }}
+                onPress={ () => { deleteCommunity(); isHapticFeedbackEnabled ? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium) : null; }}
               >
-                <Text style={styles.redText}> Leave Community </Text>
+                <Text style={styles.redText}> Delete Community </Text>
               </Pressable>
           </View>
           {/* delete button */}

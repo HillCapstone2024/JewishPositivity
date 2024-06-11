@@ -19,6 +19,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import makeThemeStyle from '../../tools/Theme.js';
 import * as Storage from "../../AsyncStorage.js";
+import * as Haptics from "expo-haptics";
 import IP_ADDRESS from "../../ip.js";
 import axios from 'axios';
 import SpinningPen from '../greet/Pen.js';
@@ -39,6 +40,7 @@ const AddFriends = ({navigation, onSwitch}) => {
     const [profilePics, setProfilePics] = useState();
     const [requestedUsers, setRequestedUsers] = useState([]);
     const [friends, setFriends] = useState([]);
+    const [isHapticFeedbackEnabled, setIsHapticFeedbackEnabled] = useState(false);
 
     const translateY = useRef(new Animated.Value(-layout.height)).current;
 
@@ -57,7 +59,21 @@ const AddFriends = ({navigation, onSwitch}) => {
       setFriends(friends);
       console.log('friends: ', friends);
       console.log("non add users: ", combinedRequsets);
-    }
+    };
+
+    const getHapticFeedback = async () => {
+      try {
+        const hapticFeedbackEnabled = await Storage.getItem('@hapticFeedbackEnabled');
+        if (hapticFeedbackEnabled === 'true') {
+          setIsHapticFeedbackEnabled(true);
+        } else {
+          setIsHapticFeedbackEnabled(false);
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    getHapticFeedback();
 
     const getFriends = async (usernameProp) => {
       try {
@@ -251,7 +267,7 @@ const AddFriends = ({navigation, onSwitch}) => {
             ) : (
               <View style={styles.acceptRequestButton}>
                 <TouchableOpacity
-                  onPress={() => handleAddFriend(item.username)}
+                  onPress={ () => { handleAddFriend(item.username); isHapticFeedbackEnabled ? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium) : null; }}
                 >
                   <Text style={styles.acceptButtonText}>ADD</Text>
                 </TouchableOpacity>

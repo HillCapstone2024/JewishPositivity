@@ -6,6 +6,7 @@ import axios from "axios";
 import IP_ADDRESS from "../../ip.js";
 import * as Storage from "../../AsyncStorage.js";
 import * as ImagePicker from "expo-image-picker";
+import * as Haptics from "expo-haptics";
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 
 
@@ -15,6 +16,21 @@ const API_URL = "http://" + IP_ADDRESS + ":8000";
 const BottomPopupJoin = ({ visible, onRequestClose, username, CSRF, initializeData }) => {
     const [communityName, setCommunityName] = useState("")
     const [activity, setActivity] = useState(null)
+    const [isHapticFeedbackEnabled, setIsHapticFeedbackEnabled] = useState(false);
+    
+    const getHapticFeedback = async () => {
+        try {
+          const hapticFeedbackEnabled = await Storage.getItem('@hapticFeedbackEnabled');
+          if (hapticFeedbackEnabled === 'true') {
+            setIsHapticFeedbackEnabled(true);
+          } else {
+            setIsHapticFeedbackEnabled(false);
+          }
+        } catch (e) {
+          console.log(e);
+        }
+    };
+    getHapticFeedback();
 
     const onGestureEvent = (event) => {
         if (event.nativeEvent.translationY > 100) {
@@ -80,7 +96,7 @@ const BottomPopupJoin = ({ visible, onRequestClose, username, CSRF, initializeDa
                     <Text style={styles.joinHeader}>Join a Community</Text>
                     <TextInput placeholder='Community Name' placeholderTextColor={'#858585'} onChangeText={(text) => setCommunityName(text)} style={styles.input} />
                     {activity}
-                    <TouchableOpacity style={styles.joinModal} onPress={handleCommunityJoin}>
+                    <TouchableOpacity style={styles.joinModal} onPress={ () => { handleCommunityJoin(); isHapticFeedbackEnabled ? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium) : null; }}>
                         <Text style={styles.buttonText}>Join</Text>
                     </TouchableOpacity>
                 </View>
@@ -96,6 +112,21 @@ const BottomPopupCreate = ({ visible, onRequestClose, username, CSRF, initialize
     const [privacy, setPrivacy] = useState('public');
     const [activity, setActivity] = useState(null)
     const [alert, setAlert] = useState(null);
+    const [isHapticFeedbackEnabled, setIsHapticFeedbackEnabled] = useState(false);
+
+    const getHapticFeedback = async () => {
+        try {
+          const hapticFeedbackEnabled = await Storage.getItem('@hapticFeedbackEnabled');
+          if (hapticFeedbackEnabled === 'true') {
+            setIsHapticFeedbackEnabled(true);
+          } else {
+            setIsHapticFeedbackEnabled(false);
+          }
+        } catch (e) {
+          console.log(e);
+        }
+      };
+    getHapticFeedback();
 
     const onGestureEvent = (event) => {
         if (event.nativeEvent.translationY > 100) {
@@ -285,7 +316,7 @@ const BottomPopupCreate = ({ visible, onRequestClose, username, CSRF, initialize
                         </View>
                         {alert}
                         {activity}
-                        <TouchableOpacity style={styles.createModal} onPress={handleCommunityCreate}>
+                        <TouchableOpacity style={styles.createModal} onPress={ () => {handleCommunityCreate(); isHapticFeedbackEnabled ? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium) : null; }}>
                             <Text style={styles.buttonText}>Create</Text>
                         </TouchableOpacity>
 

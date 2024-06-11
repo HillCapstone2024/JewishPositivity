@@ -24,6 +24,7 @@ import axios from 'axios';
 import { Ionicons } from "@expo/vector-icons";
 const layout = Dimensions.get("window");
 import SpinningPen from "../greet/Pen.js";
+import * as Haptics from "expo-haptics";
 
 //import AddFriends from '../screens/home/AddFriends.js';
 
@@ -41,6 +42,7 @@ const FriendRequests = ({navigation, onSwitch}) => {
   const [numReceivedRequests, setNumReceivedRequests] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [isHapticFeedbackEnabled, setIsHapticFeedbackEnabled] = useState(false);
 
   const translateY = useRef(new Animated.Value(-layout.height)).current;
 
@@ -115,6 +117,20 @@ const FriendRequests = ({navigation, onSwitch}) => {
   //     throw new Error("CSRF token retrieval failed");
   //   }
   // };
+
+  const getHapticFeedback = async () => {
+    try {
+      const hapticFeedbackEnabled = await Storage.getItem('@hapticFeedbackEnabled');
+      if (hapticFeedbackEnabled === 'true') {
+        setIsHapticFeedbackEnabled(true);
+      } else {
+        setIsHapticFeedbackEnabled(false);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+  getHapticFeedback();
 
   const getFriends = async (usernameProp) => {
     try {
@@ -302,7 +318,7 @@ const FriendRequests = ({navigation, onSwitch}) => {
             <View style={{ flexDirection: "row" }}>
               <View style={styles.acceptRequestButton}>
                 <TouchableOpacity
-                  onPress={() => handleAcceptRequest(item.username)}
+                  onPress={ () => { handleAcceptRequest(item.username); isHapticFeedbackEnabled ? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium) : null; }}
                 >
                   <Text style={styles.acceptButtonText}>ADD</Text>
                 </TouchableOpacity>

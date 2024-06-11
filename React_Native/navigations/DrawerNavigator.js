@@ -135,7 +135,7 @@ const CustomDrawerContent = (props) => {
         <TouchableOpacity
           onPress={() => {
             handleLogout();
-            theme["hapticFeedback"] ? null : Haptics.selectionAsync();
+            theme["hapticFeedback"] ? null : Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
           }}
           style={{ paddingVertical: 15 }}
         >

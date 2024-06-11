@@ -235,22 +235,22 @@ const SettingsScreen = ({ navigation }) => {
         </View>
           <View style={styles.contentContainer}>
 
-            <Pressable style={styles.setting} testID="terms-of-use-button" onPress={ () => { handleTermsofUse(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null;  }}>
+            <Pressable style={styles.setting} testID="terms-of-use-button" onPress={ () => { handleTermsofUse(); isHapticFeedbackEnabled ? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium) : null;  }}>
               <Ionicons name="document-text" style={styles.icon}/>
               <Text style={styles.normalText}> Terms of Use </Text>
             </Pressable>
 
-            <Pressable style={styles.setting} testID="privacy-policy-button" onPress={ () => { handlePrivacyPolicy(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }}>
+            <Pressable style={styles.setting} testID="privacy-policy-button" onPress={ () => { handlePrivacyPolicy(); isHapticFeedbackEnabled ? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium) : null; }}>
               <Ionicons name="shield-checkmark" style={styles.icon}/>
               <Text style={styles.normalText}> Privacy Policy </Text>
             </Pressable>
 
-            <Pressable style={styles.setting} onPress={ () => { handleReport(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }}>
+            <Pressable style={styles.setting} onPress={ () => { handleReport(); isHapticFeedbackEnabled ? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium) : null; }}>
               <Ionicons name="alert" style={styles.icon}/>
               <Text style={styles.normalText}> Report </Text>
             </Pressable>
 
-            <Pressable style={styles.setting} testID="delete-account-button" onPress={ () => { handleDeleteAccount(); isHapticFeedbackEnabled ? Haptics.selectionAsync() : null; }}>
+            <Pressable style={styles.setting} testID="delete-account-button" onPress={ () => { handleDeleteAccount(); isHapticFeedbackEnabled ? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium) : null; }}>
               <Text style={styles.redText}> Delete Account </Text>
             </Pressable>
           </View>

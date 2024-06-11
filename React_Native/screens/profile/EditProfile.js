@@ -27,6 +27,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import IP_ADDRESS from "../../ip.js";
 import * as FileSystem from "expo-file-system";
+import * as Haptics from "expo-haptics";
 import { Icon } from "react-native-elements";
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";

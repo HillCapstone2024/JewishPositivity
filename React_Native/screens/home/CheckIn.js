@@ -28,6 +28,7 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import * as FileSystem from "expo-file-system";
 import { Buffer } from "buffer";
 import RNPickerSelect from "react-native-picker-select";
+import * as Haptics from "expo-haptics";
 
 // import { Video, ResizeMode, Audio } from "expo-av";
 import makeThemeStyle from "../../tools/Theme.js";
