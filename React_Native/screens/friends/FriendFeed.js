@@ -63,9 +63,10 @@ const FriendFeed = () => {
       console.log('friends list', friendsList);
       // if (friendsList.length > 0) {
       // console.log('you have friends!');
-      const entries = await fetchEntries(friendsList, csrfToken);
+      const entries = await fetchEntries(storedUsername, friendsList, csrfToken);
       console.log('entries:', entries.length);
           // if (entries.length >= 1) {
+      console.log('friends:',friendsList);
       const map = await fetchProfilePics(friendsList, csrfToken);
 
       const updatedPosts = entries.map((post) => ({
@@ -82,11 +83,12 @@ const FriendFeed = () => {
       // setNoFriends(true);
       setIsLoading(false);
       setContentLoading(false);
-      if (friendsList.length < 1) {
-        setNoFriends(true);
-      } else if (entries.length < 1) {
-        setNoPosts(true);
-      }
+
+      (friendsList.length < 1) ? setNoFriends(true) : setNoFriends(false);
+      // console.log('noFriends state:', noFriends);
+
+      (entries.length < 1) ? setNoPosts(true) : setNoPosts(false);
+      // console.log('noPosts state:', noPosts);
     } catch (error) {
       console.error("Initialization failed:", error);
       setIsLoading(false);
@@ -162,8 +164,11 @@ const FriendFeed = () => {
     }
   };
 
-  const fetchEntries = async (friends) => {
+  const fetchEntries = async (username,friends) => {
     // console.log("friends list being sent: ", friends);
+    const entrieList = friends
+    entrieList.push(username)
+
     if (friends.length < 1) {
       return [];
     }
@@ -172,11 +177,13 @@ const FriendFeed = () => {
       const csrfToken = await Storage.getItem("@CSRF");
       const response = await axios.get(`${API_URL}/get_todays_checkin_info/`, {
         params: {
-          username: friends,
+          username: entrieList,
         },
       });
       // setPosts(response.data);
       // setContentLoading(false);
+      entrieList.pop(username)
+      console.log('friends before return:', entrieList);
       return response.data;
     } catch (error) {
       console.log("Error retrieving friends check in entries:", error);
@@ -288,7 +295,7 @@ const FriendFeed = () => {
         ) : (
           <TouchableOpacity
             onPress={
-              handlePress
+              handlePress()
             }
           >
             <Image
@@ -445,7 +452,7 @@ const FriendFeed = () => {
             )}
             {noPosts && (
               <View>
-                <Text style={styles.Message}>Be the first to post!</Text>
+                <Text style={styles.Message}>Be the first to post today!</Text>
               </View>
             )}
             <Animated.FlatList
