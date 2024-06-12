@@ -46,6 +46,7 @@ const AddFriends = ({navigation, onSwitch}) => {
 
     useEffect(() => {
       initializeData();
+      getHapticFeedback();
     }, []);
 
     const initializeData = async () => {
@@ -73,7 +74,7 @@ const AddFriends = ({navigation, onSwitch}) => {
         console.log(e);
       }
     };
-    getHapticFeedback();
+    
 
     const getFriends = async (usernameProp) => {
       try {
