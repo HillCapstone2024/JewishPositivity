@@ -51,6 +51,7 @@ const FriendRequests = ({navigation, onSwitch}) => {
       console.log("friends requests initialize data");
       initializeData();
     }
+    getHapticFeedback();
   }, []);
 
   const onRefresh = async () => {
@@ -130,7 +131,7 @@ const FriendRequests = ({navigation, onSwitch}) => {
       console.log(e);
     }
   };
-  getHapticFeedback();
+  
 
   const getFriends = async (usernameProp) => {
     try {
@@ -320,7 +321,7 @@ const FriendRequests = ({navigation, onSwitch}) => {
                 <TouchableOpacity
                   onPress={ () => { handleAcceptRequest(item.username); isHapticFeedbackEnabled ? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium) : null; }}
                 >
-                  <Text style={styles.acceptButtonText}>ADD</Text>
+                  <Text style={styles.acceptButtonText}>ACCEPT</Text>
                 </TouchableOpacity>
               </View>
               <View>
