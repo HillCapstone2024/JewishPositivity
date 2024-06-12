@@ -50,6 +50,7 @@ export default function CheckIn({ navigation, route }) {
   const [disableSubmit, setDisableSubmit] = useState(true);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isHapticFeedbackEnabled, setIsHapticFeedbackEnabled] = useState(false);
   const { checkInType } = route.params;
   const mediaAccessoryViewID = "MediaBar";
   const theme = makeThemeStyle();
@@ -150,6 +151,20 @@ function parseAndFormatDate(dateStr) {
   //     throw new Error("CSRF token retrieval failed");
   //   }
   // };
+
+  const getHapticFeedback = async () => {
+    try {
+      const hapticFeedbackEnabled = await Storage.getItem('@hapticFeedbackEnabled');
+      if (hapticFeedbackEnabled === 'true') {
+        setIsHapticFeedbackEnabled(true);
+      } else {
+        setIsHapticFeedbackEnabled(false);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+  getHapticFeedback();
 
   const submitCheckIn = async () => {
     console.log('formatted date: ',formattedDateTime);
@@ -472,7 +487,7 @@ function parseAndFormatDate(dateStr) {
               <TouchableOpacity
                 disabled={disableSubmit}
                 style={styles.submitButton}
-                onPress={submitCheckIn}
+                onPress={ () => { submitCheckIn(); isHapticFeedbackEnabled ? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium) : null; }}
                 testID="submitButton"
               >
                 <Text

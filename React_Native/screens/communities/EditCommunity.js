@@ -487,7 +487,8 @@ return (
                 <Switch
                     trackColor={{ false: '#f2f2f2', true: '#4A90E2' }}
                     thumbColor={'#f2f2f2'}
-                    onValueChange={() => setCommunityPrivacy(community_privacy === "private" ? "public" : "private")}
+                    // onValueChange={() => setCommunityPrivacy(community_privacy === "private" ? "public" : "private")}
+                    onValueChange={ () => { setCommunityPrivacy(community_privacy === "private" ? "public" : "private"); isHapticFeedbackEnabled ? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium) : null; }}
                     value={community_privacy === "private" ? true : false}
                 />
             </View>

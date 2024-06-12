@@ -50,6 +50,7 @@ const EditProfile = ({ navigation, onSwitch }) => {
   const [errorMessage, setErrorMessage] = useState(null);
   const [passwordModalVisible, setPasswordModalVisible] = useState(false);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [isHapticFeedbackEnabled, setIsHapticFeedbackEnabled] = useState(false);
 
   const navigateProfileView = () => {
     if (onSwitch) {
@@ -66,6 +67,20 @@ const EditProfile = ({ navigation, onSwitch }) => {
     await Storage.setItem("@password", userInfo.password);
     console.log("successfully saved user info: ", userInfo.username);
   };
+
+  const getHapticFeedback = async () => {
+    try {
+      const hapticFeedbackEnabled = await Storage.getItem('@hapticFeedbackEnabled');
+      if (hapticFeedbackEnabled === 'true') {
+        setIsHapticFeedbackEnabled(true);
+      } else {
+        setIsHapticFeedbackEnabled(false);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+  getHapticFeedback();
 
   const getUser = async () => {
     const storedUsername = await Storage.getItem("@username");
@@ -249,7 +264,7 @@ const EditProfile = ({ navigation, onSwitch }) => {
         ) : (
           <TouchableOpacity
             style={styles.submitButton}
-            onPress={handleUpdateUser}
+            onPress={ () => { handleUpdateUser(); isHapticFeedbackEnabled ? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium) : null; }}
           >
             <Text style={styles.submitText} testID="submitButton">Submit</Text>
           </TouchableOpacity>
