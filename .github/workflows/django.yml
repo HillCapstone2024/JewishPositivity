@@ -68,4 +68,6 @@ jobs:
           python manage.py test JP_Django.tests.test_views.GetCommunitesNotOwnedInfoViewTestCase
           python manage.py test JP_Django.tests.test_views.GetUsersPendingInvitesToCommunityViewTestCase
           python manage.py test JP_Django.tests.test_views.GetUsersPendingRequestsToCommunityViewTestCase
+          python manage.py test JP_Django.tests.test_views.LoginViewTestCase
+          python manage.py test JP_Django.tests.test_views.LogoutViewTestCase
     

@@ -18,7 +18,7 @@ import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 import IP_ADDRESS from "../ip.js";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import * as Storage from "../AsyncStorage.js";
 import { createAvatar } from "@dicebear/core";
@@ -73,14 +73,6 @@ const CustomDrawerContent = (props) => {
     ]);
   };
 
-  useEffect(() => {
-    // const unsubscribe = navigation.addListener("drawerOpen", () => {
-    // Call your method here
-    getUserInfo();
-    // });
-
-    // unsubscribe();
-  }, []);
 
   const getUserInfo = async () => {
     console.log("get user info called");
@@ -95,6 +87,17 @@ const CustomDrawerContent = (props) => {
       console.log("error getting drawer user info", error);
     }
   };
+
+  useEffect(
+    useCallback(() => {
+    // const unsubscribe = navigation.addListener("drawerOpen", () => {
+    // Call your method here
+    getUserInfo();
+    // });
+
+    // unsubscribe();
+   }, [])
+  );
 
   return (
     <View style={[{ flex: 1 }, theme["background"]]}>
@@ -166,6 +169,7 @@ const MyDrawer = ({ navigation }) => {
   //   }, [navigation])
   // );
   // const navigation = useNavigation();
+  const theme = makeThemeStyle();
 
   return (
     <Drawer.Navigator
