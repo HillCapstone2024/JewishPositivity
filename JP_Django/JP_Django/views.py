@@ -974,22 +974,27 @@ def get_todays_checkin_info_view(request):
                     today = date.today()
 
                     # Assuming 'user_id' is already defined
-                    all_checkins = get_user_checkins(user_id, today)
+                    # all_checkins = get_user_checkins(user_id, today)
 
-                    response_data.extend([
-                        {
-                            "username": username,
-                            "checkin_id": checkin.checkin_id,
-                            "content_type": checkin.content_type,
-                            "moment_number": checkin.moment_number,
-                            "content": base64.b64encode(checkin.content).decode('utf-8') if checkin.content is not None and checkin.content_type != "video" else videothumb,
-                            "text_entry": checkin.text_entry,
-                            "user_id": checkin.user_id.id,
-                            "date": checkin.date.strftime('%Y-%m-%d'),
-                        }
-                        for checkin in all_checkins
-                    ])
+                    # Assuming 'user_id' is already defined
+                    all_checkins = get_user_checkins(user_id)
 
+                    new_checkins = [
+                    {
+                        "username": username,
+                        "checkin_id": checkin.checkin_id,
+                        "content_type": checkin.content_type,
+                        "moment_number": checkin.moment_number,
+                        "content": base64.b64encode(checkin.content).decode('utf-8') if checkin.content is not None and checkin.content_type != "video" else videothumb,
+                        "text_entry": checkin.text_entry,
+                        "user_id": checkin.user_id.id,
+                        "date": checkin.date.strftime('%Y-%m-%d'),
+                    }
+                    for checkin in all_checkins
+                    ]
+
+                    # Prepend the new check-ins to the front of response_data
+                    response_data = new_checkins + response_data
                 logging.info(response_data)
                 return HttpResponse(json.dumps(response_data), content_type=constAppJson)
             except Exception as e:
@@ -1000,8 +1005,11 @@ def get_todays_checkin_info_view(request):
     return HttpResponse(constNotGet)
 
 
-def get_user_checkins(user_id, today):
-    return Checkin.objects.filter(user_id=user_id, date__date=today)
+# def get_user_checkins(user_id, today):
+#     return Checkin.objects.filter(user_id=user_id, date__date=today)
+
+def get_user_checkins(user_id):
+    return Checkin.objects.filter(user_id=user_id).order_by('-date')
 
 
 # ########## Utility Views ##########

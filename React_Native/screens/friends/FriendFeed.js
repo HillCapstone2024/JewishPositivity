@@ -28,6 +28,7 @@ const FriendFeed = () => {
   const [username, setUsername] = useState();
   const [posts, setPosts] = useState([]);
   const [friends, setFriends] = useState([]);
+  const [friendsWithoutUsername, setFriendsWithoutUsername] = useState([]);
   const [profilePicMap, setProfilePicMap] = useState({});
   const [video, setVideo] = useState({});
   const [contentLoading, setContentLoading] = useState(true);
@@ -65,14 +66,21 @@ const FriendFeed = () => {
       // console.log('you have friends!');
       const entries = await fetchEntries(storedUsername, friendsList, csrfToken);
       console.log('entries:', entries.length);
+      // console.log('entries list:', entries);
           // if (entries.length >= 1) {
       console.log('friends:',friendsList);
-      const map = await fetchProfilePics(friendsList, csrfToken);
+      const map = await fetchProfilePics(storedUsername, friendsList, csrfToken);
 
       const updatedPosts = entries.map((post) => ({
         ...post,
         profilepic: map[post.username] || "default_pic_base64",
       }));
+
+      // Filter out the storedUsername from the friendsList
+      const filteredFriendsList = friendsList.filter(friend => friend !== storedUsername);
+
+      // Set the filtered friends list to the friendsWithoutUsername state
+      setFriendsWithoutUsername(filteredFriendsList);
 
       //updated all states at once to prevent rerenders and 'flickers'
       setPosts(updatedPosts);
@@ -182,7 +190,7 @@ const FriendFeed = () => {
       });
       // setPosts(response.data);
       // setContentLoading(false);
-      entrieList.pop(username)
+      // entrieList.pop(username)
       console.log('friends before return:', entrieList);
       return response.data;
     } catch (error) {
@@ -221,7 +229,7 @@ const FriendFeed = () => {
     }
   };
 
-  const fetchProfilePics = async (friends) => {
+  const fetchProfilePics = async (username, friends) => {
     if (friends.length < 1) {
       return {};
     };
@@ -425,7 +433,7 @@ const FriendFeed = () => {
               ]}
             >
               <View style={styles.userContainer}>
-                {friends.map((user) => (
+                {friendsWithoutUsername.map((user) => (
                   <UserListItem
                     key={user.id}
                     user={user}
