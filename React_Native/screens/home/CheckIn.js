@@ -444,6 +444,90 @@ function parseAndFormatDate(dateStr) {
     setIsExpanded(!isExpanded); // Toggle the state variable
   };
 
+  const modehAniPrompts = [
+    "What are you grateful for today?",
+    "Think of someone who has helped you recently. How can you express gratitude to them?",
+    "Reflect on a challenge you overcame and what you learned from it.",
+    "What is one thing that brought you joy today?",
+    "What is a simple pleasure you experienced today?",
+    "Think of a skill or talent you have and how you can use it to help others."
+  ];
+  
+  const ashreiPrompts = [
+    "What made you smile today?",
+    "Recall a happy memory from your childhood.",
+    "Think of a person who inspires you and why.",
+    "What is something you're looking forward to?",
+    "Reflect on a recent accomplishment that made you feel proud.",
+    "What is a hobby or activity that brings you happiness?"
+  ];
+  
+  const shemaPrompts = [
+    "What was the most meaningful part of your day?",
+    "Reflect on a lesson you learned today.",
+    "Think of a way you showed kindness to someone today.",
+    "What is something you're grateful for in your life right now?",
+    "Recall a moment when you felt at peace today.",
+    "What is a goal or aspiration you want to work towards?"
+  ];
+
+  const PromptDropdown = ({ checkInType }) => {
+    const [selectedPrompt, setSelectedPrompt] = useState("");
+    const [isOpen, setIsOpen] = useState(false);
+  
+    let prompts = [];
+    switch (checkInType) {
+      case "ModehAni":
+        prompts = modehAniPrompts;
+        break;
+      case "Ashrei":
+        prompts = ashreiPrompts;
+        break;
+      case "Shema":
+        prompts = shemaPrompts;
+        break;
+      default:
+        break;
+    }
+
+    const toggleDropdown = () => {
+      setIsOpen(!isOpen);
+    };
+  
+    const selectPrompt = (prompt) => {
+      setSelectedPrompt(prompt);
+      setIsOpen(false);
+    };
+
+    return (
+      <View style={styles.promptDropdownContainer}>
+        <TouchableOpacity style={styles.promptDropdownHeader} onPress={toggleDropdown}>
+          <Text style={styles.promptDropdownLabel}>
+            {selectedPrompt || "Select a prompt"}
+          </Text>
+          <Ionicons
+            name={isOpen ? "chevron-up" : "chevron-down"}
+            size={24}
+            color="#4A90E2"
+          />
+        </TouchableOpacity>
+        {isOpen && (
+          <ScrollView style={styles.promptDropdownList}>
+            {prompts.map((prompt, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.promptDropdownItem}
+                onPress={() => selectPrompt(prompt)}
+              >
+                <Text style={styles.promptDropdownItemText}>{prompt}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        )}
+      </View>
+    );
+  };
+
   const mediaBoxAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     const loadMediaContainer = () => {
@@ -519,6 +603,7 @@ function parseAndFormatDate(dateStr) {
           <View style={styles.boxContainer}>
             {/* <Text style={[styles.boxDescriptor]}>Description</Text> */}
             <ScrollView style={[styles.dropdownContainer, { height: 350 }]}>
+              <PromptDropdown checkInType={checkInType} />
               <TextInput
                 style={styles.CheckInInput}
                 inputAccessoryViewID={mediaAccessoryViewID}
@@ -829,5 +914,51 @@ const styles = StyleSheet.create({
   descriptionText: {
     fontSize: 14,
     lineHeight: 22,
+  },
+  promptDropdownContainer: {
+    borderWidth: 2,
+    borderColor: "#4A90E2",
+    borderRadius: 10,
+    // marginBottom: 10,
+    padding: 15,
+    fontSize: 8,
+    // overflow: 'hidden',
+    color: 'grey',
+  },
+  promptDropdownHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 12,
+    // borderColor: 'gray',
+    borderBottomWidth: 0,
+  },
+  promptDropdownLabel: {
+    fontSize: 15,
+    // color: "#333",
+    marginRight: 5,
+    paddingLeft: 5,
+    textAlign: "left",
+  },
+  promptDropdownList: {
+    borderTopWidth: 1,
+    borderBlockColor: "#ccc",
+    maxHeight: 200,
+    position: 'relative',
+  },
+  promptDropdownItem: {
+    paddingHorizontal: 10,
+    paddingVertical: 12,
+    height: 50,
+  },
+  promptDropdownItemText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  promptDropdownArrow: {
+    position: 'absolute',
+    right: 10,
+    top: '50%',
   },
 });
