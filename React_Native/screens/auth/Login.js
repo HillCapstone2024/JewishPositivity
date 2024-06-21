@@ -29,6 +29,7 @@ const API_URL = "http://" + IP_ADDRESS + ":8000";
 
 const Login = ({ navigation }) => {
   const [username, setUsername] = useState("");
+  const [timeZone, setTimezone] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [first_name, setFirstName] = useState("");
@@ -37,7 +38,7 @@ const Login = ({ navigation }) => {
   const [errorMessage, setErrorMessage] = useState(null);
   const theme = makeThemeStyle();
 
-  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const newtimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const csrf = async () => {
     const getCsrfToken = async () => {
@@ -58,7 +59,8 @@ const Login = ({ navigation }) => {
 
   const saveUser = async () => {
     await Storage.setItem("@username", username);
-
+    
+    
     const loadUserInfo = async () => {
       try {
         const csrfToken = await getCsrfToken();
@@ -74,11 +76,14 @@ const Login = ({ navigation }) => {
           withCredentials: true,
         });
 
-        setFirstName(first_name,response.data.first_name);
-        setLastName(last_name,response.data.last_name);
-        setPassword(last_name,response.data.password); //encoded
-        setProfilePicture(last_name,response.data.profilePicture); //avatar?
-        setEmail(email,response.data.email);
+        setFirstName(response.data.first_name);
+        setLastName(response.data.last_name);
+        setPassword(response.data.password); //encoded
+        setProfilePicture(response.data.profilePicture); //avatar?
+        setEmail(response.data.email);
+        setTimezone(response.data.timezone);
+        console.log("Saved Timezone:",response.data.timezone);
+        console.log("New Timezone:",newtimezone);
   
         //save to storage
         await Storage.setItem("@first_name", response.data.first_name);
@@ -86,8 +91,10 @@ const Login = ({ navigation }) => {
         await Storage.setItem("@email", response.data.email);
         await Storage.setItem("@password", response.data.password);
         await Storage.setItem("@profilePicture", response.data.profilepicture);
+        await Storage.setItem("@timezone", response.data.timezone)
         await csrf();
         handleUpdateTimeZone();
+        
 
         console.log("successfully saved user")
       } catch (error) {
@@ -110,7 +117,7 @@ const Login = ({ navigation }) => {
         const csrfToken = await getCsrfToken();
         const requestData = {
           username: username,
-          timezone: timezone,
+          timezone: newtimezone,
         };
         const response = await axios.post(
           `${API_URL}/update_user_information/`,
@@ -124,7 +131,6 @@ const Login = ({ navigation }) => {
           }
         );
         console.log("update timezone response:", response.data);
-        console.log("timezone", timezone);
       } catch (error) {
         console.log(error)
         setErrorMessage(
@@ -234,6 +240,7 @@ const Login = ({ navigation }) => {
       // console.log("OneSignal login successful");
       console.log(username);
       saveUser();
+      console.log(timeZone);
       navigateDrawer();
     } catch (error) {
       console.log(error);

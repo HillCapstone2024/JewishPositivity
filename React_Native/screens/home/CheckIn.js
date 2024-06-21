@@ -51,12 +51,15 @@ export default function CheckIn({ navigation, route }) {
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isHapticFeedbackEnabled, setIsHapticFeedbackEnabled] = useState(false);
+  const [timezone, setTimezone] = useState("");
+  
   const { checkInType } = route.params;
   const mediaAccessoryViewID = "MediaBar";
   const theme = makeThemeStyle();
+
   const now = new Date();
   const options = {
-    timeZone: 'America/New_York',
+    timeZone: "America/Chicago",
     weekday: "long",
     year: "numeric",
     month: "long",
@@ -67,6 +70,49 @@ export default function CheckIn({ navigation, route }) {
   const formattedDateTime = new Intl.DateTimeFormat("en-US", options).format(
     now
   );
+
+  console.log("TimeZone is:", timezone);
+    
+  
+  // useEffect(() => {
+  //   const getStoredTimezone = async () => {
+  //     try {
+  //       const storedTimezone = await AsyncStorage.getItem("@timezone");
+  //       return storedTimezone;
+  //     } catch (error) {
+  //       console.error("Error retrieving timezone from storage:", error);
+  //       return null;
+  //     }
+  //   };
+
+  //   const fetchAndFormatDateTime = async () => {
+  //     try {
+  //       const timezone = await getStoredTimezone();
+  //       if (!timezone) {
+  //         throw new Error("Timezone not found in AsyncStorage");
+  //       }
+
+  //       const options = {
+  //         timeZone: timezone,
+  //         weekday: "long",
+  //         year: "numeric",
+  //         month: "long",
+  //         day: "numeric",
+  //         hour: "2-digit",
+  //         minute: "2-digit",
+  //       };
+
+  //       const now = new Date();
+  //       const newFormattedDateTime = new Intl.DateTimeFormat("en-US", options).format(now);
+  //       setFormattedDateTime(newFormattedDateTime);
+  //     } catch (error) {
+  //       console.error("Error formatting date:", error);
+  //       // Handle error appropriately in your application
+  //     }
+  //   };
+
+  //   fetchAndFormatDateTime();
+  // })};
 
 function parseAndFormatDate(dateStr) {
   //reg expression to match normal and military phone settings
@@ -124,6 +170,18 @@ function parseAndFormatDate(dateStr) {
     };
     loadUsername();
     // configureAudioMode();
+
+    const loadTimezone = async () => {
+      const storedTimezone = await Storage.getItem("@timezone");
+      console.log("StoredTimeZone:",storedTimezone);
+      if (storedTimezone) {
+        setTimezone(storedTimezone);
+      } else {
+        setTimezone("timezone not found");
+      }
+    };
+    loadTimezone();
+
   }, []);
 
   async function readFileAsBase64(uri) {
@@ -140,6 +198,10 @@ function parseAndFormatDate(dateStr) {
 
   const textToBase64 = (text) => {
     return Buffer.from(text, "utf8").toString("base64");
+  };
+
+  const getTimezone = async () => {
+
   };
 
   // const getCsrfToken = async () => {
