@@ -30,7 +30,7 @@
     "@rneui/themed": "^4.0.0-rc.8",
     "axios": "^1.6.7",
     "dotenv": "^16.4.4",
-    "expo": "^51.0.8",
+    "expo": "^51.0.14",
     "expo-av": "~14.0.3",
     "expo-file-system": "~17.0.1",
     "expo-haptics": "~13.0.1",

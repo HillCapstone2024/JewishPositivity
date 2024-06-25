@@ -52,7 +52,8 @@ export default function CheckIn({ navigation, route }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isHapticFeedbackEnabled, setIsHapticFeedbackEnabled] = useState(false);
   const [timezone, setTimezone] = useState("");
-  
+  const [selectedPrompt, setSelectedPrompt] = useState("");
+
   const { checkInType } = route.params;
   const mediaAccessoryViewID = "MediaBar";
   const theme = makeThemeStyle();
@@ -471,8 +472,8 @@ function parseAndFormatDate(dateStr) {
     "What is a goal or aspiration you want to work towards?"
   ];
 
-  const PromptDropdown = ({ checkInType }) => {
-    const [selectedPrompt, setSelectedPrompt] = useState("");
+  const PromptDropdown = ({ checkInType, selectedPrompt, setSelectedPrompt }) => {
+    // const [selectedPrompt, setSelectedPrompt] = useState("");
     const [isOpen, setIsOpen] = useState(false);
   
     let prompts = [];
@@ -603,7 +604,12 @@ function parseAndFormatDate(dateStr) {
           <View style={styles.boxContainer}>
             {/* <Text style={[styles.boxDescriptor]}>Description</Text> */}
             <ScrollView style={[styles.dropdownContainer, { height: 350 }]}>
-              <PromptDropdown checkInType={checkInType} />
+              <PromptDropdown 
+                checkInType={checkInType} 
+                selectedPrompt={selectedPrompt}
+                setSelectedPrompt={setSelectedPrompt}
+              />
+              
               <TextInput
                 style={styles.CheckInInput}
                 inputAccessoryViewID={mediaAccessoryViewID}
@@ -921,7 +927,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     // marginBottom: 10,
     padding: 15,
-    fontSize: 8,
+    fontSize: 5,
     // overflow: 'hidden',
     color: 'grey',
   },
@@ -938,13 +944,13 @@ const styles = StyleSheet.create({
     fontSize: 15,
     // color: "#333",
     marginRight: 5,
-    paddingLeft: 5,
+    paddingLeft: 2,
     textAlign: "left",
   },
   promptDropdownList: {
     borderTopWidth: 1,
     borderBlockColor: "#ccc",
-    maxHeight: 200,
+    maxHeight: 150,
     position: 'relative',
   },
   promptDropdownItem: {
