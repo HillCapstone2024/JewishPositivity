@@ -995,6 +995,9 @@ def get_todays_checkin_info_view(request):
 
                     # Prepend the new check-ins to the front of response_data
                     response_data = new_checkins + response_data
+
+                    # Sort response_data by date in descending order
+                    response_data.sort(key=lambda x: x['date'], reverse=True)
                 logging.info(response_data)
                 return HttpResponse(json.dumps(response_data), content_type=constAppJson)
             except Exception as e:

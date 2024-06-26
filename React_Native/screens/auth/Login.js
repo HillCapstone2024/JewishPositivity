@@ -91,7 +91,7 @@ const Login = ({ navigation }) => {
         await Storage.setItem("@email", response.data.email);
         await Storage.setItem("@password", response.data.password);
         await Storage.setItem("@profilePicture", response.data.profilepicture);
-        await Storage.setItem("@timezone", response.data.timezone)
+        await Storage.setItem("@timezone", newtimezone)
         await csrf();
         handleUpdateTimeZone();
         

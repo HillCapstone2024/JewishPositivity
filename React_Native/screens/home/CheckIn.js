@@ -59,21 +59,18 @@ export default function CheckIn({ navigation, route }) {
   const theme = makeThemeStyle();
 
   const now = new Date();
-  const options = {
-    timeZone: "America/Chicago",
+  const [options, setOptions] = useState({
+    timeZone: "America/New_York",
     weekday: "long",
     year: "numeric",
     month: "long",
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-  };
+  });
   const formattedDateTime = new Intl.DateTimeFormat("en-US", options).format(
     now
-  );
-
-  console.log("TimeZone is:", timezone);
-    
+  );    
   
   // useEffect(() => {
   //   const getStoredTimezone = async () => {
@@ -177,6 +174,10 @@ function parseAndFormatDate(dateStr) {
       console.log("StoredTimeZone:",storedTimezone);
       if (storedTimezone) {
         setTimezone(storedTimezone);
+        setOptions((prevOptions) => ({
+          ...prevOptions,
+          timeZone: storedTimezone,
+        }));
       } else {
         setTimezone("timezone not found");
       }
