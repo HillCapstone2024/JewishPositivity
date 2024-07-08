@@ -616,7 +616,8 @@ def create_checkin(data):
             content=content_binary_encoded, #can be media or none
             text_entry=data["text_entry"], #can be text or none
             content_type=data["content_type"],
-            date=datetime_current #will get you a datetime 
+            date=datetime_current, #will get you a datetime 
+            privacy=data["privacy"]
         )
 
         # Save checkin

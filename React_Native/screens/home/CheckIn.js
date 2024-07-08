@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   StyleSheet,
+  Switch,
   Keyboard,
   Button,
   Dimensions,
@@ -51,6 +52,7 @@ export default function CheckIn({ navigation, route }) {
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isHapticFeedbackEnabled, setIsHapticFeedbackEnabled] = useState(false);
+  const [isPrivate, setIsPrivate] = useState(false);
   const [timezone, setTimezone] = useState("");
   const [selectedPrompt, setSelectedPrompt] = useState("");
 
@@ -253,6 +255,7 @@ function parseAndFormatDate(dateStr) {
           content_type: mediaType,
           text_entry: CheckInText,
           date: parsedDate,
+          privacy: isPrivate,
         },
         {
           headers: {
@@ -542,6 +545,8 @@ function parseAndFormatDate(dateStr) {
     loadMediaContainer;
   }, [showMediaBar]);
 
+  const togglePrivacy = () => setIsPrivate(!isPrivate);
+
   return (
     <SafeAreaView style={[styles.container]}>   
       {/* <View style={styles.horizontalBar} /> */}
@@ -557,19 +562,19 @@ function parseAndFormatDate(dateStr) {
             {formattedDateTime}{" "}
           </Text>
 
-          <TouchableOpacity onPress={handleAccordianToggle}>
-            <View style={styles.headerContainer}>
-              <Text>Learn more about {checkInType}</Text>
-              <Ionicons name={isExpanded ? "chevron-up" : "chevron-down"} size={24} color="black" />
-            </View>
-          </TouchableOpacity>
+          <View style={styles.Prefsetting}>
+            <Text style={styles.settingText}>Private</Text>
+            <Switch
+              trackColor={{ false: '#f2f2f2', true: '#4A90E2' }} // Update the background color
+              thumbColor={'#f2f2f2'} // Update the thumb color
+              onValueChange={togglePrivacy}
+              value={isPrivate}
+            />
+          </View>
 
-          {isExpanded && (
-            <ScrollView style={styles.contentContainer}>
-              {/* Your existing content here */}
-              {renderTextBasedOnType()}
-            </ScrollView>
-          )}
+          
+
+          
 
           {/* Media Box Below */}
           {mediaBox ? (
@@ -627,6 +632,20 @@ function parseAndFormatDate(dateStr) {
           </View>
 
           {renderDescriptiveText()}
+
+          <TouchableOpacity onPress={handleAccordianToggle}>
+            <View style={styles.headerContainer}>
+              <Text>Learn more about {checkInType}</Text>
+              <Ionicons name={isExpanded ? "chevron-up" : "chevron-down"} size={24} color="black" />
+            </View>
+          </TouchableOpacity>
+
+          {isExpanded && (
+            <ScrollView style={styles.contentContainer}>
+              {/* Your existing content here */}
+              {renderTextBasedOnType()}
+            </ScrollView>
+          )}
         </ScrollView>
 
         {/* View for cancel and submit buttons */}
@@ -768,6 +787,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingBottom: 10,
+    paddingTop: 10,
   },
   header: {
     marginTop: 15,
@@ -967,5 +987,18 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 10,
     top: '50%',
+  },
+  Prefsetting: {
+    flexDirection: 'row', // Arrange children in a row
+    alignItems: 'center', // Align items vertically in the center
+    justifyContent: 'space-between', // Optional: Add space between items
+    padding: 10, // Optional: Add padding for better layout
+    // borderWidth: 2,
+    // borderColor: "#4A90E2",
+    // borderRadius: 10,
+  },
+  settingText: {
+    fontSize: 16, // Example font size, adjust as needed
+    marginRight: 10, // Optional: Add margin to separate text from switch
   },
 });
