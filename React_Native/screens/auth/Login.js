@@ -58,6 +58,7 @@ const Login = ({ navigation }) => {
   };
 
   const saveUser = async () => {
+    console.log("Setting username");
     await Storage.setItem("@username", username);
     
     
@@ -76,14 +77,35 @@ const Login = ({ navigation }) => {
           withCredentials: true,
         });
 
+
+        console.log("Setting First Name:", response.data.first_name);
         setFirstName(response.data.first_name);
+        console.log("First Name set to:", first_name);
+
+        console.log("Setting Last Name:", response.data.last_name);
         setLastName(response.data.last_name);
-        setPassword(response.data.password); //encoded
-        setProfilePicture(response.data.profilePicture); //avatar?
+        console.log("Last Name set to:", last_name);
+
+        console.log("Setting Password:", response.data.password);
+        setPassword(response.data.password);
+        console.log("Password set to:", response.data.password);
+
+        console.log("Setting Profile Picture:", response.data.profilePicture);
+        setProfilePicture(response.data.profilePicture);
+        console.log("Profile Picture set to:", response.data.profilePicture);
+
+        console.log("Setting Email:", response.data.email);
         setEmail(response.data.email);
+        console.log("Email set to:", response.data.email);
+
+        console.log("Setting Timezone:", response.data.timezone);
         setTimezone(response.data.timezone);
-        console.log("Saved Timezone:",response.data.timezone);
-        console.log("New Timezone:",newtimezone);
+        console.log("Timezone set to:", response.data.timezone);
+
+
+
+        // console.log("Saved Timezone:",response.data.timezone);
+        // console.log("New Timezone:",newtimezone);
   
         //save to storage
         await Storage.setItem("@first_name", response.data.first_name);
@@ -91,6 +113,7 @@ const Login = ({ navigation }) => {
         await Storage.setItem("@email", response.data.email);
         await Storage.setItem("@password", response.data.password);
         await Storage.setItem("@profilePicture", response.data.profilepicture);
+        console.log("Setting timezone");
         await Storage.setItem("@timezone", newtimezone)
         await csrf();
         handleUpdateTimeZone();
@@ -102,81 +125,107 @@ const Login = ({ navigation }) => {
       }
     };
 
-    const handleUpdateTimeZone = async () => {
-      const getCsrfToken = async () => {
-        try {
-          const response = await axios.get(`${API_URL}/csrf-token/`);
-          return response.data.csrfToken;
-        } catch (error) {
-          console.error("Error retrieving CSRF token:", error);
-          throw new Error("CSRF token retrieval failed");
-        }
-      };
-  
-      try {
-        const csrfToken = await getCsrfToken();
-        const requestData = {
-          username: username,
-          timezone: newtimezone,
-        };
-        const response = await axios.post(
-          `${API_URL}/update_user_information/`,
-          requestData,
-          {
-            headers: {
-              "X-CSRFToken": csrfToken,
-              "Content-Type": "application/json",
-            },
-            withCredentials: true,
-          }
-        );
-        console.log("update timezone response:", response.data);
-      } catch (error) {
-        console.log(error)
-        setErrorMessage(
-          <View style={styles.errorMessageBox}>
-            <Text style={styles.errorMessageText}>{error.response.data}</Text>
-          </View>
-        );
-        console.error("Update Timezone error:", error.response.data);
-      }
-    };
-  
-  
-    const handleUserInfoError = (error) => {
-      console.log(error);
-      setErrorMessage(
-        <View style={styles.errorMessageBox}>
-          <Text style={styles.errorMessageText}>{error.response.data}</Text>
-        </View>
-      );
-      console.error("Error Loading User:", error.response.data);
-    };
-  
+    loadUserInfo();
+
+  };
+
+  const handleUpdateTimeZone = async () => {
     const getCsrfToken = async () => {
       try {
         const response = await axios.get(`${API_URL}/csrf-token/`);
         return response.data.csrfToken;
       } catch (error) {
-        handleCsrfTokenError(error);
+        console.error("Error retrieving CSRF token:", error);
+        throw new Error("CSRF token retrieval failed");
       }
     };
-  
-    const handleCsrfTokenError = (error) => {
-      console.error("Error retrieving CSRF token:", error);
+
+    try {
+      const csrfToken = await getCsrfToken();
+      const requestData = {
+        username: username,
+        timezone: newtimezone,
+      };
+      const response = await axios.post(
+        `${API_URL}/update_user_information/`,
+        requestData,
+        {
+          headers: {
+            "X-CSRFToken": csrfToken,
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+      console.log("update timezone response:", response.data);
+    } catch (error) {
+      console.log(error)
       setErrorMessage(
         <View style={styles.errorMessageBox}>
-          <Text style={styles.errorMessageText}>
-            CSRF token retrieval failed
-          </Text>
+          <Text style={styles.errorMessageText}>{error.response.data}</Text>
         </View>
       );
-      throw new Error("CSRF token retrieval failed");
-    };
-  
-    loadUserInfo();
-
+      console.error("Update Timezone error:", error.response.data);
+    }
   };
+
+  const handleUserInfoError = (error) => {
+    console.log(error);
+    setErrorMessage(
+      <View style={styles.errorMessageBox}>
+        <Text style={styles.errorMessageText}>{error.response.data}</Text>
+      </View>
+    );
+    console.error("Error Loading User:", error.response.data);
+  };
+
+  const getCsrfToken = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/csrf-token/`);
+      return response.data.csrfToken;
+    } catch (error) {
+      handleCsrfTokenError(error);
+    }
+  };
+
+  const handleCsrfTokenError = (error) => {
+    console.error("Error retrieving CSRF token:", error);
+    setErrorMessage(
+      <View style={styles.errorMessageBox}>
+        <Text style={styles.errorMessageText}>
+          CSRF token retrieval failed
+        </Text>
+      </View>
+    );
+    throw new Error("CSRF token retrieval failed");
+  };
+
+    
+
+  // Ensure useEffect logs changes after the state is updated
+  useEffect(() => {
+    console.log("First name updated to:", first_name);
+  }, [first_name]);
+
+  useEffect(() => {
+    console.log("Last name updated to:", last_name);
+  }, [last_name]);
+
+  useEffect(() => {
+    console.log("Password updated to:", password);
+  }, [password]);
+
+  useEffect(() => {
+    console.log("Profile Picture updated to:", profilePicture);
+  }, [profilePicture]);
+
+  useEffect(() => {
+    console.log("Email updated to:", email);
+  }, [email]);
+
+  useEffect(() => {
+    console.log("Timezone updated to:", timeZone);
+  }, [timeZone]);
 
   const navigateSignUp = () => {
     navigation.navigate("Signup");

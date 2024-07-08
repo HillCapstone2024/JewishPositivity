@@ -95,8 +95,8 @@ const CustomDrawerContent = (props) => {
     const newtimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const storedtimezone = await Storage.getItem("@timezone");
     // const storedtimezone = "America/New_York";
-    console.log("newtimezone:",newtimezone);
-    console.log("storedtimezone:",storedtimezone);
+    // console.log("newtimezone:",newtimezone);
+    // console.log("storedtimezone:",storedtimezone);
     if (newtimezone != storedtimezone && storedtimezone != null)  {
       console.log("Handle logout");
       logout();

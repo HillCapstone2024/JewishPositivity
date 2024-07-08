@@ -135,18 +135,10 @@ describe("Login Component", () => {
 
     fireEvent.press(loginButton);
 
-    // Wait for the AsyncStorage operation to complete
     await waitFor(() => {
-      expect(Storage.setItem).toHaveBeenCalledWith(
-        "@timezone",
-        "America/New_York"
-      );
+      // Log all calls to Storage.setItem for debugging
+      console.log("Storage.setItem calls:", Storage.setItem.mock.calls);
+      expect(Storage.setItem).toHaveBeenCalledWith("@timezone", "America/New_York");
     });
-
-    // Assert on the mock calls to verify the stored timezone
-    const storedTimezone = Storage.setItem.mock.calls.find(
-      (call) => call[0] === "@timezone"
-    )[1];
-    expect(storedTimezone).toBe("America/New_York");
   });
 });
