@@ -79,6 +79,16 @@ export default function ViewCheckIn({ checkin, modalVisible, onClose }) {
       }
     };
 
+    const getPrivacyState = (privacy) => {
+      if (privacy === false) {
+        return "Public";
+      } else if (privacy === true) {
+        return "Private";
+      } else {
+        return "Unknown Private State";
+      }
+    };
+
   return (
     <View style={styles.modalContainer}>
       <Modal
@@ -121,12 +131,15 @@ export default function ViewCheckIn({ checkin, modalVisible, onClose }) {
               <Text style={[styles.detailText]}>
                 {moment(checkin?.date, "YYYY-MM-DD").format(
                   "dddd, D MMMM YYYY"
-                )}{" "}
+                )}{" "} - {getPrivacyState(checkin?.privacy)}
               </Text>
               <Text style={[styles.detailText, { marginBottom: 20 }]}>
                 {getMomentText(checkin?.moment_number)}
               </Text>
-
+              <Text>
+                Hello{checkin?.privacy}
+              </Text>
+              
               {checkin?.content_type === "image" && (
                 <Image
                   style={[styles.JournalEntryModalImage, { marginBottom: 20 }]}

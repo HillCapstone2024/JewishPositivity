@@ -12,6 +12,7 @@ export default function HomeScreen({ navigation }) {
             title: "Modeh Ani",
             date: "2021-10-01 06:00",
             content: "Thank you for your unwavering support and kindness. Your generosity has made a significant difference in my life.",
+            privacy: "false",
         },
         {
             id: '2',
@@ -19,6 +20,7 @@ export default function HomeScreen({ navigation }) {
             title: "Ashrei",
             date: "2021-10-01 12:00",
             content: "I'm deeply grateful for the laughter and joy you bring into my life. You make every moment brighter.",
+            privacy: "false",
         },
         {
             id: '3',
@@ -26,6 +28,7 @@ export default function HomeScreen({ navigation }) {
             title: "Shema",
             date: "2021-10-02 20:00",
             content: "Your thoughtful guidance has been a guiding light for me. Thank you for being my mentor and friend.",
+            privacy: "false",
         },
     ];
 
@@ -42,6 +45,7 @@ export default function HomeScreen({ navigation }) {
             <Text style={[styles.title, theme['text']]}>{item.title}</Text>
             <Text style={[styles.date, theme['text']]}>{item.date}</Text>
             <Text style={[styles.content, theme['text']]}>{item.content}</Text>
+            <Text style={[styles.privacy, theme['text']]}>{item.privacy}</Text>
         </TouchableOpacity>
     );
 
@@ -77,6 +81,9 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
     content: {
+        fontSize: 14,
+    },
+    privacy: {
         fontSize: 14,
     },
 });

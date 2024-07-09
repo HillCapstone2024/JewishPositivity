@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   StyleSheet,
+  Switch,
   Keyboard,
   Button,
   Dimensions,
@@ -50,6 +51,7 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
   const [selectedOption, setSelectedOption] = useState("");
   const [disableUpdate, setDisableUpdate] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isPrivate, setIsPrivate] = useState(selectedEntry?.privacy);
   const [updating, setUpdating] = useState(false);
   const [video, setVideo] = useState({});
   const videoRefs = useRef({});
@@ -80,6 +82,7 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
       }
     };
     loadUsername();
+    console.log("Initial privacy setting:",isPrivate);
     // configureAudioMode();
   }, []);
 
@@ -124,6 +127,7 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
       return null;
     }
   }
+
 
   const textToBase64 = (text) => {
     return Buffer.from(text, "utf8").toString("base64");
@@ -187,6 +191,7 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
       setBase64Data(base64CheckInText);
     }
     console.log("Check-in type: ", mediaType);
+    console.log("Privacy State in update:",isPrivate);
     try {
       // const csrfToken = await getCsrfToken();
       const csrfToken = await Storage.getItem("@CSRF");
@@ -198,6 +203,7 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
           content: base64Data,
           content_type: mediaType,
           text_entry: checkInText,
+          privacy: isPrivate,
         },
         {
           headers: {
@@ -397,6 +403,11 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
     setIsExpanded(!isExpanded); // Toggle the state variable
   };
 
+  const togglePrivacy = () => {
+    setIsPrivate(!isPrivate);
+    setDisableUpdate(false);
+  };
+
   return (
     <Modal
       animationType="slide"
@@ -449,19 +460,15 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
                   {formattedDateTime}{" "}
                 </Text>
 
-                <TouchableOpacity onPress={handleAccordianToggle}>
-                  <View style={styles.headerContainer}>
-                    <Text>Learn more about {getMomentTextShortHand(selectedEntry?.moment_number)}</Text>
-                    <Ionicons name={isExpanded ? "chevron-up" : "chevron-down"} size={24} color="black" />
+                  <View style={styles.Prefsetting}>
+                    <Text style={styles.settingText}>Private</Text>
+                    <Switch
+                      trackColor={{ false: '#f2f2f2', true: '#4A90E2' }} // Update the background color
+                      thumbColor={'#f2f2f2'} // Update the thumb color
+                      onValueChange={togglePrivacy}
+                      value={isPrivate}
+                    />
                   </View>
-                </TouchableOpacity>
-
-                {isExpanded && (
-                  <ScrollView style={styles.contentContainer}>
-                    {/* Your existing content here */}
-                    {renderTextBasedOnType()}
-                  </ScrollView>
-                )}
 
                 {/* Media Box Below */}
                 {mediaBox ? (
@@ -552,6 +559,20 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
                 </View>
 
                 {renderDescriptiveText()}
+
+                <TouchableOpacity onPress={handleAccordianToggle}>
+                  <View style={styles.headerContainer}>
+                    <Text>Learn more about {getMomentTextShortHand(selectedEntry?.moment_number)}</Text>
+                    <Ionicons name={isExpanded ? "chevron-up" : "chevron-down"} size={24} color="black" />
+                  </View>
+                </TouchableOpacity>
+
+                {isExpanded && (
+                  <ScrollView style={styles.contentContainer}>
+                    {/* Your existing content here */}
+                    {renderTextBasedOnType()}
+                  </ScrollView>
+                )}
 
               </ScrollView>
             </KeyboardAvoidingView>
@@ -798,5 +819,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 22,
     paddingBottom: 20,
+  },
+  Prefsetting: {
+    flexDirection: 'row', // Arrange children in a row
+    alignItems: 'center', // Align items vertically in the center
+    justifyContent: 'space-between', // Optional: Add space between items
+    padding: 10, // Optional: Add padding for better layout
+    // borderWidth: 2,
+    // borderColor: "#4A90E2",
+    // borderRadius: 10,
+  },
+  settingText: {
+    fontSize: 16, // Example font size, adjust as needed
+    marginRight: 10, // Optional: Add margin to separate text from switch
   },
 });

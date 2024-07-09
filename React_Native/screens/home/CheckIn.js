@@ -545,7 +545,10 @@ function parseAndFormatDate(dateStr) {
     loadMediaContainer;
   }, [showMediaBar]);
 
-  const togglePrivacy = () => setIsPrivate(!isPrivate);
+  const togglePrivacy = () => {
+    setIsPrivate(!isPrivate);
+    console.log("isPrivate in checkin:",isPrivate);
+  };
 
   return (
     <SafeAreaView style={[styles.container]}>   
@@ -569,6 +572,7 @@ function parseAndFormatDate(dateStr) {
               thumbColor={'#f2f2f2'} // Update the thumb color
               onValueChange={togglePrivacy}
               value={isPrivate}
+              
             />
           </View>
 

@@ -192,6 +192,17 @@ const CheckInEntryDetailsScreen = ({ route, navigation }) => {
     }
   };
 
+  const getPrivacyState = (privacy) => {
+    if (privacy === false) {
+      return "Public";
+    } else if (privacy === true) {
+      return "Private";
+    } else {
+      console.log("Privacy in getPrivacyState:",privacy);
+      return "Unknown Private State";
+    }
+  };
+
   return (
     <View style={styles.modalContainer}>
     {/* modal to show EditDeleteModal */}
@@ -262,7 +273,7 @@ const CheckInEntryDetailsScreen = ({ route, navigation }) => {
         </View>
         
         <Text style={[styles.detailText, { marginBottom: 20 }]}>
-            {moment(selectedEntry?.date, "YYYY-MM-DD").format("dddd, D MMMM YYYY")}{" "}
+            {moment(selectedEntry?.date, "YYYY-MM-DD").format("dddd, D MMMM YYYY")}{" "} - {getPrivacyState(selectedEntry?.privacy)}
         </Text>      
 
         {selectedEntry?.content_type === "image" && (
@@ -346,7 +357,14 @@ const styles = StyleSheet.create({
       color: "grey",
       fontWeight: 500,
       lineHeight: 20,
-    }, 
+    },
+    privacyText: {
+      fontSize: 14,
+      color: "grey",
+      fontWeight: 500,
+      lineHeight: 20,
+      marginBottom: 10,
+    },
   
     // Edit/Delete Modal
     centeredView: {
