@@ -14,6 +14,7 @@ import EditCheckIn from "./EditCheckIn.js";
 import VideoViewer from "../../tools/VideoViewer.js";
 import ImageViewer from "../../tools/ImageViewer.js";
 import RecordingViewer from "../../tools/RecordingViewer.js";
+import * as Haptics from "expo-haptics";
 
 const CheckInEntryDetailsScreen = ({ route, navigation }) => {
   const [username, setUsername] = useState("");
@@ -22,6 +23,7 @@ const CheckInEntryDetailsScreen = ({ route, navigation }) => {
   const [video, setVideo] = useState({});
   const [deleteModalVisible, setEditDeleteModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
+  const [isHapticFeedbackEnabled, setIsHapticFeedbackEnabled] = useState(false);
   const videoRefs = useRef({});
   const { selectedEntry } = route.params;
  
@@ -45,6 +47,20 @@ const CheckInEntryDetailsScreen = ({ route, navigation }) => {
   //   throw new Error("CSRF token retrieval failed");
   //   }
   // };
+
+  const getHapticFeedback = async () => {
+    try {
+      const hapticFeedbackEnabled = await Storage.getItem('@hapticFeedbackEnabled');
+      if (hapticFeedbackEnabled === 'true') {
+        setIsHapticFeedbackEnabled(true);
+      } else {
+        setIsHapticFeedbackEnabled(false);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+  getHapticFeedback();
 
   const handleGetVideo = async (checkin_id) => {
     console.log("getting video for check num:", checkin_id);
@@ -176,6 +192,17 @@ const CheckInEntryDetailsScreen = ({ route, navigation }) => {
     }
   };
 
+  const getPrivacyState = (privacy) => {
+    if (privacy === false) {
+      return "Public";
+    } else if (privacy === true) {
+      return "Private";
+    } else {
+      console.log("Privacy in getPrivacyState:",privacy);
+      return "Unknown Private State";
+    }
+  };
+
   return (
     <View style={styles.modalContainer}>
     {/* modal to show EditDeleteModal */}
@@ -200,8 +227,10 @@ const CheckInEntryDetailsScreen = ({ route, navigation }) => {
                 <View style={styles.horizontalBar} />
                 {/* Delete button */}
                 <TouchableOpacity onPress={() => {
+                    isHapticFeedbackEnabled ? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium) : null;
                     setCheckin_id(selectedEntry?.checkin_id);
                     console.log(checkin_id);
+                    
                     onDelete();
                     // setEditDeleteModalVisible(false);
                 }}>
@@ -244,7 +273,7 @@ const CheckInEntryDetailsScreen = ({ route, navigation }) => {
         </View>
         
         <Text style={[styles.detailText, { marginBottom: 20 }]}>
-            {moment(selectedEntry?.date, "YYYY-MM-DD").format("dddd, D MMMM YYYY")}{" "}
+            {moment(selectedEntry?.date, "YYYY-MM-DD").format("dddd, D MMMM YYYY")}{" "} - {getPrivacyState(selectedEntry?.privacy)}
         </Text>      
 
         {selectedEntry?.content_type === "image" && (
@@ -328,7 +357,14 @@ const styles = StyleSheet.create({
       color: "grey",
       fontWeight: 500,
       lineHeight: 20,
-    }, 
+    },
+    privacyText: {
+      fontSize: 14,
+      color: "grey",
+      fontWeight: 500,
+      lineHeight: 20,
+      marginBottom: 10,
+    },
   
     // Edit/Delete Modal
     centeredView: {

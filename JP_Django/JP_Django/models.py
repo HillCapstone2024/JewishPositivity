@@ -49,6 +49,7 @@ class Checkin(models.Model): #to store checkin moments data
     content_type = models.CharField(max_length=100, null=True) #either of following option: photo, audio, video
     text_entry= models.TextField(null=True) 
     content = models.BinaryField(null=True) #actual content
+    privacy = models.BooleanField(default=False) #should be false = public, true = private
 
     class Meta:
         # Define unique constraint for composite key

@@ -620,7 +620,8 @@ def create_checkin(data):
             content=content_binary_encoded, #can be media or none
             text_entry=data["text_entry"], #can be text or none
             content_type=data["content_type"],
-            date=datetime_current #will get you a datetime 
+            date=datetime_current, #will get you a datetime 
+            privacy=data["privacy"] #either public or private for both friendfeed and community
         )
 
         # Save checkin
@@ -713,6 +714,7 @@ def update_checkin_fields(checkin, data):
         'text_entry': (update_text_entry, data.get("text_entry")),
         'content_type': (update_content_type, data.get("content_type")),
         'content': (update_content, data.get("content")),
+        'privacy': (update_privacy, data.get("privacy")),
     }
 
     # Iterate over the update_actions dictionary, where each entry contains a field to update and its corresponding update function.
@@ -748,6 +750,15 @@ def update_content(checkin, new_content):
     except Exception as e:
         logging.info("ERROR IN CHANGING CONTENT: %s", e)
         return HttpResponse("Error in updating content", status=400)
+    
+def update_privacy(checkin, new_privacy):
+    try:
+        checkin.privacy = new_privacy
+        checkin.save()
+        logging.info("SUCCESS! Privacy has been updated to \"%s\"", checkin.privacy)
+    except Exception as e:
+        logging.info("ERROR IN CHANGING PRIVACY: %s", e)
+        return HttpResponse("Error in updating privacy", status=400)
 
 def delete_checkin_view(request): # to delete a specified checkin_id
     if request.method == "POST":
@@ -826,6 +837,7 @@ def format_checkin_data(checkins):
             "user_id": checkin.user_id.id,
             "date": checkin.date.strftime('%Y-%m-%d'),  # Convert date to string to be JSON serializable
             "time": checkin.date.strftime('%H:%M:%S'),
+            "privacy": checkin.privacy,
         }
         response_data.append(current_checkin)  # add checkin to the list to be returned
 

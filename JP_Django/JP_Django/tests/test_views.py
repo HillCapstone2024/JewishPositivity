@@ -1096,7 +1096,8 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'content_type': None,
         'content': None,
         'text_entry': "This is a sample checkin text",
-        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+        'privacy': False
     }
 
     PHOTO_DATA_SUCCESS = {
@@ -1105,7 +1106,8 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'content_type': 'photo',
         'content': photo, 
         'text_entry': None,
-        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+        'privacy': False
     }
 
     AUDIO_DATA_SUCCESS = {
@@ -1114,7 +1116,8 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'content_type': 'audio',
         'content': audio, 
         'text_entry': None,
-        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+        'privacy': False
     }
 
     VIDEO_DATA_SUCCESS = {
@@ -1123,7 +1126,8 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'content_type': 'video',
         'content': video, 
         'text_entry': None,
-        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+        'privacy': False
     }
 
     MISSING_USERNAME = {
@@ -1132,7 +1136,8 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'content_type': None,
         'content': None,
         'text_entry': 'This is a sample checkin text',
-        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+        'privacy': False
     }
 
     MISSING_MOMENT_NUMBER = {
@@ -1141,7 +1146,8 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'content_type': None,
         'content': None, 
         'text_entry': "This is a sample checkin text",
-        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+        'privacy': False
     }
 
     MISSING_CONTENT_TYPE = { 
@@ -1150,7 +1156,8 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'content_type': '',
         'content': photo, 
         'text_entry': "This is a sample checkin text",
-        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+        'privacy': False
     }
         
     MISSING_CONTENT_AND_TEXT = {
@@ -1159,7 +1166,8 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'content_type': None,
         'content': None,
         'text_entry': None,
-        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+        'privacy': False
     }
 
     INVALID_USERID = { 
@@ -1168,7 +1176,8 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'content_type': None,
         'content': None,
         'text_entry': "This is a sample checkin text",
-        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+        'privacy': False
     }
 
     DUPLICATE_MOMENT = {
@@ -1177,7 +1186,8 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         'content_type': 'photo',
         'content': photo,
         'text_entry': "This is a sample checkin text",
-        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+        'privacy': False
     }
 
     # Set up method to create a test user
@@ -1213,6 +1223,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
             logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
             logging.info(LOG_MSG_FORMAT, LOG_MOMENT_NUMBER, obj.moment_number)
             logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
             logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.user_id)
             logging.info('')   
 
@@ -1238,7 +1249,7 @@ class CheckinViewTestCase(TestCase): #to test handling of checkin post for text,
         # Check if the response status code is 200
         self.assertEqual(response.status_code, 200)
 
-    def test_checkin_video_success(self): #test of successful audio entry submission
+    def test_checkin_video_success(self): #test of successful video entry submission
         # logging the test we are in
         logging.info("TESTING CHECKIN_VIDEO_SUCCESS....")
         client = Client()
@@ -1356,6 +1367,7 @@ class GetCheckinsViewTestCase(TestCase): # to test retreving all checkin moments
         'content_type': None,
         'content': None, #fill in with example entry
         'text_entry': "This is a sample checkin text",
+        'privacy': False,
     }
 
     PHOTO_DATA_SUCCESS = {
@@ -1364,6 +1376,7 @@ class GetCheckinsViewTestCase(TestCase): # to test retreving all checkin moments
         'content_type': 'photo',
         'content': photo, 
         'text_entry': None,
+        'privacy': False,
     }
 
     AUDIO_DATA_SUCCESS = {
@@ -1372,6 +1385,7 @@ class GetCheckinsViewTestCase(TestCase): # to test retreving all checkin moments
         'content_type': 'audio',
         'content': audio, 
         'text_entry': None,
+        'privacy': False,
     }
 
     VIDEO_DATA_SUCCESS = {
@@ -1380,6 +1394,7 @@ class GetCheckinsViewTestCase(TestCase): # to test retreving all checkin moments
         'content_type': 'video',
         'content': video, 
         'text_entry': None,
+        'privacy': False,
     }
 
     BOTH_TEXT_AND_MEDIA_SUCCESS = {
@@ -1388,6 +1403,7 @@ class GetCheckinsViewTestCase(TestCase): # to test retreving all checkin moments
         'content_type': 'photo',
         'content': photo, 
         'text_entry': "text sample to get",
+        'privacy': False,
     }
 
     def setUp(self):
@@ -1437,6 +1453,7 @@ class GetCheckinsViewTestCase(TestCase): # to test retreving all checkin moments
             logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
             logging.info(LOG_MSG_FORMAT, LOG_MOMENT_NUMBER, obj.moment_number)
             logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
             logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.user_id)
             logging.info('')    
 
@@ -1462,6 +1479,7 @@ class GetCheckinsViewTestCase(TestCase): # to test retreving all checkin moments
             logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
             logging.info(LOG_MSG_FORMAT, LOG_MOMENT_NUMBER, obj.moment_number)
             logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
             logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.user_id)
             logging.info('')   
 
@@ -1493,7 +1511,8 @@ class UpdateCheckinsViewTestCase(TestCase):
         'content_type': None,
         'content': None, #fill in with example entry
         'text_entry': "This is a sample checkin text",
-        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+        'privacy': False
     }
 
     
@@ -1508,6 +1527,10 @@ class UpdateCheckinsViewTestCase(TestCase):
         'content': photo, 
     }
 
+    UPDATE_PRIVACY_SUCCESS = {
+        'checkin_id' : check_id,
+        'privacy': True,
+    }
 
     INVALID_CHECKIN_ID = {
         'checkin_id' : 234,
@@ -1518,7 +1541,8 @@ class UpdateCheckinsViewTestCase(TestCase):
         'content_type': None, 
         'content': None, 
         'text_entry': None,
-        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+        'privacy': False
     }
 
     
@@ -1554,6 +1578,7 @@ class UpdateCheckinsViewTestCase(TestCase):
             logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
             logging.info(LOG_MSG_FORMAT, LOG_MOMENT_NUMBER, obj.moment_number)
             logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
             logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.user_id)
             logging.info('')    
 
@@ -1575,6 +1600,7 @@ class UpdateCheckinsViewTestCase(TestCase):
             logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
             logging.info(LOG_MSG_FORMAT, LOG_MOMENT_NUMBER, obj.moment_number)
             logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
             logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.user_id)
             logging.info('')    
     
@@ -1607,6 +1633,32 @@ class UpdateCheckinsViewTestCase(TestCase):
             logging.info('Updated Checkin content')      
         logging.info('')  
 
+    def test_update_checkins_privacy_success(self):# Successfully retrieves a valid user's checkins from the database
+        logging.info("************TEST_update_checkins_privacy_success**************..........")
+        client = Client()
+
+        logging.info('Before Updated content and type:')
+        queryset = Checkin.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
+            logging.info('Checkin original content')  
+        logging.info('')  
+
+        # Send GET request to get_checkin_info_view
+        self.UPDATE_PRIVACY_SUCCESS['checkin_id'] = self.check_id #updating post data with the correct checkin ID from the setup
+        response = client.post(reverse('update_checkin_info_view'), data=json.dumps(self.UPDATE_PRIVACY_SUCCESS), content_type=CONTENT_TYPE_JSON)
+
+        # Check if response status code is 200
+        self.assertEqual(response.status_code, 200)
+
+        # Printing DB after attempted getting of checkins
+        logging.info('Response: %s', response)
+        logging.info('After Updated content and type:')
+        queryset = Checkin.objects.all()
+        for obj in queryset:
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
+            logging.info('Updated Checkin content')      
+        logging.info('')  
 
     def test_update_checkins_fail_CheckinID_DNE(self):# Fails to get checkins in database due to user not existing
         logging.info("***************TEST_update_checkins_fail_CheckinID_DNE**************")
@@ -1634,6 +1686,7 @@ class UpdateCheckinsViewTestCase(TestCase):
             logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
             logging.info(LOG_MSG_FORMAT, LOG_MOMENT_NUMBER, obj.moment_number)
             logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
             logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.user_id)
             logging.info('')  
 
@@ -1677,7 +1730,8 @@ class DeleteCheckinViewTestCase(TestCase):  # To test deleting checkins account 
         'content_type': None,
         'content': None, #fill in with example entry
         'text_entry': "This is a sample checkin text",
-        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+        'privacy': False
     }
 
     PHOTO_DATA_SUCCESS = {
@@ -1686,7 +1740,8 @@ class DeleteCheckinViewTestCase(TestCase):  # To test deleting checkins account 
         'content_type': 'photo',
         'content': photo, 
         'text_entry': None,
-        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+        'privacy': False
     }
 
     check_id = -1 #default, will change in test
@@ -1730,6 +1785,7 @@ class DeleteCheckinViewTestCase(TestCase):  # To test deleting checkins account 
             logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
             logging.info(LOG_MSG_FORMAT, LOG_MOMENT_NUMBER, obj.moment_number)
             logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
             logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.user_id)
             logging.info('')   
 
@@ -1749,6 +1805,7 @@ class DeleteCheckinViewTestCase(TestCase):  # To test deleting checkins account 
             logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
             logging.info(LOG_MSG_FORMAT, LOG_MOMENT_NUMBER, obj.moment_number)
             logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
             logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.user_id)
             logging.info('')   
 
@@ -1785,7 +1842,8 @@ class GetCheckinVideoViewTestCase(TestCase): # to test retreving a video checkin
         'content_type': 'video',
         'content': video, 
         'text_entry': None,
-        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+        'privacy': False
     }
 
     video_check_id= -1 #makes this global to access in test methods
@@ -1884,7 +1942,8 @@ class GetTodaysCheckinsViewTestCase(TestCase): # to test retreving todays checki
         'content_type': 'text',
         'content': None, #fill in with example entry
         'text_entry': "This is a sample checkin text",
-        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+        'privacy': False
     }
 
     PHOTO_DATA_SUCCESS = {
@@ -1893,7 +1952,8 @@ class GetTodaysCheckinsViewTestCase(TestCase): # to test retreving todays checki
         'content_type': 'photo',
         'content': photo, 
         'text_entry': None,
-        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+        'privacy': False
     }
 
     AUDIO_DATA_SUCCESS = {
@@ -1902,7 +1962,8 @@ class GetTodaysCheckinsViewTestCase(TestCase): # to test retreving todays checki
         'content_type': 'audio',
         'content': audio, 
         'text_entry': None,
-        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+        'privacy': False
     }
 
     VIDEO_DATA_SUCCESS = {
@@ -1911,7 +1972,8 @@ class GetTodaysCheckinsViewTestCase(TestCase): # to test retreving todays checki
         'content_type': 'video',
         'content': video, 
         'text_entry': None,
-        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+        'privacy': False
     }
 
     BOTH_TEXT_AND_MEDIA_SUCCESS = {
@@ -1920,7 +1982,8 @@ class GetTodaysCheckinsViewTestCase(TestCase): # to test retreving todays checki
         'content_type': 'video',
         'content': photo, 
         'text_entry': "text sample to get",
-        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+        'privacy': False
     }
 
     def setUp(self):
@@ -1961,6 +2024,7 @@ class GetTodaysCheckinsViewTestCase(TestCase): # to test retreving todays checki
             logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
             logging.info(LOG_MSG_FORMAT, LOG_MOMENT_NUMBER, obj.moment_number)
             logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
             logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.user_id)
             logging.info('')    
 
@@ -1986,6 +2050,7 @@ class GetTodaysCheckinsViewTestCase(TestCase): # to test retreving todays checki
             logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
             logging.info(LOG_MSG_FORMAT, LOG_MOMENT_NUMBER, obj.moment_number)
             logging.info(LOG_MSG_FORMAT, LOG_DATE, obj.date)
+            logging.info(LOG_MSG_FORMAT, LOG_PRIVACY, obj.privacy)
             logging.info(LOG_MSG_FORMAT, LOG_USER_ID, obj.user_id)
             logging.info('')   
 

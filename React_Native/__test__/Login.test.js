@@ -2,6 +2,7 @@ import React from "react";
 import { fireEvent, render, waitFor } from "@testing-library/react-native";
 import axios from "axios";
 import Login from "../screens/auth/Login.js";
+import * as Storage from "../AsyncStorage.js";
 
 //mock axios call
 jest.mock("axios");
@@ -10,17 +11,36 @@ jest.mock("axios");
 const mockNavigateDrawer = jest.fn();
 const mockResetNavigation = jest.fn();
 
-jest.mock("@react-native-async-storage/async-storage", () => ({
+jest.mock("../AsyncStorage.js", () => ({
   setItem: jest.fn(),
-  getItem: jest.fn(() => Promise.resolve(null)), // Adjust this as needed for your tests
+  getItem: jest.fn(), // Adjust this as needed for your tests
   removeItem: jest.fn(),
   clear: jest.fn(),
 }));
 
 describe("Login Component", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    Storage.getItem.mockImplementation((key) => {
+      switch (key) {
+        case '@username':
+          return Promise.resolve('testUser');
+        case '@timezone':
+          return Promise.resolve('America/New_York');
+        case '@theme':
+          return Promise.resolve('light');
+        case '@CSRF':
+          return Promise.resolve('dummyCsrfToken');
+        default:
+          return Promise.resolve(null);
+      }
+    });
+  });
+
   it("can do simple jest test", () => {
     expect(1 + 2).toBe(3);
   });
+
   it("Successfully renders login and signup buttons", () => {
     const { getByText, getByTestId } = render(<Login />);
     expect(getByTestId("usernameInput")).toBeTruthy();
@@ -81,4 +101,44 @@ describe("Login Component", () => {
     });
   });
 
+  it("tests updated timezone", async () => {
+    
+    const { getByTestId, getByPlaceholderText } = render(
+      <Login
+        navigation={{
+          navigate: mockNavigateDrawer,
+          reset: mockResetNavigation, // Mocked reset function
+        }}
+      />
+    );
+
+    const usernameInput = getByPlaceholderText('Username');
+    const passwordInput = getByPlaceholderText('Password');
+    const loginButton = getByTestId('loginButton');
+
+    fireEvent.changeText(usernameInput, 'testuser');
+    fireEvent.changeText(passwordInput, 'password123');
+
+    axios.get.mockResolvedValue({ data: { csrfToken: "test-csrf-token" } });
+    axios.post.mockResolvedValueOnce({ data: { success: true } }); // Mock login response
+    axios.get.mockResolvedValueOnce({
+      data: {
+        first_name: 'John',
+        last_name: 'Doe',
+        password: 'encodedpassword',
+        profilePicture: 'avatar.png',
+        email: 'john.doe@example.com',
+        timezone: 'America/New_York',
+      }
+    }); // Mock get_user_info response
+    axios.post.mockResolvedValueOnce({ data: { success: true } }); // Mock update_user_information response
+
+    fireEvent.press(loginButton);
+
+    await waitFor(() => {
+      // Log all calls to Storage.setItem for debugging
+      console.log("Storage.setItem calls:", Storage.setItem.mock.calls);
+      expect(Storage.setItem).toHaveBeenCalledWith("@timezone", "America/New_York");
+    });
+  });
 });

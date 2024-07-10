@@ -53,24 +53,25 @@ const CustomDrawerContent = (props) => {
   const navigation = useNavigation();
 
   const handleLogout = () => {
-    const logout = async () => {
-      // await Storage.removeItem("@username");
-      // await Storage.removeItem("@first_name");
-      // await Storage.removeItem("@last_name");
-      // await Storage.removeItem("@email");
-      // await Storage.removeItem("@profilePicture");
-      // await Storage.removeItem("@password");
-      await Storage.clearAll();
-      props.navigation.reset({
-        index: 0,
-        routes: [{ name: "Landing" }],
-      });
-      props.navigation.navigate("Landing");
-    };
     Alert.alert("Logout?", "Are you sure you want to log out?", [
       { text: "Cancel", style: "cancel" },
       { text: "Logout", onPress: () => logout() },
     ]);
+  };
+
+  const logout = async () => {
+    // await Storage.removeItem("@username");
+    // await Storage.removeItem("@first_name");
+    // await Storage.removeItem("@last_name");
+    // await Storage.removeItem("@email");
+    // await Storage.removeItem("@profilePicture");
+    // await Storage.removeItem("@password");
+    await Storage.clearAll();
+    props.navigation.reset({
+      index: 0,
+      routes: [{ name: "Landing" }],
+    });
+    props.navigation.navigate("Landing");
   };
 
 
@@ -88,11 +89,27 @@ const CustomDrawerContent = (props) => {
     }
   };
 
+  // This checks to see if your timezone changed and if it has, it will log you out so storage can be updated upon login
+  const checkTimezone = async () => {
+    console.log("checkTimezone called");
+    const newtimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const storedtimezone = await Storage.getItem("@timezone");
+    // const storedtimezone = "America/New_York";
+    // console.log("newtimezone:",newtimezone);
+    // console.log("storedtimezone:",storedtimezone);
+    if (newtimezone != storedtimezone && storedtimezone != null)  {
+      console.log("Handle logout");
+      logout();
+    }
+  }
+
   useEffect(
     useCallback(() => {
     // const unsubscribe = navigation.addListener("drawerOpen", () => {
     // Call your method here
+    
     getUserInfo();
+    checkTimezone();
     // });
 
     // unsubscribe();
