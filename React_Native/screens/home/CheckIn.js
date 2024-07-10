@@ -53,6 +53,7 @@ export default function CheckIn({ navigation, route }) {
   const [isHapticFeedbackEnabled, setIsHapticFeedbackEnabled] = useState(false);
   const [timezone, setTimezone] = useState("");
   const [selectedPrompt, setSelectedPrompt] = useState("");
+  const [prompts, setPrompts] = useState([]);
 
   const { checkInType } = route.params;
   const mediaAccessoryViewID = "MediaBar";
@@ -72,6 +73,7 @@ export default function CheckIn({ navigation, route }) {
     now
   );    
   
+
   // useEffect(() => {
   //   const getStoredTimezone = async () => {
   //     try {
@@ -446,51 +448,64 @@ function parseAndFormatDate(dateStr) {
     setIsExpanded(!isExpanded); // Toggle the state variable
   };
 
-  const modehAniPrompts = [
-    "What are you grateful for today?",
-    "Think of someone who has helped you recently. How can you express gratitude to them?",
-    "Reflect on a challenge you overcame and what you learned from it.",
-    "What is one thing that brought you joy today?",
-    "What is a simple pleasure you experienced today?",
-    "Think of a skill or talent you have and how you can use it to help others."
-  ];
+  // const modehAniPrompts = [
+  //   "What are you grateful for today?",
+  //   "Think of someone who has helped you recently. How can you express gratitude to them?",
+  //   "Reflect on a challenge you overcame and what you learned from it.",
+  //   "What is one thing that brought you joy today?",
+  //   "What is a simple pleasure you experienced today?",
+  //   "Think of a skill or talent you have and how you can use it to help others."
+  // ];
   
-  const ashreiPrompts = [
-    "What made you smile today?",
-    "Recall a happy memory from your childhood.",
-    "Think of a person who inspires you and why.",
-    "What is something you're looking forward to?",
-    "Reflect on a recent accomplishment that made you feel proud.",
-    "What is a hobby or activity that brings you happiness?"
-  ];
+  // const ashreiPrompts = [
+  //   "What made you smile today?",
+  //   "Recall a happy memory from your childhood.",
+  //   "Think of a person who inspires you and why.",
+  //   "What is something you're looking forward to?",
+  //   "Reflect on a recent accomplishment that made you feel proud.",
+  //   "What is a hobby or activity that brings you happiness?"
+  // ];
   
-  const shemaPrompts = [
-    "What was the most meaningful part of your day?",
-    "Reflect on a lesson you learned today.",
-    "Think of a way you showed kindness to someone today.",
-    "What is something you're grateful for in your life right now?",
-    "Recall a moment when you felt at peace today.",
-    "What is a goal or aspiration you want to work towards?"
-  ];
+  // const shemaPrompts = [
+  //   "What was the most meaningful part of your day?",
+  //   "Reflect on a lesson you learned today.",
+  //   "Think of a way you showed kindness to someone today.",
+  //   "What is something you're grateful for in your life right now?",
+  //   "Recall a moment when you felt at peace today.",
+  //   "What is a goal or aspiration you want to work towards?"
+  // ];
 
-  const PromptDropdown = ({ checkInType, selectedPrompt, setSelectedPrompt }) => {
+  useEffect(() => {
+    fetchPrompts();
+  }, [checkInType]);
+
+  const fetchPrompts = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/get-prompts/?checkin_type=${checkInType}`);
+      setPrompts(response.data);
+    } catch (error) {
+      console.error('Error fetching prompts:', error);
+    }
+  };
+
+  const PromptDropdown = () => {
     // const [selectedPrompt, setSelectedPrompt] = useState("");
     const [isOpen, setIsOpen] = useState(false);
   
-    let prompts = [];
-    switch (checkInType) {
-      case "ModehAni":
-        prompts = modehAniPrompts;
-        break;
-      case "Ashrei":
-        prompts = ashreiPrompts;
-        break;
-      case "Shema":
-        prompts = shemaPrompts;
-        break;
-      default:
-        break;
-    }
+    // let prompts = [];
+    // switch (checkInType) {
+    //   case "ModehAni":
+    //     prompts = modehAniPrompts;
+    //     break;
+    //   case "Ashrei":
+    //     prompts = ashreiPrompts;
+    //     break;
+    //   case "Shema":
+    //     prompts = shemaPrompts;
+    //     break;
+    //   default:
+    //     break;
+    // }
 
     const toggleDropdown = () => {
       setIsOpen(!isOpen);
@@ -515,13 +530,13 @@ function parseAndFormatDate(dateStr) {
         </TouchableOpacity>
         {isOpen && (
           <ScrollView style={styles.promptDropdownList}>
-            {prompts.map((prompt, index) => (
+            {prompts.map((prompt) => (
               <TouchableOpacity
-                key={index}
+                key={prompt.id}
                 style={styles.promptDropdownItem}
-                onPress={() => selectPrompt(prompt)}
+                onPress={() => selectPrompt(prompt.text)}
               >
-                <Text style={styles.promptDropdownItemText}>{prompt}</Text>
+                <Text style={styles.promptDropdownItemText}>{prompt.text}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -529,6 +544,36 @@ function parseAndFormatDate(dateStr) {
       </View>
     );
   };
+
+  //   return (
+  //     <View style={styles.promptDropdownContainer}>
+  //       <TouchableOpacity style={styles.promptDropdownHeader} onPress={toggleDropdown}>
+  //         <Text style={styles.promptDropdownLabel}>
+  //           {selectedPrompt || "Select a prompt"}
+  //         </Text>
+  //         <Ionicons
+  //           name={isOpen ? "chevron-up" : "chevron-down"}
+  //           size={24}
+  //           color="#4A90E2"
+  //         />
+  //       </TouchableOpacity>
+  //       {isOpen && (
+  //         <ScrollView style={styles.promptDropdownList}>
+  //           {prompts.map((prompt, index) => (
+  //             <TouchableOpacity
+  //               key={index}
+  //               style={styles.promptDropdownItem}
+  //               onPress={() => selectPrompt(prompt)}
+  //             >
+  //               <Text style={styles.promptDropdownItemText}>{prompt}</Text>
+  //             </TouchableOpacity>
+  //           ))}
+  //         </ScrollView>
+  //       )}
+  //     </View>
+  //   );
+  // };
+
 
   const mediaBoxAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
@@ -606,9 +651,9 @@ function parseAndFormatDate(dateStr) {
             {/* <Text style={[styles.boxDescriptor]}>Description</Text> */}
             <ScrollView style={[styles.dropdownContainer, { height: 350 }]}>
               <PromptDropdown 
-                checkInType={checkInType} 
-                selectedPrompt={selectedPrompt}
-                setSelectedPrompt={setSelectedPrompt}
+                // checkInType={checkInType} 
+                // selectedPrompt={selectedPrompt}
+                // setSelectedPrompt={setSelectedPrompt}
               />
               
               <TextInput

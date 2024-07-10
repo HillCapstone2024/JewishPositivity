@@ -89,3 +89,15 @@ class CommunityUser(models.Model): # to store users-community relationships
     class Meta:
         # Define unique constraint for composite key
         unique_together = [('user_id', 'community_id')] # So members can't join the same community twice
+
+class Prompt(models.Model):
+    CHECKIN_TYPES = [
+        ('ModehAni', 'Modeh Ani'),
+        ('Ashrei', 'Ashrei'),
+        ('Shema', 'Shema'),
+    ]
+    checkin_type = models.CharField(max_length=10, choices=CHECKIN_TYPES)
+    text = models.TextField()
+
+    def __str__(self):
+        return f"{self.checkin_type}: {self.text[:50]}..."

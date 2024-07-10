@@ -30,6 +30,10 @@ from django.http import FileResponse
 from .settings import BASE_DIR
 load_dotenv()
 
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from .models import Prompt
+from .serializers import PromptSerializer
 # ########## Configuration & Constants ##########
 
 
@@ -628,8 +632,8 @@ def create_checkin(data):
         return HttpResponse('Data saved successfully', status=200)
     except Exception as e:
         # Log and return an error response if the check-in creation fails
-        logging.info("Checkin failed exception: %s", e)
-        return HttpResponse("Check-in failed to save", status=400)
+        logging.info("Checkin failed exception: %s", e, exc_info=True)
+        return HttpResponse(f"Check-in failed to save:  {str(e)}", status=400)
 
 def checkin_view(request):
     # Handle the check-in POST request
@@ -2234,3 +2238,13 @@ def delete_user_from_community_view(request):
 def serve_apple_site_association():
     filepath = os.path.join(BASE_DIR.parent, 'apple-app-site-association')
     return FileResponse(open(filepath, 'rb'), content_type=constAppJson)
+
+@api_view(['GET'])
+def get_prompts(request):
+    checkin_type = request.GET.get('checkin_type')
+    if checkin_type:
+        prompts = Prompt.objects.filter(checkin_type=checkin_type)
+    else:
+        prompts = Prompt.objects.all()
+    serializer = PromptSerializer(prompts, many=True)
+    return Response(serializer.data)
