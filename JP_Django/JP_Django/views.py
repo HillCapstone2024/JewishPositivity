@@ -710,19 +710,28 @@ def validate_content_and_text_entry(data, checkin):
 
 def update_checkin_fields(checkin, data):
     # Define a dictionary mapping POST data keys to their respective update functions and expected values
+    if ('privacy' in data):
+        print("privacy is in data")
+        print(type(data.get('privacy')))
+        print("value of privacy:", data.get('privacy'))
+    
+    if data.get('privacy'):
+        print("There should be a value associated")
+        
     update_actions = {
         'text_entry': (update_text_entry, data.get("text_entry")),
         'content_type': (update_content_type, data.get("content_type")),
         'content': (update_content, data.get("content")),
         'privacy': (update_privacy, data.get("privacy")),
     }
-
+    
     # Iterate over the update_actions dictionary, where each entry contains a field to update and its corresponding update function.
-    for key, (update_func, value) in update_actions.items(): 
-        if key in data and value: # Check if the key is in the POST data and has a non-empty value
-            error_response = update_func(checkin, value) # Call the respective update function with the user object and the value from the POST data
-            if error_response: # If the update function returns an error response, return it immediately
-                return error_response
+    for key, (update_func, value) in update_actions.items():
+        if key in data:  # Check if the key is in the POST data
+            if value is not None:  # Check if the value is not None (allowing False, 0, etc.)
+                error_response = update_func(checkin, value)  # Call the respective update function with the user object and the value from the POST data
+                if error_response:  # If the update function returns an error response, return it immediately
+                    return error_response
 
 def update_text_entry(checkin, new_text_entry):
     try:
@@ -752,9 +761,17 @@ def update_content(checkin, new_content):
         return HttpResponse("Error in updating content", status=400)
     
 def update_privacy(checkin, new_privacy):
+    print("it reaches in update_privacy")
     try:
+        # print("Current privacy:", checkin.privacy)
+        # if (new_privacy == 0):
+        #     checkin.privacy = False
+        # else:
+        #     checkin.privacy = True
+        # print("After privacy:",checkin.privacy)
         checkin.privacy = new_privacy
         checkin.save()
+        print("After privacy:", checkin.privacy)
         logging.info("SUCCESS! Privacy has been updated to \"%s\"", checkin.privacy)
     except Exception as e:
         logging.info("ERROR IN CHANGING PRIVACY: %s", e)
@@ -1028,7 +1045,7 @@ def get_todays_checkin_info_view(request):
 #     return Checkin.objects.filter(user_id=user_id, date__date=today)
 
 def get_user_checkins(user_id):
-    return Checkin.objects.filter(user_id=user_id).order_by('-date')
+    return Checkin.objects.filter(user_id=user_id, privacy=False).order_by('-date')
 
 
 # ########## Utility Views ##########

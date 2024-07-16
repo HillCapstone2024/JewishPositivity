@@ -203,6 +203,8 @@ const CheckInEntryDetailsScreen = ({ route, navigation }) => {
     }
   };
 
+  
+
   return (
     <View style={styles.modalContainer}>
     {/* modal to show EditDeleteModal */}
