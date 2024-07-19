@@ -76,88 +76,49 @@ export default function CheckIn({ navigation, route }) {
   );    
   
 
-  // useEffect(() => {
-  //   const getStoredTimezone = async () => {
-  //     try {
-  //       const storedTimezone = await AsyncStorage.getItem("@timezone");
-  //       return storedTimezone;
-  //     } catch (error) {
-  //       console.error("Error retrieving timezone from storage:", error);
-  //       return null;
-  //     }
-  //   };
+  function parseAndFormatDate(dateStr) {
+    //reg expression to match normal and military phone settings
+    const regex =
+      /^(\w+),\s+(\w+)\s+(\d+),\s+(\d+)\s+at\s+(\d+):(\d+)(?:\s*(AM|PM)?)$/;
+    const match = dateStr.match(regex);
 
-  //   const fetchAndFormatDateTime = async () => {
-  //     try {
-  //       const timezone = await getStoredTimezone();
-  //       if (!timezone) {
-  //         throw new Error("Timezone not found in AsyncStorage");
-  //       }
+    if (!match) {
+      return "Invalid date format";
+    }
+    const [, , month, day, year, hour, minute, period] = match;
+    const monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    const monthNumber = monthNames.indexOf(month) + 1;
 
-  //       const options = {
-  //         timeZone: timezone,
-  //         weekday: "long",
-  //         year: "numeric",
-  //         month: "long",
-  //         day: "numeric",
-  //         hour: "2-digit",
-  //         minute: "2-digit",
-  //       };
+    let hourNumber = parseInt(hour, 10);
+    if (period === "PM" && hourNumber !== 12) {
+      hourNumber += 12;
+    } else if (period === "AM" && hourNumber === 12) {
+      hourNumber = 0;
+    }
+    const pad = (num) => (num < 10 ? "0" + num : num);
+    const formattedDate = `${year}-${pad(monthNumber)}-${pad(day)} ${pad(
+      hourNumber
+    )}:${pad(minute)}:00`;
 
-  //       const now = new Date();
-  //       const newFormattedDateTime = new Intl.DateTimeFormat("en-US", options).format(now);
-  //       setFormattedDateTime(newFormattedDateTime);
-  //     } catch (error) {
-  //       console.error("Error formatting date:", error);
-  //       // Handle error appropriately in your application
-  //     }
-  //   };
-
-  //   fetchAndFormatDateTime();
-  // })};
-
-function parseAndFormatDate(dateStr) {
-  //reg expression to match normal and military phone settings
-  const regex =
-    /^(\w+),\s+(\w+)\s+(\d+),\s+(\d+)\s+at\s+(\d+):(\d+)(?:\s*(AM|PM)?)$/;
-  const match = dateStr.match(regex);
-
-  if (!match) {
-    return "Invalid date format";
+    return formattedDate;
   }
-  const [, , month, day, year, hour, minute, period] = match;
-  const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-  const monthNumber = monthNames.indexOf(month) + 1;
-
-  let hourNumber = parseInt(hour, 10);
-  if (period === "PM" && hourNumber !== 12) {
-    hourNumber += 12;
-  } else if (period === "AM" && hourNumber === 12) {
-    hourNumber = 0;
-  }
-  const pad = (num) => (num < 10 ? "0" + num : num);
-  const formattedDate = `${year}-${pad(monthNumber)}-${pad(day)} ${pad(
-    hourNumber
-  )}:${pad(minute)}:00`;
-
-  return formattedDate;
-}
 
   useEffect(() => {
     console.log("CheckIn Recieved:",checkInType)
+    console.log("Theme is:", theme["color"])
     handleOptionChange(checkInType)
   }, [checkInType])
 
@@ -204,10 +165,6 @@ function parseAndFormatDate(dateStr) {
 
   const textToBase64 = (text) => {
     return Buffer.from(text, "utf8").toString("base64");
-  };
-
-  const getTimezone = async () => {
-
   };
 
   // const getCsrfToken = async () => {
@@ -360,7 +317,7 @@ function parseAndFormatDate(dateStr) {
     switch (checkInType) {
       case 'ModehAni':
         return (
-          <View style={styles.textContainer}>
+          <View style={[styles.textContainer, theme['background']]}>
             <Text style={{marginBottom: 10, textAlign: 'right'}}>
               מוֹדֶה אֲנִי לְפָנֶיךָ, מֶלֶךְ חַי וְקַיָּם, שֶׁהֶחֱזַרְתָּ בִּי נִשְׁמָתִי בְּחֶמְלָה ,רַבָּה אֱמוּנָתֶךָ!
             </Text>
@@ -374,7 +331,7 @@ function parseAndFormatDate(dateStr) {
         );
       case 'Ashrei':
         return (
-          <View style={styles.textContainer}>
+          <View style={[styles.textContainer, theme['background']]}>
             <Text style={{marginBottom: 10, textAlign: 'right'}}>
               אַשְׁרֵי יוֹשְׁבֵי בֵיתֶךָ עוֹד יְהַלְלוּךָ סֶּלָה.{"\n"}
               אַשְׁרֵי הָעָם שֶׁכָּכָה לּוֹ אַשְׁרֵי הָעָם שֶׁיֲהֹוָה אֱלֹהָיו.
@@ -391,7 +348,7 @@ function parseAndFormatDate(dateStr) {
         );
       default:
         return (
-          <View style={styles.textContainer}>
+          <View style={[styles.textContainer, theme['background']]}>
             <Text style={{marginBottom: 10, textAlign: 'right'}}>
               שְׁמַע יִשרָאֵל יֲהֹוָה אֱלהֵינוּ יֲהֹוָה אֶחָד: {"\n"}
               בָּרוּךְ שֵׁם כְּבוד מַלְכוּתו לְעולָם וָעֶד:
@@ -414,10 +371,10 @@ function parseAndFormatDate(dateStr) {
       case 'ModehAni':
         return (
           <View>
-            <Text style={styles.descriptionTitle}>
+            <Text style={[styles.descriptionTitle, theme["color"]]}>
               A Modeh Ani Moment: Time for Gratitude
             </Text>
-            <Text style={styles.descriptionText}>
+            <Text style={[styles.descriptionText, theme["color"]]}>
               We begin our day by thanking God for the gift of our souls. As today begins, what are the things that you are grateful for this morning?
             </Text>
           </View>
@@ -425,10 +382,10 @@ function parseAndFormatDate(dateStr) {
       case 'Ashrei':
         return (
           <View>
-            <Text style={styles.descriptionTitle}>
+            <Text style={[styles.descriptionTitle, theme["color"]]}>
               Ashrei in the Afternoon: Time for Happiness
             </Text>
-            <Text style={styles.descriptionText}>
+            <Text style={[styles.descriptionText, theme["color"]]}>
               The afternoon prayer of Ashrei is all about being happy. Take a few minutes now to do something that will make you happy or to reflect on something that is making you happy.
             </Text>
           </View>
@@ -436,10 +393,10 @@ function parseAndFormatDate(dateStr) {
       default:
         return (
           <View>
-            <Text style={styles.descriptionTitle}>
+            <Text style={[styles.descriptionTitle, theme["color"]]}>
               Time for a Shema Reflection
             </Text>
-            <Text style={styles.descriptionText}>
+            <Text style={[styles.descriptionText, theme["color"]]}>
               The Shema is a prayer traditionally recited at bedtime. The prayer begins with the instruction to “Hear,” so at the end of the day, we consider what we heard or experienced that brought us joy or meaning. Think about what you want to hold onto from today into tomorrow.
             </Text>
           </View>
@@ -522,7 +479,7 @@ function parseAndFormatDate(dateStr) {
     return (
       <View style={styles.promptDropdownContainer}>
         <TouchableOpacity style={styles.promptDropdownHeader} onPress={toggleDropdown}>
-          <Text style={styles.promptDropdownLabel}>
+          <Text style={[styles.promptDropdownLabel, theme["color"]]}>
             {selectedPrompt || "Select a prompt"}
           </Text>
           <Ionicons
@@ -592,17 +549,16 @@ function parseAndFormatDate(dateStr) {
 
   const togglePrivacy = () => {
     setIsPrivate(!isPrivate);
-    console.log("isPrivate in checkin:",isPrivate);
   };
 
   return (
-    <SafeAreaView style={[styles.container]}>   
+    <SafeAreaView style={[styles.container, theme['background']]}>   
       {/* <View style={styles.horizontalBar} /> */}
 
       {/* Main Container Section */}
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={[styles.container]}
+        style={[styles.container, theme['background']]}
       >
         
         {/* <View style={ styles.topContainer }>
@@ -619,7 +575,7 @@ function parseAndFormatDate(dateStr) {
         </View> */}
 
         <ScrollView style={styles.contentContainer}>
-          <Text style={styles.header}>{getMomentText(checkInType)}</Text>
+          <Text style={[styles.header, theme["color"]]}>{getMomentText(checkInType)}</Text>
           <Text style={[styles.datetime, theme["color"]]}>
             {formattedDateTime}{" "}
           </Text>
@@ -636,7 +592,7 @@ function parseAndFormatDate(dateStr) {
           </TouchableOpacity>
         </View>
           <View style={styles.Prefsetting}>
-            <Text style={styles.settingText}>Private</Text>
+            <Text style={[styles.settingText, theme["color"]]}>Private</Text>
             <Switch
               trackColor={{ false: '#f2f2f2', true: '#4A90E2' }} // Update the background color
               thumbColor={'#f2f2f2'} // Update the thumb color
@@ -708,7 +664,7 @@ function parseAndFormatDate(dateStr) {
           {renderDescriptiveText()}
 
           <TouchableOpacity onPress={handleAccordianToggle}>
-            <View style={styles.headerContainer}>           
+            <View style={styles.headerContainer}>
               <Text>Learn more about {checkInType}</Text>
               <Ionicons name={isExpanded ? "chevron-up" : "chevron-down"} size={24} color="black" />
             </View>
@@ -725,7 +681,7 @@ function parseAndFormatDate(dateStr) {
         {/* View for cancel and submit buttons */}
         <View style={styles.topBar}>
           {loadingSubmit ? (
-            <View style={styles.ActivityIndicator}>
+            <View style={[styles.ActivityIndicator, theme["color"]]}>
               <Text style={{padding: 10}}>Saving Check-in, this may take a moment!</Text>
               <ActivityIndicator />
             </View>
@@ -978,7 +934,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   submitButton: {
-    // backgroundColor: "#4A90E2",
+    backgroundColor: "#4A90E2",
     height: 60,
     width: 150,
     padding: 10,

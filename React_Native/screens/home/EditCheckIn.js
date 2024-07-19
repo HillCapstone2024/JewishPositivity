@@ -45,7 +45,7 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
   const [mediaBox, setMediaBox] = useState(false);
   const [mediaType, setMediaType] = useState("text");
   const [base64Data, setBase64Data] = useState("");
-  const [checkInText, setCheckInText] = useState("");
+  const [checkInText, setCheckInText] = useState(selectedEntry?.text_entry);
   const [showMediaBar, setShowMediaBar] = useState(true);
   const [mediaChanged, setMediaChanged] = useState(false);
   const [selectedOption, setSelectedOption] = useState("");
@@ -191,9 +191,9 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
       setBase64Data(base64CheckInText);
     }
     console.log("Check-in type: ", mediaType);
-    console.log("Privacy State in update:",isPrivate);
     try {
       // const csrfToken = await getCsrfToken();
+      console.log("Text entry in update:", checkInText);
       const csrfToken = await Storage.getItem("@CSRF");
       const response = await axios.post(
         `${API_URL}/update_checkin_info/`,
@@ -221,7 +221,16 @@ export default function EditCheckIn({ editModalVisible, setEditModalVisible, sel
       console.log(error);
       console.error("CheckIn Error:", error.response.data);
     }
-  };  
+  };
+
+  const privacyNumbers = (privacyState) => {
+    if (privacyState) {
+      return 1;
+    }
+    else {
+      return 0;
+    }
+  };
 
   const deleteMedia = () => {
     console.log("Deleting Check-in Media")
