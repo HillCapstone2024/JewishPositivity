@@ -604,12 +604,37 @@ function parseAndFormatDate(dateStr) {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={[styles.container]}
       >
+        
+        {/* <View style={ styles.topContainer }>
+          <TouchableOpacity
+            disabled={disableSubmit}
+            style={styles.shareButton}
+            onPress={ () => { shareCheckIn(); isHapticFeedbackEnabled ? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium) : null; }}
+            testID="shareButton"
+          >
+            <Text style={ disableSubmit ? styles.shareTextDisabled : styles.shareText}>
+              Share
+            </Text>
+          </TouchableOpacity>
+        </View> */}
+
         <ScrollView style={styles.contentContainer}>
           <Text style={styles.header}>{getMomentText(checkInType)}</Text>
           <Text style={[styles.datetime, theme["color"]]}>
             {formattedDateTime}{" "}
           </Text>
-
+          <View style={ styles.topContainer }>
+          <TouchableOpacity
+            disabled={disableSubmit}
+            style={styles.shareButton}
+            onPress={ () => { shareCheckIn(); isHapticFeedbackEnabled ? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium) : null; }}
+            testID="shareButton"
+          >
+            <Text style={ disableSubmit ? styles.shareTextDisabled : styles.shareText}>
+              Share
+            </Text>
+          </TouchableOpacity>
+        </View>
           <View style={styles.Prefsetting}>
             <Text style={styles.settingText}>Private</Text>
             <Switch
@@ -683,7 +708,7 @@ function parseAndFormatDate(dateStr) {
           {renderDescriptiveText()}
 
           <TouchableOpacity onPress={handleAccordianToggle}>
-            <View style={styles.headerContainer}>
+            <View style={styles.headerContainer}>           
               <Text>Learn more about {checkInType}</Text>
               <Ionicons name={isExpanded ? "chevron-up" : "chevron-down"} size={24} color="black" />
             </View>
@@ -720,9 +745,19 @@ function parseAndFormatDate(dateStr) {
                   Submit
                 </Text>
               </TouchableOpacity>
+
+              {/* <TouchableOpacity
+                disabled={disableSubmit}
+                style={styles.shareButton}
+                onPress={ () => { shareCheckIn(); isHapticFeedbackEnabled ? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium) : null; }}
+                testID="shareButton"
+              >
+                <Text style={ disableSubmit ? styles.shareTextDisabled : styles.shareText}>
+                  Share
+                </Text>
+              </TouchableOpacity> */}
             </View>
         
-
           )}
         </View>
         {/* end of cancel/submit section */}
@@ -829,6 +864,7 @@ const styles = StyleSheet.create({
   },
   boxContainer: {
     paddingBottom: 20,
+    paddingHorizontal: 10,
   },
   headerContainer: {
     flexDirection: "row",
@@ -839,9 +875,11 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   header: {
-    marginTop: 15,
+    marginTop: 20,
     fontSize: 28,
     fontWeight: 'bold',
+    flex: 1,
+    paddingLeft: 8,
   },
   textContainer: {
     marginBottom: 15,
@@ -850,6 +888,7 @@ const styles = StyleSheet.create({
   datetime: {
     marginBottom: 15,
     fontSize: 16,
+    paddingLeft: 8,
   },
   boxDescriptor: {
     fontSize: 16,
@@ -979,6 +1018,46 @@ const styles = StyleSheet.create({
     backgroundColor: "#ccc",
     // marginTop: 15,
   },
+  topContainer: {
+    flexDirection: 'row-reverse',
+    // justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    position: 'absolute',
+    left: 296,
+    top: 15,
+    paddingTop: 10,
+    // paddingBottom: 10,
+    
+  },
+  shareButton: {
+    height: 40,
+    width: 70,
+    padding: 10,
+    marginVertical: 5,
+    alignItems: "center",
+    borderRadius: 5,
+    // flexDirection: "row",
+    justifyContent: "center",
+
+    backgroundColor: "#f2f2f2",
+    shadowColor: "#4A90E2",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  shareText: {
+    color: "#4A90E2",
+    fontSize: 16,
+  },
+  shareTextDisabled: {
+    color: "#00F6",
+    fontSize: 16,
+  },
 
   // Check-in reminder text section
   descriptionTitle: {
@@ -990,6 +1069,8 @@ const styles = StyleSheet.create({
   descriptionText: {
     fontSize: 14,
     lineHeight: 22,
+    marginRight: 10,
+    marginLeft: 10,
   },
   promptDropdownContainer: {
     borderWidth: 2,

@@ -225,6 +225,16 @@ const CheckInEntryDetailsScreen = ({ route, navigation }) => {
                     <Text style={styles.editText}>Edit</Text>
                 </TouchableOpacity>
                 <View style={styles.horizontalBar} />
+
+                {/* Share button */}
+                <TouchableOpacity onPress={() => {
+                  console.log("Share pressed");
+                  setEditDeleteModalVisible(false);
+                }}>
+                  <Text style={styles.shareText}>Share</Text>
+                </TouchableOpacity>
+                <View style={styles.horizontalBar} />
+
                 {/* Delete button */}
                 <TouchableOpacity onPress={() => {
                     isHapticFeedbackEnabled ? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium) : null;
@@ -422,6 +432,10 @@ const styles = StyleSheet.create({
       fontSize: 18,
     },
     editText: {
+      fontSize: 18,
+      color: "#4A90E2",
+    },
+    shareText: {
       fontSize: 18,
       color: "#4A90E2",
     },
