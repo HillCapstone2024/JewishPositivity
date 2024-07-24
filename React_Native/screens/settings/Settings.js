@@ -22,19 +22,11 @@ const SettingsScreen = ({ navigation }) => {
   themeStyle = makeThemeStyle();
 
   useEffect(() => {
-    loadUsername();
-    getHapticFeedback();
-    getTheme();
-    console.log('Icon color:', 
-      
-    );
-    
-  }, []);
-
   const loadUsername = async () => {
     const storedUsername = await Storage.getItem("@username");
     setUsername(storedUsername || "No username");
   };
+  loadUsername();
 
   const getHapticFeedback = async () => {
     try {
@@ -48,11 +40,11 @@ const SettingsScreen = ({ navigation }) => {
       console.log(e);
     }
   };
+  getHapticFeedback();
 
   const getTheme = async () => {
     try {
       const temp_storage_theme = await Storage.getItem('@theme');
-      console.log("temp storage theme:",temp_storage_theme);
       setStorageTheme(temp_storage_theme);
       if (storage_theme === 'dark') {
         setTheme(true)
@@ -71,6 +63,8 @@ const SettingsScreen = ({ navigation }) => {
       console.log(e);
     }
   };
+  getTheme();
+}, []);
 
   const setHapticFeedback = async (hapticFeedbackEnabled) => {
     try {
@@ -180,7 +174,7 @@ const SettingsScreen = ({ navigation }) => {
           <View style={styles.horizontalLine} />
         </View>
           {/* <View style={styles.Prefsetting} > */}
-            <Text style={[styles.settingText, theme["color"]]}>Theme</Text>
+            <Text style={[styles.settingText]}>Theme</Text>
             <View testID="theme-selector">
             <RNPickerSelect
               testID="theme-selector"
@@ -192,7 +186,7 @@ const SettingsScreen = ({ navigation }) => {
               ]}
               value={storage_theme}
               Icon={() => (
-                <Ionicons style={{ top: 12 }} name="chevron-down-outline" size={24} color={theme["color"] || 'black'} />
+                <Ionicons style={{ top: 12 }} name="chevron-down-outline" size={24} color={"black"} />
               )}
               style={{
                 inputIOS: {
@@ -215,7 +209,7 @@ const SettingsScreen = ({ navigation }) => {
           </View>
 
           <View style={styles.Prefsetting}>
-            <Text style={[styles.feedbackText, theme.color]}>Haptic Feedback</Text>
+            <Text style={styles.settingText}>Haptic Feedback</Text>
             <Switch
               testID="haptic-feedback-switch"
               trackColor={{ false: '#f2f2f2', true: '#4A90E2' }} // Update the background color
@@ -340,7 +334,6 @@ const styles = StyleSheet.create({
     margin: 10,
   },
   settingText: {
-    color: theme["color"],
     fontSize: 20,
   },
   timesText: {
@@ -367,9 +360,6 @@ const styles = StyleSheet.create({
   icon: {
     color: '#007AFF',
     marginRight: 5,
-    fontSize: 20,
-  },
-  feedbackText: {
     fontSize: 20,
   },
 });
