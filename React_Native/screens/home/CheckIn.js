@@ -17,6 +17,7 @@ import {
   Animated,
   ActivityIndicator,
   Alert,
+  Share,
 } from "react-native";
 import axios from "axios";
 import RecordingAccessoryBar from "../../tools/RecordingBar.js";
@@ -241,6 +242,41 @@ export default function CheckIn({ navigation, route }) {
     setLoadingSubmit(false);
   };
 
+  //added
+  const shareCheckIn = async () => {
+    try {
+      // First, submit the check-in
+      await submitCheckIn();
+  
+      // Prepare the share content
+      const shareContent = {
+        message: `Check out my check-in: ${CheckInText}`,
+        url: `http://jewishpositivity.com/checkin/${username}/${momentType}`,
+      };
+  
+      // Attempt to share
+      const result = await Share.share(shareContent);
+  
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          // The user shared with a specific activity type
+          console.log(`Shared with activity type: ${result.activityType}`);
+          // You could add specific handling for different activity types here
+        } else {
+          // The user shared without a specific activity type
+          console.log('Shared successfully');
+        }
+      } else if (result.action === Share.dismissedAction) {
+        // The user dismissed the share dialog
+        console.log('Share dismissed');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error.message);
+      Alert.alert('Sharing Failed', 'There was an error while trying to share your check-in. Please try again.');
+    }
+  };
+  //added
+
   const deleteMedia = () => {
     setMediaUri(null);
     setMediaBox(false);
@@ -408,32 +444,6 @@ export default function CheckIn({ navigation, route }) {
     setIsExpanded(!isExpanded); // Toggle the state variable
   };
 
-  // const modehAniPrompts = [
-  //   "What are you grateful for today?",
-  //   "Think of someone who has helped you recently. How can you express gratitude to them?",
-  //   "Reflect on a challenge you overcame and what you learned from it.",
-  //   "What is one thing that brought you joy today?",
-  //   "What is a simple pleasure you experienced today?",
-  //   "Think of a skill or talent you have and how you can use it to help others."
-  // ];
-  
-  // const ashreiPrompts = [
-  //   "What made you smile today?",
-  //   "Recall a happy memory from your childhood.",
-  //   "Think of a person who inspires you and why.",
-  //   "What is something you're looking forward to?",
-  //   "Reflect on a recent accomplishment that made you feel proud.",
-  //   "What is a hobby or activity that brings you happiness?"
-  // ];
-  
-  // const shemaPrompts = [
-  //   "What was the most meaningful part of your day?",
-  //   "Reflect on a lesson you learned today.",
-  //   "Think of a way you showed kindness to someone today.",
-  //   "What is something you're grateful for in your life right now?",
-  //   "Recall a moment when you felt at peace today.",
-  //   "What is a goal or aspiration you want to work towards?"
-  // ];
 
   useEffect(() => {
     fetchPrompts();
