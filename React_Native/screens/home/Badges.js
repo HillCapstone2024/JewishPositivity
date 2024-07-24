@@ -183,7 +183,7 @@ export default function Badges({}) {
           {/*Current*/}
           <TouchableOpacity style={styles.button} onPress={handleModalCurrent}>
             <View style={{ flexDirection: "row" }}>
-              <Text style={styles.streakValue}>
+              <Text style={[styles.streakValue, theme['color']]}>
                 {currentStreak} {currentStreak == 1 ? "Day" : "Days"}
               </Text>
               <Ionicons name="flame" size={16} color={"orange"} />
@@ -193,7 +193,7 @@ export default function Badges({}) {
 
           <TouchableOpacity style={styles.button} onPress={handleModalLongest}>
             <View style={{ flexDirection: "row" }}>
-              <Text style={styles.streakValue}>
+              <Text style={[styles.streakValue, theme['color']]}>
                 {longestStreak} {longestStreak == 1 ? "Day" : "Days"}
               </Text>
               <Ionicons name="flame" size={16} color={"orange"} />
@@ -202,7 +202,7 @@ export default function Badges({}) {
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={handleModalLongest}>
             <View style={{ flexDirection: "row" }}>
-              <Text style={styles.streakValue}>
+              <Text style={[styles.streakValue, theme['color']]}>
                 {numAwards} {numAwards == 1 ? "Trophy" : "Trophies"}
               </Text>
               <Ionicons name="trophy" size={16} color={"orange"} />
@@ -246,7 +246,7 @@ export default function Badges({}) {
                   />
                   <Image source={dayBadgeIcon} style={styles.trophyButtonA} />
 
-                  <Text style={styles.modalText}>
+                  <Text style={[styles.modalText, theme['color']]}>
                     Badge for completing a daily check-in
                   </Text>
                   <Pressable

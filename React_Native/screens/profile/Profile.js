@@ -93,7 +93,7 @@ const UserProfile = ({ navigation, onSwitch }) => {
           testID = "profilePicture"
         />
       </View>
-      <View style={styles.userInfoContainer}>
+      <View style={[styles.userInfoContainer, theme['background']]}>
         <Text style={styles.username} testID="usernameInput">
           @{userInfo.username}
         </Text>

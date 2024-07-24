@@ -46,6 +46,7 @@ export default makeThemeStyle = () => {
   return {
     background: { backgroundColor: theme ? "#333333" : "#ececf6" }, //#ececf6 or #f2f2f2 or #ffffff
     color: { color: theme ? "#FFFFFF" : "#333333" },
+    blue: { backgroundColor: "#4A90E2"},
     // color: { color: "#333333" },
     // button: { color: "#4A90E2" },
     theme: storage_theme,
