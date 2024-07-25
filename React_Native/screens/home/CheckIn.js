@@ -972,11 +972,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   submitText: {
-    color: "#4A90E2",
+    // color: "#4A90E2",
+    color: theme ? "#ffffff" : "#4A90E2",
     fontSize: 19,
   },
   submitTextDisabled: {
-    color: "white",
+    color: "#00F6",
     fontSize: 19,
   },
   horizontalBar: {
@@ -1042,10 +1043,8 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#4A90E2",
     borderRadius: 10,
-    // marginBottom: 10,
     padding: 15,
     fontSize: 5,
-    // overflow: 'hidden',
     color: 'grey',
   },
   promptDropdownHeader: {
@@ -1054,12 +1053,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 10,
     paddingVertical: 12,
-    // borderColor: 'gray',
     borderBottomWidth: 0,
   },
   promptDropdownLabel: {
     fontSize: 15,
-    // color: "#333",
     marginRight: 5,
     paddingLeft: 2,
     textAlign: "left",
@@ -1069,6 +1066,7 @@ const styles = StyleSheet.create({
     borderBlockColor: "#ccc",
     maxHeight: 150,
     position: 'relative',
+    backgroundColor: theme ? "#333333" : "#ffffff",
   },
   promptDropdownItem: {
     paddingHorizontal: 10,
@@ -1077,7 +1075,8 @@ const styles = StyleSheet.create({
   },
   promptDropdownItemText: {
     fontSize: 16,
-    color: "#333",
+    color: theme ? "#ffffff" : "#333333",
+    // color: "#333",
   },
   promptDropdownArrow: {
     position: 'absolute',
