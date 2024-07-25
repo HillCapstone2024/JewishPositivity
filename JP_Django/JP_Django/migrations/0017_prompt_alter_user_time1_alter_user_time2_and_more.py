@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("JP_Django", "0015_alter_communityuser_status_alter_user_time1_and_more"),
+        ("JP_Django", "0016_checkin_privacy_alter_user_time1_alter_user_time2_and_more"),
     ]
 
     operations = [
