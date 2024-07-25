@@ -4197,7 +4197,8 @@ class UpdateStreakTestCase(TestCase):
         'content_type': 'text',
         'content': None, #fill in with example entry
         'text_entry': "This is a sample checkin text",
-        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        'date': datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+        'privacy': False
     }
     
     checkin_id=-1

@@ -710,13 +710,6 @@ def validate_content_and_text_entry(data, checkin):
 
 def update_checkin_fields(checkin, data):
     # Define a dictionary mapping POST data keys to their respective update functions and expected values
-    if ('privacy' in data):
-        print("privacy is in data")
-        print(type(data.get('privacy')))
-        print("value of privacy:", data.get('privacy'))
-    
-    if data.get('privacy'):
-        print("There should be a value associated")
         
     update_actions = {
         'text_entry': (update_text_entry, data.get("text_entry")),
@@ -761,17 +754,9 @@ def update_content(checkin, new_content):
         return HttpResponse("Error in updating content", status=400)
     
 def update_privacy(checkin, new_privacy):
-    print("it reaches in update_privacy")
     try:
-        # print("Current privacy:", checkin.privacy)
-        # if (new_privacy == 0):
-        #     checkin.privacy = False
-        # else:
-        #     checkin.privacy = True
-        # print("After privacy:",checkin.privacy)
         checkin.privacy = new_privacy
         checkin.save()
-        print("After privacy:", checkin.privacy)
         logging.info("SUCCESS! Privacy has been updated to \"%s\"", checkin.privacy)
     except Exception as e:
         logging.info("ERROR IN CHANGING PRIVACY: %s", e)
