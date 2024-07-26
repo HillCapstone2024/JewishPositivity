@@ -232,7 +232,7 @@ const FriendsList = ({ navigation, onSwitch }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, theme["background"]]}>
       {isLoading ? (
         <View testID="loading-screen">
           <View style={styles.sectionContainer}>

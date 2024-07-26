@@ -280,7 +280,7 @@ const AddFriends = ({navigation, onSwitch}) => {
     };
 
     return (
-      <KeyboardAvoidingView style={styles.container}>
+      <KeyboardAvoidingView style={[styles.container, theme["background"]]}>
         <ExpandingSearchBar onSearch={handleSearch} />
         {isLoading ? (
           <View style={styles.loadingStyle}>
@@ -292,7 +292,7 @@ const AddFriends = ({navigation, onSwitch}) => {
           >
             {users.length === 0 ? (
               <View style={styles.noUsers}>
-                <Text style={styles.noUsersText}>No matching users found!</Text>
+                <Text style={[styles.noUsersText, theme['color']]}>No matching users found!</Text>
               </View>
             ) : (
               <FlatList
