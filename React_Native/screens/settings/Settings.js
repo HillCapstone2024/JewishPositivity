@@ -20,6 +20,7 @@ const SettingsScreen = ({ navigation }) => {
   const [theme, setTheme] = useState(false);
   const [storage_theme, setStorageTheme] = useState('system');
   themeStyle = makeThemeStyle();
+  let iconColor = theme === 'light' ? 'black' : 'white';
 
   useEffect(() => {
   const loadUsername = async () => {
@@ -174,7 +175,7 @@ const SettingsScreen = ({ navigation }) => {
           <View style={styles.horizontalLine} />
         </View>
           {/* <View style={styles.Prefsetting} > */}
-            <Text style={[styles.settingText]}>Theme</Text>
+            <Text style={[styles.settingText, themeStyle["color"]]}>Theme</Text>
             <View testID="theme-selector">
             <RNPickerSelect
               testID="theme-selector"
@@ -186,7 +187,7 @@ const SettingsScreen = ({ navigation }) => {
               ]}
               value={storage_theme}
               Icon={() => (
-                <Ionicons style={{ top: 12 }} name="chevron-down-outline" size={24} color={"black"} />
+                <Ionicons style={{ top: 12 }} name="chevron-down-outline" size={24} color={iconColor} />
               )}
               style={{
                 inputIOS: {

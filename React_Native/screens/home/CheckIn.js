@@ -61,6 +61,8 @@ export default function CheckIn({ navigation, route }) {
   const { checkInType } = route.params;
   const mediaAccessoryViewID = "MediaBar";
   const theme = makeThemeStyle();
+  let iconColor = theme === 'light' ? 'black' : 'white';
+
 
   const now = new Date();
   const [options, setOptions] = useState({
@@ -656,7 +658,7 @@ export default function CheckIn({ navigation, route }) {
               />
               
               <TextInput
-                style={styles.CheckInInput}
+                style={[styles.CheckInInput, theme['color']]}
                 inputAccessoryViewID={mediaAccessoryViewID}
                 placeholder={"Enter reflection here…"}
                 placeholderTextColor={"grey"}
@@ -674,8 +676,8 @@ export default function CheckIn({ navigation, route }) {
 
           <TouchableOpacity onPress={handleAccordianToggle}>
             <View style={styles.headerContainer}>
-              <Text>Learn more about {checkInType}</Text>
-              <Ionicons name={isExpanded ? "chevron-up" : "chevron-down"} size={24} color="black" />
+              <Text style={theme['color']}>Learn more about {checkInType}</Text>
+              <Ionicons name={isExpanded ? "chevron-up" : "chevron-down"} size={24} color={iconColor} />
             </View>
           </TouchableOpacity>
 
