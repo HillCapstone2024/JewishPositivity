@@ -1,11 +1,11 @@
 name: Build and Deploy to TestFlight
 
 on:
-  workflow_dispatch:  # Allows manual triggering
+  # workflow_dispatch:  # Allows manual triggering
   # You can also keep other triggers if you want
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
 
 jobs:
   build:
@@ -25,22 +25,8 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          cd ios
-          if [ -f "Podfile" ]; then
-            pod install
-          fi
-          cd ..
-
-      - name: Resolve Package Dependencies
-        run: |
-          cd ios
-          if [ -f "JewishPositivity.xcworkspace" ]; then
-            xcodebuild -resolvePackageDependencies -workspace JewishPositivity.xcworkspace -scheme JewishPositivity -derivedDataPath ../DerivedData
-          else
-            xcodebuild -resolvePackageDependencies -project JewishPositivity.xcodeproj -scheme JewishPositivity -derivedDataPath ../DerivedData
-          fi
-          cd ..
-
+          bundle install
+          npm install
       - name: Build and Upload to TestFlight
         run: bundle exec fastlane ios beta
         env:
