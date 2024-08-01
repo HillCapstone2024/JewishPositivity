@@ -1,0 +1,36 @@
+name: Build and Deploy to TestFlight
+
+on:
+  workflow_dispatch:  # Allows manual triggering
+  # You can also keep other triggers if you want
+  # push:
+  #   branches:
+  #     - main
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'  # Specify the Ruby version you need
+
+      - name: Install Bundler
+        run: gem install bundler
+
+      - name: Install Dependencies
+        run: |
+          bundle install
+          npm install
+
+      - name: Build and Upload to TestFlight
+        run: bundle exec fastlane ios beta
+        env:
+          APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
