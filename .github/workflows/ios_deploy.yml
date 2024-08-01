@@ -26,7 +26,7 @@ jobs:
       - name: Install Dependencies
         run: |
           cd ios
-          pod install  # Install CocoaPods dependencies
+          pod install
           cd ..
 
       - name: Build and Upload to TestFlight

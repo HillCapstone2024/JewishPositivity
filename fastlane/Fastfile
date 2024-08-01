@@ -14,7 +14,6 @@
 # update_fastlane
 
 # Fastfile
-default_platform(:ios)
 
 default_platform(:ios)
 
