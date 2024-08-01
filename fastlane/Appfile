@@ -6,5 +6,5 @@
 #     https://docs.fastlane.tools/advanced/#appfile
 
 # Appfile
-app_identifier("com.yourcompany.yourapp") # Replace with your app's bundle identifier
-apple_id("your-email@example.com") # Your Apple ID
+app_identifier("com.jewishpositivity.jewishpositivity") # Replace with your app's bundle identifier
+apple_id("jewishpositivity2024@gmail.com") # Your Apple ID

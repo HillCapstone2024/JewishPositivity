@@ -25,9 +25,8 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          cd ios
-          pod install
-          cd ..
+          bundle install
+          npm install
 
       - name: Build and Upload to TestFlight
         run: bundle exec fastlane ios beta
