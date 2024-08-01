@@ -31,7 +31,7 @@ platform :ios do
 
       # Build the app (ensure you have the correct scheme)
       build_app(
-        scheme: "JewishPositivity", # Replace with your app's scheme name
+        scheme: "jewishpositivity", # Replace with your app's scheme name
         project: "./ios/JewishPositivity.xcodeproj", # Adjust the path as needed
         export_method: "app-store" # Use "ad-hoc" if you're distributing outside the App Store
       )
