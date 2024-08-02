@@ -24,9 +24,11 @@ jobs:
         run: gem install bundler
 
       - name: Install Dependencies
+        working-directory: ./React_Native
         run: |
           bundle install
           npm install
+
       - name: Build and Upload to TestFlight
         run: bundle exec fastlane ios beta
         env:
