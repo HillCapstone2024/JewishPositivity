@@ -106,10 +106,6 @@ DATABASES = {
         "PASSWORD": password,
         "HOST": host,
         "PORT": port,
-        'TEST': {
-            'NAME': 'test_production',
-            'DEPENDENCIES': [],
-        },
     }
 }
 

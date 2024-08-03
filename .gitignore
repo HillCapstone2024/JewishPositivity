@@ -3,13 +3,8 @@ node_modules/
 .DS_Store
 .expo/
 ip.js
-# Ignore Android build files
-android/.gradle/
-android/app/build/
-android/app/src/main/res/raw/keystore.jks # Optional: Ignore your keystore file if applicable
-# Ignore iOS build files
-ios/build/
-ios/Pods/
+andriod/
+ios/
 notificationsTest.json
 tempCodeRunnerFile.js
 # Django
