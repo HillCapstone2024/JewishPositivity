@@ -30,6 +30,10 @@ jobs:
           cd ..
           npm install
 
+      - name: Install CocoaPods
+        working-directory: ./React_Native/ios
+        run: bundle exec pod install
+
       - name: Build and Upload to TestFlight
         working-directory: ./React_Native/ios
         run: bundle exec fastlane ios beta
