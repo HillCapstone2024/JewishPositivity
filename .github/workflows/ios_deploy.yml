@@ -22,18 +22,13 @@ jobs:
 
       - name: Install Bundler
         run: gem install bundler
-  
-      - name: Install Ruby Dependencies
+
+      - name: Install Dependencies
         working-directory: ./React_Native/ios
-        run: bundle install
-  
-      - name: Install Node.js Dependencies
-        working-directory: ./React_Native
-        run: npm install
-  
-      - name: Install CocoaPods
-        working-directory: ./React_Native/ios
-        run: bundle exec pod install
+        run: |
+          bundle install
+          cd ..
+          npm install
 
       - name: Build and Upload to TestFlight
         working-directory: ./React_Native/ios
