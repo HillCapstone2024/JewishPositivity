@@ -28,16 +28,22 @@ const About = ({ navigation }) => {
 
       <View style={styles.sectionContainer}>
         <Text style={styles.sectionTitle}> About our App</Text>
-        <View style={styles.horizontalLine} />
+        <View style={[styles.horizontalLine, theme['color']]} />
       </View>
 
       <View>
         <Text style={[styles.aboutText, theme['color']]}>Positive Psychology is the scientific study of the strengths that enable individuals and communities to thrive. There are a variety of practices recommended throughout the day and a person’s life that support people in pursuing a happier and more meaningful life. Judaism is a religion that is thousands of years old; as a monotheistic religion it encourages a relationship with God (however one might believe that) through a variety of commandments, rituals, and practices that have been handed down through the generations.</Text>
+        <Text style={styles.paragraphSpace} />
         <Text style={[styles.aboutText, theme['color']]}>Traditionally Jews pray three times a day. Using that model of three moments of reflection or check-in this app is seeking to find a way to encourage people to connect with themselves, their Judaism, and positive psychology at three points every day. In the morning with a moment of gratitude, in the afternoon with an opportunity for happiness, and in the evening with a chance to reflect on the day.</Text>
+        <Text style={styles.paragraphSpace} />
         <Text style={[styles.aboutText, theme['color']]}>“A Modeh Ani Moment: Time for Gratitude”: We  begin our day by thanking God for our souls, as today begins what other things do you want to thank God for?</Text>
+        <Text style={styles.paragraphSpace} />
         <Text style={[styles.aboutText, theme['color']]}>“Ashrei in the Afternoon: Time for Happiness”: The afternoon prayer of Ashrei is all about being happy. Take a few minutes now to do something that will make you happy or focus on something that is making you happy.</Text>
+        <Text style={styles.paragraphSpace} />
         <Text style={[styles.aboutText, theme['color']]}>"Time for a Shema Reflection”: The Shema is a prayer traditionally recited at bedtime. The prayer begins with the instruction to “hear” and so at the end of the day we consider what we heard or experienced during our day that brought us joy. And to begin thinking about what we will do tomorrow. It will be a chance to reflect.</Text>
+        <Text style={styles.paragraphSpace} />
         <Text style={[styles.aboutText, theme['color']]}>We are grateful to the students of Stonehill College for developing this app for Temple Shir Tikva.</Text>
+        <Text style={styles.paragraphSpace} />  
       </View>
 
       <View style={styles.sectionContainer}>
@@ -54,7 +60,7 @@ const About = ({ navigation }) => {
         </View>
 
         <View style={styles.textContainter}>
-          <Text> This icon is how you see your archive of old posts.</Text>
+          <Text style={[theme['color']]}> This icon is how you see your archive of old posts.</Text>
         </View>
       </View>
 
@@ -77,7 +83,7 @@ const About = ({ navigation }) => {
         </View>
 
         <View style={styles.textContainter}>
-        <Text>This icon is how you make a reflection post.</Text>
+        <Text style={[theme['color']]}>This icon is how you make a reflection post.</Text>
         </View>
       </View>
 
@@ -91,7 +97,7 @@ const About = ({ navigation }) => {
         </View>
 
         <View style={styles.textContainter}>
-        <Text>This icon is how you see your friends posts.</Text>
+        <Text style={[theme['color']]}>This icon is how you see your friends posts.</Text>
         </View>
       </View>
 
@@ -104,7 +110,7 @@ const About = ({ navigation }) => {
         </View>
 
         <View style={styles.textContainter}>
-          <Text>This icon is how you access you communities.</Text>
+          <Text style={[theme['color']]}>This icon is how you access you communities.</Text>
         </View>
       </View>
 
@@ -128,7 +134,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     paddingVertical: 12,
-    fontSize: 12,
+    fontSize: 16,
     fontWeight: '600',
     color: '#9e9e9e',
     textTransform: 'uppercase',
@@ -202,11 +208,18 @@ const styles = StyleSheet.create({
     // marginLeft: "5%",
     justifyContent: 'center',
     // alignContent: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
   },
   aboutText: {
 
     fontSize: 15,
     justifyContent: 'center',
+    lineHeight: 24,
+    textAlign: 'justify',
+  },
+  paragraphSpace: {
+    height: 10,
   },
 });
 
