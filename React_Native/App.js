@@ -6,11 +6,11 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { AppRegistry, Platform } from "react-native";
 
-// import { LogLevel, OneSignal } from "react-native-onesignal";
+//import { LogLevel, OneSignal } from "react-native-onesignal";
 // import Constants from "expo-constants";
 
 import AuthNavigator from "./navigations/AuthNavigator.js";
-import CheckInScreen from "./screens/home/CheckInScreen.js"; // Import the CheckInScreen component
+
 // OneSignal.Debug.setLogLevel(LogLevel.Verbose);
 // OneSignal.initialize(Constants.expoConfig.extra.oneSignalAppId);
 // OneSignal.Notifications.requestPermission(true);
@@ -38,18 +38,6 @@ const linking = {
 };
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    // Check authentication status from storage or API
-    const checkAuthStatus = async () => {
-      const token = await Storage.getItem("authToken");
-      setIsAuthenticated(!!token);
-    };
-
-    checkAuthStatus();
-  }, []);
-
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <NavigationContainer linking={linking}>

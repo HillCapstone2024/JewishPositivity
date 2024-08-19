@@ -58,43 +58,48 @@ PODS:
   - hermes-engine (0.74.1):
     - hermes-engine/Pre-built (= 0.74.1)
   - hermes-engine/Pre-built (0.74.1)
-  - OneSignalXCFramework (5.1.0):
-    - OneSignalXCFramework/OneSignalComplete (= 5.1.0)
-  - OneSignalXCFramework/OneSignal (5.1.0):
+  - OneSignalXCFramework (5.2.2):
+    - OneSignalXCFramework/OneSignalComplete (= 5.2.2)
+  - OneSignalXCFramework/OneSignal (5.2.2):
     - OneSignalXCFramework/OneSignalCore
     - OneSignalXCFramework/OneSignalExtension
+    - OneSignalXCFramework/OneSignalLiveActivities
     - OneSignalXCFramework/OneSignalNotifications
     - OneSignalXCFramework/OneSignalOSCore
     - OneSignalXCFramework/OneSignalOutcomes
     - OneSignalXCFramework/OneSignalUser
-  - OneSignalXCFramework/OneSignalComplete (5.1.0):
+  - OneSignalXCFramework/OneSignalComplete (5.2.2):
     - OneSignalXCFramework/OneSignal
     - OneSignalXCFramework/OneSignalInAppMessages
     - OneSignalXCFramework/OneSignalLocation
-  - OneSignalXCFramework/OneSignalCore (5.1.0)
-  - OneSignalXCFramework/OneSignalExtension (5.1.0):
+  - OneSignalXCFramework/OneSignalCore (5.2.2)
+  - OneSignalXCFramework/OneSignalExtension (5.2.2):
     - OneSignalXCFramework/OneSignalCore
     - OneSignalXCFramework/OneSignalOutcomes
-  - OneSignalXCFramework/OneSignalInAppMessages (5.1.0):
+  - OneSignalXCFramework/OneSignalInAppMessages (5.2.2):
     - OneSignalXCFramework/OneSignalCore
     - OneSignalXCFramework/OneSignalNotifications
     - OneSignalXCFramework/OneSignalOSCore
     - OneSignalXCFramework/OneSignalOutcomes
     - OneSignalXCFramework/OneSignalUser
-  - OneSignalXCFramework/OneSignalLocation (5.1.0):
+  - OneSignalXCFramework/OneSignalLiveActivities (5.2.2):
+    - OneSignalXCFramework/OneSignalCore
+    - OneSignalXCFramework/OneSignalOSCore
+    - OneSignalXCFramework/OneSignalUser
+  - OneSignalXCFramework/OneSignalLocation (5.2.2):
     - OneSignalXCFramework/OneSignalCore
     - OneSignalXCFramework/OneSignalNotifications
     - OneSignalXCFramework/OneSignalOSCore
     - OneSignalXCFramework/OneSignalUser
-  - OneSignalXCFramework/OneSignalNotifications (5.1.0):
+  - OneSignalXCFramework/OneSignalNotifications (5.2.2):
     - OneSignalXCFramework/OneSignalCore
     - OneSignalXCFramework/OneSignalExtension
     - OneSignalXCFramework/OneSignalOutcomes
-  - OneSignalXCFramework/OneSignalOSCore (5.1.0):
+  - OneSignalXCFramework/OneSignalOSCore (5.2.2):
     - OneSignalXCFramework/OneSignalCore
-  - OneSignalXCFramework/OneSignalOutcomes (5.1.0):
+  - OneSignalXCFramework/OneSignalOutcomes (5.2.2):
     - OneSignalXCFramework/OneSignalCore
-  - OneSignalXCFramework/OneSignalUser (5.1.0):
+  - OneSignalXCFramework/OneSignalUser (5.2.2):
     - OneSignalXCFramework/OneSignalCore
     - OneSignalXCFramework/OneSignalNotifications
     - OneSignalXCFramework/OneSignalOSCore
@@ -1048,8 +1053,8 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-onesignal (5.0.6):
-    - OneSignalXCFramework (= 5.1.0)
+  - react-native-onesignal (5.2.2):
+    - OneSignalXCFramework (= 5.2.2)
     - React (< 1.0.0, >= 0.13.0)
   - react-native-pager-view (6.3.0):
     - DoubleConversion
@@ -1696,7 +1701,7 @@ SPEC CHECKSUMS:
   fmt: 4c2741a687cc09f0634a2e2c72a838b99f1ff120
   glog: c5d68082e772fa1c511173d6b30a9de2c05a69a2
   hermes-engine: 16b8530de1b383cdada1476cf52d1b52f0692cbc
-  OneSignalXCFramework: 72a6dbc5d97b7eba09a51837f7858d8957ac2629
+  OneSignalXCFramework: f06edd9b146c7ac5935136a117ce2a5fdd6420f6
   RCT-Folly: 02617c592a293bd6d418e0a88ff4ee1f88329b47
   RCTDeprecation: efb313d8126259e9294dc4ee0002f44a6f676aba
   RCTRequired: f49ea29cece52aee20db633ae7edc4b271435562
@@ -1722,7 +1727,7 @@ SPEC CHECKSUMS:
   React-logger: 7e7403a2b14c97f847d90763af76b84b152b6fce
   React-Mapbuffer: 11029dcd47c5c9e057a4092ab9c2a8d10a496a33
   react-native-image-picker: f2b8c6c74ad4fc4d7ddb646391be7df47c63e46c
-  react-native-onesignal: 644153586b70f8bfb73a238edcdfbe1582fe0a8c
+  react-native-onesignal: 592184d34780d04ebbea2b9844d5b6088606cb30
   react-native-pager-view: c1e29e1a6105a02807392ba822ad322447a72f55
   react-native-pdf: 79aa75e39a80c1d45ffe58aa500f3cf08f267a2e
   react-native-safe-area-context: dcab599c527c2d7de2d76507a523d20a0b83823d
@@ -1763,6 +1768,6 @@ SPEC CHECKSUMS:
   SocketRocket: abac6f5de4d4d62d24e11868d7a2f427e0ef940d
   Yoga: 348f8b538c3ed4423eb58a8e5730feec50bce372
 
-PODFILE CHECKSUM: 3f32db7547d9eb6fe21fd62cfbf5075f1bafef06
+PODFILE CHECKSUM: 03e05a102e4789333864d9e087bc6c04a55aacdc
 
 COCOAPODS: 1.15.2
