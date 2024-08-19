@@ -4,7 +4,7 @@ import json
 import re
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import get_user_model
 from JP_Django.models import Checkin, Friends, Badges, User, Community, CommunityUser
 from django.middleware.csrf import get_token
@@ -32,7 +32,7 @@ load_dotenv()
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Prompt
+from .models import Prompt, User, Checkin
 from .serializers import PromptSerializer
 # ########## Configuration & Constants ##########
 
@@ -1032,6 +1032,32 @@ def get_todays_checkin_info_view(request):
 def get_user_checkins(user_id):
     return Checkin.objects.filter(user_id=user_id, privacy=False).order_by('-date')
 
+
+
+def checkin_detail_view(request, username, moment_number):
+    try:
+        user = get_object_or_404(User, username=username)
+        checkins = Checkin.objects.filter(user_id=user.id, moment_number=moment_number)
+        
+        if not checkins.exists():
+            return JsonResponse({"error": "Check-in not found"}, status=404)
+
+        response_data = [
+            {
+                'username': user.username,
+                'moment_number': checkin.moment_number,
+                'date': checkin.date.strftime('%Y-%m-%d %H:%M:%S'),
+                'text_entry': checkin.text_entry,
+                'content_type': checkin.content_type,
+                'content': base64.b64encode(checkin.content).decode('utf-8') if checkin.content else None,
+                'privacy': checkin.privacy,
+            }
+            for checkin in checkins
+        ]
+        return JsonResponse(response_data, safe=False)
+    except User.DoesNotExist:
+        return JsonResponse({"error": "User not found"}, status=404)
+    
 
 # ########## Utility Views ##########
 

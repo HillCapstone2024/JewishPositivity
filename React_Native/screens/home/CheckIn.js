@@ -111,7 +111,7 @@ export default function CheckIn({ navigation, route }) {
     } else if (period === "AM" && hourNumber === 12) {
       hourNumber = 0;
     }
-    const pad = (num) => (num < 10 ? "0" + num : num);
+    const pad = (num) => (num < 10 ? "0" + Number(num) : num);
     const formattedDate = `${year}-${pad(monthNumber)}-${pad(day)} ${pad(
       hourNumber
     )}:${pad(minute)}:00`;

@@ -10,7 +10,7 @@ import { AppRegistry, Platform } from "react-native";
 // import Constants from "expo-constants";
 
 import AuthNavigator from "./navigations/AuthNavigator.js";
-
+import CheckInScreen from "./screens/home/CheckInScreen.js"; // Import the CheckInScreen component
 // OneSignal.Debug.setLogLevel(LogLevel.Verbose);
 // OneSignal.initialize(Constants.expoConfig.extra.oneSignalAppId);
 // OneSignal.Notifications.requestPermission(true);
@@ -23,12 +23,14 @@ const linking = {
   config: {
     screens: {
       CheckIn: {
-        path: "CheckIn/:checkInType",
+        path: "checkin/:username/:moment_number",
         parse: {
-          momentType: (checkInType) => `CheckIn-${checkInType}`,
+          username: (username) => `${username}`,
+          moment_number: (moment_number) => `Number(moment_number)`,
         },
         stringify: {
-          momentType: (checkInType) => checkInType.replace(/^CheckIn-/, ""),
+          username: (username) => username,
+          moment_number: (moment_number) => moment_number,
         },
       },
     },
@@ -36,10 +38,29 @@ const linking = {
 };
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    // Check authentication status from storage or API
+    const checkAuthStatus = async () => {
+      const token = await Storage.getItem("authToken");
+      setIsAuthenticated(!!token);
+    };
+
+    checkAuthStatus();
+  }, []);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <NavigationContainer linking={linking}>
-        <AuthNavigator />
+      {isAuthenticated ? (
+        <Stack.Navigator>
+          {/* <Stack.Screen name="AuthNavigator" component={AuthNavigator} /> */}
+          <Stack.Screen name="CheckIn" component={CheckInScreen} />
+        </Stack.Navigator>
+        ) : (
+          <AuthNavigator />
+        )}
       </NavigationContainer>
     </GestureHandlerRootView>
   );
