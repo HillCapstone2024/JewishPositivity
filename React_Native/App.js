@@ -38,6 +38,22 @@ const linking = {
 };
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
+
+  const checkAuthStatus = async () => {
+    try {
+      // Replace this with your actual authentication check logic
+      const authStatus = await Storage.getItem('isAuthenticated');
+      setIsAuthenticated(authStatus === 'true');
+    } catch (error) {
+      console.error('Error checking auth status:', error);
+    }
+  };
+  
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <NavigationContainer linking={linking}>
