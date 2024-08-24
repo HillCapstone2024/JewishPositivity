@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { View, Text, ActivityIndicator, TouchableOpacity, StyleSheet, ScrollView, Button, Image, Dimensions, Modal, Pressable, TouchableWithoutFeedback } from 'react-native';
+import { Alert, View, Text, ActivityIndicator, TouchableOpacity, StyleSheet, ScrollView, Button, Image, Dimensions, Modal, Pressable, TouchableWithoutFeedback } from 'react-native';
 import makeThemeStyle from '../../tools/Theme.js';
 import * as Storage from "../../AsyncStorage.js";
 import IP_ADDRESS from "../../ip.js";
@@ -15,6 +15,7 @@ import VideoViewer from "../../tools/VideoViewer.js";
 import ImageViewer from "../../tools/ImageViewer.js";
 import RecordingViewer from "../../tools/RecordingViewer.js";
 import * as Haptics from "expo-haptics";
+import { Share } from 'react-native';
 
 const CheckInEntryDetailsScreen = ({ route, navigation }) => {
   const [username, setUsername] = useState("");
@@ -204,6 +205,69 @@ const CheckInEntryDetailsScreen = ({ route, navigation }) => {
   };
 
   
+  const onShare = async () => {
+    try {
+      if (!username) {
+        console.error('Username is not available');
+        Alert.alert('Sharing Failed', 'Unable to share due to missing information. Please try again later.');
+        return;
+      }
+  
+      // Instead of submitting the check-in again, let's just share the existing check-in
+      const shareContent = {
+        message: `Check out my ${getMomentText(selectedEntry?.moment_number)} check-in: ${selectedEntry?.text_entry}`,
+        url: `http://jewishpositivity.com/checkin/${username}/${selectedEntry?.moment_number}`,
+      };
+  
+      // Attempt to share
+      const result = await Share.share(shareContent);
+  
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          console.log(`Shared with activity type: ${result.activityType}`);
+        } else {
+          console.log('Shared successfully');
+        }
+      } else if (result.action === Share.dismissedAction) {
+        console.log('Share dismissed');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error.message);
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error('Error data:', error.response.data);
+        console.error('Error status:', error.response.status);
+        console.error('Error headers:', error.response.headers);
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error('Error request:', error.request);
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error('Error message:', error.message);
+      }
+      Alert.alert('Sharing Failed', 'There was an error while trying to share your check-in. Please try again.');
+    }
+  };
+
+  useEffect(() => {
+    const loadUsername = async () => {
+      try {
+        const storedUsername = await Storage.getItem("@username");
+        if (storedUsername) {
+          setUsername(storedUsername);
+        } else {
+          console.error("Username not found in storage");
+          // Handle the case where username is not found
+        }
+      } catch (error) {
+        console.error("Error loading username:", error);
+        // Handle the error appropriately
+      }
+    };
+  
+    loadUsername();
+  }, []);
 
   return (
     <View style={styles.modalContainer}>
@@ -232,6 +296,7 @@ const CheckInEntryDetailsScreen = ({ route, navigation }) => {
                 <TouchableOpacity onPress={() => {
                   console.log("Share pressed");
                   setEditDeleteModalVisible(false);
+                  onShare();
                 }}>
                   <Text style={styles.shareText}>Share</Text>
                 </TouchableOpacity>

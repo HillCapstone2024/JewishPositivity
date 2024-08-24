@@ -28,10 +28,10 @@ const linking = {
           username: (username) => `${username}`,
           moment_number: (moment_number) => `Number(moment_number)`,
         },
-        stringify: {
-          username: (username) => username,
-          moment_number: (moment_number) => moment_number,
-        },
+        // stringify: {
+        //   username: (username) => username,
+        //   moment_number: (moment_number) => moment_number,
+        // },
       },
     },
   },
@@ -53,7 +53,8 @@ export default function App() {
       console.error('Error checking auth status:', error);
     }
   };
-  
+
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <NavigationContainer linking={linking}>

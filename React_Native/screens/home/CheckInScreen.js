@@ -5,7 +5,7 @@ import IP_ADDRESS from "../../ip.js";
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
 const CheckInScreen = ({ route }) => {
-  const { username } = route.params;
+  const { username, moment_number } = route.params;
   const [checkinData, setCheckinData] = useState(null);
   const [loading, setLoading] = useState(true);
 

@@ -56,6 +56,7 @@ urlpatterns = [
     path('get_video_info/', get_video_info_view, name='get_video_info_view'), # Returns only video checkins. Expects a check-in ID
     path('get-prompts/', views.get_prompts, name='get_prompts'),
     path('checkin/<str:username>/<int:moment_number>/', checkin_detail_view, name='checkin_detail_view'),
+    path('check-duplicate/', views.check_duplicate, name='check_duplicate'),
     
     # Friend-Related GET Actions
     path('get_friend_info/', get_friends_view, name='get_friends_view'), # Returns a user's friends. Expects a usename

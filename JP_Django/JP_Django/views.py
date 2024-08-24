@@ -6,6 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import get_user_model
+from django.views.decorators.csrf import csrf_exempt
 from JP_Django.models import Checkin, Friends, Badges, User, Community, CommunityUser
 from django.middleware.csrf import get_token
 from django.http import JsonResponse
@@ -1057,6 +1058,34 @@ def checkin_detail_view(request, username, moment_number):
         return JsonResponse(response_data, safe=False)
     except User.DoesNotExist:
         return JsonResponse({"error": "User not found"}, status=404)
+    except Checkin.DoesNotExist:
+        return JsonResponse({"error": "Check-in not found"}, status=404)
+    
+@csrf_exempt
+def check_duplicate(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        username = data.get('username')
+        moment_number = data.get('moment_number')
+        date = data.get('date')
+
+        try:
+            user = User.objects.get(username=username)
+            datetime_current = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+
+            existing_checkin = Checkin.objects.filter(
+                user_id=user.id,
+                moment_number=moment_number,
+                date__date=datetime_current.date()
+            ).exists()
+
+            return JsonResponse({'isDuplicate': existing_checkin})
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
     
 
 # ########## Utility Views ##########

@@ -32,7 +32,6 @@ import { Buffer } from "buffer";
 import RNPickerSelect from "react-native-picker-select";
 import * as Haptics from "expo-haptics";
 
-// import { Video, ResizeMode, Audio } from "expo-av";
 import makeThemeStyle from "../../tools/Theme.js";
 import * as Storage from "../../AsyncStorage.js";
 import IP_ADDRESS from "../../ip.js";
@@ -134,7 +133,7 @@ export default function CheckIn({ navigation, route }) {
       }
     };
     loadUsername();
-    // configureAudioMode();
+
 
     const loadTimezone = async () => {
       const storedTimezone = await Storage.getItem("@timezone");
@@ -169,16 +168,6 @@ export default function CheckIn({ navigation, route }) {
     return Buffer.from(text, "utf8").toString("base64");
   };
 
-  // const getCsrfToken = async () => {
-  //   try {
-  //     const response = await axios.get(`${API_URL}/csrf-token/`);
-  //     return response.data.csrfToken;
-  //   } catch (error) {
-  //     console.error("Error retrieving CSRF token:", error);
-  //     throw new Error("CSRF token retrieval failed");
-  //   }
-  // };
-
   const getHapticFeedback = async () => {
     try {
       const hapticFeedbackEnabled = await Storage.getItem('@hapticFeedbackEnabled');
@@ -194,29 +183,80 @@ export default function CheckIn({ navigation, route }) {
   getHapticFeedback();
 
   const submitCheckIn = async () => {
-    console.log('formatted date: ',formattedDateTime);
-    console.log("new date:", parseAndFormatDate(formattedDateTime));
-    const parsedDate = parseAndFormatDate(formattedDateTime);
-    setLoadingSubmit(true);
-    let base64CheckInText = "";
-    if (mediaType === "text") {
-      base64CheckInText = textToBase64(CheckInText);
-      setBase64Data(base64CheckInText);
-    }
-    console.log("check in type: ", mediaType);
+    try 
+    {
+      const isDuplicate = await checkForDuplicateCheckIn();
+      if (isDuplicate) {
+        Alert.alert(
+          "Duplicate Check-in",
+          "You have already submitted a check-in of this type for today. You cannot save duplicate check-ins.",
+          [{ text: "OK", onPress: () => console.log("Duplicate Alert Closed") }]
+        );
+        return false; // Indicate that submission failed due to duplicate
+      }
+      console.log('formatted date: ',formattedDateTime);
+      console.log("new date:", parseAndFormatDate(formattedDateTime));
+      const parsedDate = parseAndFormatDate(formattedDateTime);
+      setLoadingSubmit(true);
+      let base64CheckInText = "";
+      if (mediaType === "text") {
+        base64CheckInText = textToBase64(CheckInText);
+        setBase64Data(base64CheckInText);
+      }
+      console.log("check in type: ", mediaType);
+      try {
+        const csrfToken = await Storage.getItem("@CSRF");
+        const response = await axios.post(
+          `${API_URL}/check-in/`,
+          {
+            username: username,
+            moment_number: momentType,
+            content: base64Data,
+            content_type: mediaType,
+            text_entry: CheckInText,
+            date: parsedDate,
+            privacy: isPrivate,
+          },
+          {
+            headers: {
+              "X-CSRFToken": csrfToken,
+              "Content-Type": "application/json",
+            },
+            withCredentials: true,
+          }
+        );
+        console.log("check in response:", response.data);
+        //on successful submit close the page
+        navigation.goBack();
+        return true; 
+      } catch (error) {
+        console.log(error);
+        console.log("CheckIn Error:", error.response.data);
+        if (error.response.data === "Error: Duplicate Moment Today") {
+          Alert.alert(
+            "Duplicate Check-in Type Recieved",
+            "You have already submitted a check-in of this type for today. Please select a different check-in type or try again tomorrow.",
+            [{ text: "OK", onPress: () => console.log("Alert Closed") }]
+          );
+          return false;
+        }
+      }
+    } finally {
+        setLoadingSubmit(false);
+      }
+  };
+
+  //added
+  const checkForDuplicateCheckIn = async () => {
     try {
-      // const csrfToken = await getCsrfToken();
       const csrfToken = await Storage.getItem("@CSRF");
+      const parsedDate = parseAndFormatDate(formattedDateTime);
       const response = await axios.post(
-        `${API_URL}/check-in/`,
+        `${API_URL}/check-duplicate/`,
         {
           username: username,
           moment_number: momentType,
-          content: base64Data,
-          content_type: mediaType,
-          text_entry: CheckInText,
           date: parsedDate,
-          privacy: isPrivate,
         },
         {
           headers: {
@@ -226,28 +266,41 @@ export default function CheckIn({ navigation, route }) {
           withCredentials: true,
         }
       );
-      console.log("check in response:", response.data);
-      //on successful submit close the page
-      navigation.goBack();
+      return response.data.isDuplicate;
     } catch (error) {
-      console.log(error);
-      console.log("CheckIn Error:", error.response.data);
-      if (error.response.data === "Error: Duplicate Moment Today") {
-        Alert.alert(
-          "Duplicate Check-in Type Recieved",
-          "You have already submitted a check-in of this type for today. Please select a different check-in type or try again tomorrow.",
-          [{ text: "OK", onPress: () => console.log("Alert Closed") }]
-        );
+      console.error('Error checking for duplicate:', error);
+      if (error.response && error.response.status === 404) {
+        console.error('Endpoint not found. Please check your API configuration.');
       }
+      // Instead of throwing the error, we'll return false to allow the check-in process to continue
+      return false;
     }
-    setLoadingSubmit(false);
   };
 
-  //added
+  
   const shareCheckIn = async () => {
     try {
-      // First, submit the check-in
-      await submitCheckIn();
+      let isDuplicate;
+      try {
+        isDuplicate = await checkForDuplicateCheckIn();
+      } catch (error) {
+        console.error('Failed to check for duplicate:', error);
+        isDuplicate = false; // Assume it's not a duplicate if the check fails
+      }
+  
+      if (isDuplicate) {
+        Alert.alert(
+          "Duplicate Check-in",
+          "You have already submitted a check-in of this type for today. You cannot share duplicate check-ins.",
+          [{ text: "OK", onPress: () => console.log("Duplicate Alert Closed") }]
+        );
+        return; // Exit the function early if it's a duplicate
+      }
+  
+      const submissionSuccessful = await submitCheckIn();
+      if (!submissionSuccessful) {
+        return; // Exit if submission failed
+      }
   
       // Prepare the share content
       const shareContent = {
@@ -260,15 +313,11 @@ export default function CheckIn({ navigation, route }) {
   
       if (result.action === Share.sharedAction) {
         if (result.activityType) {
-          // The user shared with a specific activity type
           console.log(`Shared with activity type: ${result.activityType}`);
-          // You could add specific handling for different activity types here
         } else {
-          // The user shared without a specific activity type
           console.log('Shared successfully');
         }
       } else if (result.action === Share.dismissedAction) {
-        // The user dismissed the share dialog
         console.log('Share dismissed');
       }
     } catch (error) {
@@ -290,10 +339,8 @@ export default function CheckIn({ navigation, route }) {
     setShowMediaBar(true);
     setMediaUri(uri);
     setMediaType("recording");
-    // setDisableSubmit(true);
     const base64String = await readFileAsBase64(uri);
     setBase64Data(base64String);
-    // setCheckInText("");
     setMediaBox(true);
     setMediaChanged(!mediaChanged);
     setDisableSubmit(false);
@@ -303,8 +350,6 @@ export default function CheckIn({ navigation, route }) {
     console.log("received data from mediabar", mediaProp);
     setMediaUri(mediaProp.assets[0].uri);
     setMediaType(mediaProp.assets[0].type);
-    //sometimes mediaUri state doesn't update before next line
-    //pass mediaProp.assets[0].uri directly to fix this
     setDisableSubmit(true);
     const base64String = await readFileAsBase64(mediaProp.assets[0].uri);
     setBase64Data(base64String);
@@ -315,7 +360,6 @@ export default function CheckIn({ navigation, route }) {
 
   const handleTextComplete = (text) => {
     setCheckInText(text);
-    // console.log(text);
     if (mediaUri === null) {
       setDisableSubmit(text.trim().length === 0);
     }
@@ -460,23 +504,8 @@ export default function CheckIn({ navigation, route }) {
   };
 
   const PromptDropdown = () => {
-    // const [selectedPrompt, setSelectedPrompt] = useState("");
     const [isOpen, setIsOpen] = useState(false);
   
-    // let prompts = [];
-    // switch (checkInType) {
-    //   case "ModehAni":
-    //     prompts = modehAniPrompts;
-    //     break;
-    //   case "Ashrei":
-    //     prompts = ashreiPrompts;
-    //     break;
-    //   case "Shema":
-    //     prompts = shemaPrompts;
-    //     break;
-    //   default:
-    //     break;
-    // }
 
     const toggleDropdown = () => {
       setIsOpen(!isOpen);
@@ -516,35 +545,7 @@ export default function CheckIn({ navigation, route }) {
     );
   };
 
-  //   return (
-  //     <View style={styles.promptDropdownContainer}>
-  //       <TouchableOpacity style={styles.promptDropdownHeader} onPress={toggleDropdown}>
-  //         <Text style={styles.promptDropdownLabel}>
-  //           {selectedPrompt || "Select a prompt"}
-  //         </Text>
-  //         <Ionicons
-  //           name={isOpen ? "chevron-up" : "chevron-down"}
-  //           size={24}
-  //           color="#4A90E2"
-  //         />
-  //       </TouchableOpacity>
-  //       {isOpen && (
-  //         <ScrollView style={styles.promptDropdownList}>
-  //           {prompts.map((prompt, index) => (
-  //             <TouchableOpacity
-  //               key={index}
-  //               style={styles.promptDropdownItem}
-  //               onPress={() => selectPrompt(prompt)}
-  //             >
-  //               <Text style={styles.promptDropdownItemText}>{prompt}</Text>
-  //             </TouchableOpacity>
-  //           ))}
-  //         </ScrollView>
-  //       )}
-  //     </View>
-  //   );
-  // };
-
+  
 
   const mediaBoxAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
@@ -564,26 +565,12 @@ export default function CheckIn({ navigation, route }) {
 
   return (
     <SafeAreaView style={[styles.container, theme['background']]}>   
-      {/* <View style={styles.horizontalBar} /> */}
 
       {/* Main Container Section */}
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={[styles.container, theme['background']]}
       >
-        
-        {/* <View style={ styles.topContainer }>
-          <TouchableOpacity
-            disabled={disableSubmit}
-            style={styles.shareButton}
-            onPress={ () => { shareCheckIn(); isHapticFeedbackEnabled ? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium) : null; }}
-            testID="shareButton"
-          >
-            <Text style={ disableSubmit ? styles.shareTextDisabled : styles.shareText}>
-              Share
-            </Text>
-          </TouchableOpacity>
-        </View> */}
 
         <ScrollView style={styles.contentContainer}>
           <Text style={[styles.header, theme["color"]]}>{getMomentText(checkInType)}</Text>
@@ -649,12 +636,8 @@ export default function CheckIn({ navigation, route }) {
           ) : null}
 
           <View style={styles.boxContainer}>
-            {/* <Text style={[styles.boxDescriptor]}>Description</Text> */}
             <ScrollView style={[styles.dropdownContainer, { height: 350 }]}>
               <PromptDropdown 
-                // checkInType={checkInType} 
-                // selectedPrompt={selectedPrompt}
-                // setSelectedPrompt={setSelectedPrompt}
               />
               
               <TextInput
@@ -712,17 +695,6 @@ export default function CheckIn({ navigation, route }) {
                   Submit
                 </Text>
               </TouchableOpacity>
-
-              {/* <TouchableOpacity
-                disabled={disableSubmit}
-                style={styles.shareButton}
-                onPress={ () => { shareCheckIn(); isHapticFeedbackEnabled ? Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium) : null; }}
-                testID="shareButton"
-              >
-                <Text style={ disableSubmit ? styles.shareTextDisabled : styles.shareText}>
-                  Share
-                </Text>
-              </TouchableOpacity> */}
             </View>
         
           )}
@@ -804,7 +776,6 @@ const stylesProgressBar = StyleSheet.create({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // padding: 10,
     backgroundColor: "white",
   },
   contentContainer: {
@@ -817,16 +788,11 @@ const styles = StyleSheet.create({
     padding: 16,
     fontSize: 16,
     color: 'grey',
-    // flexDirection: "row",
-    // alignItems: "center",
-    // backgroundColor: "green",
-    // justifyContent: "space-around",
   },
   dropdownLabel: {
     marginRight: 10,
     fontSize: 15,
     paddingLeft: 14,
-    // paddingTop: 10,
     textAlign: "left",
   },
   boxContainer: {
@@ -869,7 +835,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 16,
     fontSize: 16,
-    // fontWeight: "bold",
   },
   CheckInInput: {
     fontSize: 16,
@@ -878,30 +843,15 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   mediaContainer: {
-    // backgroundColor: "pink",
-    // alignItems: "center",
-    // paddingHorizontal: 10,
-    // paddingTop: 5,
     marginBottom: 10,
-    // borderRadius: 5,
-    // marginHorizontal: Dimensions.get("window").width / 2.55,
     width: 60,
     height: 60,
-  },
-  mediaContainerUpper: {
-    // flexDirection: "row",
-    // justifyContent: "space-between",
-    // alignItems: "center",
-    // backgroundColor: "red",
-    // marginBottom: 5,
-    // paddingHorizontal: 10,
   },
   image: {
     width: 50,
     height: 50,
     marginTop: 20,
     backgroundColor: "black",
-    // flex: 1,
   },
   video: {
     alignSelf: "center",
@@ -913,7 +863,6 @@ const styles = StyleSheet.create({
   deleteMedia: {
     justifyContent: "center",
     marginTop: 10,
-    // flex: 1,
   },
   separator: {
     borderBottomWidth: StyleSheet.hairlineWidth,
@@ -952,8 +901,6 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     alignItems: "center",
     borderRadius: 5,
-    // borderWidth: 2,
-    // borderColor: "black",
     flexDirection: "row",
     justifyContent: "center",
 
@@ -983,19 +930,15 @@ const styles = StyleSheet.create({
   horizontalBar: {
     height: 2,
     backgroundColor: "#ccc",
-    // marginTop: 15,
   },
   topContainer: {
     flexDirection: 'row-reverse',
-    // justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
     position: 'absolute',
     left: 296,
     top: 15,
     paddingTop: 10,
-    // paddingBottom: 10,
-    
   },
   shareButton: {
     height: 40,
@@ -1004,7 +947,6 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     alignItems: "center",
     borderRadius: 5,
-    // flexDirection: "row",
     justifyContent: "center",
 
     backgroundColor: "#f2f2f2",
@@ -1043,10 +985,8 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#4A90E2",
     borderRadius: 10,
-    // marginBottom: 10,
     padding: 15,
     fontSize: 5,
-    // overflow: 'hidden',
     color: 'grey',
   },
   promptDropdownHeader: {
@@ -1055,12 +995,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 10,
     paddingVertical: 12,
-    // borderColor: 'gray',
     borderBottomWidth: 0,
   },
   promptDropdownLabel: {
     fontSize: 15,
-    // color: "#333",
     marginRight: 5,
     paddingLeft: 2,
     textAlign: "left",
@@ -1090,9 +1028,6 @@ const styles = StyleSheet.create({
     alignItems: 'center', // Align items vertically in the center
     justifyContent: 'space-between', // Optional: Add space between items
     padding: 10, // Optional: Add padding for better layout
-    // borderWidth: 2,
-    // borderColor: "#4A90E2",
-    // borderRadius: 10,
   },
   settingText: {
     fontSize: 16, // Example font size, adjust as needed

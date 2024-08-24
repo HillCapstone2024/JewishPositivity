@@ -21,11 +21,7 @@ import makeThemeStyle from '../../tools/Theme.js';
 
 const API_URL = "http://" + IP_ADDRESS + ":8000";
 
-// import { LogLevel, OneSignal } from "react-native-onesignal";
-// import Constants from "expo-constants";
 
-// OneSignal.Debug.setLogLevel(LogLevel.Verbose);
-// OneSignal.initialize(Constants.expoConfig.extra.oneSignalAppId);
 
 const Login = ({ navigation }) => {
   const [username, setUsername] = useState("");
@@ -53,8 +49,7 @@ const Login = ({ navigation }) => {
     const csrfToken = await getCsrfToken();
     await Storage.setItem("@CSRF", csrfToken);
     console.log("stored token: ", csrfToken);
-    // const csrfToken1 = await Storage.getItem("@CSRF");
-    // console.log("stored token1: ", csrfToken1);
+
   };
 
   const saveUser = async () => {
@@ -102,10 +97,6 @@ const Login = ({ navigation }) => {
         setTimezone(response.data.timezone);
         console.log("Timezone set to:", response.data.timezone);
 
-
-
-        // console.log("Saved Timezone:",response.data.timezone);
-        // console.log("New Timezone:",newtimezone);
   
         //save to storage
         await Storage.setItem("@first_name", response.data.first_name);
@@ -285,8 +276,6 @@ const Login = ({ navigation }) => {
         }
       );
       console.log("Login response:", response.data);
-      // OneSignal.login(username);
-      // console.log("OneSignal login successful");
       console.log(username);
       saveUser();
       console.log(timeZone);
@@ -309,10 +298,6 @@ const Login = ({ navigation }) => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={[styles.container, theme["background"]]}
       >
-        {/* <SvgXml xml={logos['notebookPen.svg']} style={styles.logo} /> */}
-        {/* <SvgXml xml={logos['appTileFinal.svg']} style={styles.logo} /> */}
-        {/* <SvgXml xml={logos['notebook.svg']} style={styles.logo} /> */}
-        {/* <SvgXml xml={logos['pen.svg']} style={styles.logo} /> */}
         <Image source={require("../../assets/images/notebookPen.png")} style={styles.logo} />
         {errorMessage}
         <TextInput

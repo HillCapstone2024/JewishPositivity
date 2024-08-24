@@ -1800,7 +1800,6 @@ class DeleteCheckinViewTestCase(TestCase):  # To test deleting checkins account 
         queryset = Checkin.objects.all() #should only print the one checkin moment that remains
         for obj in queryset:
             logging.info(LOG_MSG_FORMAT, LOG_CHECKIN_ID, obj.checkin_id)
-            #logging.info(LOG_MSG_FORMAT, LOG_CONTENT, obj.content)
             logging.info(LOG_MSG_FORMAT, LOG_TEXT_ENTRY, obj.text_entry)
             logging.info(LOG_MSG_FORMAT, LOG_CONTENT_TYPE, obj.content_type)
             logging.info(LOG_MSG_FORMAT, LOG_MOMENT_NUMBER, obj.moment_number)
